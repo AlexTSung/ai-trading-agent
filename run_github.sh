@@ -37,13 +37,15 @@ if [ -f "$LOG_DIR/$DATE.json" ]; then
 fi
 
 # ── GUARDRAIL G2: Time window ─────────────────────────────────────────────
-# GitHub Actions runs at 13:45 UTC = 9:45 AM ET (EDT). Hard cutoff at 15:30 UTC = 11:30 AM ET.
-HOUR_UTC=$(date -u +%H)
-MIN_UTC=$(date -u +%M)
-MINS=$((HOUR_UTC * 60 + MIN_UTC))
-if [ "$MINS" -gt $((15 * 60 + 30)) ]; then
-  echo "GUARDRAIL G2: Past 11:30 AM ET — aborting pipeline."
-  exit 1
+# Skip time check when TEST_MODE=1 (for manual workflow_dispatch runs only)
+if [ "${TEST_MODE}" != "1" ]; then
+  HOUR_UTC=$(date -u +%H)
+  MIN_UTC=$(date -u +%M)
+  MINS=$((HOUR_UTC * 60 + MIN_UTC))
+  if [ "$MINS" -gt $((15 * 60 + 30)) ]; then
+    echo "GUARDRAIL G2: Past 11:30 AM ET — aborting pipeline."
+    exit 1
+  fi
 fi
 
 echo ""
