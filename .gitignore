@@ -1,0 +1,24 @@
+# Never commit credentials or keys
+.env
+*.env.*
+*.key
+secrets/
+
+# Raw JSON logs — keep markdown journals only (JSON has no value in git history)
+logs/paper/*.json
+logs/paper/run-*.log
+logs/real/
+
+# Journal data (personal trading records)
+journal/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db

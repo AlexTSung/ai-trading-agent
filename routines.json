@@ -1,0 +1,39 @@
+{
+  "routines": [
+    {
+      "name": "Morning Research",
+      "schedule": "45 9 * * 1-5",
+      "timezone": "America/New_York",
+      "prompt": "Run the morning research routine. First, check market status by running: python scripts/research.py status. If the market is closed, write a single line to journal/YYYY-MM-DD.md noting 'Market closed — no research run' and stop. If the market is open, run: python scripts/research.py full. Save the raw JSON output to journal/YYYY-MM-DD.json. Then write the Research section of journal/YYYY-MM-DD.md with a summary of each symbol's technicals and news. Format per config/journal-template.md.",
+      "allowed_tools": ["bash", "read", "write"]
+    },
+    {
+      "name": "Trading Session",
+      "schedule": "0 10 * * 1-5",
+      "timezone": "America/New_York",
+      "prompt": "Run the trading session. First check market status: python scripts/trade.py status. If market is closed, log 'Market closed — no trades placed' and stop. If open: (1) Run python scripts/trade.py session to evaluate signals and place orders. (2) For each trade decision — buy, sell, or hold — log the full reasoning chain from CLAUDE.md's Decision Framework. (3) Append results to the Trades Executed section of journal/YYYY-MM-DD.md. Never place a market order. Never skip the journal entry.",
+      "allowed_tools": ["bash", "read", "write"]
+    },
+    {
+      "name": "Midday Stop-Loss Check",
+      "schedule": "0 12 * * 1-5",
+      "timezone": "America/New_York",
+      "prompt": "Run a midday risk check. Execute: python scripts/trade.py check-stops. If any stop-losses triggered, log the event in today's journal immediately under a new section '## Midday Stop-Loss Events'. Also run python scripts/research.py midday to check for any dramatic signal changes. If a position has reversed strongly (signal flipped to STRONG_SELL), close it and log reasoning.",
+      "allowed_tools": ["bash", "read", "write"]
+    },
+    {
+      "name": "End of Day Journal",
+      "schedule": "15 16 * * 1-5",
+      "timezone": "America/New_York",
+      "prompt": "Run the end-of-day routine. Execute: python scripts/journal.py eod. This writes the full journal entry. After it completes, read the generated journal/YYYY-MM-DD.md and add the Reflection section yourself: (1) What worked today? (2) What decision are you least confident about and why? (3) What signals should you watch tomorrow? (4) If any stop-losses fired, what would you do differently? Write with specificity — no generic observations. Every journal entry should contain at least one thing you learned or noticed.",
+      "allowed_tools": ["bash", "read", "write"]
+    },
+    {
+      "name": "Weekly Review",
+      "schedule": "30 16 * * 5",
+      "timezone": "America/New_York",
+      "prompt": "It's Friday. Run the weekly review: python scripts/journal.py weekly. Read the output file. Identify: (1) Best trade of the week and why it worked. (2) Worst decision of the week — what signal did you miss? (3) Any pattern in what your signals are getting right or wrong. (4) Proposed update to CLAUDE.md Lessons Learned section. Write your proposed CLAUDE.md update as a suggestion in the weekly review file, then apply it if confidence is high.",
+      "allowed_tools": ["bash", "read", "write"]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+name: Morning Trading Pipeline
+
+on:
+  schedule:
+    # 13:45 UTC = 9:45 AM ET (EDT, UTC-4) — after market open, before 10:30 AM cutoff
+    - cron: '45 13 * * 1-5'
+  workflow_dispatch:  # allow manual trigger from GitHub UI
+
+jobs:
+  morning-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20  # hard kill after 20 min — prevents runaway sessions
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run morning pipeline
+        env:
+          APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
+          APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
+        run: |
+          chmod +x run_github.sh
+          bash run_github.sh
+
+      - name: Commit logs back to repo
+        if: always()  # commit logs even if pipeline had warnings
+        run: |
+          git config user.name "Trading Agent"
+          git config user.email "agent@youversion.com"
+          git add logs/paper/
+          git diff --staged --quiet || git commit -m "chore: trading logs $(date +%Y-%m-%d) morning"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload run log as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: morning-log-${{ github.run_id }}
+          path: logs/paper/
+          retention-days: 30

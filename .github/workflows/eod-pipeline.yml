@@ -1,0 +1,54 @@
+name: EOD Trading Pipeline
+
+on:
+  schedule:
+    # 21:15 UTC = 5:15 PM ET (EDT, UTC-4) — after market close + 1hr buffer
+    - cron: '15 21 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  eod-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run EOD pipeline
+        env:
+          APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
+          APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
+        run: |
+          chmod +x run_eod_github.sh
+          bash run_eod_github.sh
+
+      - name: Commit logs back to repo
+        if: always()
+        run: |
+          git config user.name "Trading Agent"
+          git config user.email "agent@youversion.com"
+          git add logs/paper/
+          git diff --staged --quiet || git commit -m "chore: trading logs $(date +%Y-%m-%d) EOD"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload EOD log as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eod-log-${{ github.run_id }}
+          path: logs/paper/
+          retention-days: 30

@@ -1,0 +1,98 @@
+{
+  "watchlist": [
+    {
+      "symbol": "SPY",
+      "description": "S&P 500 ETF — baseline market exposure and trend anchor",
+      "max_allocation_pct": 15,
+      "notes": "Use SPY as the market weather vane. If SPY signal is WEAK_SELL or worse, reduce long exposure and consider bearish instruments."
+    },
+    {
+      "symbol": "QQQ",
+      "description": "Nasdaq-100 ETF — tech sector exposure",
+      "max_allocation_pct": 10,
+      "notes": "Correlated with NVDA/MSFT. Avoid doubling up if tech names are already weighted high."
+    },
+    {
+      "symbol": "NVDA",
+      "description": "GPU / AI infrastructure — high conviction AI play",
+      "max_allocation_pct": 8,
+      "notes": "Volatile around earnings. Check earnings calendar before entering."
+    },
+    {
+      "symbol": "AAPL",
+      "description": "Large cap tech — stability anchor",
+      "max_allocation_pct": 8,
+      "notes": "Sensitive to macro and supply chain news. Strong consumer brand moat."
+    },
+    {
+      "symbol": "MSFT",
+      "description": "Cloud / enterprise — AI infrastructure and Azure growth",
+      "max_allocation_pct": 8,
+      "notes": "Copilot monetization narrative. Watch Azure growth rate in earnings."
+    },
+    {
+      "symbol": "GOOGL",
+      "description": "Alphabet — Google AI, Cloud, YouTube, Waymo autonomous vehicles",
+      "max_allocation_pct": 8,
+      "notes": "Added 2026-06-29. Replaced Verizon in Dow Jones — forces index fund structural buying. Watch Waymo expansion and Gemini AI narrative."
+    },
+    {
+      "symbol": "AMZN",
+      "description": "Amazon — AWS cloud, e-commerce, AI infrastructure (Anthropic backer)",
+      "max_allocation_pct": 8,
+      "notes": "Added 2026-06-29. Analyst $1T revenue path by 2028. AI cloud moat via Anthropic partnership. Strong when macro is risk-on."
+    },
+    {
+      "symbol": "TSLA",
+      "description": "Tesla — EV, autonomous driving, energy storage",
+      "max_allocation_pct": 5,
+      "notes": "Added 2026-06-29. High beta. Q2 delivery count is key catalyst each quarter. Volatile — only enter on STRONG_BUY signal or major catalyst."
+    },
+    {
+      "symbol": "NOK",
+      "description": "Nokia — telecom infrastructure, 5G network equipment",
+      "max_allocation_pct": 5,
+      "notes": "Added 2026-06-15 via StockTwits screener. Low price point, high volume. Google Cloud Gemini AI partnership catalyst."
+    },
+    {
+      "symbol": "PYPL",
+      "description": "PayPal — fintech payments platform",
+      "max_allocation_pct": 5,
+      "notes": "Added 2026-06-15 via StockTwits screener. Watch for MA20/MA50 crossover confirmation before entering. Currently STRONG_SELL — monitor."
+    },
+    {
+      "symbol": "DDOG",
+      "description": "Datadog — cloud monitoring and AI observability",
+      "max_allocation_pct": 5,
+      "notes": "Added 2026-06-15. Currently in paper portfolio at +15% gain. Truist upgrade to Buy, $300 PT. Strong STRONG_BUY MA signal."
+    },
+    {
+      "symbol": "SQQQ",
+      "description": "ProShares UltraPro Short QQQ — 3x inverse Nasdaq-100",
+      "max_allocation_pct": 5,
+      "type": "bearish_instrument",
+      "notes": "BEARISH PLAY. Buy when QQQ MA20 < MA50 AND tech sector has STRONG_SELL signal. Size at 2.5-5%. Not for long-term holding — decay factor. Exit when QQQ recovers MA20."
+    },
+    {
+      "symbol": "SPXS",
+      "description": "Direxion Daily S&P 500 Bear 3x — 3x inverse S&P 500",
+      "max_allocation_pct": 5,
+      "type": "bearish_instrument",
+      "notes": "BEARISH PLAY. Buy when SPY MA20 < MA50 AND macro regime is risk-off (VIX > 20). Exit quickly — leveraged ETF decay. Max hold 5 days."
+    },
+    {
+      "symbol": "SOXS",
+      "description": "Direxion Daily Semiconductors Bear 3x — 3x inverse SOX index",
+      "max_allocation_pct": 5,
+      "type": "bearish_instrument",
+      "notes": "BEARISH PLAY. Use when NVDA/INTC/MU all show STRONG_SELL and semiconductor news is negative (export bans, DRAM lawsuits, capex cuts)."
+    }
+  ],
+  "cash_reserve_pct": 20,
+  "discovery": {
+    "enabled": true,
+    "sources": ["alpaca_most_active", "alpaca_market_movers", "stocktwits_screener", "alpaca_news_scan"],
+    "notes": "Each morning, run discovery before researcher. Pull top 10 most active + top 5 gainers. Filter: price > $5, market cap > $500M, not already pumped > 8%. Feed qualified tickers into researcher alongside watchlist."
+  },
+  "notes": "Expanded 2026-06-29. Added GOOGL, AMZN, TSLA (long candidates) and SQQQ, SPXS, SOXS (bearish instruments). Discovery pipeline now feeds fresh tickers daily."
+}
