@@ -175,10 +175,12 @@ def _load_social_tickers(max_tickers=10):
         return []
 
 
-def _load_intelligence_tickers(max_tickers=10):
+def _load_intelligence_tickers(max_tickers=15):
     """
-    Read today's intelligence scan output and return Reddit trending tickers
-    and any other discovery tickers that should be researched.
+    Read today's intelligence scan and return discovery tickers from 3 sources:
+    - Alpaca most-active stocks (always reliable — fresh every day)
+    - Top gainers under 8% move (momentum without pump risk)
+    - Reddit trending (when available)
     """
     from datetime import date as _date
     today = _date.today().isoformat()
@@ -189,19 +191,51 @@ def _load_intelligence_tickers(max_tickers=10):
         with open(intel_path) as f:
             intel = json.load(f)
         tickers = []
-        reddit_data = intel.get("reddit", {})
-        for t in reddit_data.get("tickers", [])[:max_tickers]:
-            sym = t.get("symbol", "")
-            if not sym or len(sym) > 5:
+        seen = set()
+
+        # Alpaca most-active — most reliable daily discovery source
+        discovery = intel.get("market_discovery", {}).get("discovery", {})
+        for s in discovery.get("most_active", [])[:10]:
+            sym = s.get("symbol", "")
+            if not sym or len(sym) > 5 or sym in seen:
                 continue
+            seen.add(sym)
             tickers.append({
                 "symbol": sym,
-                "description": f"Reddit trending — {t.get('reddit_mentions', 0)} mentions in r/{t.get('subreddit','')}",
+                "description": f"Alpaca most-active — {s.get('volume', 0):,} shares traded",
+                "max_allocation_pct": 3,
+                "source": "alpaca_most_active",
+            })
+
+        # Top gainers filtered to < 8% (not a pump)
+        for s in discovery.get("top_gainers", [])[:5]:
+            sym = s.get("symbol", "")
+            price = s.get("price", 0)
+            if not sym or len(sym) > 5 or sym in seen or (price and price < 5):
+                continue
+            seen.add(sym)
+            tickers.append({
+                "symbol": sym,
+                "description": f"Top gainer +{s.get('change_pct', 0)}% today",
+                "max_allocation_pct": 3,
+                "source": "alpaca_gainers",
+            })
+
+        # Reddit trending tickers (bonus when available)
+        for t in intel.get("reddit", {}).get("tickers", [])[:5]:
+            sym = t.get("symbol", "")
+            if not sym or len(sym) > 5 or sym in seen:
+                continue
+            seen.add(sym)
+            tickers.append({
+                "symbol": sym,
+                "description": f"Reddit trending — {t.get('reddit_mentions', 0)} mentions",
                 "max_allocation_pct": 3,
                 "source": "reddit",
-                "reddit_mentions": t.get("reddit_mentions", 0),
             })
-        return tickers
+
+        print(f"  [intel loader] {len(tickers)} discovery tickers: {[t['symbol'] for t in tickers]}", file=sys.stderr)
+        return tickers[:max_tickers]
     except Exception as e:
         print(f"  [intelligence loader] {e}", file=sys.stderr)
         return []

@@ -471,6 +471,54 @@ def get_unusual_options(symbol=None):
 
 
 # ── 9. Full morning intelligence run ─────────────────────────────────────
+def get_market_discovery():
+    """
+    Pull Alpaca most-active stocks and top market movers.
+    This is the most reliable daily discovery source — always returns fresh tickers.
+    Returns up to 20 symbols with volume/momentum context.
+    """
+    results = {"most_active": [], "top_gainers": [], "top_losers": []}
+    try:
+        # Most active by volume
+        url = f"{DATA_URL}/v1beta1/screener/stocks/most-actives?by=volume&top=20"
+        r = requests.get(url, headers=_alpaca_headers(), timeout=10)
+        if r.status_code == 200:
+            for s in r.json().get("most_actives", []):
+                results["most_active"].append({
+                    "symbol": s.get("symbol"),
+                    "volume": s.get("volume"),
+                    "trade_count": s.get("trade_count"),
+                })
+    except Exception as e:
+        results["most_active_error"] = str(e)
+
+    try:
+        # Top gainers and losers
+        url = f"{DATA_URL}/v1beta1/screener/stocks/movers?top=10"
+        r = requests.get(url, headers=_alpaca_headers(), timeout=10)
+        if r.status_code == 200:
+            data = r.json()
+            for s in data.get("gainers", []):
+                pct = s.get("percent_change", 0)
+                # Filter: < 8% gain (pump check) and price > $5
+                if pct < 8.0:
+                    results["top_gainers"].append({
+                        "symbol": s.get("symbol"),
+                        "change_pct": round(pct, 2),
+                        "price": s.get("price"),
+                    })
+            for s in data.get("losers", []):
+                results["top_losers"].append({
+                    "symbol": s.get("symbol"),
+                    "change_pct": round(s.get("percent_change", 0), 2),
+                    "price": s.get("price"),
+                })
+    except Exception as e:
+        results["movers_error"] = str(e)
+
+    return {"timestamp": datetime.now().isoformat(), "source": "alpaca_discovery", "discovery": results}
+
+
 def morning_intelligence():
     """
     Full pre-market intelligence scan. Run at 8:30 AM ET before market open.
@@ -483,25 +531,28 @@ def morning_intelligence():
         "run_type": "morning_intelligence",
     }
 
-    print("  [1/7] Fear & Greed Index...", file=sys.stderr)
+    print("  [1/8] Fear & Greed Index...", file=sys.stderr)
     output["fear_greed"] = get_fear_greed()
 
-    print("  [2/7] VIX...", file=sys.stderr)
+    print("  [2/8] VIX...", file=sys.stderr)
     output["vix"] = get_vix()
 
-    print("  [3/7] Global market signals...", file=sys.stderr)
+    print("  [3/8] Global market signals...", file=sys.stderr)
     output["global_markets"] = get_global_signals()
 
-    print("  [4/7] Macro data (FRED)...", file=sys.stderr)
+    print("  [4/8] Macro data (FRED)...", file=sys.stderr)
     output["macro"] = get_macro_data()
 
-    print("  [5/7] Reddit trending tickers...", file=sys.stderr)
+    print("  [5/8] Market discovery (most-active + movers)...", file=sys.stderr)
+    output["market_discovery"] = get_market_discovery()
+
+    print("  [6/8] Reddit trending tickers...", file=sys.stderr)
     output["reddit"] = scan_reddit()
 
-    print("  [6/7] Earnings calendar...", file=sys.stderr)
+    print("  [7/8] Earnings calendar...", file=sys.stderr)
     output["earnings_watch"] = get_earnings_calendar()
 
-    print("  [7/7] SEC insider buys (7d)...", file=sys.stderr)
+    print("  [8/8] SEC insider buys (7d)...", file=sys.stderr)
     output["insider_activity"] = get_insider_buys()
 
     # Save to logs
