@@ -2,7 +2,7 @@ name: EOD Trading Pipeline
 
 on:
   schedule:
-    # 21:15 UTC = 5:15 PM ET (EDT, UTC-4) — after market close + 1hr buffer
+    # 21:15 UTC = 5:15 PM ET (EDT, UTC-4) - after market close + 1hr buffer
     - cron: '15 21 * * 1-5'
   workflow_dispatch:
 

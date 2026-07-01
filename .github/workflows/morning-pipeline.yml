@@ -2,7 +2,7 @@ name: Morning Trading Pipeline
 
 on:
   schedule:
-    # 13:45 UTC = 9:45 AM ET (EDT, UTC-4) — after market open, before 10:30 AM cutoff
+    # 13:45 UTC = 9:45 AM ET (EDT, UTC-4) - after market open, before 10:30 AM cutoff
     - cron: '45 13 * * 1-5'
   workflow_dispatch:  # allow manual trigger from GitHub UI
 
