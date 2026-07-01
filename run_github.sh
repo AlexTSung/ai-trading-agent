@@ -49,24 +49,28 @@ if [ "${TEST_MODE}" != "1" ]; then
 fi
 
 echo ""
-echo "--- [1/5] Intelligence scan ---"
+echo "--- [1/7] Intelligence scan (VIX, macro, Reddit, global markets) ---"
 python3 intelligence.py morning || { echo "WARN: intelligence.py failed — continuing"; }
 
 echo ""
-echo "--- [2/5] Social screener ---"
+echo "--- [2/7] Social screener (StockTwits trending) ---"
 python3 reddit_screener.py scan || { echo "WARN: reddit_screener.py failed — continuing"; }
 
 echo ""
-echo "--- [3/5] Research ---"
+echo "--- [3/7] Full market screener (S&P 500 + Nasdaq 100 + news firehose) ---"
+python3 screener.py scan || { echo "WARN: screener.py failed — continuing without screener tickers"; }
+
+echo ""
+echo "--- [4/7] Research (watchlist + all discovered tickers) ---"
 python3 research.py full
 RESEARCH_EXIT=$?
 if [ $RESEARCH_EXIT -ne 0 ]; then
-  echo "GUARDRAIL G9: research.py failed (exit $RESEARCH_EXIT) — aborting steps 4-5, no trades placed."
+  echo "GUARDRAIL G9: research.py failed (exit $RESEARCH_EXIT) — aborting, no trades placed."
   exit $RESEARCH_EXIT
 fi
 
 echo ""
-echo "--- [4/5] Judge ---"
+echo "--- [5/7] Judge ---"
 python3 judge.py session
 JUDGE_EXIT=$?
 if [ $JUDGE_EXIT -ne 0 ]; then
@@ -75,8 +79,9 @@ if [ $JUDGE_EXIT -ne 0 ]; then
 fi
 
 echo ""
-echo "--- [5/5] Executor ---"
+echo "--- [6/7] Executor ---"
 python3 trade.py session
 
 echo ""
+echo "--- [7/7] Done ---"
 echo "=== Morning pipeline complete: $(date -u +%H:%M:%S) UTC ==="
