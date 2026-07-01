@@ -9,7 +9,9 @@ on:
 jobs:
   morning-pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 20  # hard kill after 20 min — prevents runaway sessions
+    timeout-minutes: 20
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repo
