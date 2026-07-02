@@ -43,8 +43,8 @@ if [ "${TEST_MODE}" != "1" ]; then
   MIN_UTC=$(date -u +%M)
   MINS=$((HOUR_UTC * 60 + MIN_UTC))
   if [ "$MINS" -gt $((15 * 60 + 30)) ]; then
-    echo "GUARDRAIL G2: Past 11:30 AM ET — aborting pipeline."
-    exit 1
+    echo "GUARDRAIL G2: Past 11:30 AM ET — skipping pipeline (not a failure)."
+    exit 0
   fi
 fi
 
