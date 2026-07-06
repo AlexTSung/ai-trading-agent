@@ -380,11 +380,14 @@ def run_trading_session():
             results["trades"].append(trade)
 
         elif signal in ("STRONG_BUY", "WEAK_BUY") and sym not in open_syms:
-            # New position — standard gate: score ≥ 7.0
-            if judge_rec != "APPROVE" or judge_score < 7.0:
+            # Gate is source-aware: 7.0 for watchlist, 8.5 for discovery stocks
+            gate = judge_result.get("approval_gate", 7.0)
+            if judge_rec != "APPROVE" or judge_score < gate:
                 results["vetoed_by_judge"].append({
                     "symbol": sym, "signal": signal,
                     "judge_recommendation": judge_rec, "judge_score": judge_score,
+                    "approval_gate": gate,
+                    "is_discovery": judge_result.get("is_discovery", False),
                     "rationale": judge_result.get("rationale", "No Judge data")
                 })
                 continue

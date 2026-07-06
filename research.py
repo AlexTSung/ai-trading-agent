@@ -562,18 +562,24 @@ def get_yahoo_fundamentals(symbol):
         analyst_rec = rec[0].get("buy", 0) if rec else 0
         analyst_sell = rec[0].get("sell", 0) if rec else 0
 
+        market_cap_raw = summary.get("marketCap", {}).get("raw") or keystats.get("enterpriseValue", {}).get("raw")
+        profit_margin_raw = findata.get("profitMargins", {}).get("raw")
+
         return {
-            "pe_ratio":          _val(summary, "trailingPE"),
-            "forward_pe":        _val(summary, "forwardPE"),
-            "eps_ttm":           _val(keystats, "trailingEps"),
-            "revenue_growth":    _val(findata, "revenueGrowth"),
-            "profit_margin":     _val(findata, "profitMargins"),
-            "analyst_target":    _val(findata, "targetMeanPrice"),
-            "current_price":     _val(findata, "currentPrice"),
-            "short_float":       _val(keystats, "shortPercentOfFloat"),
-            "analyst_buy_count": analyst_rec,
+            "pe_ratio":           _val(summary, "trailingPE"),
+            "forward_pe":         _val(summary, "forwardPE"),
+            "eps_ttm":            _val(keystats, "trailingEps"),
+            "revenue_growth":     _val(findata, "revenueGrowth"),
+            "profit_margin":      _val(findata, "profitMargins"),
+            "analyst_target":     _val(findata, "targetMeanPrice"),
+            "current_price":      _val(findata, "currentPrice"),
+            "short_float":        _val(keystats, "shortPercentOfFloat"),
+            "analyst_buy_count":  analyst_rec,
             "analyst_sell_count": analyst_sell,
-            "upside_pct":        round(
+            "market_cap":         market_cap_raw,
+            "market_cap_b":       round(market_cap_raw / 1e9, 2) if market_cap_raw else None,
+            "is_profitable":      (profit_margin_raw > 0) if profit_margin_raw is not None else None,
+            "upside_pct":         round(
                 (float(_val(findata, "targetMeanPrice") or 0) /
                  float(_val(findata, "currentPrice") or 1) - 1) * 100, 1
             ) if _val(findata, "targetMeanPrice") and _val(findata, "currentPrice") else None,

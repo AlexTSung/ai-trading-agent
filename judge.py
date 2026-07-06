@@ -23,11 +23,24 @@ JUDGE_MIN_SCORE = 7.0   # Executor gate
 
 # ── Scoring Weights ───────────────────────────────────────────────────────────
 # Total = 10 points. Weights sum to 10.
-W_TECHNICAL   = 3.0   # MA signal strength
-W_NEWS        = 2.0   # News sentiment
-W_MACRO       = 1.5   # SPY regime
+# Lesson from portfolio analysis: small-cap discovery stocks with good MA signals
+# were losing trades. Quality (market cap, profitability, analyst coverage) is
+# the single strongest predictor of a winning stock. Reduced technical weight
+# accordingly and added explicit quality criterion.
+W_TECHNICAL   = 2.0   # MA signal + RSI/BB entry quality
+W_NEWS        = 1.5   # News sentiment
+W_MACRO       = 1.0   # SPY regime
 W_PORTFOLIO   = 2.0   # Cash reserve + correlation
-W_VOLATILITY  = 1.5   # VIX proxy / market tone
+W_VOLATILITY  = 1.0   # VIX proxy / market tone
+W_QUALITY     = 2.5   # NEW: market cap, profitability, analyst coverage
+
+# ── Source-aware approval thresholds ──────────────────────────────────────────
+# Discovery stocks (social, screener, most-active) have NOT been manually vetted.
+# They require a higher bar than watchlist picks.
+SCORE_GATE_WATCHLIST  = 7.0   # manually curated, known thesis
+SCORE_GATE_DISCOVERY  = 8.5   # auto-discovered, unknown quality
+DISCOVERY_SOURCES = {"social_screener", "alpaca_most_active", "alpaca_gainers",
+                     "market_screener", "news_firehose", "reddit", "congressional"}
 
 # ── Earnings Proximity Veto ───────────────────────────────────────────────────
 EARNINGS_VETO_DAYS = 3  # Auto-veto if earnings within this many days
@@ -232,6 +245,92 @@ def score_volatility(research: dict) -> tuple:
     # Fallback: use SPY intraday range as vol proxy
     spy_data = research.get("symbols", {}).get("SPY", {})
     return 1.0, "VIX proxy unavailable — neutral volatility assumption (add VIXY to watchlist)"
+
+def score_quality(sym_data: dict, is_discovery: bool) -> tuple:
+    """
+    Score 0–2.5 based on business quality signals.
+    Market cap is the primary filter — every significant loser was small/micro cap.
+    Profitability and analyst coverage are secondary filters.
+
+    Hard veto for discovery stocks: market cap < $1B (micro/nano cap)
+    Returns: (score, note, hard_veto: bool)
+    """
+    funds     = sym_data.get("fundamentals", {})
+    cap_b     = funds.get("market_cap_b")       # float in billions, or None
+    is_prof   = funds.get("is_profitable")      # bool or None
+    buy_count = funds.get("analyst_buy_count") or 0
+    short_fl  = funds.get("short_float")
+
+    score = 0.0
+    notes = []
+
+    # ── Market cap (0–1.5 pts) ────────────────────────────────────────────────
+    if cap_b is not None:
+        if cap_b >= 100:
+            score += 1.5
+            notes.append(f"Mega-cap ${cap_b:.0f}B")
+        elif cap_b >= 10:
+            score += 1.25
+            notes.append(f"Large-cap ${cap_b:.0f}B")
+        elif cap_b >= 2:
+            score += 0.75
+            notes.append(f"Mid-cap ${cap_b:.1f}B")
+        elif cap_b >= 0.5:
+            score += 0.25
+            notes.append(f"Small-cap ${cap_b:.1f}B — limited institutional support")
+        else:
+            # Micro-cap: hard veto for discovery stocks
+            if is_discovery:
+                return 0.0, f"MICRO_CAP VETO: ${cap_b:.2f}B market cap — too small for discovery buys", True
+            score += 0.0
+            notes.append(f"Micro-cap ${cap_b:.2f}B — very high risk")
+    else:
+        if is_discovery:
+            # No cap data on a discovery stock = can't verify quality
+            score += 0.0
+            notes.append("Market cap unavailable — capped at 0 for discovery stock")
+        else:
+            score += 0.5   # watchlist stock, give benefit of the doubt
+            notes.append("Market cap data unavailable")
+
+    # ── Profitability (0–0.5 pts) ─────────────────────────────────────────────
+    if is_prof is True:
+        score += 0.5
+        notes.append("Profitable")
+    elif is_prof is False:
+        score -= 0.25
+        notes.append("Unprofitable — burning cash")
+
+    # ── Analyst coverage (0–0.5 pts) ─────────────────────────────────────────
+    if buy_count >= 20:
+        score += 0.5
+        notes.append(f"{buy_count} analyst buy ratings — strong institutional coverage")
+    elif buy_count >= 10:
+        score += 0.35
+        notes.append(f"{buy_count} analyst buy ratings")
+    elif buy_count >= 5:
+        score += 0.15
+        notes.append(f"{buy_count} analyst buy ratings")
+    elif buy_count == 0 and is_discovery:
+        score -= 0.25
+        notes.append("Zero analyst buy coverage on a discovery stock")
+
+    # ── High short float penalty ──────────────────────────────────────────────
+    try:
+        if short_fl:
+            sf = float(str(short_fl).replace("%", ""))
+            if sf > 20:
+                score -= 0.5
+                notes.append(f"Short float {short_fl} — heavily shorted, risk of squeeze or continued decline")
+            elif sf > 10:
+                score -= 0.25
+                notes.append(f"Short float {short_fl} — elevated short interest")
+    except (ValueError, TypeError):
+        pass
+
+    score = round(max(0.0, min(score, W_QUALITY)), 2)
+    return score, "; ".join(notes) if notes else "No quality data", False
+
 
 def check_earnings_veto(news_items: list, symbol: str) -> tuple:
     """
@@ -550,12 +649,25 @@ def score_symbol(symbol: str, research: dict) -> dict:
             "criteria": {"earnings_veto": True}
         }
 
+    # Determine if this is a discovery or watchlist stock
+    is_discovery = sym_data.get("source", "watchlist") in DISCOVERY_SOURCES
+
     # Score each criterion
     t_score, t_note = score_technical(technicals)
     n_score, n_note = score_news(news, sym_data)
     m_score, m_note = score_macro(research)
     p_score, p_note = score_portfolio(research, symbol)
     v_score, v_note = score_volatility(research)
+    q_score, q_note, q_hard_veto = score_quality(sym_data, is_discovery)
+
+    # Hard veto: micro-cap discovery stock
+    if q_hard_veto:
+        return {
+            "symbol": symbol, "recommendation": "VETO",
+            "score": 0.0,
+            "rationale": f"Quality veto: {q_note}",
+            "criteria": {"quality": {"score": 0.0, "note": q_note, "veto": True}}
+        }
 
     # Hard veto: cash below floor
     if "CASH BELOW 20%" in p_note:
@@ -564,11 +676,12 @@ def score_symbol(symbol: str, research: dict) -> dict:
             "score": 0.0,
             "rationale": "Cash reserve below 20% floor — hard veto",
             "criteria": {
-                "technical": {"score": t_score, "note": t_note},
-                "news": {"score": n_score, "note": n_note},
-                "macro": {"score": m_score, "note": m_note},
-                "portfolio": {"score": p_score, "note": p_note},
+                "technical":  {"score": t_score, "note": t_note},
+                "news":       {"score": n_score, "note": n_note},
+                "macro":      {"score": m_score, "note": m_note},
+                "portfolio":  {"score": p_score, "note": p_note},
                 "volatility": {"score": v_score, "note": v_note},
+                "quality":    {"score": q_score, "note": q_note},
             }
         }
 
@@ -577,43 +690,51 @@ def score_symbol(symbol: str, research: dict) -> dict:
         return {
             "symbol": symbol, "recommendation": "VETO",
             "score": t_score,
-            "rationale": f"Sell signal present — not a buy candidate",
+            "rationale": "Sell signal present — not a buy candidate",
             "criteria": {
-                "technical": {"score": t_score, "note": t_note},
-                "news": {"score": n_score, "note": n_note},
-                "macro": {"score": m_score, "note": m_note},
-                "portfolio": {"score": p_score, "note": p_note},
+                "technical":  {"score": t_score, "note": t_note},
+                "news":       {"score": n_score, "note": n_note},
+                "macro":      {"score": m_score, "note": m_note},
+                "portfolio":  {"score": p_score, "note": p_note},
                 "volatility": {"score": v_score, "note": v_note},
+                "quality":    {"score": q_score, "note": q_note},
             }
         }
 
-    total = round(t_score + n_score + m_score + p_score + v_score, 2)
-
+    total = round(t_score + n_score + m_score + p_score + v_score + q_score, 2)
     is_avg_down = "AVG_DOWN candidate" in p_note
 
-    if total >= JUDGE_MIN_SCORE:
+    # Source-aware approval threshold
+    gate = SCORE_GATE_DISCOVERY if is_discovery else SCORE_GATE_WATCHLIST
+
+    if total >= gate:
         rec = "APPROVE"
     elif total >= 5.0:
         rec = "HOLD"
     else:
         rec = "VETO"
 
-    # Avg-down requires stronger conviction: score ≥ 8.0
+    # Avg-down requires stronger conviction regardless of source
     if is_avg_down and total < 8.0:
         rec = "VETO"
 
+    source_note = f"Source: {'discovery' if is_discovery else 'watchlist'} | Gate: {gate}"
     rationale = (
         f"Technical: {t_note}. "
         f"News: {n_note}. "
         f"Macro: {m_note}. "
         f"Portfolio: {p_note}. "
-        f"Volatility: {v_note}."
+        f"Volatility: {v_note}. "
+        f"Quality: {q_note}. "
+        f"{source_note}."
     )
 
     return {
         "symbol": symbol,
         "recommendation": rec,
         "score": total,
+        "approval_gate": gate,
+        "is_discovery": is_discovery,
         "avg_down_candidate": is_avg_down,
         "score_breakdown": {
             "technical":  f"{t_score}/{W_TECHNICAL}",
@@ -621,6 +742,7 @@ def score_symbol(symbol: str, research: dict) -> dict:
             "macro":      f"{m_score}/{W_MACRO}",
             "portfolio":  f"{p_score}/{W_PORTFOLIO}",
             "volatility": f"{v_score}/{W_VOLATILITY}",
+            "quality":    f"{q_score}/{W_QUALITY}",
         },
         "criteria": {
             "technical":  {"score": t_score, "note": t_note},
@@ -628,6 +750,7 @@ def score_symbol(symbol: str, research: dict) -> dict:
             "macro":      {"score": m_score, "note": m_note},
             "portfolio":  {"score": p_score, "note": p_note},
             "volatility": {"score": v_score, "note": v_note},
+            "quality":    {"score": q_score, "note": q_note},
         },
         "rationale": rationale,
     }
@@ -698,6 +821,9 @@ def run_judge_session() -> dict:
             results["held"].append(sym)
         else:
             results["vetoed"].append(sym)
+        # Log the gate used so the markdown report is transparent
+        scored["_gate_used"] = scored.get("approval_gate",
+            SCORE_GATE_DISCOVERY if scored.get("is_discovery") else SCORE_GATE_WATCHLIST)
 
     # Save judge output
     out_path = os.path.join(JOURNAL_DIR, f"{today}-judge.json")
