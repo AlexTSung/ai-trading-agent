@@ -155,12 +155,12 @@ def close_position(symbol, reason=""):
 
     return place_limit_order(symbol, qty, "sell", limit_price, reason=reason)
 
-def buy_with_guardrails(symbol, signal_strength, account):
+def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=None):
     """
     Full buy flow:
     1. Check market is open
-    2. Calculate size
-    3. Get ask price and set limit
+    2. Set limit price at MA20 × 0.995 pullback target (from research), or ask if already there
+    3. Calculate size
     4. Place order
     Returns dict with order result + audit trail.
     """
@@ -168,14 +168,23 @@ def buy_with_guardrails(symbol, signal_strength, account):
     if not clock.get("is_open"):
         return {"error": "Market is closed. No order placed.", "symbol": symbol}
 
-    ask         = get_latest_ask(symbol)
-    limit_price = round(ask * (1 + LIMIT_SLIPPAGE), 2)  # Slightly above ask for fill probability
+    ask = get_latest_ask(symbol)
+
+    if research_limit_price and research_limit_price > 0:
+        # Use MA20 pullback target from research — patient entry, avoids chasing
+        # If ask is already below the target (deep pullback), use ask instead
+        limit_price = round(min(ask, research_limit_price), 2)
+        price_note  = f"MA20-target ${research_limit_price:.2f}"
+    else:
+        # Fallback: ask with small discount for patience
+        limit_price = round(ask * (1 - LIMIT_SLIPPAGE), 2)
+        price_note  = f"ask ${ask:.2f}"
 
     qty, sizing_note = calculate_max_shares(symbol, account, limit_price)
     if qty == 0:
         return {"error": sizing_note, "symbol": symbol, "action": "SKIPPED"}
 
-    reason = f"Signal: {signal_strength} | Ask: ${ask:.2f} | Limit: ${limit_price:.2f} | {sizing_note}"
+    reason = f"Signal: {signal_strength} | {price_note} | Limit: ${limit_price:.2f} | {sizing_note}"
     order  = place_limit_order(symbol, qty, "buy", limit_price, reason=reason)
 
     # Immediately place OCO exit structure: T1+stop and T2+stop on 50/50 split.
@@ -325,9 +334,11 @@ def run_trading_session():
         close_result = close_position(sym, reason=f"STOP-LOSS: Position down {trigger['unrealized_plpc']*100:.1f}%")
         results["stop_losses"].append({"symbol": sym, "result": close_result, "trigger": trigger})
 
-    # 2. Execute only Judge-approved buys
+    # 2. Execute only Judge-approved buys and avg-downs
     symbols_data = research.get("symbols", {})
     open_syms    = {p["symbol"] for p in positions}
+
+    AVG_DOWN_MIN_SCORE = 8.0  # Stricter gate for adding to existing positions
 
     for sym, data in symbols_data.items():
         if "error" in data:
@@ -336,34 +347,56 @@ def run_trading_session():
 
         tech   = data.get("technicals", {})
         signal = tech.get("signal", "HOLD")
+        # MA20 pullback target from research — prefer patient entry
+        research_limit = tech.get("limit_price")
+
+        # Sell signals bypass Judge — risk management always wins
+        if signal in ("STRONG_SELL", "WEAK_SELL") and sym in open_syms:
+            close_result = close_position(sym, reason=f"Sell signal: {signal}")
+            results["trades"].append({"symbol": sym, "action": "SELL", "result": close_result})
+            continue
+
+        judge_result = judge_scores.get(sym, {})
+        judge_rec    = judge_result.get("recommendation", "HOLD")
+        judge_score  = judge_result.get("score", 0)
+        is_avg_down  = judge_result.get("avg_down_candidate", False)
 
         if signal in ("STRONG_BUY", "WEAK_BUY") and sym not in open_syms:
-            judge_result = judge_scores.get(sym, {})
-            judge_rec    = judge_result.get("recommendation", "HOLD")
-            judge_score  = judge_result.get("score", 0)
-
+            # New position — standard gate: score ≥ 7.0
             if judge_rec != "APPROVE" or judge_score < 7.0:
                 results["vetoed_by_judge"].append({
-                    "symbol": sym,
-                    "signal": signal,
-                    "judge_recommendation": judge_rec,
-                    "judge_score": judge_score,
+                    "symbol": sym, "signal": signal,
+                    "judge_recommendation": judge_rec, "judge_score": judge_score,
                     "rationale": judge_result.get("rationale", "No Judge data")
                 })
                 continue
 
             account = get_account()
-            trade   = buy_with_guardrails(sym, signal, account)
+            trade   = buy_with_guardrails(sym, signal, account, research_limit_price=research_limit)
             trade["judge_score"] = judge_score
+            trade["action"] = "BUY"
             results["trades"].append(trade)
 
-        elif signal in ("STRONG_SELL", "WEAK_SELL") and sym in open_syms:
-            # Sell signals bypass Judge — risk management always wins
-            close_result = close_position(sym, reason=f"Sell signal: {signal}")
-            results["trades"].append({"symbol": sym, "action": "SELL", "result": close_result})
+        elif is_avg_down and sym in open_syms:
+            # Avg-down — stricter gate: score ≥ 8.0 and APPROVE
+            if judge_rec != "APPROVE" or judge_score < AVG_DOWN_MIN_SCORE:
+                results["vetoed_by_judge"].append({
+                    "symbol": sym, "signal": signal,
+                    "judge_recommendation": judge_rec, "judge_score": judge_score,
+                    "rationale": f"Avg-down requires score ≥ {AVG_DOWN_MIN_SCORE}, got {judge_score}. "
+                                 + judge_result.get("rationale", "")
+                })
+                continue
+
+            account = get_account()
+            trade   = buy_with_guardrails(sym, signal, account, research_limit_price=research_limit)
+            trade["judge_score"] = judge_score
+            trade["action"] = "AVG_DOWN"
+            results["trades"].append(trade)
 
         else:
-            results["skipped"].append({"symbol": sym, "signal": signal, "reason": "HOLD or already in position"})
+            results["skipped"].append({"symbol": sym, "signal": signal,
+                                       "reason": "HOLD or no qualifying signal"})
 
     # Save session results
     session_path = os.path.join(logs_dir, f"{today}-session.json")

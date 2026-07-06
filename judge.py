@@ -135,8 +135,13 @@ def score_macro(research: dict) -> tuple:
     else:
         return 0.75, "NEUTRAL macro regime"
 
+AVG_DOWN_MIN_DROP = 0.03   # Must be ≥3% below avg entry price to qualify
+AVG_DOWN_MAX_POS  = 0.08   # Max total position size (% of portfolio) before avg-down blocked
+
 def score_portfolio(research: dict, symbol: str) -> tuple:
-    """Score 0–2 based on cash reserve % and existing position correlation."""
+    """Score 0–2 based on cash reserve % and existing position correlation.
+    Existing positions score 1.5 as avg-down candidates when ≥3% below entry and under max size.
+    """
     account   = research.get("account", {})
     positions = research.get("positions", [])
 
@@ -147,17 +152,39 @@ def score_portfolio(research: dict, symbol: str) -> tuple:
     except (TypeError, ZeroDivisionError):
         return 1.0, "Portfolio data unavailable"
 
-    open_syms = [p["symbol"] for p in positions]
+    open_pos = {p["symbol"]: p for p in positions}
 
-    # Already in this position
-    if symbol in open_syms:
-        return 0.0, f"Already holding {symbol} — no new position"
+    # Already holding — check avg-down eligibility
+    if symbol in open_pos:
+        pos = open_pos[symbol]
+        try:
+            current_price = float(pos.get("current_price", 0))
+            avg_entry     = float(pos.get("avg_entry_price", 0))
+            mkt_val       = float(pos.get("market_value", 0))
+            pct_down      = (current_price - avg_entry) / avg_entry if avg_entry else 0
+            pos_pct       = mkt_val / port_val if port_val else 0
+        except (TypeError, ValueError):
+            return 0.0, f"Already holding {symbol} — data error, skipping avg-down"
+
+        if pos_pct >= AVG_DOWN_MAX_POS:
+            return 0.0, f"Already holding {symbol} — at max size ({pos_pct*100:.1f}% of portfolio, cap 8%)"
+        if pct_down >= 0:
+            return 0.0, f"Already holding {symbol} — price above entry, avg-down not warranted"
+        if abs(pct_down) < AVG_DOWN_MIN_DROP:
+            return 0.0, f"Already holding {symbol} — only {abs(pct_down)*100:.1f}% below entry (need ≥3%)"
+
+        return 1.5, (
+            f"AVG_DOWN candidate: {symbol} is {abs(pct_down)*100:.1f}% below entry "
+            f"(entry ${avg_entry:.2f} → now ${current_price:.2f}), "
+            f"position {pos_pct*100:.1f}% of portfolio (max 8%)"
+        )
+
+    open_syms = list(open_pos.keys())
 
     # Correlation penalty: tech-heavy basket
-    tech_names  = {"NVDA", "AAPL", "MSFT", "GOOG", "GOOGL", "META", "AMZN", "AMD", "TSM", "AVGO", "QQQ"}
-    defense_names = {"LMT", "RTX", "NOC", "GD", "LHX"}
-    open_tech   = [s for s in open_syms if s in tech_names]
-    corr_note   = ""
+    tech_names   = {"NVDA", "AAPL", "MSFT", "GOOG", "GOOGL", "META", "AMZN", "AMD", "TSM", "AVGO", "QQQ"}
+    open_tech    = [s for s in open_syms if s in tech_names]
+    corr_note    = ""
     corr_penalty = 0.0
 
     if symbol in tech_names and len(open_tech) >= 2:
@@ -311,11 +338,17 @@ def score_symbol(symbol: str, research: dict) -> dict:
 
     total = round(t_score + n_score + m_score + p_score + v_score, 2)
 
+    is_avg_down = "AVG_DOWN candidate" in p_note
+
     if total >= JUDGE_MIN_SCORE:
         rec = "APPROVE"
     elif total >= 5.0:
         rec = "HOLD"
     else:
+        rec = "VETO"
+
+    # Avg-down requires stronger conviction: score ≥ 8.0
+    if is_avg_down and total < 8.0:
         rec = "VETO"
 
     rationale = (
@@ -330,6 +363,7 @@ def score_symbol(symbol: str, research: dict) -> dict:
         "symbol": symbol,
         "recommendation": rec,
         "score": total,
+        "avg_down_candidate": is_avg_down,
         "score_breakdown": {
             "technical":  f"{t_score}/{W_TECHNICAL}",
             "news":       f"{n_score}/{W_NEWS}",
@@ -390,13 +424,17 @@ def run_judge_session() -> dict:
         "scores": {}
     }
 
-    # Only judge buy candidates (STRONG_BUY or WEAK_BUY signal)
+    # Load positions for avg-down eligibility checks
+    positions_by_sym = {p["symbol"]: p for p in research.get("positions", [])}
+
+    # Judge buy candidates (STRONG_BUY/WEAK_BUY) AND existing positions that may avg-down
     for sym, data in symbols_data.items():
         if sym == "SPY":  # SPY is macro ref, not a trade candidate
             continue
         tech   = data.get("technicals", {})
         signal = tech.get("signal", "HOLD")
-        if signal not in ("STRONG_BUY", "WEAK_BUY"):
+        is_held = sym in positions_by_sym
+        if signal not in ("STRONG_BUY", "WEAK_BUY") and not is_held:
             continue
 
         scored = score_symbol(sym, research)
