@@ -247,6 +247,7 @@ def check_earnings_veto(news_items: list, symbol: str) -> tuple:
     return False, ""
 
 DIP_BUY_MIN_SCORE  = 8.0   # Strict gate — dip buys require highest conviction
+
 DIP_BUY_STRUCTURAL_KW = [
     "bankruptcy", "fraud", "sec investigation", "accounting irregularit",
     "restatement", "going concern", "delisted", "chapter 11", "insolvency",
@@ -257,22 +258,97 @@ DIP_BUY_TEMPORARY_KW = [
     "lowered guidance", "earnings miss", "revenue miss",
 ]
 
+
+def check_falling_knife(technicals: dict, dip_pct: float) -> tuple:
+    """
+    Distinguishes a true dip (quality stock hit by a shock) from a falling knife
+    (already-weak stock continuing to collapse).
+
+    Returns: (is_falling_knife: bool, hard_veto: bool, penalty: float, reason: str)
+
+    Hard veto conditions (do not trade under any circumstances):
+      - Stock was already below MA50 yesterday — was weak BEFORE today's drop
+      - 3+ consecutive down days before today — sustained distribution
+
+    Penalty conditions (reduce score but don't veto):
+      - Was below MA20 yesterday (mild downtrend entering the drop): -1.5 pts
+      - 2 consecutive down days: -1.0 pt
+
+    Strength signals (reduce penalty or boost confidence):
+      - RSI < 35 (oversold/capitulation): signals panic bottom, not a falling knife
+      - Volume spike ≥ 2x average: capitulation volume, sellers exhausting
+    """
+    was_above_ma50 = technicals.get("was_above_ma50_yest", True)
+    was_above_ma20 = technicals.get("was_above_ma20_yest", True)
+    consec_down    = technicals.get("consec_down_days", 0)
+    rsi            = technicals.get("rsi", 50)
+    vol_ratio      = technicals.get("volume_ratio", 1.0)
+    oversold       = rsi < 35
+    capitulation   = vol_ratio >= 2.0
+
+    reasons = []
+
+    # ── Hard veto ─────────────────────────────────────────────────────────────
+    if not was_above_ma50:
+        return (True, True, 0,
+                f"FALLING KNIFE VETO: Stock was already below MA50 before today's drop — "
+                f"pre-existing downtrend, not a dip buy opportunity")
+
+    if consec_down >= 3:
+        return (True, True, 0,
+                f"FALLING KNIFE VETO: {consec_down} consecutive down days before today — "
+                f"sustained distribution, not a single-day shock")
+
+    # ── Penalty assessment ────────────────────────────────────────────────────
+    penalty = 0.0
+
+    if not was_above_ma20:
+        penalty += 1.5
+        reasons.append(f"Was below MA20 yesterday (mild prior weakness): -1.5pts")
+
+    if consec_down == 2:
+        penalty += 1.0
+        reasons.append(f"2 consecutive down days before drop: -1.0pt")
+    elif consec_down == 1:
+        penalty += 0.5
+        reasons.append(f"1 down day before drop: -0.5pt")
+
+    # ── Capitulation bonuses (offset knife penalties) ─────────────────────────
+    if oversold:
+        penalty = max(0.0, penalty - 1.0)
+        reasons.append(f"RSI {rsi:.0f} (oversold/panic) offsets knife risk: +1.0pt back")
+
+    if capitulation:
+        penalty = max(0.0, penalty - 0.5)
+        reasons.append(f"Volume {vol_ratio:.1f}x avg (capitulation selling): +0.5pt back")
+
+    is_knife = penalty > 0
+    reason   = "; ".join(reasons) if reasons else "Clean single-day shock on healthy stock"
+    return (is_knife, False, round(penalty, 2), reason)
+
+
 def score_dip_buy(symbol: str, research: dict) -> dict:
     """
-    Special scoring path for stocks down 25%+ in a single day.
-    MA signals are ignored — price will always be bearish after a crash.
-    Focus: is this a QUALITY company having a BAD DAY, or a structural collapse?
+    Special scoring path for stocks down ≥15% in a single day.
+    MA signals are ignored — price will always be bearish after a shock drop.
 
-    Scoring (10 pts max):
-      Fundamentals quality  0–4 pts  (analyst targets, buy ratings, revenue growth)
-      News catalyst type    0–3 pts  (temporary miss = opportunity; fraud = veto)
-      Macro regime          0–1.5 pts
-      Portfolio / cash      0–2 pts
-    Gate: ≥ 8.0 to APPROVE
+    Two-gate system:
+      1. Falling knife filter: was the stock STRONG before today?
+         - Hard veto if below MA50 yesterday or 3+ consecutive down days
+         - Penalty if below MA20 or 1-2 prior down days
+         - Penalty reduced if RSI is oversold or volume shows capitulation
+
+      2. Conviction scoring (10 pts, gate ≥ 8.0):
+         Fundamentals quality  0–4 pts  (analyst targets, buy ratings, rev growth)
+         News catalyst type    0–3 pts  (temporary event = opportunity; fraud = veto)
+         Macro regime          0–1.5 pts
+         Portfolio / cash      0–2 pts
+         Falling knife penalty  deducted from total
     """
     sym_data   = research.get("symbols", {}).get(symbol, {})
     news       = sym_data.get("news", [])
     funds      = sym_data.get("fundamentals", {})
+    technicals = sym_data.get("technicals", {})
     dip_pct    = abs(sym_data.get("dip_pct_change", 0))
 
     if "error" in sym_data:
@@ -280,7 +356,7 @@ def score_dip_buy(symbol: str, research: dict) -> dict:
                 "dip_buy_candidate": True, "rationale": f"Data error: {sym_data['error']}",
                 "criteria": {}}
 
-    # Hard veto: structural / legal problems detected in news
+    # ── Gate 1: Structural news veto ─────────────────────────────────────────
     for item in news[:10]:
         headline = (item.get("headline", "") + " " + item.get("summary", "")).lower()
         for kw in DIP_BUY_STRUCTURAL_KW:
@@ -288,10 +364,20 @@ def score_dip_buy(symbol: str, research: dict) -> dict:
                 return {
                     "symbol": symbol, "recommendation": "VETO", "score": 0.0,
                     "dip_buy_candidate": True,
-                    "rationale": f"DIP VETO — structural red flag in news: '{kw}' detected. "
+                    "rationale": f"DIP VETO — structural red flag: '{kw}' in news. "
                                  f"Not a dip — potential business collapse.",
                     "criteria": {"structural_veto": True, "trigger": kw}
                 }
+
+    # ── Gate 2: Falling knife check ───────────────────────────────────────────
+    is_knife, hard_veto, knife_penalty, knife_reason = check_falling_knife(technicals, dip_pct)
+    if hard_veto:
+        return {
+            "symbol": symbol, "recommendation": "VETO", "score": 0.0,
+            "dip_buy_candidate": True,
+            "rationale": knife_reason,
+            "criteria": {"falling_knife_veto": True, "knife_reason": knife_reason}
+        }
 
     # ── Fundamentals score (0–4) ─────────────────────────────────────────────
     fund_score = 0.0
@@ -308,13 +394,13 @@ def score_dip_buy(symbol: str, research: dict) -> dict:
                       float(str(current_price).replace(",", "")) - 1) * 100
             if upside >= 60:
                 fund_score += 2.0
-                fund_notes.append(f"Massive upside to analyst target: {upside:.0f}%")
+                fund_notes.append(f"Analyst target = {upside:.0f}% upside")
             elif upside >= 30:
                 fund_score += 1.0
-                fund_notes.append(f"Strong analyst target upside: {upside:.0f}%")
+                fund_notes.append(f"Analyst target = {upside:.0f}% upside")
             elif upside >= 10:
                 fund_score += 0.5
-                fund_notes.append(f"Analyst target upside: {upside:.0f}%")
+                fund_notes.append(f"Analyst target = {upside:.0f}% upside")
     except (ValueError, TypeError):
         pass
 
@@ -333,15 +419,15 @@ def score_dip_buy(symbol: str, research: dict) -> dict:
             rg = float(str(rev_growth).replace("%", "").replace("x", ""))
             if rg > 0.20:
                 fund_score += 0.5
-                fund_notes.append(f"Revenue growth: {rev_growth}")
+                fund_notes.append(f"Revenue growing {rev_growth}")
     except (ValueError, TypeError):
         pass
 
     fund_score = round(min(fund_score, 4.0), 2)
     fund_note  = "; ".join(fund_notes) if fund_notes else "Insufficient fundamental data"
 
-    # ── News catalyst score (0–3) ────────────────────────────────────────────
-    news_score = 2.0   # start bullish — drop is likely an overreaction
+    # ── News catalyst score (0–3) ─────────────────────────────────────────────
+    news_score = 2.0
     news_notes = []
     for item in news[:5]:
         headline = (item.get("headline", "") + " " + item.get("summary", "")).lower()
@@ -350,12 +436,11 @@ def score_dip_buy(symbol: str, research: dict) -> dict:
                 news_score = max(0.5, news_score - 0.5)
                 news_notes.append(f"Temporary catalyst: {kw}")
                 break
-
     if not news_notes:
         news_notes.append("No confirmed catalyst — may be sympathy selling or macro fear")
     news_note = "; ".join(news_notes)
 
-    # ── Macro + Portfolio (reuse standard scorers) ───────────────────────────
+    # ── Macro + Portfolio ─────────────────────────────────────────────────────
     m_score, m_note = score_macro(research)
     p_score, p_note = score_portfolio(research, symbol)
     if "CASH BELOW 20%" in p_note:
@@ -364,8 +449,15 @@ def score_dip_buy(symbol: str, research: dict) -> dict:
                 "rationale": "Cash below 20% floor — cannot take dip position",
                 "criteria": {}}
 
-    total = round(min(fund_score + news_score + m_score + p_score, 10.0), 2)
-    rec   = "APPROVE" if total >= DIP_BUY_MIN_SCORE else "VETO"
+    # ── Final score (knife penalty deducted last) ─────────────────────────────
+    raw_total = fund_score + news_score + m_score + p_score
+    total     = round(max(0.0, min(raw_total - knife_penalty, 10.0)), 2)
+    rec       = "APPROVE" if total >= DIP_BUY_MIN_SCORE else "VETO"
+
+    knife_label = (
+        f"Clean entry (no knife risk)"          if knife_penalty == 0 else
+        f"Knife risk penalty: -{knife_penalty}pt"
+    )
 
     return {
         "symbol":            symbol,
@@ -375,22 +467,26 @@ def score_dip_buy(symbol: str, research: dict) -> dict:
         "dip_buy_approved":  rec == "APPROVE",
         "dip_pct_drop":      dip_pct,
         "score_breakdown": {
-            "fundamentals":   f"{fund_score}/4.0",
-            "news_catalyst":  f"{news_score}/3.0",
-            "macro":          f"{m_score}/{W_MACRO}",
-            "portfolio":      f"{p_score}/{W_PORTFOLIO}",
+            "fundamentals":    f"{fund_score}/4.0",
+            "news_catalyst":   f"{news_score}/3.0",
+            "macro":           f"{m_score}/{W_MACRO}",
+            "portfolio":       f"{p_score}/{W_PORTFOLIO}",
+            "knife_penalty":   f"-{knife_penalty}",
         },
         "criteria": {
-            "fundamentals":  {"score": fund_score,  "note": fund_note},
-            "news_catalyst": {"score": news_score,  "note": news_note},
-            "macro":         {"score": m_score,     "note": m_note},
-            "portfolio":     {"score": p_score,     "note": p_note},
+            "fundamentals":    {"score": fund_score,      "note": fund_note},
+            "news_catalyst":   {"score": news_score,      "note": news_note},
+            "macro":           {"score": m_score,         "note": m_note},
+            "portfolio":       {"score": p_score,         "note": p_note},
+            "falling_knife":   {"penalty": knife_penalty, "note": f"{knife_label}. {knife_reason}"},
         },
         "rationale": (
             f"DIP BUY — stock down {dip_pct:.0f}% today. "
+            f"Knife check: {knife_reason}. "
             f"Fundamentals: {fund_note}. News: {news_note}. "
-            f"Macro: {m_note}. Portfolio: {p_note}. "
-            f"Score {total}/10 (gate ≥{DIP_BUY_MIN_SCORE}). {rec}."
+            f"Macro: {m_note}. "
+            f"Raw score {raw_total:.1f} − knife penalty {knife_penalty} = {total}/10 "
+            f"(gate ≥{DIP_BUY_MIN_SCORE}). {rec}."
         ),
     }
 

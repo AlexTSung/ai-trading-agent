@@ -292,7 +292,7 @@ def get_congressional_trades(days_back=14):
 
 
 # ── Dip opportunity detector ─────────────────────────────────────────────────
-def detect_dip_opportunities(snapshots, min_drop_pct=25.0, min_price=5.0, min_volume=200_000):
+def detect_dip_opportunities(snapshots, min_drop_pct=15.0, min_price=5.0, min_volume=200_000):
     """
     Find stocks that dropped 25%+ today vs previous close.
     These are high-conviction dip buy candidates — quality stocks on panic selling.

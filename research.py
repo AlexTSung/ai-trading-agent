@@ -169,6 +169,19 @@ def compute_technicals(bars_data):
     atr = round(mean(true_ranges[-14:]), 4) if len(true_ranges) >= 14 else None
     atr_pct = round(atr / last * 100, 2) if atr and last else None  # ATR as % of price
 
+    # ── Pre-drop strength (used by falling knife detection in judge.py) ──────
+    prev_close          = closes[-2] if len(closes) >= 2 else last
+    was_above_ma50_yest = prev_close > ma50
+    was_above_ma20_yest = prev_close > ma20
+
+    # Count consecutive down closes ending yesterday (not counting today)
+    consec_down = 0
+    for i in range(len(closes) - 2, max(len(closes) - 8, 0), -1):
+        if closes[i] < closes[i - 1]:
+            consec_down += 1
+        else:
+            break
+
     # ── MA Signal ─────────────────────────────────────────────────────────
     if ma20 > ma50 and last > ma20:
         signal = "STRONG_BUY"
@@ -209,9 +222,13 @@ def compute_technicals(bars_data):
         "volume_spike":     vol_spike,
         "atr":              atr,
         "atr_pct":          atr_pct,
-        "entry_score":      entry_score,
-        "entry_quality":    "EXCELLENT" if entry_score >= 70 else "GOOD" if entry_score >= 45 else "FAIR" if entry_score >= 25 else "POOR",
-        "limit_price":      round(ma20 * 0.995, 2),  # target entry per CLAUDE.md rule
+        "entry_score":          entry_score,
+        "entry_quality":        "EXCELLENT" if entry_score >= 70 else "GOOD" if entry_score >= 45 else "FAIR" if entry_score >= 25 else "POOR",
+        "limit_price":          round(ma20 * 0.995, 2),
+        "prev_close":           round(prev_close, 4),
+        "was_above_ma50_yest":  was_above_ma50_yest,
+        "was_above_ma20_yest":  was_above_ma20_yest,
+        "consec_down_days":     consec_down,
     }
 
 
