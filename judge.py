@@ -246,15 +246,170 @@ def check_earnings_veto(news_items: list, symbol: str) -> tuple:
             return True, f"Earnings proximity detected in recent news — auto-veto per hard rule #6"
     return False, ""
 
+DIP_BUY_MIN_SCORE  = 8.0   # Strict gate — dip buys require highest conviction
+DIP_BUY_STRUCTURAL_KW = [
+    "bankruptcy", "fraud", "sec investigation", "accounting irregularit",
+    "restatement", "going concern", "delisted", "chapter 11", "insolvency",
+    "ponzi", "class action", "criminal", "federal investigation",
+]
+DIP_BUY_TEMPORARY_KW = [
+    "miss", "guidance cut", "disappoints", "below expectations",
+    "lowered guidance", "earnings miss", "revenue miss",
+]
+
+def score_dip_buy(symbol: str, research: dict) -> dict:
+    """
+    Special scoring path for stocks down 25%+ in a single day.
+    MA signals are ignored — price will always be bearish after a crash.
+    Focus: is this a QUALITY company having a BAD DAY, or a structural collapse?
+
+    Scoring (10 pts max):
+      Fundamentals quality  0–4 pts  (analyst targets, buy ratings, revenue growth)
+      News catalyst type    0–3 pts  (temporary miss = opportunity; fraud = veto)
+      Macro regime          0–1.5 pts
+      Portfolio / cash      0–2 pts
+    Gate: ≥ 8.0 to APPROVE
+    """
+    sym_data   = research.get("symbols", {}).get(symbol, {})
+    news       = sym_data.get("news", [])
+    funds      = sym_data.get("fundamentals", {})
+    dip_pct    = abs(sym_data.get("dip_pct_change", 0))
+
+    if "error" in sym_data:
+        return {"symbol": symbol, "recommendation": "VETO", "score": 0.0,
+                "dip_buy_candidate": True, "rationale": f"Data error: {sym_data['error']}",
+                "criteria": {}}
+
+    # Hard veto: structural / legal problems detected in news
+    for item in news[:10]:
+        headline = (item.get("headline", "") + " " + item.get("summary", "")).lower()
+        for kw in DIP_BUY_STRUCTURAL_KW:
+            if kw in headline:
+                return {
+                    "symbol": symbol, "recommendation": "VETO", "score": 0.0,
+                    "dip_buy_candidate": True,
+                    "rationale": f"DIP VETO — structural red flag in news: '{kw}' detected. "
+                                 f"Not a dip — potential business collapse.",
+                    "criteria": {"structural_veto": True, "trigger": kw}
+                }
+
+    # ── Fundamentals score (0–4) ─────────────────────────────────────────────
+    fund_score = 0.0
+    fund_notes = []
+
+    analyst_target = funds.get("analyst_target")
+    current_price  = funds.get("current_price") or sym_data.get("dip_price", 0)
+    buy_count      = funds.get("analyst_buy_count", 0) or 0
+    rev_growth     = funds.get("revenue_growth")
+
+    try:
+        if analyst_target and current_price:
+            upside = (float(str(analyst_target).replace(",", "")) /
+                      float(str(current_price).replace(",", "")) - 1) * 100
+            if upside >= 60:
+                fund_score += 2.0
+                fund_notes.append(f"Massive upside to analyst target: {upside:.0f}%")
+            elif upside >= 30:
+                fund_score += 1.0
+                fund_notes.append(f"Strong analyst target upside: {upside:.0f}%")
+            elif upside >= 10:
+                fund_score += 0.5
+                fund_notes.append(f"Analyst target upside: {upside:.0f}%")
+    except (ValueError, TypeError):
+        pass
+
+    if buy_count >= 10:
+        fund_score += 1.5
+        fund_notes.append(f"{buy_count} analyst buy ratings")
+    elif buy_count >= 5:
+        fund_score += 1.0
+        fund_notes.append(f"{buy_count} analyst buy ratings")
+    elif buy_count >= 2:
+        fund_score += 0.5
+        fund_notes.append(f"{buy_count} analyst buy ratings")
+
+    try:
+        if rev_growth:
+            rg = float(str(rev_growth).replace("%", "").replace("x", ""))
+            if rg > 0.20:
+                fund_score += 0.5
+                fund_notes.append(f"Revenue growth: {rev_growth}")
+    except (ValueError, TypeError):
+        pass
+
+    fund_score = round(min(fund_score, 4.0), 2)
+    fund_note  = "; ".join(fund_notes) if fund_notes else "Insufficient fundamental data"
+
+    # ── News catalyst score (0–3) ────────────────────────────────────────────
+    news_score = 2.0   # start bullish — drop is likely an overreaction
+    news_notes = []
+    for item in news[:5]:
+        headline = (item.get("headline", "") + " " + item.get("summary", "")).lower()
+        for kw in DIP_BUY_TEMPORARY_KW:
+            if kw in headline:
+                news_score = max(0.5, news_score - 0.5)
+                news_notes.append(f"Temporary catalyst: {kw}")
+                break
+
+    if not news_notes:
+        news_notes.append("No confirmed catalyst — may be sympathy selling or macro fear")
+    news_note = "; ".join(news_notes)
+
+    # ── Macro + Portfolio (reuse standard scorers) ───────────────────────────
+    m_score, m_note = score_macro(research)
+    p_score, p_note = score_portfolio(research, symbol)
+    if "CASH BELOW 20%" in p_note:
+        return {"symbol": symbol, "recommendation": "VETO", "score": 0.0,
+                "dip_buy_candidate": True,
+                "rationale": "Cash below 20% floor — cannot take dip position",
+                "criteria": {}}
+
+    total = round(min(fund_score + news_score + m_score + p_score, 10.0), 2)
+    rec   = "APPROVE" if total >= DIP_BUY_MIN_SCORE else "VETO"
+
+    return {
+        "symbol":            symbol,
+        "recommendation":    rec,
+        "score":             total,
+        "dip_buy_candidate": True,
+        "dip_buy_approved":  rec == "APPROVE",
+        "dip_pct_drop":      dip_pct,
+        "score_breakdown": {
+            "fundamentals":   f"{fund_score}/4.0",
+            "news_catalyst":  f"{news_score}/3.0",
+            "macro":          f"{m_score}/{W_MACRO}",
+            "portfolio":      f"{p_score}/{W_PORTFOLIO}",
+        },
+        "criteria": {
+            "fundamentals":  {"score": fund_score,  "note": fund_note},
+            "news_catalyst": {"score": news_score,  "note": news_note},
+            "macro":         {"score": m_score,     "note": m_note},
+            "portfolio":     {"score": p_score,     "note": p_note},
+        },
+        "rationale": (
+            f"DIP BUY — stock down {dip_pct:.0f}% today. "
+            f"Fundamentals: {fund_note}. News: {news_note}. "
+            f"Macro: {m_note}. Portfolio: {p_note}. "
+            f"Score {total}/10 (gate ≥{DIP_BUY_MIN_SCORE}). {rec}."
+        ),
+    }
+
+
 # ── Master Scoring Function ───────────────────────────────────────────────────
 
 def score_symbol(symbol: str, research: dict) -> dict:
     """
     Run all criteria for one symbol. Returns full judge output dict.
+    Dip buy candidates (25%+ single-day drop) are routed to score_dip_buy()
+    which uses fundamentals-first scoring instead of MA signals.
     """
     sym_data   = research.get("symbols", {}).get(symbol, {})
     technicals = sym_data.get("technicals", {})
     news       = sym_data.get("news", [])
+
+    # Route dip buy candidates to fundamentals-first scoring path
+    if sym_data.get("dip_buy_candidate"):
+        return score_dip_buy(symbol, research)
 
     if "error" in sym_data:
         return {
@@ -433,8 +588,9 @@ def run_judge_session() -> dict:
             continue
         tech   = data.get("technicals", {})
         signal = tech.get("signal", "HOLD")
-        is_held = sym in positions_by_sym
-        if signal not in ("STRONG_BUY", "WEAK_BUY") and not is_held:
+        is_held       = sym in positions_by_sym
+        is_dip        = data.get("dip_buy_candidate", False)
+        if signal not in ("STRONG_BUY", "WEAK_BUY") and not is_held and not is_dip:
             continue
 
         scored = score_symbol(sym, research)

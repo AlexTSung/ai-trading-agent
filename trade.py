@@ -24,9 +24,10 @@ ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
 BASE_URL      = os.getenv("APCA_BASE_URL", "https://paper-api.alpaca.markets")
 DATA_URL      = "https://data.alpaca.markets"
 
-CASH_RESERVE_PCT  = 0.20   # Always keep 20% in cash
-MAX_POSITION_PCT  = 0.05   # Max 5% per position
-STOP_LOSS_PCT     = -0.08  # -8% stop distance
+CASH_RESERVE_PCT      = 0.20   # Always keep 20% in cash
+MAX_POSITION_PCT      = 0.05   # Max 5% per position (standard)
+DIP_BUY_POSITION_PCT  = 0.08   # Max 8% for high-conviction dip buys
+STOP_LOSS_PCT         = -0.08  # -8% stop distance
 LIMIT_SLIPPAGE    = 0.002  # Orders within 0.2% of ask
 TAKE_PROFIT_R1    = 2.0    # T1 = entry + 2 × stop_distance (2:1 R/R, sell 50%)
 TAKE_PROFIT_R2    = 3.0    # T2 = entry + 3 × stop_distance (3:1 R/R, sell remaining)
@@ -83,24 +84,25 @@ def get_orders(status="all", after_date=None):
     return r.json()
 
 # ── Guardrails ────────────────────────────────────────────────────────────────
-def calculate_max_shares(symbol, account, limit_price):
+def calculate_max_shares(symbol, account, limit_price, is_dip_buy=False):
     """
-    How many shares can we buy given:
-    - 5% max position size
-    - 20% cash reserve must be maintained
+    How many shares can we buy given cash reserve and position size limits.
+    Dip buys use 8% max sizing instead of standard 5%.
     """
     portfolio_value = float(account["portfolio_value"])
     current_cash    = float(account["cash"])
     min_cash        = portfolio_value * CASH_RESERVE_PCT
     deployable_cash = current_cash - min_cash
-    max_by_pct      = portfolio_value * MAX_POSITION_PCT
+    pos_pct         = DIP_BUY_POSITION_PCT if is_dip_buy else MAX_POSITION_PCT
+    max_by_pct      = portfolio_value * pos_pct
 
     budget = min(deployable_cash, max_by_pct)
     if budget <= 0:
         return 0, f"Insufficient deployable cash: ${deployable_cash:.2f} (reserve: ${min_cash:.2f})"
 
     shares = math.floor(budget / limit_price)
-    return shares, f"Budget: ${budget:.2f} → {shares} shares @ ${limit_price:.2f}"
+    size_label = "DIP_BUY 8%" if is_dip_buy else "5%"
+    return shares, f"Budget ({size_label}): ${budget:.2f} → {shares} shares @ ${limit_price:.2f}"
 
 def check_stop_loss(positions):
     """Return any positions that have hit the -8% stop-loss threshold."""
@@ -155,7 +157,7 @@ def close_position(symbol, reason=""):
 
     return place_limit_order(symbol, qty, "sell", limit_price, reason=reason)
 
-def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=None):
+def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=None, is_dip_buy=False):
     """
     Full buy flow:
     1. Check market is open
@@ -170,7 +172,11 @@ def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=N
 
     ask = get_latest_ask(symbol)
 
-    if research_limit_price and research_limit_price > 0:
+    if is_dip_buy:
+        # Dip buy: stock already down 25%+ — buy at current ask, don't wait for pullback
+        limit_price = round(ask * (1 + LIMIT_SLIPPAGE), 2)
+        price_note  = f"DIP ask ${ask:.2f}"
+    elif research_limit_price and research_limit_price > 0:
         # Use MA20 pullback target from research — patient entry, avoids chasing
         # If ask is already below the target (deep pullback), use ask instead
         limit_price = round(min(ask, research_limit_price), 2)
@@ -180,7 +186,7 @@ def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=N
         limit_price = round(ask * (1 - LIMIT_SLIPPAGE), 2)
         price_note  = f"ask ${ask:.2f}"
 
-    qty, sizing_note = calculate_max_shares(symbol, account, limit_price)
+    qty, sizing_note = calculate_max_shares(symbol, account, limit_price, is_dip_buy=is_dip_buy)
     if qty == 0:
         return {"error": sizing_note, "symbol": symbol, "action": "SKIPPED"}
 
@@ -356,12 +362,24 @@ def run_trading_session():
             results["trades"].append({"symbol": sym, "action": "SELL", "result": close_result})
             continue
 
-        judge_result = judge_scores.get(sym, {})
-        judge_rec    = judge_result.get("recommendation", "HOLD")
-        judge_score  = judge_result.get("score", 0)
-        is_avg_down  = judge_result.get("avg_down_candidate", False)
+        judge_result    = judge_scores.get(sym, {})
+        judge_rec       = judge_result.get("recommendation", "HOLD")
+        judge_score     = judge_result.get("score", 0)
+        is_avg_down     = judge_result.get("avg_down_candidate", False)
+        is_dip_approved = judge_result.get("dip_buy_approved", False)
+        is_dip          = judge_result.get("dip_buy_candidate", False) or data.get("dip_buy_candidate", False)
 
-        if signal in ("STRONG_BUY", "WEAK_BUY") and sym not in open_syms:
+        if is_dip and is_dip_approved and sym not in open_syms:
+            # Dip buy — stock down 25%+, fundamentals intact, high conviction
+            account = get_account()
+            trade   = buy_with_guardrails(sym, f"DIP_BUY_{judge_result.get('dip_pct_drop', 0):.0f}pct",
+                                          account, is_dip_buy=True)
+            trade["judge_score"] = judge_score
+            trade["action"] = "DIP_BUY"
+            trade["dip_pct_drop"] = judge_result.get("dip_pct_drop", 0)
+            results["trades"].append(trade)
+
+        elif signal in ("STRONG_BUY", "WEAK_BUY") and sym not in open_syms:
             # New position — standard gate: score ≥ 7.0
             if judge_rec != "APPROVE" or judge_score < 7.0:
                 results["vetoed_by_judge"].append({

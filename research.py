@@ -336,6 +336,43 @@ def _load_intelligence_tickers(max_tickers=15):
         return []
 
 
+def _load_dip_tickers():
+    """
+    Load 25%+ single-day drop candidates from today's screener output.
+    These bypass normal signal filtering in the Judge — dip scoring path used instead.
+    """
+    from datetime import date as _date
+    today = _date.today().isoformat()
+    path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-screener.json")
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path) as f:
+            data = json.load(f)
+        tickers = []
+        for d in data.get("dip_opportunities", []):
+            sym = d.get("symbol", "")
+            if not sym or len(sym) > 5:
+                continue
+            tickers.append({
+                "symbol":            sym,
+                "description":       f"DIP BUY ALERT: {d.get('pct_change', 0):.1f}% today "
+                                     f"(prev close ${d.get('prev_close', 0):.2f} → ${d.get('price', 0):.2f})",
+                "max_allocation_pct": 8,   # higher conviction sizing
+                "source":            "dip_screener",
+                "dip_buy_candidate": True,
+                "dip_pct_change":    d.get("pct_change", 0),
+                "dip_prev_close":    d.get("prev_close", 0),
+                "dip_price":         d.get("price", 0),
+            })
+        if tickers:
+            print(f"  [dip loader] {len(tickers)} dip candidates: {[t['symbol'] for t in tickers]}", file=sys.stderr)
+        return tickers
+    except Exception as e:
+        print(f"  [dip loader] {e}", file=sys.stderr)
+        return []
+
+
 def _load_screener_tickers(max_tickers=15):
     """Load top candidates from today's full market screener output."""
     from datetime import date as _date
@@ -413,13 +450,22 @@ def full_research():
     social_tickers   = _load_social_tickers(max_tickers=10)
     intel_tickers    = _load_intelligence_tickers(max_tickers=15)
     screener_tickers = _load_screener_tickers(max_tickers=15)
+    dip_tickers      = _load_dip_tickers()
 
     watchlist_syms = {item["symbol"] for item in watchlist_items}
     extra_items = []
-    for t in social_tickers + intel_tickers + screener_tickers:
+    for t in social_tickers + intel_tickers + screener_tickers + dip_tickers:
         if t["symbol"] not in watchlist_syms:
             extra_items.append(t)
             watchlist_syms.add(t["symbol"])
+        elif t.get("dip_buy_candidate"):
+            # Dip flag must propagate even if symbol is already on watchlist
+            for w in watchlist_items:
+                if w["symbol"] == t["symbol"]:
+                    w["dip_buy_candidate"]  = True
+                    w["dip_pct_change"]     = t.get("dip_pct_change", 0)
+                    w["dip_prev_close"]     = t.get("dip_prev_close", 0)
+                    w["max_allocation_pct"] = 8  # upgrade sizing
 
     all_items = watchlist_items + extra_items
     print(f"  [research] Total symbols to research: {len(all_items)} "
@@ -453,7 +499,7 @@ def full_research():
             news_sum    = summarize_news(news_raw)
             fundamentals = get_yahoo_fundamentals(sym)
 
-            results["symbols"][sym] = {
+            sym_result = {
                 "description":      item.get("description", ""),
                 "max_allocation_pct": item.get("max_allocation_pct", 5),
                 "source":           item.get("source", "watchlist"),
@@ -461,6 +507,12 @@ def full_research():
                 "news":             news_sum,
                 "fundamentals":     fundamentals,
             }
+            # Propagate dip buy flag so Judge routes to dip scoring path
+            if item.get("dip_buy_candidate"):
+                sym_result["dip_buy_candidate"] = True
+                sym_result["dip_pct_change"]    = item.get("dip_pct_change", 0)
+                sym_result["dip_prev_close"]    = item.get("dip_prev_close", 0)
+            results["symbols"][sym] = sym_result
         except Exception as e:
             results["symbols"][sym] = {"error": str(e)}
 

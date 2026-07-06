@@ -291,6 +291,47 @@ def get_congressional_trades(days_back=14):
         return {"error": str(e)}
 
 
+# ── Dip opportunity detector ─────────────────────────────────────────────────
+def detect_dip_opportunities(snapshots, min_drop_pct=25.0, min_price=5.0, min_volume=200_000):
+    """
+    Find stocks that dropped 25%+ today vs previous close.
+    These are high-conviction dip buy candidates — quality stocks on panic selling.
+    Runs against the snapshot data already fetched (no extra API calls).
+    """
+    dips = []
+    for sym, snap in snapshots.items():
+        try:
+            daily      = snap.get("dailyBar", {})
+            prev       = snap.get("prevDailyBar", {})
+            price      = daily.get("c", 0) or snap.get("latestTrade", {}).get("p", 0)
+            volume     = daily.get("v", 0)
+            prev_close = prev.get("c", 0)
+
+            if price < min_price or volume < min_volume or not prev_close:
+                continue
+
+            pct_change = (price - prev_close) / prev_close * 100
+
+            if pct_change <= -min_drop_pct:
+                dips.append({
+                    "symbol":        sym,
+                    "price":         round(price, 2),
+                    "prev_close":    round(prev_close, 2),
+                    "pct_change":    round(pct_change, 2),
+                    "drop_pct":      round(abs(pct_change), 2),
+                    "volume":        int(volume),
+                    "dip_buy_candidate": True,
+                })
+        except Exception:
+            continue
+
+    dips.sort(key=lambda x: x["drop_pct"], reverse=True)
+    if dips:
+        print(f"  [screener] DIP ALERTS: {len(dips)} stocks down ≥{min_drop_pct:.0f}% today: "
+              f"{[d['symbol'] for d in dips[:10]]}", file=sys.stderr)
+    return dips
+
+
 # ── Full morning scan ─────────────────────────────────────────────────────────
 def full_scan(top_n=30):
     """
@@ -324,6 +365,12 @@ def full_scan(top_n=30):
     output["top_candidates"]   = candidates[:top_n]
     output["total_scanned"]    = len(universe)
     output["passed_prefilter"] = len(candidates)
+
+    # Dip opportunities (25%+ single-day drops) — uses snapshots already fetched
+    dips = detect_dip_opportunities(snapshots)
+    output["dip_opportunities"] = dips
+    if dips:
+        print(f"  [screener] {len(dips)} dip buy candidates flagged", file=sys.stderr)
 
     # Sector rotation
     print("  [screener] Sector rotation...", file=sys.stderr)
