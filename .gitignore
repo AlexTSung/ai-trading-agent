@@ -4,8 +4,13 @@
 *.key
 secrets/
 
-# Raw JSON logs — keep markdown journals only (JSON has no value in git history)
-logs/paper/*.json
+# Pipeline state JSON IS tracked. It is not disposable output: the morning
+# idempotency guard (run_github.sh) and the EOD reviewer/journal all read these
+# files, and every GitHub Actions run starts from a fresh checkout. While they
+# were ignored, the double-run guard could never fire and the EOD journal
+# silently reported "Judge not run today" on days the Judge had run.
+# These files hold computed technicals and decisions only — no raw bars — so
+# they stay small.
 logs/paper/run-*.log
 logs/real/
 

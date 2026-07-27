@@ -57,9 +57,9 @@ Do not proceed until the user confirms. No exceptions.
   `place_stock_order`, `get_orders`, `cancel_order_by_id`,
   `get_stock_bars`, `get_stock_snapshot`, `get_stock_latest_quote`,
   `get_news`, `get_clock`, `get_portfolio_history`
-- **scripts/research.py** — MA signal computation and watchlist summary
-- **scripts/journal.py** — EOD markdown + CSV trade log
-- **scripts/trade.py** — trade session execution logic
+- **research.py** — MA signal computation and watchlist summary
+- **journal.py** — EOD markdown + CSV trade log
+- **trade.py** — trade session execution logic
 
 ## Agent Stack (Judge-Executor Model)
 ```
@@ -139,12 +139,20 @@ Run `python reviewer.py calibration 30` to check current standing.
 **Decision log**: On 2026-06-29, Alex extended the experiment by 7 days (through July 7) because all 6 closed positions were negative. Root causes identified and ruleset was overhauled. The new MA20 pullback entry strategy, tiered stops, and 30-day minimum hold need at least one full market week to validate before real money goes at risk.
 
 ## Daily Schedule (All times ET, weekdays only)
-| Time | Routine | Script |
-|------|---------|--------|
-| 9:45 AM | Morning Research | `python scripts/research.py full` |
-| 10:00 AM | Trade Execution | `python scripts/trade.py session` |
-| 12:00 PM | Midday Check | `python scripts/research.py midday` |
-| 4:15 PM | End-of-Day Journal | `python scripts/journal.py eod` |
+
+**Where automation actually runs:** GitHub Actions, using GitHub Secrets — not
+on any local machine. The `.github/workflows/*.yml` files are the single source
+of truth for the schedule. `routines.json` is reference material only; no script
+reads it, and times listed there are not what runs.
+
+| ET | Workflow | Cron (UTC) | Runner |
+|------|----------|------------|--------|
+| 9:45 AM | `morning-pipeline.yml` | `45 13 * * 1-5` | `run_github.sh` — intelligence → social → screener → research → judge → executor |
+| 12:00 PM | `midday-pipeline.yml` | `0 16 * * 1-5` | `run_midday_github.sh` — stop-loss + inverse ETF max-hold + midday research |
+| 5:15 PM | `eod-pipeline.yml` | `15 21 * * 1-5` | `run_eod_github.sh` — reviewer → journal (1hr post-close buffer) |
+
+Local equivalents for manual runs: `python research.py full`,
+`python trade.py session`, `python trade.py check-stops`, `python journal.py eod`.
 
 ## Hard Rules (Never Break These)
 1. **Check market status first.** Never place orders when `is_open` is false.
@@ -279,7 +287,7 @@ Before placing any buy:
 - **Strong Sell**: Price < 50-day MA OR stop-loss triggered
 
 ## Journal Format
-Every journal entry must follow the template in `config/journal-template.md`.
+Every journal entry must follow the template in `journal-template.md`.
 Sections: Portfolio Status → Market Research (per symbol) → Trades Executed → Positions Closed → Reflection → Tomorrow's Watch
 
 ## Lessons Learned
