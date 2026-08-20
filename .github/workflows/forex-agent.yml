@@ -1,0 +1,123 @@
+name: Forex Trading Agent
+
+on:
+  schedule:
+    # 4× daily at key session transitions (UTC):
+    #   12:00 UTC = 7-8AM ET  — London midpoint, momentum setups
+    #   17:00 UTC = 12-1PM ET — London/NY overlap, highest liquidity
+    #   22:00 UTC = 5-6PM ET  — After NY close, Asia pre-open carry entries
+    #   04:00 UTC = 11PM ET   — Tokyo session, JPY/AUD carry pairs
+    - cron: '0 4,12,17,22 * * 1-5'   # Mon-Fri only (FX closed weekends)
+    # Weekly strategy learner — Sunday 08:00 UTC (before Monday open)
+    - cron: '0 8 * * 0'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run mode'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - dry-run
+          - scan-only
+          - judge-only
+          - sync-journal
+          - status
+          - weekly-learn
+          - patterns
+
+env:
+  OANDA_ENV: practice
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  run-forex-agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Use a PAT so we can push back updated logs + config
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run forex agent
+        env:
+          OANDA_API_KEY:    ${{ secrets.OANDA_API_KEY }}
+          OANDA_ACCOUNT_ID: ${{ secrets.OANDA_ACCOUNT_ID }}
+          OANDA_ENV:        practice
+        run: |
+          MODE="${{ github.event.inputs.mode || 'full' }}"
+          echo "Running forex agent in mode: $MODE"
+          case "$MODE" in
+            full)         python3 run_forex.py ;;
+            dry-run)      python3 run_forex.py --dry-run ;;
+            scan-only)    python3 run_forex.py --scan-only ;;
+            judge-only)   python3 run_forex.py --judge-only ;;
+            sync-journal) python3 run_forex.py --sync-journal ;;
+            status)       python3 run_forex.py --status ;;
+            weekly-learn) python3 forex_optimizer.py weekly ;;
+            patterns)     python3 forex_optimizer.py patterns ;;
+          esac
+
+      - name: Run optimizer (tune weights from journal)
+        if: github.event.inputs.mode == '' || github.event.inputs.mode == 'full'
+        env:
+          OANDA_API_KEY:    ${{ secrets.OANDA_API_KEY }}
+          OANDA_ACCOUNT_ID: ${{ secrets.OANDA_ACCOUNT_ID }}
+          OANDA_ENV:        practice
+        run: python3 forex_optimizer.py daily
+
+      - name: Weekly strategy scrape (Sundays)
+        if: github.event.schedule == '0 8 * * 0'
+        env:
+          OANDA_API_KEY:    ${{ secrets.OANDA_API_KEY }}
+          OANDA_ACCOUNT_ID: ${{ secrets.OANDA_ACCOUNT_ID }}
+          OANDA_ENV:        practice
+        run: python3 forex_optimizer.py weekly
+
+      - name: Commit updated journal + config back to repo
+        if: always()
+        run: |
+          git config user.name  "forex-agent[bot]"
+          git config user.email "forex-agent@noreply.github.com"
+
+          # Stage agent memory files only — never credentials or big logs
+          git add -f \
+            logs/forex/trade_journal.json \
+            logs/forex/*_research.json \
+            logs/forex/*_verdicts.json \
+            logs/forex/*_scan.json \
+            logs/forex/*_trades.json \
+            logs/forex/*_reflection.md \
+            forex_config.json \
+            strategies/forex_learnings.md 2>/dev/null || true
+
+          # Only commit if something changed
+          if ! git diff --cached --quiet; then
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+            git commit -m "agent: forex run ${TIMESTAMP}"
+            git push
+          else
+            echo "No changes to commit."
+          fi
+
+      - name: Upload logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forex-logs-${{ github.run_number }}
+          path: |
+            logs/forex/trade_journal.json
+            logs/forex/*_verdicts.json
+            logs/forex/*_scan.json
+            forex_config.json
+          retention-days: 30
+          if-no-files-found: ignore

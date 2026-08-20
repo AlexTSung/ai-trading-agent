@@ -1,0 +1,2628 @@
+=== Trading Agent Run: 2026-06-30 13:52:47 ET ===
+  Keys loaded from MCP config (not logged)
+
+--- [1/5] Intelligence scan (8:30 AM) ---
+Running morning intelligence scan...
+  [1/7] Fear & Greed Index...
+  [2/7] VIX...
+  [3/7] Global market signals...
+  [4/7] Macro data (FRED)...
+  [5/7] Reddit trending tickers...
+  [6/7] Earnings calendar...
+  [7/7] SEC insider buys (7d)...
+  Saved to /Users/alexsung/Downloads/AI Trading Agent/logs/paper/2026-06-30-intelligence.json
+{
+  "timestamp": "2026-06-30T13:52:47.773521",
+  "run_type": "morning_intelligence",
+  "fear_greed": {
+    "source": "fred_vix_proxy",
+    "vix": 17.65,
+    "vix_date": "2026-06-29",
+    "score": 65,
+    "rating": "Greed",
+    "signal": "GREED \u2014 risk-on, watch exits",
+    "timestamp": "2026-06-30T13:52:47.997915"
+  },
+  "vix": {
+    "symbol": "VIXY",
+    "price": 21.35,
+    "note": "VIXY proxy for VIX"
+  },
+  "global_markets": {
+    "timestamp": "2026-06-30T13:52:48.340661",
+    "source": "global_etfs",
+    "markets": {
+      "EWJ": {
+        "description": "Japan (Nikkei proxy)",
+        "prev_close": 93.21,
+        "today": 93.46,
+        "change_pct": 0.27,
+        "signal": "FLAT"
+      },
+      "EWG": {
+        "description": "Germany (DAX proxy)",
+        "prev_close": 40.95,
+        "today": 41.41,
+        "change_pct": 1.12,
+        "signal": "UP"
+      },
+      "FXI": {
+        "description": "China (HSI/CSI proxy)",
+        "prev_close": 31.72,
+        "today": 31.66,
+        "change_pct": -0.17,
+        "signal": "FLAT"
+      },
+      "EWU": {
+        "description": "UK (FTSE proxy)",
+        "prev_close": 46.15,
+        "today": 46.08,
+        "change_pct": -0.15,
+        "signal": "FLAT"
+      },
+      "EWZ": {
+        "description": "Brazil (Ibovespa proxy)",
+        "prev_close": 34.55,
+        "today": 34.45,
+        "change_pct": -0.29,
+        "signal": "FLAT"
+      },
+      "EEM": {
+        "description": "Emerging markets",
+        "prev_close": 67.44,
+        "today": 68.5,
+        "change_pct": 1.57,
+        "signal": "UP"
+      },
+      "GLD": {
+        "description": "Gold",
+        "prev_close": 368.62,
+        "today": 369.94,
+        "change_pct": 0.36,
+        "signal": "FLAT"
+      },
+      "USO": {
+        "description": "Oil",
+        "prev_close": 107.09,
+        "today": 106.16,
+        "change_pct": -0.87,
+        "signal": "DOWN"
+      },
+      "TLT": {
+        "description": "US 20yr Treasuries (rates proxy)",
+        "prev_close": 87.42,
+        "today": 86.78,
+        "change_pct": -0.73,
+        "signal": "DOWN"
+      },
+      "UUP": {
+        "description": "US Dollar index",
+        "prev_close": 28.38,
+        "today": 28.4,
+        "change_pct": 0.09,
+        "signal": "FLAT"
+      }
+    }
+  },
+  "macro": {
+    "timestamp": "2026-06-30T13:52:51.423566",
+    "source": "fred_csv",
+    "macro": {
+      "FEDFUNDS": {
+        "label": "Fed Funds Rate",
+        "value": "3.63",
+        "date": "2026-05-01",
+        "note": ""
+      },
+      "CPIAUCSL": {
+        "label": "CPI (inflation)",
+        "value": "333.979",
+        "date": "2026-05-01",
+        "note": "CPI index level 333.979 \u2014 watch YoY % change"
+      },
+      "UNRATE": {
+        "label": "Unemployment Rate",
+        "value": "4.3",
+        "date": "2026-05-01",
+        "note": ""
+      },
+      "T10Y2Y": {
+        "label": "Yield Curve (10yr-2yr spread)",
+        "value": "0.28",
+        "date": "2026-06-29",
+        "note": "Flat curve \u2014 caution"
+      },
+      "DGS10": {
+        "label": "10-Year Treasury Yield",
+        "value": "4.38",
+        "date": "2026-06-26",
+        "note": ""
+      },
+      "VIXCLS": {
+        "label": "VIX Closing Price",
+        "value": "17.65",
+        "date": "2026-06-29",
+        "note": "LOW VOL \u2014 risk-on, full sizing allowed"
+      }
+    }
+  },
+  "reddit": {
+    "timestamp": "2026-06-30T13:52:53.320222",
+    "source": "reddit",
+    "tickers": []
+  },
+  "earnings_watch": {
+    "timestamp": "2026-06-30T13:52:55.079686",
+    "earnings_watch": [
+      {
+        "symbol": "MSFT",
+        "headline": "Warren Buffett Breaks A 20-Year Tradition As Report Says His Gates Foundation Donation Is Suddenly On Hold Over Epstein Files Review",
+        "date": "2026-06-30T11:03:08Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "TSLA",
+        "headline": "Deutsche Bank Estimates Tesla Q2 Deliveries At 416,000",
+        "date": "2026-06-30T13:52:22Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      }
+    ]
+  },
+  "insider_activity": {
+    "timestamp": "2026-06-30T13:52:56.695271",
+    "source": "sec_edgar",
+    "insider_filings": [
+      {
+        "company": "",
+        "filed": "2026-06-24",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-24",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-23",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-23",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-26",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-29",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-26",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-26",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-23",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-29",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-23",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-24",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-23",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-24",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-29",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-23",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-29",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-23",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-23",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-06-29",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      }
+    ]
+  }
+}
+
+--- [2/5] Social screener (9:00 AM) ---
+🔍 Fetching trending symbols from StockTwits...
+  30 symbols to scan
+🛡️  Running pump & dump guardrails...
+    ⚠️  FLAGGED   NOK: 1 flag(s)
+    ⚠️  FLAGGED   LCID: 1 flag(s)
+    ⚠️  FLAGGED   CADL: 1 flag(s)
+    ⚠️  FLAGGED   JACK: 1 flag(s)
+  Pump scan: 36 clean, 4 flagged, 0 vetoed
+
+=================================================================
+TOP STOCKTWITS TICKERS — 2026-06-30
+=================================================================
+ 1. NOK    🟢 BULLISH  Bull:  66.7% |  30 msgs | Score: 88.0
+ 2. LCID   🟢 BULLISH  Bull:  63.3% |  30 msgs | Score: 86.9
+ 3. CADL   🟢 BULLISH  Bull:  63.3% |  30 msgs | Score: 86.4
+ 4. NBIS   🟢 BULLISH  Bull:  46.7% |  30 msgs | Score: 81.4
+ 5. AMD    🟢 BULLISH  Bull:  40.0% |  30 msgs | Score: 79.2
+ 6. NKE    🟢 BULLISH  Bull:  40.0% |  30 msgs | Score: 79.2
+ 7. OUST   🟢 BULLISH  Bull:  40.0% |  30 msgs | Score: 79.2
+ 8. NVDA   🟢 BULLISH  Bull:  40.0% |  30 msgs | Score: 79.2
+ 9. FCEL   🟢 BULLISH  Bull:  36.7% |  30 msgs | Score: 78.1
+10. QCOM   🟢 BULLISH  Bull:  36.7% |  30 msgs | Score: 78.1
+11. AMBA   🟢 BULLISH  Bull:  36.7% |  30 msgs | Score: 78.1
+12. BE     🟢 BULLISH  Bull:  36.7% |  30 msgs | Score: 78.1
+13. UBER   🟢 BULLISH  Bull:  36.7% |  30 msgs | Score: 78.1
+14. GOOGL  🟢 BULLISH  Bull:  36.7% |  30 msgs | Score: 78.1
+15. LLY    🟢 BULLISH  Bull:  33.3% |  30 msgs | Score: 77.0
+16. SPY    🟢 BULLISH  Bull:  33.3% |  30 msgs | Score: 77.0
+17. TSLA   🟢 BULLISH  Bull:  33.3% |  30 msgs | Score: 77.0
+18. CRCL   🟢 BULLISH  Bull:  30.0% |  30 msgs | Score: 75.9
+19. PEP    🟢 BULLISH  Bull:  30.0% |  30 msgs | Score: 75.9
+20. PYPL   🟡 MIXED    Bull:  30.0% |  30 msgs | Score: 75.9
+
+Report: /Users/alexsung/Downloads/AI Trading Agent/logs/paper/2026-06-30-social.md
+
+--- [3/5] Research (9:45 AM) ---
+  [research] Expanded by 8 social/reddit tickers: ['LCID', 'CADL', 'NBIS', 'AMD', 'NKE', 'OUST', 'FCEL', 'QCOM']
+{
+  "timestamp": "2026-06-30T13:53:37.754730",
+  "market_open": true,
+  "next_open": "2026-07-01T09:30:00-04:00",
+  "account": {
+    "cash": "69514.33",
+    "portfolio_value": "99485.66",
+    "buying_power": "347254.83"
+  },
+  "positions": [
+    {
+      "asset_id": "b0b6dd9d-8b9b-48a9-ba46-b9d54906e415",
+      "symbol": "AAPL",
+      "exchange": "NASDAQ",
+      "asset_class": "us_equity",
+      "asset_marginable": true,
+      "qty": "17",
+      "qty_available": "0",
+      "avg_entry_price": "283.7",
+      "side": "long",
+      "market_value": "4878.065",
+      "cost_basis": "4822.9",
+      "unrealized_pl": "55.165",
+      "unrealized_plpc": "0.01144",
+      "unrealized_intraday_pl": "88.485",
+      "unrealized_intraday_plpc": "0.01847",
+      "current_price": "286.945",
+      "lastday_price": "281.74",
+      "change_today": "0.01847"
+    },
+    {
+      "asset_id": "113d6f5b-a48f-4d20-a63f-79ea0bc88ebd",
+      "symbol": "DDOG",
+      "exchange": "NASDAQ",
+      "asset_class": "us_equity",
+      "asset_marginable": true,
+      "qty": "21",
+      "qty_available": "0",
+      "avg_entry_price": "218.57",
+      "side": "long",
+      "market_value": "5446.14",
+      "cost_basis": "4589.97",
+      "unrealized_pl": "856.17",
+      "unrealized_plpc": "0.18653",
+      "unrealized_intraday_pl": "226.17",
+      "unrealized_intraday_plpc": "0.04333",
+      "current_price": "259.34",
+      "lastday_price": "248.57",
+      "change_today": "0.04333"
+    },
+    {
+      "asset_id": "69b15845-7c63-4586-b274-1cfdfe9df3d8",
+      "symbol": "GOOGL",
+      "exchange": "NASDAQ",
+      "asset_class": "us_equity",
+      "asset_marginable": true,
+      "qty": "14",
+      "qty_available": "0",
+      "avg_entry_price": "351.64",
+      "side": "long",
+      "market_value": "4996.74",
+      "cost_basis": "4922.96",
+      "unrealized_pl": "73.78",
+      "unrealized_plpc": "0.01499",
+      "unrealized_intraday_pl": "45.64",
+      "unrealized_intraday_plpc": "0.00922",
+      "current_price": "356.91",
+      "lastday_price": "353.65",
+      "change_today": "0.00922"
+    },
+    {
+      "asset_id": "53f4d07f-dfcc-48d5-bb73-d8a4bab76a10",
+      "symbol": "NOK",
+      "exchange": "NYSE",
+      "asset_class": "us_equity",
+      "asset_marginable": false,
+      "qty": "394",
+      "qty_available": "0",
+      "avg_entry_price": "12.43",
+      "side": "long",
+      "market_value": "5257.93",
+      "cost_basis": "4897.42",
+      "unrealized_pl": "360.51",
+      "unrealized_plpc": "0.07361",
+      "unrealized_intraday_pl": "124.11",
+      "unrealized_intraday_plpc": "0.02417",
+      "current_price": "13.345",
+      "lastday_price": "13.03",
+      "change_today": "0.02417"
+    },
+    {
+      "asset_id": "4ce9353c-66d1-46c2-898f-fce867ab0247",
+      "symbol": "NVDA",
+      "exchange": "NASDAQ",
+      "asset_class": "us_equity",
+      "asset_marginable": true,
+      "qty": "25",
+      "qty_available": "0",
+      "avg_entry_price": "192.81",
+      "side": "long",
+      "market_value": "4972.25",
+      "cost_basis": "4820.25",
+      "unrealized_pl": "152",
+      "unrealized_plpc": "0.03153",
+      "unrealized_intraday_pl": "98",
+      "unrealized_intraday_plpc": "0.02011",
+      "current_price": "198.89",
+      "lastday_price": "194.97",
+      "change_today": "0.02011"
+    },
+    {
+      "asset_id": "2d9e926c-e17c-47c3-ad8c-26c7a594e48f",
+      "symbol": "QQQ",
+      "exchange": "NASDAQ",
+      "asset_class": "us_equity",
+      "asset_marginable": true,
+      "qty": "6",
+      "qty_available": "0",
+      "avg_entry_price": "733.16",
+      "side": "long",
+      "market_value": "4420.2",
+      "cost_basis": "4398.96",
+      "unrealized_pl": "21.24",
+      "unrealized_plpc": "0.00483",
+      "unrealized_intraday_pl": "75.72",
+      "unrealized_intraday_plpc": "0.01743",
+      "current_price": "736.7",
+      "lastday_price": "724.08",
+      "change_today": "0.01743"
+    }
+  ],
+  "symbols": {
+    "SPY": {
+      "description": "S&P 500 ETF \u2014 baseline market exposure and trend anchor",
+      "max_allocation_pct": 15,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 733.3025,
+        "ma50": 698.3936,
+        "last_close": 750.46,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "'TikTok Finalizing Settlement of Addiction Lawsuit to Avoid Trial' - Bloomberg",
+          "source": "benzinga",
+          "published": "2026-06-30T18:22:13Z",
+          "url": "https://www.benzinga.com/news/26/06/60199166/tiktok-finalizing-settlement-addiction-lawsuit-avoid-trial-bloomberg"
+        },
+        {
+          "headline": "Look Closer At SPY, QQQ: Investors Are Rigging A Safety Net Under The Stock Market",
+          "source": "benzinga",
+          "published": "2026-06-30T18:15:23Z",
+          "url": "https://www.benzinga.com/etfs/specialty-etfs/26/06/60198973/spy-qqq-investors-safety-net-under-stock-market"
+        },
+        {
+          "headline": "Two Market Positives, But Warsh's Speech and Jobs Data Could Shift Sentiment; \u2018Never Sell Bitcoin\u2019 Approach Abandoned",
+          "source": "benzinga",
+          "published": "2026-06-30T17:04:36Z",
+          "url": "https://www.benzinga.com/Opinion/26/06/60196149/two-market-positives-but-warsh-speech-and-jobs-data-could-shift-sentiment-never-sell-bitcoin-approach-abandoned"
+        },
+        {
+          "headline": "President Trump Posts On Truth Social \"The Supreme Court upheld Birthright Citizenship, which is too bad for our Country, but we can easily make it up in Congress through Legislation, with the support of the President, that has now been determined during this process. No long and unwieldy Constitutional Amendment is necessary! Congress should start TODAY to work on ending expensive and unfair to our Country, Birthright Citizenship. They will have my Complete and Total Support!\"",
+          "source": "benzinga",
+          "published": "2026-06-30T16:25:58Z",
+          "url": "https://www.benzinga.com/economics/macro-economic-events/26/06/60194737/president-trump-posts-truth-social-supreme-court-upheld-birthright-citizenship-which-too-bad-our-cou"
+        },
+        {
+          "headline": "U.S. Supreme Court Agrees To Hear Apple Appeal Of Contempt Order In Epic Games Lawsuit Over App Store Fees",
+          "source": "benzinga",
+          "published": "2026-06-30T16:05:26Z",
+          "url": "https://www.benzinga.com/economics/macro-economic-events/26/06/60194015/u-s-supreme-court-agrees-hear-apple-appeal-contempt-order-epic-games-lawsuit-over-app-store-fees"
+        }
+      ]
+    },
+    "QQQ": {
+      "description": "Nasdaq-100 ETF \u2014 tech sector exposure",
+      "max_allocation_pct": 10,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 698.1488,
+        "ma50": 644.8011,
+        "last_close": 730.11,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Look Closer At SPY, QQQ: Investors Are Rigging A Safety Net Under The Stock Market",
+          "source": "benzinga",
+          "published": "2026-06-30T18:15:23Z",
+          "url": "https://www.benzinga.com/etfs/specialty-etfs/26/06/60198973/spy-qqq-investors-safety-net-under-stock-market"
+        },
+        {
+          "headline": "AI Chips Power Wall Street Higher, Dow Eyes Records: Stock Market Today",
+          "source": "benzinga",
+          "published": "2026-06-30T17:26:06Z",
+          "url": "https://www.benzinga.com/markets/equities/26/06/60196958/ai-chip-rally-nasdaq-100-dow-jones-markets-tuesday-wall-street-news-today"
+        },
+        {
+          "headline": "Two Market Positives, But Warsh's Speech and Jobs Data Could Shift Sentiment; \u2018Never Sell Bitcoin\u2019 Approach Abandoned",
+          "source": "benzinga",
+          "published": "2026-06-30T17:04:36Z",
+          "url": "https://www.benzinga.com/Opinion/26/06/60196149/two-market-positives-but-warsh-speech-and-jobs-data-could-shift-sentiment-never-sell-bitcoin-approach-abandoned"
+        },
+        {
+          "headline": "Stock Market Today: S&P 500, Dow, Nasdaq Futures Gain As Trump Demands Lower Gas Prices 'Immediately'\u2014 Vishay Intertechnology, AeroVironment, Nike In Focus (UPDATED)",
+          "source": "benzinga",
+          "published": "2026-06-30T12:33:27Z",
+          "url": "https://www.benzinga.com/markets/equities/26/06/60179297/stock-market-today-sp-500-dow-futures-rise-as-trump-demands-lower-gas-prices-immediately-vishay-intertechnology-aerovironment-nike-in-focus"
+        },
+        {
+          "headline": "Bank Of America Advises Hedging Portfolios Ahead Of Potential Q3 S&P 500 Pullback, Warns Of 'Three-Wave Correction'",
+          "source": "benzinga",
+          "published": "2026-06-30T10:49:19Z",
+          "url": "https://www.benzinga.com/analyst-stock-ratings/analyst-color/26/06/60180536/bank-of-america-advises-hedging-portfolios-ahead-of-potential-q3-sp-500-pullback-warns-of-three-wave-correction"
+        }
+      ]
+    },
+    "NVDA": {
+      "description": "GPU / AI infrastructure \u2014 high conviction AI play",
+      "max_allocation_pct": 8,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 214.6662,
+        "ma50": 197.4949,
+        "last_close": 214.785,
+        "ma20_trending_up": false,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Two Market Positives, But Warsh's Speech and Jobs Data Could Shift Sentiment; \u2018Never Sell Bitcoin\u2019 Approach Abandoned",
+          "source": "benzinga",
+          "published": "2026-06-30T17:04:36Z",
+          "url": "https://www.benzinga.com/Opinion/26/06/60196149/two-market-positives-but-warsh-speech-and-jobs-data-could-shift-sentiment-never-sell-bitcoin-approach-abandoned"
+        },
+        {
+          "headline": "Micron Stock Is Up 300%. Why Does It Still Trade Cheaper Than Nvidia And Broadcom?",
+          "source": "benzinga",
+          "published": "2026-06-30T15:58:44Z",
+          "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/06/60193665/micron-stock-is-up-300-why-does-it-still-trade-cheaper-than-nvidia-and-broadcom"
+        },
+        {
+          "headline": "Nvidia vs. Micron: The AI Stock Race Has A New 5-Year Winner",
+          "source": "benzinga",
+          "published": "2026-06-30T15:17:22Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/60191628/nvidia-vs-micron-which-stock-wins-performance-five-years-returns-ai-trade"
+        },
+        {
+          "headline": "Forget Nvidia: Kerrisdale Says This Under-The-Radar AI Stock Could Rally 100% Or More",
+          "source": "benzinga",
+          "published": "2026-06-30T14:50:39Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/60190231/forget-nvidia-kerrisdale-says-this-under-the-radar-ai-stock-could-rally-100-or-more"
+        },
+        {
+          "headline": "Micron\u2019s Record Stock Rally Looks Tame Next To This 520% AI Chip Winner",
+          "source": "benzinga",
+          "published": "2026-06-30T14:45:01Z",
+          "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/06/60189927/micron-mu-record-stock-rally-looks-tame-next-to-maxlinear"
+        }
+      ]
+    },
+    "AAPL": {
+      "description": "Large cap tech \u2014 stability anchor",
+      "max_allocation_pct": 8,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 291.3707,
+        "ma50": 271.7026,
+        "last_close": 308.33,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "10 Information Technology Stocks Whale Activity In Today\u2019s Session",
+          "source": "benzinga",
+          "published": "2026-06-30T17:35:35Z",
+          "url": "https://www.benzinga.com/markets/options/26/06/60197276/10-information-technology-stocks-whale-activity-today-s-session"
+        },
+        {
+          "headline": "Two Market Positives, But Warsh's Speech and Jobs Data Could Shift Sentiment; \u2018Never Sell Bitcoin\u2019 Approach Abandoned",
+          "source": "benzinga",
+          "published": "2026-06-30T17:04:36Z",
+          "url": "https://www.benzinga.com/Opinion/26/06/60196149/two-market-positives-but-warsh-speech-and-jobs-data-could-shift-sentiment-never-sell-bitcoin-approach-abandoned"
+        },
+        {
+          "headline": "Apple Says Creator Studio Gets Smarter, Faster, And More Connected; Updates Bring New Integrations With Pixelmator Pro Across Final Cut Pro, Keynote, Pages, And Numbers; Even More Intelligent Tools In Final Cut Pro; The Ability To Generate Shapes To Further Customize A Project; And A New Producer Project In Logic Pro",
+          "source": "benzinga",
+          "published": "2026-06-30T17:04:46Z",
+          "url": "https://www.benzinga.com/news/26/06/60196151/apple-says-creator-studio-gets-smarter-faster-and-more-connected-updates-bring-new-integrations-pixe"
+        },
+        {
+          "headline": "CNBC Halftime Report Final Trades: Apple, Amgen, Micron Technology, Palo Alto Networks",
+          "source": "benzinga",
+          "published": "2026-06-30T17:00:33Z",
+          "url": "https://www.benzinga.com/quote/PANW"
+        },
+        {
+          "headline": "What's Going On With Apple Stock Tuesday?",
+          "source": "benzinga",
+          "published": "2026-06-30T16:52:38Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/60195702/apple-stock-jumps-2-why-wall-street-insiders-are-urging-investors-to-buy-the-dip-now"
+        }
+      ]
+    },
+    "MSFT": {
+      "description": "Cloud / enterprise \u2014 AI infrastructure and Azure growth",
+      "max_allocation_pct": 8,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 416.184,
+        "ma50": 400.8457,
+        "last_close": 416.09,
+        "ma20_trending_up": false,
+        "signal": "WEAK_BUY"
+      },
+      "news": [
+        {
+          "headline": "10 Information Technology Stocks Whale Activity In Today\u2019s Session",
+          "source": "benzinga",
+          "published": "2026-06-30T17:35:35Z",
+          "url": "https://www.benzinga.com/markets/options/26/06/60197276/10-information-technology-stocks-whale-activity-today-s-session"
+        },
+        {
+          "headline": "Two Market Positives, But Warsh's Speech and Jobs Data Could Shift Sentiment; \u2018Never Sell Bitcoin\u2019 Approach Abandoned",
+          "source": "benzinga",
+          "published": "2026-06-30T17:04:36Z",
+          "url": "https://www.benzinga.com/Opinion/26/06/60196149/two-market-positives-but-warsh-speech-and-jobs-data-could-shift-sentiment-never-sell-bitcoin-approach-abandoned"
+        },
+        {
+          "headline": "Nokia, SAP And Microsoft Enter Strategic Multi-Year Agreement to Advance Cloud- And AI-Driven Business Transformation",
+          "source": "benzinga",
+          "published": "2026-06-30T14:18:26Z",
+          "url": "https://www.benzinga.com/news/26/06/60188556/nokia-sap-and-microsoft-enter-strategic-multi-year-agreement-advance-cloud-and-ai-driven-business-tr"
+        },
+        {
+          "headline": "'OpenAI Discovers New Way to Cut Inference Costs in Half' - The Information",
+          "source": "benzinga",
+          "published": "2026-06-30T14:08:24Z",
+          "url": "https://www.benzinga.com/news/26/06/60187923/openai-discovers-new-way-cut-inference-costs-half-information"
+        },
+        {
+          "headline": "Warren Buffett Breaks A 20-Year Tradition As Report Says His Gates Foundation Donation Is Suddenly On Hold Over Epstein Files Review",
+          "source": "benzinga",
+          "published": "2026-06-30T11:03:08Z",
+          "url": "https://www.benzinga.com/news/politics/26/06/60180734/warren-buffett-breaks-a-20-year-tradition-as-report-says-his-gates-foundation-donation-is-suddenly-on-hold-over-epstein-files-review"
+        }
+      ]
+    },
+    "GOOGL": {
+      "description": "Alphabet \u2014 Google AI, Cloud, YouTube, Waymo autonomous vehicles",
+      "max_allocation_pct": 8,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 387.4133,
+        "ma50": 342.8755,
+        "last_close": 388.91,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Stripe, Visa, BlackRock Back New Open USD Stablecoin In Bid To Challenge Tether, Circle",
+          "source": "benzinga",
+          "published": "2026-06-30T18:18:23Z",
+          "url": "https://www.benzinga.com/crypto/cryptocurrency/26/06/60199038/stripe-visa-blackrock-back-new-open-usd-stablecoin-in-bid-to-challenge-tether-circle"
+        },
+        {
+          "headline": "Anthropic Introduces Claude Sonnet 5",
+          "source": "benzinga",
+          "published": "2026-06-30T17:59:11Z",
+          "url": "https://www.benzinga.com/news/26/06/60198289/anthropic-introduces-claude-sonnet-5"
+        },
+        {
+          "headline": "Why Is Verizon Stock Falling Tuesday?",
+          "source": "benzinga",
+          "published": "2026-06-30T16:29:35Z",
+          "url": "https://www.benzinga.com/markets/large-cap/26/06/60194840/why-is-verizon-stock-falling-tuesday"
+        },
+        {
+          "headline": "Google Announces General Availability Of Nano Banana 2 Lite (Gemini 3.1 Flash-Lite Image); Releases Gemini Omni Flash In Public Preview",
+          "source": "benzinga",
+          "published": "2026-06-30T16:06:29Z",
+          "url": "https://www.benzinga.com/news/26/06/60194069/google-announces-general-availability-nano-banana-2-lite-gemini-3-1-flash-lite-image-releases-gemini"
+        },
+        {
+          "headline": "Alphabet Replaces Verizon In Dow Jones As Analyst Boosts Target To $415",
+          "source": "benzinga",
+          "published": "2026-06-30T14:34:44Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60189502/alphabet-replaces-verizon-in-dow-jones-as-analyst-boosts-target-to-415"
+        }
+      ]
+    },
+    "AMZN": {
+      "description": "Amazon \u2014 AWS cloud, e-commerce, AI infrastructure (Anthropic backer)",
+      "max_allocation_pct": 8,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 267.3057,
+        "ma50": 243.0802,
+        "last_close": 265.27,
+        "ma20_trending_up": true,
+        "signal": "WEAK_BUY"
+      },
+      "news": [
+        {
+          "headline": "Anthropic Introduces Claude Sonnet 5",
+          "source": "benzinga",
+          "published": "2026-06-30T17:59:11Z",
+          "url": "https://www.benzinga.com/news/26/06/60198289/anthropic-introduces-claude-sonnet-5"
+        },
+        {
+          "headline": "Two Market Positives, But Warsh's Speech and Jobs Data Could Shift Sentiment; \u2018Never Sell Bitcoin\u2019 Approach Abandoned",
+          "source": "benzinga",
+          "published": "2026-06-30T17:04:36Z",
+          "url": "https://www.benzinga.com/Opinion/26/06/60196149/two-market-positives-but-warsh-speech-and-jobs-data-could-shift-sentiment-never-sell-bitcoin-approach-abandoned"
+        },
+        {
+          "headline": "Amazon Stock On Watch As Prime Day Pull-Forward Meets 20% AWS Price Pop",
+          "source": "benzinga",
+          "published": "2026-06-30T15:54:35Z",
+          "url": "https://www.benzinga.com/analyst-stock-ratings/reiteration/26/06/60193394/amazon-stock-on-watch-as-prime-day-pull-forward-meets-20-aws-price-pop"
+        },
+        {
+          "headline": "Amazon Web Services Invests $1B In News AWS Forward Deployed Engineering Organization",
+          "source": "benzinga",
+          "published": "2026-06-30T15:25:43Z",
+          "url": "https://www.benzinga.com/news/26/06/60191998/amazon-web-services-invests-1b-news-aws-forward-deployed-engineering-organization"
+        },
+        {
+          "headline": "FTC Requires Amazon To Pay $2.25M To Resolve Charges It Knowingly Violated The Fair Credit Reporting Act",
+          "source": "benzinga",
+          "published": "2026-06-30T14:55:51Z",
+          "url": "https://www.benzinga.com/government/26/06/60190502/ftc-requires-amazon-pay-2-25m-resolve-charges-it-knowingly-violated-fair-credit-reporting-act"
+        }
+      ]
+    },
+    "TSLA": {
+      "description": "Tesla \u2014 EV, autonomous driving, energy storage",
+      "max_allocation_pct": 5,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 411.9855,
+        "ma50": 389.1626,
+        "last_close": 433.53,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Tesla Stock: 73% Of Benzinga Viewers Have Owned It. Here's How Many Still Do.",
+          "source": "benzinga",
+          "published": "2026-06-30T17:59:51Z",
+          "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/06/60198339/tesla-stock-73-of-benzinga-viewers-have-owned-it-heres-how-many-still-do"
+        },
+        {
+          "headline": "10 Consumer Discretionary Stocks With Whale Alerts In Today\u2019s Session",
+          "source": "benzinga",
+          "published": "2026-06-30T17:35:36Z",
+          "url": "https://www.benzinga.com/markets/options/26/06/60197278/10-consumer-discretionary-stocks-whale-alerts-today-s-session"
+        },
+        {
+          "headline": "Two Market Positives, But Warsh's Speech and Jobs Data Could Shift Sentiment; \u2018Never Sell Bitcoin\u2019 Approach Abandoned",
+          "source": "benzinga",
+          "published": "2026-06-30T17:04:36Z",
+          "url": "https://www.benzinga.com/Opinion/26/06/60196149/two-market-positives-but-warsh-speech-and-jobs-data-could-shift-sentiment-never-sell-bitcoin-approach-abandoned"
+        },
+        {
+          "headline": "Elon Musk's X Money \u2014 New Details On Bank Killer Super App",
+          "source": "benzinga",
+          "published": "2026-06-30T15:38:07Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/60192677/elon-musks-x-money-new-details-on-bank-killer-super-app"
+        },
+        {
+          "headline": "Deutsche Bank Estimates Tesla Q2 Deliveries At 416,000",
+          "source": "benzinga",
+          "published": "2026-06-30T13:52:22Z",
+          "url": "https://www.benzinga.com/news/26/06/60186749/deutsche-bank-estimates-tesla-q2-deliveries-416-000"
+        }
+      ]
+    },
+    "NOK": {
+      "description": "Nokia \u2014 telecom infrastructure, 5G network equipment",
+      "max_allocation_pct": 5,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 13.6105,
+        "ma50": 10.96,
+        "last_close": 16.45,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Nokia, SAP And Microsoft Enter Strategic Multi-Year Agreement to Advance Cloud- And AI-Driven Business Transformation",
+          "source": "benzinga",
+          "published": "2026-06-30T14:18:26Z",
+          "url": "https://www.benzinga.com/news/26/06/60188556/nokia-sap-and-microsoft-enter-strategic-multi-year-agreement-advance-cloud-and-ai-driven-business-tr"
+        },
+        {
+          "headline": "Benzinga Bulls And Bears: Micron, Take-Two, SpaceX \u2014 And Nasdaq Posts Sharpest Decline In Months",
+          "source": "benzinga",
+          "published": "2026-06-27T12:01:09Z",
+          "url": "https://www.benzinga.com/markets/market-summary/26/06/60144904/benzinga-bulls-and-bears-micron-take-two-spacex-and-nasdaq-posts-sharpest-decline-in-months"
+        },
+        {
+          "headline": "What's Going On With Nokia Stock Friday?",
+          "source": "benzinga",
+          "published": "2026-06-26T12:59:55Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60123749/whats-going-on-with-nokia-stock-friday-2"
+        },
+        {
+          "headline": "Nokia Shares Are Climbing Thursday: What's Driving The Move?",
+          "source": "benzinga",
+          "published": "2026-06-25T12:58:31Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60095284/nokia-shares-are-climbing-thursday-whats-driving-the-move"
+        },
+        {
+          "headline": "Nancy Pelosi Stock Tracker Flags Eli Lilly, Nokia After Trump Praise: \u2018Keep An Eye On These Two\u2019",
+          "source": "benzinga",
+          "published": "2026-06-25T08:03:27Z",
+          "url": "https://www.benzinga.com/markets/equities/26/06/60089988/nancy-pelosi-stock-tracker-flags-eli-lilly-nokia-after-trump-praise-keep-an-eye-on-these-two"
+        }
+      ]
+    },
+    "PYPL": {
+      "description": "PayPal \u2014 fintech payments platform",
+      "max_allocation_pct": 5,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 46.3143,
+        "ma50": 46.6097,
+        "last_close": 44.16,
+        "ma20_trending_up": false,
+        "signal": "STRONG_SELL"
+      },
+      "news": [
+        {
+          "headline": "Stripe, Visa, BlackRock Back New Open USD Stablecoin In Bid To Challenge Tether, Circle",
+          "source": "benzinga",
+          "published": "2026-06-30T18:18:23Z",
+          "url": "https://www.benzinga.com/crypto/cryptocurrency/26/06/60199038/stripe-visa-blackrock-back-new-open-usd-stablecoin-in-bid-to-challenge-tether-circle"
+        },
+        {
+          "headline": "Piper Sandler Maintains Neutral on PayPal Holdings, Lowers Price Target to $42",
+          "source": "benzinga",
+          "published": "2026-06-30T16:20:16Z",
+          "url": "https://www.benzinga.com/news/26/06/60194572/piper-sandler-maintains-neutral-paypal-holdings-lowers-price-target-42"
+        },
+        {
+          "headline": "Elon Musk's X Money \u2014 New Details On Bank Killer Super App",
+          "source": "benzinga",
+          "published": "2026-06-30T15:38:07Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/60192677/elon-musks-x-money-new-details-on-bank-killer-super-app"
+        },
+        {
+          "headline": "As AI Fraud Explodes, New Report Says 15 Million Americans Were Scammed Last Year And Americans Lost About $68 Billion",
+          "source": "benzinga",
+          "published": "2026-06-30T12:34:14Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/60183272/as-ai-fraud-explodes-new-report-says-15-million-americans-were-scammed-last-year-and-americans-lost-about-68-billion"
+        },
+        {
+          "headline": "Google, Meta Unite With Crypto Analytics Firms At Prince William's Forum To Fight Illegal Wildlife Trade: Report",
+          "source": "benzinga",
+          "published": "2026-06-22T06:37:35Z",
+          "url": "https://www.benzinga.com/crypto/cryptocurrency/26/06/60006799/google-meta-and-crypto-firms-join-prince-williams-effort-to-combat-illegal-wildlife-trade"
+        }
+      ]
+    },
+    "DDOG": {
+      "description": "Datadog \u2014 cloud monitoring and AI observability",
+      "max_allocation_pct": 5,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 184.084,
+        "ma50": 146.9564,
+        "last_close": 223.575,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Micron To Rally More Than 57%? Here Are 10 Top Analyst Forecasts For Thursday",
+          "source": "benzinga",
+          "published": "2026-06-25T13:06:49Z",
+          "url": "https://www.benzinga.com/news/26/06/60095710/micron-to-rally-more-than-57-here-are-10-top-analyst-forecasts-for-thursday"
+        },
+        {
+          "headline": "Needham Maintains Buy on Datadog, Raises Price Target to $260",
+          "source": "benzinga",
+          "published": "2026-06-25T11:37:44Z",
+          "url": "https://www.benzinga.com/news/26/06/60093119/needham-maintains-buy-datadog-raises-price-target-260"
+        },
+        {
+          "headline": "Here's How Much $100 Invested In Datadog 5 Years Ago Would Be Worth Today",
+          "source": "benzinga",
+          "published": "2026-06-19T23:15:48Z",
+          "url": "https://www.benzinga.com/news/26/06/60003670/here-s-how-much-100-invested-datadog-5-years-ago-would-be-worth-today"
+        },
+        {
+          "headline": "Scotiabank Maintains Sector Outperform on Datadog, Raises Price Target to $275",
+          "source": "benzinga",
+          "published": "2026-06-18T19:42:35Z",
+          "url": "https://www.benzinga.com/news/26/06/53290490/scotiabank-maintains-sector-outperform-on-datadog-raises-price-target-to-275"
+        },
+        {
+          "headline": "Citigroup Maintains Buy on Datadog, Raises Price Target to $270",
+          "source": "benzinga",
+          "published": "2026-06-17T15:27:04Z",
+          "url": "https://www.benzinga.com/news/26/06/53253993/citigroup-maintains-buy-on-datadog-raises-price-target-to-270"
+        }
+      ]
+    },
+    "SQQQ": {
+      "description": "ProShares UltraPro Short QQQ \u2014 3x inverse Nasdaq-100",
+      "max_allocation_pct": 5,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 45.3355,
+        "ma50": 59.9987,
+        "last_close": 39.33,
+        "ma20_trending_up": false,
+        "signal": "STRONG_SELL"
+      },
+      "news": [
+        {
+          "headline": "Tech Stocks' Relief Rally Crumbles: SOXL Craters 15%, AMD Sheds 6% As Recovery Fizzles",
+          "source": "benzinga",
+          "published": "2026-06-09T16:41:09Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/53095242/tech-stocks-relief-rally-crumbles-soxl-amd-fall"
+        },
+        {
+          "headline": "Trading Halt: Halt status updated at 8:55:00 AM ET: Quotation Resumption: News and Resumption Times",
+          "source": "benzinga",
+          "published": "2025-11-20T13:55:05Z",
+          "url": "https://www.benzinga.com/25/11/48973617/trading-halt-halt-status-updated-at-8-55-00-am-et-quotation-resumption-news-and-resumption-times"
+        },
+        {
+          "headline": "Trading Halt: Halted at 7:50:00 p.m. ET - Trading Halt: Halt News Pending",
+          "source": "benzinga",
+          "published": "2025-11-20T00:50:04Z",
+          "url": "https://www.benzinga.com/25/11/48966334/trading-halt-halted-at-7-50-00-p-m-et-trading-halt-halt-news-pending"
+        },
+        {
+          "headline": "Trump's Tariffs Kept Market Unfazed As Leveraged ETFs See 74% Inflow Since April Lows: 'Risk Appetite Is Incredibly Strong'",
+          "source": "benzinga",
+          "published": "2025-10-02T10:49:55Z",
+          "url": "https://www.benzinga.com/etfs/broad-u-s-equity-etfs/25/10/47989644/trumps-tariffs-kept-market-unfazed-as-leveraged-etfs-see-74-inflow-since-april-lows-risk-appetite-is-incredibly-strong"
+        },
+        {
+          "headline": "How To Profit From AI Correction: 5 Defensive Plays And 4 Sectors Set To Surge",
+          "source": "benzinga",
+          "published": "2025-09-25T16:09:06Z",
+          "url": "https://www.benzinga.com/Opinion/25/09/47870915/how-to-profit-from-ai-correction-5-defensive-plays-and-4-sectors-set-to-surge"
+        }
+      ]
+    },
+    "SPXS": {
+      "description": "Direxion Daily S&P 500 Bear 3x \u2014 3x inverse S&P 500",
+      "max_allocation_pct": 5,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 28.3697,
+        "ma50": 33.3421,
+        "last_close": 26.53,
+        "ma20_trending_up": false,
+        "signal": "STRONG_SELL"
+      },
+      "news": [
+        {
+          "headline": "Alphabet Just Reignited The AI Trade \u2014 Mag 7 ETFs Are Back In The Spotlight (CORRECTED)",
+          "source": "benzinga",
+          "published": "2026-02-06T18:07:13Z",
+          "url": "https://www.benzinga.com/etfs/sector-etfs/26/02/50421111/alphabet-ai-trade-mag-7-etfs"
+        },
+        {
+          "headline": "ETF Traders Are Quietly Positioning For Market Turbulence: Direxion",
+          "source": "benzinga",
+          "published": "2025-09-04T18:08:08Z",
+          "url": "https://www.benzinga.com/etfs/broad-u-s-equity-etfs/25/09/47506224/etf-traders-are-quietly-positioning-for-market-turbulence-direxion"
+        },
+        {
+          "headline": "US Recession Fears Are 'Intensifying' \u2014 But Is Bitcoin The Real Flight To Safety? Expert Weighs In",
+          "source": "benzinga",
+          "published": "2025-04-15T18:22:03Z",
+          "url": "https://www.benzinga.com/analyst-ratings/analyst-color/25/04/44823070/us-recession-fears-are-intensifying-but-is-bitcoin-the-real-flight-to-safety-expert-weighs-in"
+        },
+        {
+          "headline": "EXCLUSIVE: When Volatility (VIX) Peaks, Will That Be The Bottom? Watch These Signals, Says Direxion Expert",
+          "source": "benzinga",
+          "published": "2025-04-15T17:52:47Z",
+          "url": "https://www.benzinga.com/economics/macro-economic-events/25/04/44822162/exclusive-when-volatility-vix-peaks-will-that-be-the-bottom-watch-these-signals-says-direxion-expert"
+        },
+        {
+          "headline": "Direxion Sparks Up Its Product Strategy With New CPO",
+          "source": "benzinga",
+          "published": "2025-04-01T13:00:16Z",
+          "url": "https://www.benzinga.com/tech/25/04/44584618/direxion-sparks-up-its-product-strategy-with-new-cpo"
+        }
+      ]
+    },
+    "SOXS": {
+      "description": "Direxion Daily Semiconductors Bear 3x \u2014 3x inverse SOX index",
+      "max_allocation_pct": 5,
+      "source": "watchlist",
+      "technicals": {
+        "ma20": 10.2058,
+        "ma50": 22.0147,
+        "last_close": 6.3,
+        "ma20_trending_up": false,
+        "signal": "STRONG_SELL"
+      },
+      "news": [
+        {
+          "headline": "Micron CEO Says AI Memory Shortage Could Last Beyond 2028: These ETFs Are Positioned To Profit",
+          "source": "benzinga",
+          "published": "2026-06-25T12:24:51Z",
+          "url": "https://www.benzinga.com/etfs/sector-etfs/26/06/60094351/micron-ceo-says-ai-memory-shortage-could-last-beyond-2028-these-etfs-are-positioned-to-profit"
+        },
+        {
+          "headline": "Broadcom's AI Outlook Misses, But Bigger ETF Opportunity Is Emerging",
+          "source": "benzinga",
+          "published": "2026-06-04T15:36:41Z",
+          "url": "https://www.benzinga.com/etfs/sector-etfs/26/06/53006259/broadcoms-ai-outlook-misses-but-bigger-etf-opportunity-is-emerging"
+        },
+        {
+          "headline": "SOXL Soars 450% YTD As AI Chip Rally Ignites Leveraged ETF Frenzy",
+          "source": "benzinga",
+          "published": "2026-06-02T18:40:45Z",
+          "url": "https://www.benzinga.com/etfs/specialty-etfs/26/06/52952825/soxl-soars-450-ytd-as-ai-chip-rally-ignites-leveraged-etf-frenzy"
+        },
+        {
+          "headline": "SOXL Tumbles As Micron, SanDisk Drag Semis Lower; SOXS Spikes On Memory Shockwave",
+          "source": "benzinga",
+          "published": "2026-05-12T19:08:30Z",
+          "url": "https://www.benzinga.com/etfs/sector-etfs/26/05/52503039/soxl-tumbles-as-micron-sandisk-drag-semis-lower-soxs-spikes-on-memory-shockwave"
+        },
+        {
+          "headline": "The Chip Stock Rally That Broke History: SOXX Notches Record 17-Day Win Streak",
+          "source": "benzinga",
+          "published": "2026-04-24T18:53:58Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/04/52044222/the-chip-stock-rally-that-broke-history-soxx-notches-record-17-day-win-streak"
+        }
+      ]
+    },
+    "LCID": {
+      "description": "Social screener pick \u2014 StockTwits momentum 87",
+      "max_allocation_pct": 3,
+      "source": "social_screener",
+      "technicals": {
+        "ma20": 6.0782,
+        "ma50": 7.7179,
+        "last_close": 5.975,
+        "ma20_trending_up": true,
+        "signal": "STRONG_SELL"
+      },
+      "news": [
+        {
+          "headline": "Uber Ends Waymo Robotaxi Partnership In Phoenix, Plans New AV Tie-Up: Report",
+          "source": "benzinga",
+          "published": "2026-06-30T05:44:25Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/60177451/uber-ends-waymo-robotaxi-partnership-in-phoenix-plans-new-av-tie-up-report"
+        },
+        {
+          "headline": "Powder Keg Stocks: 10 Most\u2011Shorted Names Primed For A Monster Squeeze (CORRECTED)",
+          "source": "benzinga",
+          "published": "2026-06-29T15:14:35Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60159752/powder-keg-stocks-10-most%e2%80%91shorted-names-primed-for-a-monster-squeeze"
+        },
+        {
+          "headline": "Lucid Stock Is Climbing Friday: What's Driving The Action?",
+          "source": "benzinga",
+          "published": "2026-06-26T15:01:38Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60129627/lucid-stock-is-climbing-friday-whats-driving-the-action"
+        },
+        {
+          "headline": "Lucid Stock Edges Lower Wednesday Afternoon: What's Going On?",
+          "source": "benzinga",
+          "published": "2026-06-24T19:53:10Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60083959/lucid-stock-edges-lower-wednesday-afternoon-whats-going-on"
+        },
+        {
+          "headline": "Lucid Stock Defies Market Slump As Investors Weigh 2027 Uber Robotaxi Launch",
+          "source": "benzinga",
+          "published": "2026-06-23T20:16:41Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60058009/lucid-stock-defies-market-slump-as-investors-weigh-2027-uber-robotaxi-launch"
+        }
+      ]
+    },
+    "CADL": {
+      "description": "Social screener pick \u2014 StockTwits momentum 86",
+      "max_allocation_pct": 3,
+      "source": "social_screener",
+      "technicals": {
+        "ma20": 7.7655,
+        "ma50": 6.3372,
+        "last_close": 7.96,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Candel Therapeutics Starts Pivotal Phase 3 AURORA Study Of Aglatimagene Besadenovec Plus  Valacyclovir In Combination With Continued Pembrolizumab In Participants With Metastatic Non-Squamous Non-Small Cell Lung Cancer",
+          "source": "benzinga",
+          "published": "2026-06-30T12:15:04Z",
+          "url": "https://www.benzinga.com/news/26/06/60182714/candel-therapeutics-starts-pivotal-phase-3-aurora-study-aglatimagene-besadenovec-plus-valacyclovir-c"
+        },
+        {
+          "headline": "Candel Therapeutics Announces Lancet Oncology Publication Of Phase 3 Data Showing 30% DFS Improvement For Aglatimagene Besadenovec In Localized Prostate Cancer",
+          "source": "benzinga",
+          "published": "2026-06-02T12:19:57Z",
+          "url": "https://www.benzinga.com/general/biotech/26/06/52934343/candel-therapeutics-announces-lancet-oncology-publication-of-phase-3-data-showing-30-dfs-improvem"
+        },
+        {
+          "headline": "Candel Therapeutics Reports Positive Phase 3 Prostate Cancer Trial Data",
+          "source": "benzinga",
+          "published": "2026-05-16T18:47:05Z",
+          "url": "https://www.benzinga.com/markets/equities/26/05/52622969/candel-therapeutics-reports-positive-phase-3-prostate-cancer-trial-data"
+        },
+        {
+          "headline": "Candel Therapeutics Presents New Results From Extended Follow-Up Of Randomized, Double-Blind, Placebo-Controlled Pivotal Phase 3 Trial Of Aglatimagene Besadenovec In Prostate Cancer At AUA 2026 Annual Meeting",
+          "source": "benzinga",
+          "published": "2026-05-15T20:07:42Z",
+          "url": "https://www.benzinga.com/news/26/05/52615121/candel-therapeutics-presents-new-results-from-extended-follow-up-of-randomized-double-blind-placebo"
+        },
+        {
+          "headline": "Candel Therapeutics Q1 EPS $(0.14) Beats $(0.34) Estimate",
+          "source": "benzinga",
+          "published": "2026-05-14T12:12:18Z",
+          "url": "https://www.benzinga.com/news/earnings/26/05/52556803/candel-therapeutics-q1-eps-0-14-beats-0-34-estimate"
+        }
+      ]
+    },
+    "NBIS": {
+      "description": "Social screener pick \u2014 StockTwits momentum 81",
+      "max_allocation_pct": 3,
+      "source": "social_screener",
+      "technicals": {
+        "ma20": 186.2575,
+        "ma50": 152.9964,
+        "last_close": 208.25,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Nebius Stock Is Climbing Tuesday: What's Driving The Action?",
+          "source": "benzinga",
+          "published": "2026-06-30T16:29:18Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60194830/nebius-stock-is-climbing-tuesday-whats-driving-the-action"
+        },
+        {
+          "headline": "What's Going On With Nebius Group Stock Monday?",
+          "source": "benzinga",
+          "published": "2026-06-29T18:13:50Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60169237/whats-going-on-with-nebius-group-stock-monday-2"
+        },
+        {
+          "headline": "If You Invested $1000 In Nebius Group Stock 10 Years Ago, You Would Have This Much Today",
+          "source": "benzinga",
+          "published": "2026-06-29T14:00:51Z",
+          "url": "https://www.benzinga.com/news/26/06/60157433/if-you-invested-1000-nebius-group-stock-10-years-ago-you-would-have-much-today"
+        },
+        {
+          "headline": "Nebius, IREN and CoreWeave Retreat Amid Rising Short Interest",
+          "source": "benzinga",
+          "published": "2026-06-28T20:36:14Z",
+          "url": "https://www.benzinga.com/markets/equities/26/06/60147344/nebius-iren-and-coreweave-retreat-amid-rising-short-interest"
+        },
+        {
+          "headline": "10 Information Technology Stocks Whale Activity In Today\u2019s Session",
+          "source": "benzinga",
+          "published": "2026-06-24T17:35:28Z",
+          "url": "https://www.benzinga.com/markets/options/26/06/60079332/10-information-technology-stocks-whale-activity-today-s-session"
+        }
+      ]
+    },
+    "AMD": {
+      "description": "Social screener pick \u2014 StockTwits momentum 79",
+      "max_allocation_pct": 3,
+      "source": "social_screener",
+      "technicals": {
+        "ma20": 414.3315,
+        "ma50": 309.3832,
+        "last_close": 503.95,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "10 Information Technology Stocks Whale Activity In Today\u2019s Session",
+          "source": "benzinga",
+          "published": "2026-06-30T17:35:35Z",
+          "url": "https://www.benzinga.com/markets/options/26/06/60197276/10-information-technology-stocks-whale-activity-today-s-session"
+        },
+        {
+          "headline": "Wells Fargo Maintains Overweight on Advanced Micro Devices, Raises Price Target to $615",
+          "source": "benzinga",
+          "published": "2026-06-30T15:20:46Z",
+          "url": "https://www.benzinga.com/news/26/06/60191787/wells-fargo-maintains-overweight-advanced-micro-devices-raises-price-target-615"
+        },
+        {
+          "headline": "Nvidia Isn't The Expensive AI Stock Anymore\u2014AMD, Palantir And ARM Are",
+          "source": "benzinga",
+          "published": "2026-06-30T14:10:58Z",
+          "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/06/60188138/nvidia-isnt-the-expensive-ai-stock-anymore-amd-palantir-and-arm-are"
+        },
+        {
+          "headline": "Forget AMD And Micron \u2014 The Next Wave Of AI Winners Are The Ones Nobody Talks About",
+          "source": "benzinga",
+          "published": "2026-06-30T10:23:37Z",
+          "url": "https://www.benzinga.com/analyst-stock-ratings/analyst-color/26/06/60180041/forget-amd-and-micron-the-next-wave-of-ai-winners-are-the-ones-nobody-talks-about"
+        },
+        {
+          "headline": "What's Going On With AMD Stock Tuesday?",
+          "source": "benzinga",
+          "published": "2026-06-30T09:56:34Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/60179331/whats-going-on-with-amd-stock-tuesday-8"
+        }
+      ]
+    },
+    "NKE": {
+      "description": "Social screener pick \u2014 StockTwits momentum 79",
+      "max_allocation_pct": 3,
+      "source": "social_screener",
+      "technicals": {
+        "ma20": 43.5495,
+        "ma50": 46.1956,
+        "last_close": 44.94,
+        "ma20_trending_up": false,
+        "signal": "STRONG_SELL"
+      },
+      "news": [
+        {
+          "headline": "10 Consumer Discretionary Stocks With Whale Alerts In Today\u2019s Session",
+          "source": "benzinga",
+          "published": "2026-06-30T17:35:36Z",
+          "url": "https://www.benzinga.com/markets/options/26/06/60197278/10-consumer-discretionary-stocks-whale-alerts-today-s-session"
+        },
+        {
+          "headline": "AI Chips Power Wall Street Higher, Dow Eyes Records: Stock Market Today",
+          "source": "benzinga",
+          "published": "2026-06-30T17:26:06Z",
+          "url": "https://www.benzinga.com/markets/equities/26/06/60196958/ai-chip-rally-nasdaq-100-dow-jones-markets-tuesday-wall-street-news-today"
+        },
+        {
+          "headline": "Nike In The Spotlight Ahead Of Q4 Earnings",
+          "source": "benzinga",
+          "published": "2026-06-30T14:05:18Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60187784/nike-in-the-spotlight-ahead-of-q4-earnings"
+        },
+        {
+          "headline": "Stock Market Today: S&P 500, Dow, Nasdaq Futures Gain As Trump Demands Lower Gas Prices 'Immediately'\u2014 Vishay Intertechnology, AeroVironment, Nike In Focus (UPDATED)",
+          "source": "benzinga",
+          "published": "2026-06-30T12:33:27Z",
+          "url": "https://www.benzinga.com/markets/equities/26/06/60179297/stock-market-today-sp-500-dow-futures-rise-as-trump-demands-lower-gas-prices-immediately-vishay-intertechnology-aerovironment-nike-in-focus"
+        },
+        {
+          "headline": "Earnings Scheduled For June 30, 2026",
+          "source": "benzinga",
+          "published": "2026-06-30T11:12:11Z",
+          "url": "https://www.benzinga.com/news/earnings/26/06/60181032/earnings-scheduled-june-30-2026"
+        }
+      ]
+    },
+    "OUST": {
+      "description": "Social screener pick \u2014 StockTwits momentum 79",
+      "max_allocation_pct": 3,
+      "source": "social_screener",
+      "technicals": {
+        "ma20": 30.2443,
+        "ma50": 25.2686,
+        "last_close": 42.66,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Ouster Stock Hits 52-Week Highs: What Investors Need To Know",
+          "source": "benzinga",
+          "published": "2026-06-30T15:31:47Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60192299/ouster-stock-hits-52-week-highs-what-investors-need-to-know"
+        },
+        {
+          "headline": "12 Information Technology Stocks Moving In Monday's Intraday Session",
+          "source": "benzinga",
+          "published": "2026-06-29T17:05:46Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60166202/12-information-technology-stocks-moving-monday-s-intraday-session"
+        },
+        {
+          "headline": "Ouster Stock Is Surging Monday: What's Driving The Action?",
+          "source": "benzinga",
+          "published": "2026-06-29T14:05:40Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60157971/ouster-stock-is-surging-monday-whats-driving-the-action"
+        },
+        {
+          "headline": "Iridium Communications, FuelCell Energy, Rocket Lab And Other Big Stocks Moving Higher On Monday",
+          "source": "benzinga",
+          "published": "2026-06-29T13:58:27Z",
+          "url": "https://www.benzinga.com/news/26/06/60157223/iridium-communications-fuelcell-energy-rocket-lab-and-other-big-stocks-moving-higher-on-monday"
+        },
+        {
+          "headline": "Consumer Tech News (June 15-18): Trump Signals Major US Chip Alliance, Snap AR Glasses Face Criticism & More",
+          "source": "benzinga",
+          "published": "2026-06-21T13:41:05Z",
+          "url": "https://www.benzinga.com/markets/tech/26/06/60005276/consumer-tech-news-june-15-18-trump-signals-major-us-chip-alliance-snap-ar-glasses-face-criticism-more"
+        }
+      ]
+    },
+    "FCEL": {
+      "description": "Social screener pick \u2014 StockTwits momentum 78",
+      "max_allocation_pct": 3,
+      "source": "social_screener",
+      "technicals": {
+        "ma20": 17.109,
+        "ma50": 11.3764,
+        "last_close": 24.37,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "10 Industrials Stocks With Whale Alerts In Today\u2019s Session",
+          "source": "benzinga",
+          "published": "2026-06-30T17:35:35Z",
+          "url": "https://www.benzinga.com/markets/options/26/06/60197277/10-industrials-stocks-whale-alerts-today-s-session"
+        },
+        {
+          "headline": "12 Industrials Stocks Moving In Tuesday's Intraday Session",
+          "source": "benzinga",
+          "published": "2026-06-30T17:05:42Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60196205/12-industrials-stocks-moving-tuesday-s-intraday-session"
+        },
+        {
+          "headline": "Is FuelCell Energy Stock A Buy At 52-Week Highs?",
+          "source": "benzinga",
+          "published": "2026-06-30T15:06:00Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60191115/is-fuelcell-energy-stock-a-buy-at-52-week-highs"
+        },
+        {
+          "headline": "AEVEX, Abivax, Watts Water Technologies And Other Big Stocks Moving Higher On Tuesday",
+          "source": "benzinga",
+          "published": "2026-06-30T14:01:23Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60187346/aevex-abivax-watts-water-technologies-and-other-big-stocks-moving-higher-on-tuesday"
+        },
+        {
+          "headline": "12 Industrials Stocks Moving In Monday's Intraday Session",
+          "source": "benzinga",
+          "published": "2026-06-29T17:05:47Z",
+          "url": "https://www.benzinga.com/trading-ideas/movers/26/06/60166203/12-industrials-stocks-moving-monday-s-intraday-session"
+        }
+      ]
+    },
+    "QCOM": {
+      "description": "Social screener pick \u2014 StockTwits momentum 78",
+      "max_allocation_pct": 3,
+      "source": "social_screener",
+      "technicals": {
+        "ma20": 199.859,
+        "ma50": 158.9582,
+        "last_close": 248.74,
+        "ma20_trending_up": true,
+        "signal": "STRONG_BUY"
+      },
+      "news": [
+        {
+          "headline": "Mizuho Maintains Neutral on Qualcomm, Raises Price Target to $210",
+          "source": "benzinga",
+          "published": "2026-06-29T14:08:40Z",
+          "url": "https://www.benzinga.com/news/26/06/60158143/mizuho-maintains-neutral-qualcomm-raises-price-target-210"
+        },
+        {
+          "headline": "Stock Market Today: Nasdaq, Dow S&P 500 Futures Jump As Trump Admin Says US, Iran Will 'Stand Down' For Now\u2014 Verizon, HP, Universe Pharmaceuticals In Focus  (UPDATED)",
+          "source": "benzinga",
+          "published": "2026-06-29T12:52:43Z",
+          "url": "https://www.benzinga.com/markets/equities/26/06/60149448/stock-market-today-dow-jones-sp-500-futures-gain-as-trump-admin-says-us-iran-will-stand-down-verizon-hp-universe-pharmaceuticals-in-focus"
+        },
+        {
+          "headline": "5 Stock Picks Last Week From Wall Street's Most Accurate Analysts",
+          "source": "benzinga",
+          "published": "2026-06-29T10:45:10Z",
+          "url": "https://www.benzinga.com/analyst-stock-ratings/price-target/26/06/60151000/5-stock-picks-last-week-from-wall-streets-most-accurate-analysts-31"
+        },
+        {
+          "headline": "Qualcomm Now Has The Pieces To Compete Across The AI Stack: Analyst",
+          "source": "benzinga",
+          "published": "2026-06-29T09:35:26Z",
+          "url": "https://www.benzinga.com/analyst-stock-ratings/analyst-color/26/06/60149718/qualcomm-now-has-the-pieces-to-compete-across-the-ai-stack-analyst"
+        },
+        {
+          "headline": "Benzinga Bulls And Bears: Micron, Take-Two, SpaceX \u2014 And Nasdaq Posts Sharpest Decline In Months",
+          "source": "benzinga",
+          "published": "2026-06-27T12:01:09Z",
+          "url": "https://www.benzinga.com/markets/market-summary/26/06/60144904/benzinga-bulls-and-bears-micron-take-two-spacex-and-nasdaq-posts-sharpest-decline-in-months"
+        }
+      ]
+    }
+  },
+  "discovery_sources": {
+    "social_tickers": [
+      "NOK",
+      "LCID",
+      "CADL",
+      "NBIS",
+      "AMD",
+      "NKE",
+      "OUST",
+      "NVDA",
+      "FCEL",
+      "QCOM"
+    ],
+    "reddit_tickers": []
+  }
+}
+
+--- [4/5] Judge (10:00 AM) ---
+{
+  "timestamp": "2026-06-30T13:53:45.171312",
+  "date": "2026-06-30",
+  "approved": [
+    "TSLA",
+    "DDOG",
+    "CADL",
+    "NBIS",
+    "AMD",
+    "OUST",
+    "FCEL",
+    "QCOM"
+  ],
+  "held": [
+    "QQQ",
+    "NVDA",
+    "AAPL",
+    "MSFT",
+    "GOOGL",
+    "AMZN",
+    "NOK"
+  ],
+  "vetoed": [],
+  "scores": {
+    "QQQ": {
+      "symbol": "QQQ",
+      "recommendation": "HOLD",
+      "score": 6.0,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "0.5/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $698.15 > MA50 $644.80, price $730.11 above both"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding QQQ \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $698.15 > MA50 $644.80, price $730.11 above both. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Already holding QQQ \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "NVDA": {
+      "symbol": "NVDA",
+      "recommendation": "HOLD",
+      "score": 5.5,
+      "score_breakdown": {
+        "technical": "2.5/3.0",
+        "news": "0.5/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 2.5,
+          "note": "STRONG_BUY \u2014 MA20 $214.67 > MA50 $197.49, price $214.78 above both"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding NVDA \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $214.67 > MA50 $197.49, price $214.78 above both. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Already holding NVDA \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "AAPL": {
+      "symbol": "AAPL",
+      "recommendation": "HOLD",
+      "score": 5.5,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "0.0/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $291.37 > MA50 $271.70, price $308.33 above both"
+        },
+        "news": {
+          "score": 0.0,
+          "note": "NEGATIVE \u2014 2 bearish signals in recent headlines"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding AAPL \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $291.37 > MA50 $271.70, price $308.33 above both. News: NEGATIVE \u2014 2 bearish signals in recent headlines. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Already holding AAPL \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "MSFT": {
+      "symbol": "MSFT",
+      "recommendation": "HOLD",
+      "score": 5.5,
+      "score_breakdown": {
+        "technical": "1.5/3.0",
+        "news": "0.0/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "1.5/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $416.18 > MA50 $400.85, price between MAs"
+        },
+        "news": {
+          "score": 0.0,
+          "note": "NEGATIVE \u2014 2 bearish signals in recent headlines"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Strong cash reserve 70% | Correlation penalty: already holding AAPL, GOOGL, NVDA, QQQ"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $416.18 > MA50 $400.85, price between MAs. News: NEGATIVE \u2014 2 bearish signals in recent headlines. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70% | Correlation penalty: already holding AAPL, GOOGL, NVDA, QQQ. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "GOOGL": {
+      "symbol": "GOOGL",
+      "recommendation": "HOLD",
+      "score": 6.5,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "1.0/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $387.41 > MA50 $342.88, price $388.91 above both"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding GOOGL \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $387.41 > MA50 $342.88, price $388.91 above both. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Already holding GOOGL \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "AMZN": {
+      "symbol": "AMZN",
+      "recommendation": "HOLD",
+      "score": 6.0,
+      "score_breakdown": {
+        "technical": "1.5/3.0",
+        "news": "0.5/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "1.5/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $267.31 > MA50 $243.08, price between MAs"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Strong cash reserve 70% | Correlation penalty: already holding AAPL, GOOGL, NVDA, QQQ"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $267.31 > MA50 $243.08, price between MAs. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70% | Correlation penalty: already holding AAPL, GOOGL, NVDA, QQQ. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "TSLA": {
+      "symbol": "TSLA",
+      "recommendation": "APPROVE",
+      "score": 8.0,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "0.5/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "2.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $411.99 > MA50 $389.16, price $433.53 above both"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 70%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $411.99 > MA50 $389.16, price $433.53 above both. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70%. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "NOK": {
+      "symbol": "NOK",
+      "recommendation": "HOLD",
+      "score": 5.75,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "0.25/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $13.61 > MA50 $10.96, price $16.45 above both"
+        },
+        "news": {
+          "score": 0.25,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present | PUMP FLAG PENALTY -0.25: SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal befo"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding NOK \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $13.61 > MA50 $10.96, price $16.45 above both. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present | PUMP FLAG PENALTY -0.25: SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal befo. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Already holding NOK \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "DDOG": {
+      "symbol": "DDOG",
+      "recommendation": "APPROVE",
+      "score": 7.5,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "2.0/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $184.08 > MA50 $146.96, price $223.57 above both"
+        },
+        "news": {
+          "score": 2.0,
+          "note": "POSITIVE \u2014 5 bullish signals in recent headlines"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding DDOG \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $184.08 > MA50 $146.96, price $223.57 above both. News: POSITIVE \u2014 5 bullish signals in recent headlines. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Already holding DDOG \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "CADL": {
+      "symbol": "CADL",
+      "recommendation": "APPROVE",
+      "score": 8.75,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "1.25/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "2.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $7.77 > MA50 $6.34, price $7.96 above both"
+        },
+        "news": {
+          "score": 1.25,
+          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives | PUMP FLAG PENALTY -0.25: SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal befo"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 70%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $7.77 > MA50 $6.34, price $7.96 above both. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives | PUMP FLAG PENALTY -0.25: SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal befo. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70%. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "NBIS": {
+      "symbol": "NBIS",
+      "recommendation": "APPROVE",
+      "score": 8.5,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "1.0/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "2.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $186.26 > MA50 $153.00, price $208.25 above both"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 70%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $186.26 > MA50 $153.00, price $208.25 above both. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70%. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "AMD": {
+      "symbol": "AMD",
+      "recommendation": "APPROVE",
+      "score": 9.0,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "2.0/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "1.5/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $414.33 > MA50 $309.38, price $503.95 above both"
+        },
+        "news": {
+          "score": 2.0,
+          "note": "POSITIVE \u2014 2 bullish signals in recent headlines"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Strong cash reserve 70% | Correlation penalty: already holding AAPL, GOOGL, NVDA, QQQ"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $414.33 > MA50 $309.38, price $503.95 above both. News: POSITIVE \u2014 2 bullish signals in recent headlines. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70% | Correlation penalty: already holding AAPL, GOOGL, NVDA, QQQ. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "OUST": {
+      "symbol": "OUST",
+      "recommendation": "APPROVE",
+      "score": 8.5,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "1.0/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "2.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $30.24 > MA50 $25.27, price $42.66 above both"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 70%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $30.24 > MA50 $25.27, price $42.66 above both. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70%. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "FCEL": {
+      "symbol": "FCEL",
+      "recommendation": "APPROVE",
+      "score": 9.0,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "1.5/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "2.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $17.11 > MA50 $11.38, price $24.37 above both"
+        },
+        "news": {
+          "score": 1.5,
+          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 70%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $17.11 > MA50 $11.38, price $24.37 above both. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70%. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "QCOM": {
+      "symbol": "QCOM",
+      "recommendation": "APPROVE",
+      "score": 8.0,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "0.5/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "2.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $199.86 > MA50 $158.96, price $248.74 above both"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 70%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $199.86 > MA50 $158.96, price $248.74 above both. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70%. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    }
+  },
+  "report_path": "/Users/alexsung/Downloads/AI Trading Agent/logs/paper/2026-06-30-judge.md"
+}
+
+--- [5/5] Executor (10:05 AM) ---
+{
+  "timestamp": "2026-06-30T13:53:45.577827",
+  "trades": [
+    {
+      "symbol": "TSLA",
+      "action": "BUY",
+      "qty": 11,
+      "limit_price": 421.84,
+      "order": {
+        "id": "63a4e798-f24a-4040-bfdb-ec409920434f",
+        "client_order_id": "agent-buy-TSLA-20260630135346",
+        "created_at": "2026-06-30T18:53:46.41691595Z",
+        "updated_at": "2026-06-30T18:53:46.41877507Z",
+        "submitted_at": "2026-06-30T18:53:46.41691595Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "8ccae427-5dd0-45b3-b5fe-7ba5e422c766",
+        "symbol": "TSLA",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "11",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "day",
+        "limit_price": "421.84",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-06-30T20:00:00Z",
+        "_agent_reason": "Signal: STRONG_BUY | Ask: $421.00 | Limit: $421.84 | Budget: $4974.15 \u2192 11 shares @ $421.84",
+        "_limit_price_used": 421.84
+      },
+      "exits": [
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t1",
+          "_target_price": 489.34,
+          "_stop_price": 388.09
+        },
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t2",
+          "_target_price": 523.09,
+          "_stop_price": 388.09
+        }
+      ],
+      "note": "Signal: STRONG_BUY | Ask: $421.00 | Limit: $421.84 | Budget: $4974.15 \u2192 11 shares @ $421.84",
+      "judge_score": 8.0
+    },
+    {
+      "symbol": "CADL",
+      "action": "BUY",
+      "qty": 461,
+      "limit_price": 10.79,
+      "order": {
+        "id": "770f1f58-c8d6-4494-8349-2986f9aba827",
+        "client_order_id": "agent-buy-CADL-20260630135347",
+        "created_at": "2026-06-30T18:53:47.381439287Z",
+        "updated_at": "2026-06-30T18:53:47.393429587Z",
+        "submitted_at": "2026-06-30T18:53:47.381439287Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "c8a9ac0a-524e-49a9-bfac-d0c406abc73d",
+        "symbol": "CADL",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "461",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "day",
+        "limit_price": "10.79",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-06-30T20:00:00Z",
+        "_agent_reason": "Signal: STRONG_BUY | Ask: $10.77 | Limit: $10.79 | Budget: $4974.20 \u2192 461 shares @ $10.79",
+        "_limit_price_used": 10.79
+      },
+      "exits": [
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t1",
+          "_target_price": 12.51,
+          "_stop_price": 9.93
+        },
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t2",
+          "_target_price": 13.37,
+          "_stop_price": 9.93
+        }
+      ],
+      "note": "Signal: STRONG_BUY | Ask: $10.77 | Limit: $10.79 | Budget: $4974.20 \u2192 461 shares @ $10.79",
+      "judge_score": 8.75
+    },
+    {
+      "symbol": "NBIS",
+      "action": "BUY",
+      "qty": 17,
+      "limit_price": 283.57,
+      "order": {
+        "id": "1cdf51aa-6b66-4af5-ab94-71a5692016fc",
+        "client_order_id": "agent-buy-NBIS-20260630135348",
+        "created_at": "2026-06-30T18:53:48.539198802Z",
+        "updated_at": "2026-06-30T18:53:48.543378592Z",
+        "submitted_at": "2026-06-30T18:53:48.539198802Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "44d23ccc-a7b5-4cfd-968d-590a6274f43b",
+        "symbol": "NBIS",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "17",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "day",
+        "limit_price": "283.57",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-06-30T20:00:00Z",
+        "_agent_reason": "Signal: STRONG_BUY | Ask: $283.00 | Limit: $283.57 | Budget: $4973.98 \u2192 17 shares @ $283.57",
+        "_limit_price_used": 283.57
+      },
+      "exits": [
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t1",
+          "_target_price": 328.95,
+          "_stop_price": 260.88
+        },
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t2",
+          "_target_price": 351.64,
+          "_stop_price": 260.88
+        }
+      ],
+      "note": "Signal: STRONG_BUY | Ask: $283.00 | Limit: $283.57 | Budget: $4973.98 \u2192 17 shares @ $283.57",
+      "judge_score": 8.5
+    },
+    {
+      "symbol": "AMD",
+      "action": "BUY",
+      "qty": 8,
+      "limit_price": 584.34,
+      "order": {
+        "id": "1261a24d-06ba-4c08-8d4b-9751b46c3a0b",
+        "client_order_id": "agent-buy-AMD-20260630135349",
+        "created_at": "2026-06-30T18:53:49.467227782Z",
+        "updated_at": "2026-06-30T18:53:49.468570042Z",
+        "submitted_at": "2026-06-30T18:53:49.467227782Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "03fb07bb-5db1-4077-8dea-5d711b272625",
+        "symbol": "AMD",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "8",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "day",
+        "limit_price": "584.34",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-06-30T20:00:00Z",
+        "_agent_reason": "Signal: STRONG_BUY | Ask: $583.17 | Limit: $584.34 | Budget: $4974.18 \u2192 8 shares @ $584.34",
+        "_limit_price_used": 584.34
+      },
+      "exits": [
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t1",
+          "_target_price": 677.84,
+          "_stop_price": 537.59
+        },
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t2",
+          "_target_price": 724.59,
+          "_stop_price": 537.59
+        }
+      ],
+      "note": "Signal: STRONG_BUY | Ask: $583.17 | Limit: $584.34 | Budget: $4974.18 \u2192 8 shares @ $584.34",
+      "judge_score": 9.0
+    },
+    {
+      "symbol": "OUST",
+      "action": "BUY",
+      "qty": 76,
+      "limit_price": 64.63,
+      "order": {
+        "id": "c3867046-be5e-4e59-937c-6fa201ae0f34",
+        "client_order_id": "agent-buy-OUST-20260630135350",
+        "created_at": "2026-06-30T18:53:50.373651781Z",
+        "updated_at": "2026-06-30T18:53:50.377146511Z",
+        "submitted_at": "2026-06-30T18:53:50.373651781Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "02afaf0c-ecc0-4608-961b-1f1b06a14ae6",
+        "symbol": "OUST",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "76",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "day",
+        "limit_price": "64.63",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-06-30T20:00:00Z",
+        "_agent_reason": "Signal: STRONG_BUY | Ask: $64.50 | Limit: $64.63 | Budget: $4974.06 \u2192 76 shares @ $64.63",
+        "_limit_price_used": 64.63
+      },
+      "exits": [
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t1",
+          "_target_price": 74.97,
+          "_stop_price": 59.46
+        },
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t2",
+          "_target_price": 80.14,
+          "_stop_price": 59.46
+        }
+      ],
+      "note": "Signal: STRONG_BUY | Ask: $64.50 | Limit: $64.63 | Budget: $4974.06 \u2192 76 shares @ $64.63",
+      "judge_score": 8.5
+    },
+    {
+      "symbol": "FCEL",
+      "action": "BUY",
+      "qty": 129,
+      "limit_price": 38.48,
+      "order": {
+        "id": "28cea2b8-698b-46d7-8587-25e269ce71dd",
+        "client_order_id": "agent-buy-FCEL-20260630135351",
+        "created_at": "2026-06-30T18:53:51.454893947Z",
+        "updated_at": "2026-06-30T18:53:51.456557217Z",
+        "submitted_at": "2026-06-30T18:53:51.454893947Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "20c30426-4ff2-470e-a29c-f5595d44ce54",
+        "symbol": "FCEL",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "129",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "day",
+        "limit_price": "38.48",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-06-30T20:00:00Z",
+        "_agent_reason": "Signal: STRONG_BUY | Ask: $38.40 | Limit: $38.48 | Budget: $4974.05 \u2192 129 shares @ $38.48",
+        "_limit_price_used": 38.48
+      },
+      "exits": [
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t1",
+          "_target_price": 44.64,
+          "_stop_price": 35.4
+        },
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t2",
+          "_target_price": 47.72,
+          "_stop_price": 35.4
+        }
+      ],
+      "note": "Signal: STRONG_BUY | Ask: $38.40 | Limit: $38.48 | Budget: $4974.05 \u2192 129 shares @ $38.48",
+      "judge_score": 9.0
+    },
+    {
+      "symbol": "QCOM",
+      "action": "BUY",
+      "qty": 26,
+      "limit_price": 186.91,
+      "order": {
+        "id": "c26d1f43-4dc9-4b57-be9e-52bd62a89ac1",
+        "client_order_id": "agent-buy-QCOM-20260630135352",
+        "created_at": "2026-06-30T18:53:52.65332066Z",
+        "updated_at": "2026-06-30T18:53:52.6549432Z",
+        "submitted_at": "2026-06-30T18:53:52.65332066Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "39be1334-06b6-4df2-a2f1-b21b942628d0",
+        "symbol": "QCOM",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "26",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "day",
+        "limit_price": "186.91",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-06-30T20:00:00Z",
+        "_agent_reason": "Signal: STRONG_BUY | Ask: $186.54 | Limit: $186.91 | Budget: $4973.78 \u2192 26 shares @ $186.91",
+        "_limit_price_used": 186.91
+      },
+      "exits": [
+        {
+          "id": "705bdba4-1630-4b69-a263-662fd6d5aa4a",
+          "client_order_id": "t1-oco-2026-06-30-QCOM",
+          "created_at": "2026-06-30T18:53:52.838808366Z",
+          "updated_at": "2026-06-30T18:53:52.839681156Z",
+          "submitted_at": "2026-06-30T18:53:52.838808366Z",
+          "filled_at": null,
+          "expired_at": null,
+          "canceled_at": null,
+          "failed_at": null,
+          "replaced_at": null,
+          "replaced_by": null,
+          "replaces": null,
+          "asset_id": "39be1334-06b6-4df2-a2f1-b21b942628d0",
+          "symbol": "QCOM",
+          "asset_class": "us_equity",
+          "notional": null,
+          "qty": "13",
+          "filled_qty": "0",
+          "filled_avg_price": null,
+          "order_class": "oco",
+          "order_type": "limit",
+          "type": "limit",
+          "side": "sell",
+          "position_intent": "sell_to_close",
+          "time_in_force": "gtc",
+          "limit_price": "216.81",
+          "stop_price": null,
+          "status": "pending_new",
+          "extended_hours": false,
+          "legs": [
+            {
+              "id": "135be58f-da68-4187-ba9f-cd45aafdb101",
+              "client_order_id": "5e1214b2-71a1-4cfd-a8eb-fa1d07a447c9",
+              "created_at": "2026-06-30T18:53:52.838808366Z",
+              "updated_at": "2026-06-30T18:53:52.839641516Z",
+              "submitted_at": "2026-06-30T18:53:52.838808366Z",
+              "filled_at": null,
+              "expired_at": null,
+              "canceled_at": null,
+              "failed_at": null,
+              "replaced_at": null,
+              "replaced_by": null,
+              "replaces": null,
+              "asset_id": "39be1334-06b6-4df2-a2f1-b21b942628d0",
+              "symbol": "QCOM",
+              "asset_class": "us_equity",
+              "notional": null,
+              "qty": "13",
+              "filled_qty": "0",
+              "filled_avg_price": null,
+              "order_class": "oco",
+              "order_type": "stop",
+              "type": "stop",
+              "side": "sell",
+              "position_intent": "sell_to_close",
+              "time_in_force": "gtc",
+              "limit_price": null,
+              "stop_price": "171.96",
+              "status": "held",
+              "extended_hours": false,
+              "legs": null,
+              "trail_percent": null,
+              "trail_price": null,
+              "hwm": null,
+              "subtag": null,
+              "source": null,
+              "expires_at": "2026-09-28T20:00:00Z"
+            }
+          ],
+          "trail_percent": null,
+          "trail_price": null,
+          "hwm": null,
+          "subtag": null,
+          "source": null,
+          "expires_at": "2026-09-28T20:00:00Z",
+          "_label": "t1",
+          "_target_price": 216.81,
+          "_stop_price": 171.96
+        },
+        {
+          "available": "0",
+          "code": 40310000,
+          "existing_qty": "13",
+          "held_for_orders": "13",
+          "message": "insufficient qty available for order (requested: 13, available: 0)",
+          "symbol": "QCOM",
+          "_label": "t2",
+          "_target_price": 231.76,
+          "_stop_price": 171.96
+        }
+      ],
+      "note": "Signal: STRONG_BUY | Ask: $186.54 | Limit: $186.91 | Budget: $4973.78 \u2192 26 shares @ $186.91",
+      "judge_score": 8.0
+    }
+  ],
+  "skipped": [
+    {
+      "symbol": "QQQ",
+      "signal": "STRONG_BUY",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "NVDA",
+      "signal": "STRONG_BUY",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "AAPL",
+      "signal": "STRONG_BUY",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "GOOGL",
+      "signal": "STRONG_BUY",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "NOK",
+      "signal": "STRONG_BUY",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "PYPL",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "DDOG",
+      "signal": "STRONG_BUY",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "SQQQ",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "SPXS",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "SOXS",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "LCID",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or already in position"
+    },
+    {
+      "symbol": "NKE",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or already in position"
+    }
+  ],
+  "vetoed_by_judge": [
+    {
+      "symbol": "SPY",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "HOLD",
+      "judge_score": 0,
+      "rationale": "No Judge data"
+    },
+    {
+      "symbol": "MSFT",
+      "signal": "WEAK_BUY",
+      "judge_recommendation": "HOLD",
+      "judge_score": 5.5,
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $416.18 > MA50 $400.85, price between MAs. News: NEGATIVE \u2014 2 bearish signals in recent headlines. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70% | Correlation penalty: already holding AAPL, GOOGL, NVDA, QQQ. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    {
+      "symbol": "AMZN",
+      "signal": "WEAK_BUY",
+      "judge_recommendation": "HOLD",
+      "judge_score": 6.0,
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $267.31 > MA50 $243.08, price between MAs. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $733.30 > MA50 $698.39. Portfolio: Strong cash reserve 70% | Correlation penalty: already holding AAPL, GOOGL, NVDA, QQQ. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    }
+  ],
+  "stop_losses": [],
+  "orphan_cancels": []
+}
+
+=== Morning pipeline complete: 13:53:53 ===

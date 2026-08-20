@@ -1,0 +1,202 @@
+{
+  "timestamp": "2026-06-23T09:03:48.675449",
+  "date": "2026-06-23",
+  "approved": [
+    "MSFT",
+    "NOK"
+  ],
+  "held": [
+    "NVDA",
+    "AAPL",
+    "DDOG"
+  ],
+  "vetoed": [
+    "QQQ"
+  ],
+  "scores": {
+    "QQQ": {
+      "symbol": "QQQ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "Earnings proximity detected in recent news \u2014 auto-veto per hard rule #6",
+      "criteria": {
+        "earnings_veto": true
+      }
+    },
+    "NVDA": {
+      "symbol": "NVDA",
+      "recommendation": "HOLD",
+      "score": 6.0,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "0.5/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $211.31 > MA50 $193.96, price $222.35 above both"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding NVDA \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $211.31 > MA50 $193.96, price $222.35 above both. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32. Portfolio: Already holding NVDA \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "AAPL": {
+      "symbol": "AAPL",
+      "recommendation": "HOLD",
+      "score": 5.5,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "0.0/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $282.76 > MA50 $266.98, price $297.85 above both"
+        },
+        "news": {
+          "score": 0.0,
+          "note": "NEGATIVE \u2014 2 bearish signals in recent headlines"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding AAPL \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $282.76 > MA50 $266.98, price $297.85 above both. News: NEGATIVE \u2014 2 bearish signals in recent headlines. Macro: RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32. Portfolio: Already holding AAPL \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "MSFT": {
+      "symbol": "MSFT",
+      "recommendation": "APPROVE",
+      "score": 9.0,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "2.0/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "1.5/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $417.68 > MA50 $399.35, price $423.61 above both"
+        },
+        "news": {
+          "score": 2.0,
+          "note": "POSITIVE \u2014 2 bullish signals in recent headlines"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Strong cash reserve 76% | Correlation penalty: already holding AAPL, NVDA, QQQ"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $417.68 > MA50 $399.35, price $423.61 above both. News: POSITIVE \u2014 2 bullish signals in recent headlines. Macro: RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32. Portfolio: Strong cash reserve 76% | Correlation penalty: already holding AAPL, NVDA, QQQ. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "NOK": {
+      "symbol": "NOK",
+      "recommendation": "APPROVE",
+      "score": 7.0,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "1.5/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $12.53 > MA50 $10.29, price $13.72 above both"
+        },
+        "news": {
+          "score": 1.5,
+          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding NOK \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $12.53 > MA50 $10.29, price $13.72 above both. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives. Macro: RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32. Portfolio: Already holding NOK \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    },
+    "DDOG": {
+      "symbol": "DDOG",
+      "recommendation": "HOLD",
+      "score": 6.0,
+      "score_breakdown": {
+        "technical": "3.0/3.0",
+        "news": "0.5/2.0",
+        "macro": "1.5/1.5",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 3.0,
+          "note": "STRONG_BUY \u2014 MA20 $162.08 > MA50 $137.75, price $208.65 above both"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding DDOG \u2014 no new position"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $162.08 > MA50 $137.75, price $208.65 above both. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $725.24 > MA50 $691.32. Portfolio: Already holding DDOG \u2014 no new position. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist)."
+    }
+  }
+}

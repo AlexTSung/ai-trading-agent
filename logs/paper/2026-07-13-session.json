@@ -1,0 +1,349 @@
+{
+  "timestamp": "2026-07-13T09:58:28.860560",
+  "trades": [
+    {
+      "symbol": "MSFT",
+      "action": "SELL",
+      "result": {
+        "id": "97a23ad0-1ab3-45bb-b607-4cdcff47f1c6",
+        "client_order_id": "agent-sell-MSFT-20260713095829",
+        "created_at": "2026-07-13T14:58:29.644069672Z",
+        "updated_at": "2026-07-13T14:58:29.650559832Z",
+        "submitted_at": "2026-07-13T14:58:29.644069672Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "b6d1aa75-5c9c-4353-a305-9e2caa1925ab",
+        "symbol": "MSFT",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "12",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "day",
+        "limit_price": "388.26",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-07-13T20:00:00Z",
+        "_agent_reason": "Sell signal: STRONG_SELL",
+        "_limit_price_used": 388.26
+      }
+    },
+    {
+      "symbol": "TSLA",
+      "action": "SELL",
+      "result": {
+        "id": "14069a06-2720-4ec9-865a-8580e20f4be7",
+        "client_order_id": "agent-sell-TSLA-20260713095829",
+        "created_at": "2026-07-13T14:58:29.947691697Z",
+        "updated_at": "2026-07-13T14:58:29.956563707Z",
+        "submitted_at": "2026-07-13T14:58:29.947691697Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "8ccae427-5dd0-45b3-b5fe-7ba5e422c766",
+        "symbol": "TSLA",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "11",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "day",
+        "limit_price": "397.6",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-07-13T20:00:00Z",
+        "_agent_reason": "Sell signal: STRONG_SELL",
+        "_limit_price_used": 397.6
+      }
+    },
+    {
+      "symbol": "TGTX",
+      "action": "BUY",
+      "qty": 119,
+      "limit_price": 39.66,
+      "order": {
+        "id": "38ca3821-b787-4bc7-9cbb-be7888163f26",
+        "client_order_id": "agent-buy-TGTX-20260713095830",
+        "created_at": "2026-07-13T14:58:30.636656948Z",
+        "updated_at": "2026-07-13T14:58:30.637879658Z",
+        "submitted_at": "2026-07-13T14:58:30.636656948Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "b19f159c-0fe9-4899-a7bc-01cc2f3424a5",
+        "symbol": "TGTX",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "119",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "day",
+        "limit_price": "39.66",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-07-13T20:00:00Z",
+        "_agent_reason": "Signal: STRONG_BUY | MA20-target $39.66 | Limit: $39.66 | Budget (5%): $4747.56 \u2192 119 shares @ $39.66",
+        "_limit_price_used": 39.66
+      },
+      "exits": [
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t1",
+          "_target_price": 46.0,
+          "_stop_price": 36.49
+        },
+        {
+          "code": 42210000,
+          "message": "oco orders must be exit orders",
+          "_label": "t2",
+          "_target_price": 49.17,
+          "_stop_price": 36.49
+        }
+      ],
+      "note": "Signal: STRONG_BUY | MA20-target $39.66 | Limit: $39.66 | Budget (5%): $4747.56 \u2192 119 shares @ $39.66",
+      "judge_score": 9.5
+    }
+  ],
+  "skipped": [
+    {
+      "symbol": "QQQ",
+      "signal": "WEAK_BUY",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "NVDA",
+      "signal": "WEAK_BUY",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "AAPL",
+      "signal": "WEAK_BUY",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "GOOGL",
+      "signal": "WEAK_BUY",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "AMZN",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "PYPL",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "DDOG",
+      "signal": "STRONG_BUY",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SQQQ",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SPXS",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SOXS",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SOFI",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ASST",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ONDS",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "KOLD",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "RCAT",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "AGEN",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "BITO",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SNDQ",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "LGPS",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SOBR",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ELPW",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "TZA",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    }
+  ],
+  "vetoed_by_judge": [
+    {
+      "symbol": "SPY",
+      "signal": "WEAK_BUY",
+      "judge_recommendation": "HOLD",
+      "judge_score": 0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "No Judge data"
+    },
+    {
+      "symbol": "NOK",
+      "signal": "WEAK_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 7.25,
+      "rationale": "Avg-down requires score \u2265 8.0, got 7.25. Technical: WEAK_BUY \u2014 MA20 $14.92 > MA50 $12.40, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives | PUMP FLAG PENALTY -0.25: SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal befo. Macro: RISK-ON \u2014 SPY MA20 $746.22 > MA50 $717.40. Portfolio: AVG_DOWN candidate: NOK is 4.1% below entry (entry $12.43 \u2192 now $11.91), position 4.9% of portfolio (max 8%). Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist). Quality: Market cap data unavailable. Source: watchlist | Gate: 7.0."
+    },
+    {
+      "symbol": "FTRK",
+      "signal": "WEAK_BUY",
+      "judge_recommendation": "HOLD",
+      "judge_score": 7.0,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $0.47 > MA50 $0.42, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-ON \u2014 SPY MA20 $746.22 > MA50 $717.40. Portfolio: Strong cash reserve 44%. Volatility: VIX proxy unavailable \u2014 neutral volatility assumption (add VIXY to watchlist). Quality: Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock. Source: discovery | Gate: 8.5."
+    }
+  ],
+  "stop_losses": [
+    {
+      "symbol": "RKTO",
+      "result": {
+        "id": "f09ba74e-f2d0-460d-8c6b-f1bdc0753a9d",
+        "client_order_id": "agent-sell-RKTO-20260713095829",
+        "created_at": "2026-07-13T14:58:29.318984917Z",
+        "updated_at": "2026-07-13T14:58:29.328067237Z",
+        "submitted_at": "2026-07-13T14:58:29.318984917Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "c04f1162-e913-45cd-8190-ba7e15f3f36c",
+        "symbol": "RKTO",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "4942",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "day",
+        "limit_price": "0.88",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-07-13T20:00:00Z",
+        "_agent_reason": "STOP-LOSS: Position down -9.0%",
+        "_limit_price_used": 0.88
+      },
+      "trigger": {
+        "symbol": "RKTO",
+        "qty": "4942",
+        "avg_entry": "0.969",
+        "current_price": "0.8822",
+        "unrealized_plpc": -0.08958
+      }
+    }
+  ],
+  "orphan_cancels": []
+}
