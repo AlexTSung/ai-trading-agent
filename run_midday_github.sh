@@ -40,11 +40,20 @@ if [ "${TEST_MODE}" != "1" ] && { [ "$HOUR_UTC" -lt 14 ] || [ "$HOUR_UTC" -ge 20
 fi
 
 echo ""
-echo "--- [1/2] Stop-loss + inverse ETF max-hold check ---"
+echo "--- [1/3] Phantom equity / corporate action check ---"
+# Exit code 2 means suspect positions were found. Surface it loudly but do not
+# fail the job — the stop-loss check below still needs to run.
+python3 trade.py check-phantom | tee "$LOG_DIR/$DATE-phantom-check.json" || {
+  echo "⚠️  PHANTOM EQUITY DETECTED — see $DATE-phantom-check.json"
+  echo "⚠️  Reported portfolio value is inflated. Reconcile before trusting P&L."
+}
+
+echo ""
+echo "--- [2/3] Stop-loss + inverse ETF max-hold check ---"
 python3 trade.py check-stops | tee "$LOG_DIR/$DATE-midday-stops.json"
 
 echo ""
-echo "--- [2/2] Midday research (signal reversals) ---"
+echo "--- [3/3] Midday research (signal reversals) ---"
 python3 research.py midday > "$LOG_DIR/$DATE-midday.json" \
   || echo "WARN: research.py midday failed — stop checks above still applied"
 

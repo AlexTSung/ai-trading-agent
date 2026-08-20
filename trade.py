@@ -78,6 +78,16 @@ INVERSE_MAX_HOLD_DAYS  = 3     # Inverse ETFs decay — never hold long
 # ── Partial profit-taking (CLAUDE.md Hard Rule 7) ─────────────────────────────
 T1_SELL_FRACTION = 0.40        # Sell 40% at T1, 40% at T2, let 20% run
 
+# ── Phantom equity / corporate action detection ───────────────────────────────
+# On 2026-08-03 LBGJ was restated from $0.02 to $3.79 over a weekend while the
+# share count (154,903) and cost basis ($0.0288) were untouched. That is a
+# reverse split applied to the quote but not to the position, and it inflated
+# reported portfolio value from $86,925 to $674,658 of equity that does not
+# exist. A legitimate reverse split reduces shares and raises basis in the same
+# ratio, leaving market value roughly unchanged.
+PHANTOM_PRICE_RATIO = 10.0   # >=10x or <=1/10x vs cost basis is implausible
+PHANTOM_MAX_PLPC    = 10.0   # unrealized P&L above +1000% is not a real move
+
 LOGS_DIR   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "paper")
 STATE_PATH = os.path.join(LOGS_DIR, "agent-state.json")
 
@@ -348,6 +358,77 @@ def check_inverse_etf_max_hold(positions, state=None):
     return stale
 
 
+def detect_phantom_equity(positions, state=None):
+    """
+    Flag positions whose price has moved implausibly far from its cost basis
+    while the share count stayed put — the fingerprint of a corporate action
+    (usually a reverse split) applied to the quote but not to the position.
+
+    Such a position reports enormous unrealized gains that cannot be realized:
+    the shares are not actually there at that price. Left unflagged it corrupts
+    portfolio value, the journal, and the graduation win-rate statistics.
+
+    Returns a list of flag dicts; empty when everything looks sane.
+    """
+    state = state if state is not None else load_state()
+    flags = []
+
+    for pos in positions:
+        sym   = pos["symbol"]
+        entry = float(pos.get("avg_entry_price") or 0)
+        price = float(pos.get("current_price") or 0)
+        qty   = float(pos.get("qty") or 0)
+        plpc  = float(pos.get("unrealized_plpc") or 0)
+        if entry <= 0 or price <= 0:
+            continue
+
+        ratio    = price / entry
+        reasons  = []
+
+        if ratio >= PHANTOM_PRICE_RATIO:
+            reasons.append(f"price ${price:,.4f} is {ratio:,.0f}x its cost basis "
+                           f"${entry:.4f}")
+        elif ratio <= 1.0 / PHANTOM_PRICE_RATIO:
+            reasons.append(f"price ${price:,.4f} is 1/{1/ratio:,.0f} of its cost "
+                           f"basis ${entry:.4f}")
+
+        if plpc >= PHANTOM_MAX_PLPC:
+            reasons.append(f"unrealized P&L {plpc*100:,.0f}% exceeds the "
+                           f"{PHANTOM_MAX_PLPC*100:,.0f}% plausibility ceiling")
+
+        if not reasons:
+            continue
+
+        # Share count unchanged since entry turns suspicion into near-certainty:
+        # a real split would have adjusted it.
+        recorded = state.get("entries", {}).get(sym, {}).get("qty")
+        if recorded is not None and float(recorded) == qty:
+            reasons.append(f"share count unchanged at {qty:,.0f} since entry — a "
+                           f"genuine split would have adjusted it")
+
+        if entry < MIN_TRADE_PRICE:
+            reasons.append(f"entry price ${entry:.4f} was below the "
+                           f"${MIN_TRADE_PRICE:.2f} floor, where reverse splits "
+                           f"are routine")
+
+        flags.append({
+            "symbol": sym,
+            "qty": qty,
+            "avg_entry_price": entry,
+            "current_price": price,
+            "price_ratio": round(ratio, 2),
+            "unrealized_plpc": plpc,
+            "reported_market_value": round(qty * price, 2),
+            "cost_basis": round(qty * entry, 2),
+            "phantom_amount": round(qty * price - qty * entry, 2),
+            "reasons": reasons,
+            "action": "TRADING_BLOCKED — verify the corporate action with the "
+                      "broker before buying or selling this symbol",
+        })
+
+    return flags
+
+
 def ensure_exits_for_positions(positions, open_orders, state=None):
     """
     Attach OCO exits to any held position that has no protective sell order.
@@ -357,11 +438,13 @@ def ensure_exits_for_positions(positions, open_orders, state=None):
     """
     state       = state if state is not None else load_state()
     covered     = {o["symbol"] for o in open_orders if o["side"] == "sell"}
+    # Never anchor exits to a price we do not trust.
+    suspect     = {f["symbol"] for f in detect_phantom_equity(positions, state)}
     attached    = []
 
     for pos in positions:
         sym = pos["symbol"]
-        if sym in covered:
+        if sym in covered or sym in suspect:
             continue
         qty = int(float(pos["qty"]))
         if qty <= 0:
@@ -696,7 +779,17 @@ def run_trading_session():
         "orphan_cancels": [],
         "exits_attached": [],
         "blocked_by_rules": [],
+        "phantom_equity": [],
     }
+
+    # Corporate-action sanity check runs before anything trades. A position whose
+    # price was restated without adjusting shares reports equity that cannot be
+    # realized; acting on it (selling into a phantom take-profit, or sizing new
+    # buys off an inflated portfolio value) would book fictional results.
+    phantom = detect_phantom_equity(positions, state)
+    phantom_syms = {f["symbol"] for f in phantom}
+    if phantom:
+        results["phantom_equity"] = phantom
 
     # 0. Cancel OCO exit orders left over from day-limit buys that expired unfilled
     open_orders = get_orders(status="open")
@@ -742,6 +835,14 @@ def run_trading_session():
     for sym, data in symbols_data.items():
         if "error" in data:
             results["skipped"].append({"symbol": sym, "reason": data["error"]})
+            continue
+
+        if sym in phantom_syms:
+            results["blocked_by_rules"].append({
+                "symbol": sym, "action": "TRADING_BLOCKED",
+                "reason": "Phantom equity / unverified corporate action — "
+                          "no orders until the position is reconciled.",
+            })
             continue
 
         tech   = data.get("technicals", {})
@@ -812,11 +913,17 @@ def run_trading_session():
                 continue
 
         def _record_entry(trade_result):
-            """Track entry date and score so min-hold can be enforced later."""
+            """
+            Track entry date, score and share count. The quantity is what lets
+            detect_phantom_equity() tell a real split (shares adjusted) from a
+            quote-only restatement (shares unchanged).
+            """
             if order_succeeded(trade_result.get("order", {})):
                 state["entries"][sym] = {
                     "date": datetime.now().isoformat(),
                     "judge_score": judge_score,
+                    "qty": trade_result.get("qty"),
+                    "entry_limit": trade_result.get("limit_price"),
                 }
 
         if is_dip and is_dip_approved and sym not in open_syms:
@@ -898,11 +1005,20 @@ def check_stops():
     state     = load_state()
     triggers  = check_stop_loss(positions, state)
     stale     = check_inverse_etf_max_hold(positions, state)
+    phantom   = detect_phantom_equity(positions, state)
+    suspect   = {f["symbol"] for f in phantom}
     results   = {"checked": len(positions), "triggers": triggers,
-                 "inverse_max_hold": stale, "closed": [], "failed": []}
+                 "inverse_max_hold": stale, "phantom_equity": phantom,
+                 "closed": [], "failed": [], "skipped_suspect": []}
 
     for trigger in triggers + stale:
         sym = trigger["symbol"]
+        if sym in suspect:
+            # Do not liquidate against a price we cannot trust.
+            results["skipped_suspect"].append(
+                {"symbol": sym, "reason": "phantom equity — manual reconciliation "
+                                          "required before any exit"})
+            continue
         close_result = close_position(sym, reason=trigger["reason"])
         entry = {"symbol": sym, "result": close_result, "trigger": trigger}
         if order_succeeded(close_result):
@@ -930,6 +1046,15 @@ if __name__ == "__main__":
 
     elif action == "check-stops":
         print(json.dumps(check_stops(), indent=2))
+
+    elif action == "check-phantom":
+        _flags = detect_phantom_equity(get_positions())
+        print(json.dumps({
+            "phantom_equity": _flags,
+            "total_phantom_amount": round(sum(f["phantom_amount"] for f in _flags), 2),
+            "verdict": "SUSPECT — reconcile with the broker" if _flags else "clean",
+        }, indent=2))
+        sys.exit(2 if _flags else 0)
 
     elif action == "order":
         # python scripts/trade.py order AAPL 5 buy 195.50

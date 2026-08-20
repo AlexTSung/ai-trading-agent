@@ -28,6 +28,11 @@ try:
 except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
 
+# A single-trade P&L beyond this magnitude (in percent) is treated as a data
+# fault rather than a result. Real equity trades do not move 1000% intraday;
+# unadjusted reverse splits do.
+IMPLAUSIBLE_PNL_PCT = 1000.0
+
 # ── Auth ─────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
 ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
@@ -182,6 +187,14 @@ def score_trade(order: dict, judge_score: float | None) -> dict:
     else:
         verdict = "POOR_TRADE"
 
+    # A P&L this large is a data fault, not a trade outcome. LBGJ was restated
+    # from $0.02 to $3.79 by an unadjusted reverse split and would otherwise be
+    # logged as a +10,941% GOOD_TRADE — on its own enough to clear the 55%
+    # graduation win rate and unlock real money on fictional performance.
+    # DATA_SUSPECT keeps it in the record but out of the win/loss counts.
+    if abs(pnl_pct) >= IMPLAUSIBLE_PNL_PCT:
+        verdict = "DATA_SUSPECT"
+
     return {
         "symbol": symbol,
         "side": side,
@@ -267,19 +280,41 @@ def run_calibration_report(days: int = 30) -> str:
     if not rows:
         return f"No calibration data in the last {days} days."
 
-    deltas  = [float(r["delta"]) for r in rows]
-    avg_delta = mean(deltas)
-    wins    = [r for r in rows if r["verdict"] == "GOOD_TRADE"]
-    losses  = [r for r in rows if r["verdict"] == "POOR_TRADE"]
+    # delta is blank whenever the Judge score was unavailable; float("") raises,
+    # which used to crash this whole report.
+    deltas    = [float(r["delta"]) for r in rows if (r.get("delta") or "").strip()]
+    avg_delta = mean(deltas) if deltas else 0.0
+
+    # Data-suspect rows are excluded from the win rate entirely — they are
+    # broker/corporate-action faults, not trade outcomes, and leaving them in
+    # either direction distorts the graduation decision.
+    suspect  = [r for r in rows if r["verdict"] == "DATA_SUSPECT"]
+    scored   = [r for r in rows if r["verdict"] != "DATA_SUSPECT"]
+    wins     = [r for r in scored if r["verdict"] == "GOOD_TRADE"]
+    losses   = [r for r in scored if r["verdict"] == "POOR_TRADE"]
+    win_rate = (len(wins) / len(scored) * 100) if scored else 0.0
 
     lines = [
         f"# Calibration Report — Last {days} Days",
-        f"**Trades analyzed**: {len(rows)}",
-        f"**Win rate**: {len(wins)/len(rows)*100:.1f}% ({len(wins)} good, {len(losses)} poor)",
-        f"**Avg Judge→Reviewer delta**: {avg_delta:+.2f}",
+        f"**Trades analyzed**: {len(scored)}"
+        + (f" ({len(rows)} logged, {len(suspect)} excluded as DATA_SUSPECT)"
+           if suspect else ""),
+        f"**Win rate**: {win_rate:.1f}% ({len(wins)} good, {len(losses)} poor)"
+        f" — graduation requires ≥55%",
+        f"**Avg Judge→Reviewer delta**: {avg_delta:+.2f}"
+        + ("" if deltas else " (no Judge scores on record)"),
         "",
         "## Interpretation",
     ]
+
+    if suspect:
+        lines.append(
+            f"⚠️ **{len(suspect)} trade(s) excluded as DATA_SUSPECT**: "
+            + ", ".join(sorted({r['symbol'] for r in suspect}))
+            + ". Implausible P&L indicates an unadjusted corporate action rather "
+              "than a real outcome. Reconcile with the broker before treating "
+              "these as performance."
+        )
 
     if avg_delta > 1.0:
         lines.append(f"Judge is **underconfident** by avg {avg_delta:.2f} pts — consider raising score weights")

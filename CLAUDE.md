@@ -173,6 +173,9 @@ Local equivalents for manual runs: `python3 research.py full`,
 8. **Cash reserve**: Always maintain at least 20% of portfolio value in cash. Do not deploy capital that would breach this floor.
 9. **No earnings week FOMO**: Do not open new positions in a stock within 3 trading days before its earnings report.
 10. **Journal is mandatory**: Write a journal entry every market day, even if you placed no trades. A day with no journal entry is a bug.
+11. **Phantom equity is never performance.** If a position's price moves ≥10× (or ≤1/10×) against its cost basis while the share count is unchanged, treat it as an unadjusted corporate action — not a gain. Such a position is blocked from all trading, excluded from exit placement, and its P&L is logged as `DATA_SUSPECT` rather than counted toward win rate or graduation. Reconcile with the broker before treating the value as real.
+    - **Precedent**: on 2026-08-03 LBGJ was restated from $0.02 to $3.79 over a weekend while the position held 154,903 shares at a $0.0288 basis throughout. Reported portfolio value jumped from $86,925 to $674,658 — roughly $488,000 of equity that did not exist. A genuine reverse split reduces shares and raises basis in the same ratio, leaving market value approximately flat.
+    - Run `python3 trade.py check-phantom` to audit open positions at any time; the midday pipeline runs it automatically.
 
 ## Macro Regime Check (Dalio)
 Before any trading session, note the macro regime:
