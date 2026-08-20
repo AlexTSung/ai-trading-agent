@@ -100,14 +100,14 @@ Do not proceed until the user confirms. No exceptions.
 ## Daily Schedule
 | Time | Agent | Script | Action |
 |------|-------|--------|--------|
-| 8:30 AM | Intelligence | `python intelligence.py morning` | Fear/Greed, VIX, global markets, macro, Reddit, earnings watch, insider buys |
-| 9:00 AM | Social Screener | `python reddit_screener.py scan` | StockTwits + Reddit trending tickers — feeds into Researcher |
-| 9:45 AM | Researcher | `python research.py full` | Bars, news, MAs on watchlist + intelligence tickers |
-| 10:00 AM | Judge | `python judge.py session` | Score signals with full intelligence context, APPROVE/HOLD/VETO |
-| 10:05 AM | Executor | `python trade.py session` | Execute approved trades only |
-| 12:00 PM | Researcher | `python research.py midday` | Check open positions, flag stop-loss candidates |
-| 4:15 PM | Reviewer | `python reviewer.py eod` | Post-trade scoring + calibration log |
-| 4:30 PM | Journal | `python journal.py eod` | Synthesize all agents into daily MD |
+| 8:30 AM | Intelligence | `python3 intelligence.py morning` | Fear/Greed, VIX, global markets, macro, Reddit, earnings watch, insider buys |
+| 9:00 AM | Social Screener | `python3 reddit_screener.py scan` | StockTwits + Reddit trending tickers — feeds into Researcher |
+| 9:45 AM | Researcher | `python3 research.py full` | Bars, news, MAs on watchlist + intelligence tickers |
+| 10:00 AM | Judge | `python3 judge.py session` | Score signals with full intelligence context, APPROVE/HOLD/VETO |
+| 10:05 AM | Executor | `python3 trade.py session` | Execute approved trades only |
+| 12:00 PM | Researcher | `python3 research.py midday` | Check open positions, flag stop-loss candidates |
+| 4:15 PM | Reviewer | `python3 reviewer.py eod` | Post-trade scoring + calibration log |
+| 4:30 PM | Journal | `python3 journal.py eod` | Synthesize all agents into daily MD |
 
 ## Social Screener Config (StockTwits)
 - **Source**: StockTwits API — free, no API key required, purpose-built for stock mentions
@@ -127,7 +127,7 @@ A signal type earns Robinhood access only when ALL of these are met in paper:
 - **Avg Reviewer post-trade score ≥ 6.0**
 - **Manual approval by Alex** — no auto-graduation ever
 
-Run `python reviewer.py calibration 30` to check current standing.
+Run `python3 reviewer.py calibration 30` to check current standing.
 
 ## Experiment Timeline
 | Phase | Dates | Status | Decision |
@@ -151,8 +151,8 @@ reads it, and times listed there are not what runs.
 | 12:00 PM | `midday-pipeline.yml` | `0 16 * * 1-5` | `run_midday_github.sh` — stop-loss + inverse ETF max-hold + midday research |
 | 5:15 PM | `eod-pipeline.yml` | `15 21 * * 1-5` | `run_eod_github.sh` — reviewer → journal (1hr post-close buffer) |
 
-Local equivalents for manual runs: `python research.py full`,
-`python trade.py session`, `python trade.py check-stops`, `python journal.py eod`.
+Local equivalents for manual runs: `python3 research.py full`,
+`python3 trade.py session`, `python3 trade.py check-stops`, `python3 journal.py eod`.
 
 ## Hard Rules (Never Break These)
 1. **Check market status first.** Never place orders when `is_open` is false.
