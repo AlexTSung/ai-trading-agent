@@ -10,7 +10,16 @@ echo "======================"
 # 1. Python dependencies
 echo ""
 echo "→ Installing Python dependencies..."
-pip install requests python-dotenv --quiet
+# Use python3 -m pip, not bare `pip`. macOS ships python3 without a `pip`
+# shim, so `pip install` fails with "command not found" there.
+if command -v python3 >/dev/null 2>&1; then
+  python3 -m pip install -r requirements.txt --quiet
+else
+  echo "  ❌ python3 not found. Install it first:"
+  echo "     macOS:  xcode-select --install   (or: brew install python3)"
+  echo "     Ubuntu: sudo apt install python3 python3-pip"
+  exit 1
+fi
 
 # 2. Create .env file if it doesn't exist
 if [ ! -f .env ]; then
@@ -45,17 +54,21 @@ echo "  1. Edit .env with your Alpaca paper trading API keys"
 echo "     → Get them at: https://app.alpaca.markets (toggle to Paper Trading)"
 echo ""
 echo "  2. Test your connection:"
-echo "     python scripts/research.py account"
+echo "     python3 research.py account"
 echo ""
 echo "  3. Run a manual research pass:"
-echo "     python scripts/research.py full"
+echo "     python3 research.py full"
 echo ""
 echo "  4. Check market status:"
-echo "     python scripts/trade.py status"
+echo "     python3 trade.py status"
 echo ""
-echo "  5. Configure Claude Code routines:"
-echo "     → Open .claude/routines.json"
-echo "     → Enable in Claude Code settings"
+echo "  5. Review the automation schedule:"
+echo "     → .github/workflows/  (this is what actually runs the agent)"
+echo "     → routines.json is reference only — no script reads it"
 echo ""
 echo "  6. Run your first manual end-of-day journal:"
-echo "     python scripts/journal.py eod"
+echo "     python3 journal.py eod"
+echo ""
+echo "NOTE: Live trading runs on GitHub Actions using GitHub Secrets, not this"
+echo "      machine's .env. Add APCA_API_KEY_ID and APCA_API_SECRET_KEY under"
+echo "      Settings → Secrets and variables → Actions to enable the pipelines."

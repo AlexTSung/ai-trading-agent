@@ -42,8 +42,25 @@ SCORE_GATE_DISCOVERY  = 8.5   # auto-discovered, unknown quality
 DISCOVERY_SOURCES = {"social_screener", "alpaca_most_active", "alpaca_gainers",
                      "market_screener", "news_firehose", "reddit", "congressional"}
 
+MAX_TOTAL_SCORE = 10.0
+assert (W_TECHNICAL + W_NEWS + W_MACRO + W_PORTFOLIO + W_VOLATILITY
+        + W_QUALITY) == MAX_TOTAL_SCORE, "Criterion weights must sum to 10"
+
 # ── Earnings Proximity Veto ───────────────────────────────────────────────────
 EARNINGS_VETO_DAYS = 3  # Auto-veto if earnings within this many days
+
+# Discovery stocks that score zero on quality have no verifiable market cap,
+# profitability, or analyst coverage. A strong chart is not enough on its own.
+DISCOVERY_MIN_QUALITY = 0.5
+
+
+def _clamp(scored: tuple, weight: float) -> tuple:
+    """Clamp a (score, note) pair from a scorer into [0, weight]."""
+    score, note = scored
+    capped = max(0.0, min(float(score), weight))
+    if capped != score:
+        note = f"{note} [capped {score}→{capped} at weight {weight}]"
+    return round(capped, 2), note
 
 def load_today_research():
     today = date.today().isoformat()
@@ -330,6 +347,39 @@ def score_quality(sym_data: dict, is_discovery: bool) -> tuple:
 
     score = round(max(0.0, min(score, W_QUALITY)), 2)
     return score, "; ".join(notes) if notes else "No quality data", False
+
+
+RSI_OVERBOUGHT_GATE   = 60.0   # CLAUDE.md Entry Checklist: RSI > 60 means wait
+MAX_EXTENSION_ABOVE_MA20 = 0.03  # ...and do not chase more than 3% above MA20
+
+
+def check_chase_veto(technicals: dict, symbol: str) -> tuple:
+    """
+    Refuse entries that chase strength, per CLAUDE.md Entry Checklist:
+      1. More than 3% above MA20 → wait for a pullback.
+      2. RSI(14) above 60 → overbought, wait.
+
+    Returns (veto: bool, reason: str).
+    """
+    if not technicals or "error" in technicals:
+        return False, ""
+
+    rsi  = technicals.get("rsi")
+    ma20 = technicals.get("ma20") or 0
+    last = technicals.get("last_close") or 0
+
+    if rsi is not None and rsi > RSI_OVERBOUGHT_GATE:
+        return True, (f"CHASE VETO: RSI(14) {rsi:.0f} is above "
+                      f"{RSI_OVERBOUGHT_GATE:.0f} — overbought, wait for a pullback")
+
+    if ma20 > 0 and last > 0:
+        extension = (last - ma20) / ma20
+        if extension > MAX_EXTENSION_ABOVE_MA20:
+            return True, (f"CHASE VETO: price ${last:.2f} is {extension:.1%} above "
+                          f"MA20 ${ma20:.2f} (limit "
+                          f"{MAX_EXTENSION_ABOVE_MA20:.0%}) — do not chase")
+
+    return False, ""
 
 
 def check_earnings_veto(news_items: list, symbol: str) -> tuple:
@@ -649,16 +699,32 @@ def score_symbol(symbol: str, research: dict) -> dict:
             "criteria": {"earnings_veto": True}
         }
 
+    # Chase veto (CLAUDE.md Entry Checklist items 1-2). research.py already
+    # computes RSI(14) and MA20, but nothing enforced the "don't chase" rules:
+    # entries were approved at 20-day highs on overbought RSI.
+    chase_veto, chase_reason = check_chase_veto(technicals, symbol)
+    if chase_veto:
+        return {
+            "symbol": symbol, "recommendation": "VETO",
+            "score": 0.0, "rationale": chase_reason,
+            "criteria": {"chase_veto": True, "note": chase_reason},
+        }
+
     # Determine if this is a discovery or watchlist stock
     is_discovery = sym_data.get("source", "watchlist") in DISCOVERY_SOURCES
 
-    # Score each criterion
-    t_score, t_note = score_technical(technicals)
-    n_score, n_note = score_news(news, sym_data)
-    m_score, m_note = score_macro(research)
-    p_score, p_note = score_portfolio(research, symbol)
-    v_score, v_note = score_volatility(research)
-    q_score, q_note, q_hard_veto = score_quality(sym_data, is_discovery)
+    # Score each criterion, clamped to its declared weight.
+    # The individual scorers were written against an older 3.0/1.5-point scale and
+    # still return values above the current weights (technical up to 3.0 vs
+    # W_TECHNICAL 2.0, macro and volatility up to 1.5 vs 1.0). Summing them raw
+    # inflated every total by as much as 2.0 points and pushed unvetted discovery
+    # stocks over the 8.5 gate. Clamp at the source so the 10-point scale is real.
+    t_score, t_note = _clamp(score_technical(technicals),  W_TECHNICAL)
+    n_score, n_note = _clamp(score_news(news, sym_data),   W_NEWS)
+    m_score, m_note = _clamp(score_macro(research),        W_MACRO)
+    p_score, p_note = _clamp(score_portfolio(research, symbol), W_PORTFOLIO)
+    v_score, v_note = _clamp(score_volatility(research),   W_VOLATILITY)
+    q_score, q_note, q_hard_veto = score_quality(sym_data, is_discovery)  # already clamped
 
     # Hard veto: micro-cap discovery stock
     if q_hard_veto:
@@ -701,8 +767,30 @@ def score_symbol(symbol: str, research: dict) -> dict:
             }
         }
 
-    total = round(t_score + n_score + m_score + p_score + v_score + q_score, 2)
+    total = round(min(t_score + n_score + m_score + p_score + v_score + q_score,
+                      MAX_TOTAL_SCORE), 2)
     is_avg_down = "AVG_DOWN candidate" in p_note
+
+    # Hard veto: unvetted discovery stock with no quality evidence at all.
+    if is_discovery and q_score < DISCOVERY_MIN_QUALITY:
+        return {
+            "symbol": symbol, "recommendation": "VETO",
+            "score": total,
+            "approval_gate": SCORE_GATE_DISCOVERY,
+            "is_discovery": True,
+            "rationale": (
+                f"Discovery quality veto: scored {q_score}/{W_QUALITY} on quality "
+                f"(minimum {DISCOVERY_MIN_QUALITY}). {q_note}"
+            ),
+            "criteria": {
+                "technical":  {"score": t_score, "note": t_note},
+                "news":       {"score": n_score, "note": n_note},
+                "macro":      {"score": m_score, "note": m_note},
+                "portfolio":  {"score": p_score, "note": p_note},
+                "volatility": {"score": v_score, "note": v_note},
+                "quality":    {"score": q_score, "note": q_note, "veto": True},
+            },
+        }
 
     # Source-aware approval threshold
     gate = SCORE_GATE_DISCOVERY if is_discovery else SCORE_GATE_WATCHLIST

@@ -57,9 +57,9 @@ Do not proceed until the user confirms. No exceptions.
   `place_stock_order`, `get_orders`, `cancel_order_by_id`,
   `get_stock_bars`, `get_stock_snapshot`, `get_stock_latest_quote`,
   `get_news`, `get_clock`, `get_portfolio_history`
-- **scripts/research.py** — MA signal computation and watchlist summary
-- **scripts/journal.py** — EOD markdown + CSV trade log
-- **scripts/trade.py** — trade session execution logic
+- **research.py** — MA signal computation and watchlist summary
+- **journal.py** — EOD markdown + CSV trade log
+- **trade.py** — trade session execution logic
 
 ## Agent Stack (Judge-Executor Model)
 ```
@@ -100,14 +100,14 @@ Do not proceed until the user confirms. No exceptions.
 ## Daily Schedule
 | Time | Agent | Script | Action |
 |------|-------|--------|--------|
-| 8:30 AM | Intelligence | `python intelligence.py morning` | Fear/Greed, VIX, global markets, macro, Reddit, earnings watch, insider buys |
-| 9:00 AM | Social Screener | `python reddit_screener.py scan` | StockTwits + Reddit trending tickers — feeds into Researcher |
-| 9:45 AM | Researcher | `python research.py full` | Bars, news, MAs on watchlist + intelligence tickers |
-| 10:00 AM | Judge | `python judge.py session` | Score signals with full intelligence context, APPROVE/HOLD/VETO |
-| 10:05 AM | Executor | `python trade.py session` | Execute approved trades only |
-| 12:00 PM | Researcher | `python research.py midday` | Check open positions, flag stop-loss candidates |
-| 4:15 PM | Reviewer | `python reviewer.py eod` | Post-trade scoring + calibration log |
-| 4:30 PM | Journal | `python journal.py eod` | Synthesize all agents into daily MD |
+| 8:30 AM | Intelligence | `python3 intelligence.py morning` | Fear/Greed, VIX, global markets, macro, Reddit, earnings watch, insider buys |
+| 9:00 AM | Social Screener | `python3 reddit_screener.py scan` | StockTwits + Reddit trending tickers — feeds into Researcher |
+| 9:45 AM | Researcher | `python3 research.py full` | Bars, news, MAs on watchlist + intelligence tickers |
+| 10:00 AM | Judge | `python3 judge.py session` | Score signals with full intelligence context, APPROVE/HOLD/VETO |
+| 10:05 AM | Executor | `python3 trade.py session` | Execute approved trades only |
+| 12:00 PM | Researcher | `python3 research.py midday` | Check open positions, flag stop-loss candidates |
+| 4:15 PM | Reviewer | `python3 reviewer.py eod` | Post-trade scoring + calibration log |
+| 4:30 PM | Journal | `python3 journal.py eod` | Synthesize all agents into daily MD |
 
 ## Social Screener Config (StockTwits)
 - **Source**: StockTwits API — free, no API key required, purpose-built for stock mentions
@@ -127,7 +127,7 @@ A signal type earns Robinhood access only when ALL of these are met in paper:
 - **Avg Reviewer post-trade score ≥ 6.0**
 - **Manual approval by Alex** — no auto-graduation ever
 
-Run `python reviewer.py calibration 30` to check current standing.
+Run `python3 reviewer.py calibration 30` to check current standing.
 
 ## Experiment Timeline
 | Phase | Dates | Status | Decision |
@@ -139,12 +139,20 @@ Run `python reviewer.py calibration 30` to check current standing.
 **Decision log**: On 2026-06-29, Alex extended the experiment by 7 days (through July 7) because all 6 closed positions were negative. Root causes identified and ruleset was overhauled. The new MA20 pullback entry strategy, tiered stops, and 30-day minimum hold need at least one full market week to validate before real money goes at risk.
 
 ## Daily Schedule (All times ET, weekdays only)
-| Time | Routine | Script |
-|------|---------|--------|
-| 9:45 AM | Morning Research | `python scripts/research.py full` |
-| 10:00 AM | Trade Execution | `python scripts/trade.py session` |
-| 12:00 PM | Midday Check | `python scripts/research.py midday` |
-| 4:15 PM | End-of-Day Journal | `python scripts/journal.py eod` |
+
+**Where automation actually runs:** GitHub Actions, using GitHub Secrets — not
+on any local machine. The `.github/workflows/*.yml` files are the single source
+of truth for the schedule. `routines.json` is reference material only; no script
+reads it, and times listed there are not what runs.
+
+| ET | Workflow | Cron (UTC) | Runner |
+|------|----------|------------|--------|
+| 9:45 AM | `morning-pipeline.yml` | `45 13 * * 1-5` | `run_github.sh` — intelligence → social → screener → research → judge → executor |
+| 12:00 PM | `midday-pipeline.yml` | `0 16 * * 1-5` | `run_midday_github.sh` — stop-loss + inverse ETF max-hold + midday research |
+| 5:15 PM | `eod-pipeline.yml` | `15 21 * * 1-5` | `run_eod_github.sh` — reviewer → journal (1hr post-close buffer) |
+
+Local equivalents for manual runs: `python3 research.py full`,
+`python3 trade.py session`, `python3 trade.py check-stops`, `python3 journal.py eod`.
 
 ## Hard Rules (Never Break These)
 1. **Check market status first.** Never place orders when `is_open` is false.
@@ -165,6 +173,9 @@ Run `python reviewer.py calibration 30` to check current standing.
 8. **Cash reserve**: Always maintain at least 20% of portfolio value in cash. Do not deploy capital that would breach this floor.
 9. **No earnings week FOMO**: Do not open new positions in a stock within 3 trading days before its earnings report.
 10. **Journal is mandatory**: Write a journal entry every market day, even if you placed no trades. A day with no journal entry is a bug.
+11. **Phantom equity is never performance.** If a position's price moves ≥10× (or ≤1/10×) against its cost basis while the share count is unchanged, treat it as an unadjusted corporate action — not a gain. Such a position is blocked from all trading, excluded from exit placement, and its P&L is logged as `DATA_SUSPECT` rather than counted toward win rate or graduation. Reconcile with the broker before treating the value as real.
+    - **Precedent**: on 2026-08-03 LBGJ was restated from $0.02 to $3.79 over a weekend while the position held 154,903 shares at a $0.0288 basis throughout. Reported portfolio value jumped from $86,925 to $674,658 — roughly $488,000 of equity that did not exist. A genuine reverse split reduces shares and raises basis in the same ratio, leaving market value approximately flat.
+    - Run `python3 trade.py check-phantom` to audit open positions at any time; the midday pipeline runs it automatically.
 
 ## Macro Regime Check (Dalio)
 Before any trading session, note the macro regime:
@@ -279,7 +290,7 @@ Before placing any buy:
 - **Strong Sell**: Price < 50-day MA OR stop-loss triggered
 
 ## Journal Format
-Every journal entry must follow the template in `config/journal-template.md`.
+Every journal entry must follow the template in `journal-template.md`.
 Sections: Portfolio Status → Market Research (per symbol) → Trades Executed → Positions Closed → Reflection → Tomorrow's Watch
 
 ## Lessons Learned

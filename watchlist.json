@@ -86,6 +86,13 @@
       "max_allocation_pct": 5,
       "type": "bearish_instrument",
       "notes": "BEARISH PLAY. Use when NVDA/INTC/MU all show STRONG_SELL and semiconductor news is negative (export bans, DRAM lawsuits, capex cuts)."
+    },
+    {
+      "symbol": "VIXY",
+      "description": "ProShares VIX Short-Term Futures — volatility gauge, NOT a trade candidate",
+      "max_allocation_pct": 0,
+      "type": "signal_only",
+      "notes": "SIGNAL ONLY — never buy. judge.py score_volatility reads VIXY technicals as the VIX proxy for the Citadel sizing rule. Without it in the watchlist, every stock silently received a free full-weight volatility point and the 'reduce size when VIX > 25' rule never activated. max_allocation_pct 0 keeps it out of the buy path."
     }
   ],
   "cash_reserve_pct": 20,

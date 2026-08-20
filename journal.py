@@ -15,6 +15,16 @@ import csv
 import requests
 from datetime import datetime, date, timedelta
 
+# ── Load .env ────────────────────────────────────────────────────────────────
+# setup.sh writes a .env file, but nothing used to read it, so filling in keys
+# there had no effect. Environment variables already set (GitHub Secrets, MCP
+# config, an exporting shell) always win — load_dotenv does not override them.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+except ImportError:
+    pass  # python-dotenv is optional; env vars may be supplied by the shell
+
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
 ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
 BASE_URL      = os.getenv("APCA_BASE_URL", "https://paper-api.alpaca.markets")

@@ -28,6 +28,16 @@ from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
 # ── Config ────────────────────────────────────────────────────────────────────
+# ── Load .env ────────────────────────────────────────────────────────────────
+# setup.sh writes a .env file, but nothing used to read it, so filling in keys
+# there had no effect. Environment variables already set (GitHub Secrets, MCP
+# config, an exporting shell) always win — load_dotenv does not override them.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+except ImportError:
+    pass  # python-dotenv is optional; env vars may be supplied by the shell
+
 STOCKTWITS_BASE  = "https://api.stocktwits.com/api/2"
 MAX_AGE_DAYS     = 7
 REQUEST_DELAY    = 0.5   # seconds between calls — free tier is 200 req/hour
@@ -294,7 +304,16 @@ def run_pump_check(symbol: str, analysis: dict, price_data: dict) -> dict:
     volume_ratio  = price_data.get("volume_ratio", 0)
 
     # ── Guardrail 1: Price floor ──────────────────────────────────────────────
-    if current_price > 0 and current_price < MIN_PRICE:
+    # Fails closed. The previous `current_price > 0 and current_price < MIN_PRICE`
+    # form skipped the veto entirely when price data was missing, because
+    # price_data.get("current_price", 0) defaults to 0 — so an unpriced penny
+    # stock passed the floor it was supposed to fail.
+    if current_price <= 0:
+        vetoes.append(
+            f"PRICE_UNKNOWN: no usable price for this ticker — cannot verify the "
+            f"${MIN_PRICE:.2f} floor, so it is rejected rather than assumed safe"
+        )
+    elif current_price < MIN_PRICE:
         vetoes.append(
             f"PRICE_FLOOR: ${current_price:.2f} is below ${MIN_PRICE:.2f} minimum — "
             f"penny stocks are primary pump vehicles"
