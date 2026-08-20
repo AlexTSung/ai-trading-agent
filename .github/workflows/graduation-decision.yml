@@ -1,0 +1,81 @@
+name: Phase 2B Graduation Decision
+
+# Renders the Paper → Robinhood graduation decision against the Phase 2B
+# baseline (2026-08-20) and commits it to logs/paper/.
+#
+# The verdict is advisory only. CLAUDE.md requires manual approval by Alex —
+# no auto-graduation ever. This workflow places no orders and changes no
+# strategy; it only produces the report so the decision is made against
+# measured data rather than memory.
+
+on:
+  schedule:
+    # 21:30 UTC on 3 September = 5:30 PM ET, after the EOD pipeline has run.
+    # Phase 2B decision date, two weeks from the 2026-08-20 baseline reset.
+    - cron: '30 21 3 9 *'
+  workflow_dispatch:
+    inputs:
+      since:
+        description: 'Baseline date to measure from (YYYY-MM-DD)'
+        required: false
+        default: '2026-08-20'
+
+jobs:
+  graduation-decision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Render graduation decision
+        env:
+          APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
+          APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
+          SINCE: ${{ github.event.inputs.since || '2026-08-20' }}
+        run: |
+          mkdir -p logs/paper
+          OUT="logs/paper/$(date +%Y-%m-%d)-graduation-decision.md"
+          python3 reviewer.py graduation "$SINCE" | tee "$OUT"
+          echo ""
+          echo "--- calibration context ---"
+          python3 reviewer.py calibration 30 | tee -a "$OUT" || true
+          echo ""
+          echo "--- phantom equity audit ---"
+          python3 trade.py check-phantom | tee -a "$OUT" || \
+            echo "PHANTOM EQUITY PRESENT — performance figures are unreliable" \
+              | tee -a "$OUT"
+
+      - name: Commit decision report
+        if: always()
+        run: |
+          git config user.name "Trading Agent"
+          git config user.email "agent@youversion.com"
+          git pull --rebase origin ${{ github.ref_name }} || true
+          git add logs/paper/
+          git diff --staged --quiet || git commit -m "chore: Phase 2B graduation decision $(date +%Y-%m-%d)"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload decision as artifact
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: graduation-decision-${{ github.run_id }}
+          path: logs/paper/*-graduation-decision.md
+          retention-days: 90

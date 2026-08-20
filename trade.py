@@ -542,7 +542,7 @@ def close_position(symbol, reason=""):
 
 def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=None,
                         is_dip_buy=False, judge_score=None, research_last_close=None,
-                        watchlist=None):
+                        watchlist=None, size_multiplier=1.0):
     """
     Full buy flow:
     1. Check market is open
@@ -606,13 +606,25 @@ def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=N
 
     pct = DIP_BUY_POSITION_PCT if is_dip_buy else allocation_cap_for(
         symbol, watchlist, judge_score)
+
+    # Citadel volatility rule: halve size above VIX 25, no new positions above
+    # VIX 35. The multiplier arrives from the Judge, which reads the real VIX
+    # level carried through from intelligence.py.
+    vix_note = ""
+    if size_multiplier is not None and size_multiplier != 1.0:
+        if size_multiplier <= 0:
+            return {"error": "VOLATILITY BLOCK: VIX regime forbids new positions",
+                    "symbol": symbol, "action": "SKIPPED"}
+        pct *= size_multiplier
+        vix_note = f" | VIX size x{size_multiplier:g}"
+
     qty, sizing_note = calculate_max_shares(symbol, account, limit_price, pct)
     if qty == 0:
         return {"error": sizing_note, "symbol": symbol, "action": "SKIPPED"}
 
     reason = (f"Signal: {signal_strength} | {price_note} | Limit: ${limit_price:.2f} | "
               f"{sizing_note} | Tier {tier_for(symbol)} stop "
-              f"{stop_pct_for(symbol):.0%}")
+              f"{stop_pct_for(symbol):.0%}{vix_note}")
     order  = place_limit_order(symbol, qty, "buy", limit_price, reason=reason)
 
     if not order_succeeded(order):
@@ -893,6 +905,7 @@ def run_trading_session():
         is_avg_down     = judge_result.get("avg_down_candidate", False)
         is_dip_approved = judge_result.get("dip_buy_approved", False)
         is_dip          = judge_result.get("dip_buy_candidate", False) or data.get("dip_buy_candidate", False)
+        size_mult       = judge_result.get("size_multiplier", 1.0)
 
         # 48-hour re-entry cooling-off after a stop-out (CLAUDE.md Hard Rule 4).
         # Applies to every buy path below, including dip buys and avg-downs.
@@ -933,7 +946,8 @@ def run_trading_session():
                                           account, is_dip_buy=True,
                                           judge_score=judge_score,
                                           research_last_close=research_close,
-                                          watchlist=watchlist)
+                                          watchlist=watchlist,
+                                          size_multiplier=size_mult)
             trade["judge_score"] = judge_score
             trade["action"] = "DIP_BUY"
             trade["dip_pct_drop"] = judge_result.get("dip_pct_drop", 0)
@@ -958,7 +972,8 @@ def run_trading_session():
                                           research_limit_price=research_limit,
                                           judge_score=judge_score,
                                           research_last_close=research_close,
-                                          watchlist=watchlist)
+                                          watchlist=watchlist,
+                                          size_multiplier=size_mult)
             trade["judge_score"] = judge_score
             trade["action"] = "BUY"
             results["trades"].append(trade)
@@ -980,7 +995,8 @@ def run_trading_session():
                                           research_limit_price=research_limit,
                                           judge_score=judge_score,
                                           research_last_close=research_close,
-                                          watchlist=watchlist)
+                                          watchlist=watchlist,
+                                          size_multiplier=size_mult)
             trade["judge_score"] = judge_score
             trade["action"] = "AVG_DOWN"
             results["trades"].append(trade)

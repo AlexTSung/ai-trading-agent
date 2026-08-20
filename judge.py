@@ -243,10 +243,27 @@ def score_portfolio(research: dict, symbol: str) -> tuple:
 
 def score_volatility(research: dict) -> tuple:
     """
-    Score 0–1.5 using VIXY as VIX proxy if available in research,
-    otherwise infer from recent SPY range volatility.
+    Score 0–1.5 from the real VIX level when available, then VIXY trend,
+    then SPY range as a last resort.
     """
-    # Try VIXY as VIX proxy
+    # Authoritative source: the VIX close carried through from intelligence.py
+    # (FRED VIXCLS). Previously this data was fetched every morning and thrown
+    # away, so this branch never ran and every candidate banked a free point.
+    intel = research.get("intelligence") or {}
+    vix   = intel.get("vix")
+    if isinstance(vix, (int, float)):
+        regime = intel.get("vix_regime", "UNKNOWN")
+        if vix > VIX_NO_NEW_POSITIONS:
+            return 0.0, (f"VIX {vix:.1f} > {VIX_NO_NEW_POSITIONS:.0f} — no new "
+                         f"positions, manage existing only ({regime})")
+        if vix > VIX_HALF_SIZE:
+            return 0.25, (f"VIX {vix:.1f} > {VIX_HALF_SIZE:.0f} — elevated "
+                          f"volatility, half sizing applies ({regime})")
+        if vix >= 20:
+            return 0.75, f"VIX {vix:.1f} — moderate volatility ({regime})"
+        return 1.5, f"VIX {vix:.1f} — calm tape, favorable entry ({regime})"
+
+    # Fallback: VIXY trend from the watchlist
     vixy = research.get("symbols", {}).get("VIXY", {})
     tech  = vixy.get("technicals", {})
 
@@ -263,7 +280,8 @@ def score_volatility(research: dict) -> tuple:
     spy_data = research.get("symbols", {}).get("SPY", {})
     return 1.0, "VIX proxy unavailable — neutral volatility assumption (add VIXY to watchlist)"
 
-def score_quality(sym_data: dict, is_discovery: bool) -> tuple:
+def score_quality(sym_data: dict, is_discovery: bool, symbol: str = "",
+                  insider_buy_symbols: list = None) -> tuple:
     """
     Score 0–2.5 based on business quality signals.
     Market cap is the primary filter — every significant loser was small/micro cap.
@@ -345,9 +363,21 @@ def score_quality(sym_data: dict, is_discovery: bool) -> tuple:
     except (ValueError, TypeError):
         pass
 
+    # Insider buying (SEC EDGAR Form 4), carried through from intelligence.py.
+    # Officers and directors buying their own stock with their own money is one
+    # of the few genuinely informative quality signals available for free. This
+    # was fetched every morning and discarded before now.
+    if symbol and symbol in (insider_buy_symbols or []):
+        score += 0.5
+        notes.append(f"INSIDER BUYING: recent Form 4 purchase filed for {symbol}")
+
     score = round(max(0.0, min(score, W_QUALITY)), 2)
     return score, "; ".join(notes) if notes else "No quality data", False
 
+
+# Citadel volatility sizing thresholds, evaluated against the real VIX index.
+VIX_HALF_SIZE        = 25.0
+VIX_NO_NEW_POSITIONS = 35.0
 
 RSI_OVERBOUGHT_GATE   = 60.0   # CLAUDE.md Entry Checklist: RSI > 60 means wait
 MAX_EXTENSION_ABOVE_MA20 = 0.03  # ...and do not chase more than 3% above MA20
@@ -382,17 +412,47 @@ def check_chase_veto(technicals: dict, symbol: str) -> tuple:
     return False, ""
 
 
-def check_earnings_veto(news_items: list, symbol: str) -> tuple:
+# Backward-looking phrasing: a recap of a past report is not an upcoming one.
+BACKWARD_EARNINGS_KW = ("reported", "posted", "beat", "missed", "last quarter",
+                        "results showed", "after reporting", "following its")
+FORWARD_EARNINGS_KW  = ("will report", "to report", "is scheduled", "ahead of",
+                        "upcoming", "next week", "due to report", "expected to report",
+                        "previews", "preview", "before the bell", "after the bell")
+
+
+def check_earnings_veto(news_items: list, symbol: str, research: dict = None) -> tuple:
     """
-    Veto if any headline suggests earnings are within 3 days.
-    Heuristic: look for 'earnings' or 'reports' in recent news.
+    Enforce the 3-day earnings blackout (CLAUDE.md Hard Rule 9).
+
+    Two sources are consulted:
+      1. intelligence.py's earnings watch, which scans 10 articles per symbol
+         each morning. Previously computed and discarded.
+      2. This symbol's own recent news.
+
+    Neither is a true earnings calendar — Alpaca has no earnings endpoint on the
+    free tier, so both are keyword scans over news. Recall is improved by taking
+    the union, and false positives are reduced by ignoring purely backward-looking
+    recaps ("reported Q2 results") unless forward-looking language is also
+    present. A real calendar feed would be strictly better; see CLAUDE.md.
     """
+    intel = (research or {}).get("intelligence") or {}
+    if symbol in (intel.get("earnings_watch_symbols") or []):
+        return True, (f"EARNINGS VETO: {symbol} flagged by the morning earnings "
+                      f"watch — no entry within {EARNINGS_VETO_DAYS} trading days "
+                      f"of a report")
+
     earnings_kw = ["earnings", "reports q", "quarterly results", "eps report",
                    "earnings report", "reports earnings"]
     for item in (news_items or [])[:10]:
-        headline = (item.get("headline", "") + " " + item.get("summary", "")).lower()
-        if any(kw in headline for kw in earnings_kw):
-            return True, f"Earnings proximity detected in recent news — auto-veto per hard rule #6"
+        text = (item.get("headline", "") + " " + item.get("summary", "")).lower()
+        if not any(kw in text for kw in earnings_kw):
+            continue
+        forward  = any(kw in text for kw in FORWARD_EARNINGS_KW)
+        backward = any(kw in text for kw in BACKWARD_EARNINGS_KW)
+        if backward and not forward:
+            continue  # recap of a report already out — not a blackout trigger
+        return True, (f"EARNINGS VETO: upcoming-earnings language in recent news "
+                      f"for {symbol} — auto-veto per Hard Rule 9")
     return False, ""
 
 DIP_BUY_MIN_SCORE  = 8.0   # Strict gate — dip buys require highest conviction
@@ -691,12 +751,26 @@ def score_symbol(symbol: str, research: dict) -> dict:
         pass  # Screener not run yet — proceed normally
 
     # Earnings veto (hard rule — bypasses scoring)
-    earnings_veto, earnings_reason = check_earnings_veto(news, symbol)
+    earnings_veto, earnings_reason = check_earnings_veto(news, symbol, research)
     if earnings_veto:
         return {
             "symbol": symbol, "recommendation": "VETO",
             "score": 0.0, "rationale": earnings_reason,
             "criteria": {"earnings_veto": True}
+        }
+
+    # Volatility regime veto (CLAUDE.md "Volatility Position Sizing").
+    # Above VIX 35 the rule is manage-existing-only. This never fired before
+    # because the VIX was fetched each morning and then discarded.
+    _intel = research.get("intelligence") or {}
+    _vix   = _intel.get("vix")
+    if isinstance(_vix, (int, float)) and _vix > VIX_NO_NEW_POSITIONS:
+        return {
+            "symbol": symbol, "recommendation": "VETO", "score": 0.0,
+            "rationale": (f"VOLATILITY VETO: VIX {_vix:.1f} exceeds "
+                          f"{VIX_NO_NEW_POSITIONS:.0f} — no new positions, "
+                          f"manage existing only"),
+            "criteria": {"volatility_veto": True, "vix": _vix},
         }
 
     # Chase veto (CLAUDE.md Entry Checklist items 1-2). research.py already
@@ -724,7 +798,10 @@ def score_symbol(symbol: str, research: dict) -> dict:
     m_score, m_note = _clamp(score_macro(research),        W_MACRO)
     p_score, p_note = _clamp(score_portfolio(research, symbol), W_PORTFOLIO)
     v_score, v_note = _clamp(score_volatility(research),   W_VOLATILITY)
-    q_score, q_note, q_hard_veto = score_quality(sym_data, is_discovery)  # already clamped
+    q_score, q_note, q_hard_veto = score_quality(
+        sym_data, is_discovery, symbol,
+        (research.get("intelligence") or {}).get("insider_buy_symbols"),
+    )  # already clamped
 
     # Hard veto: micro-cap discovery stock
     if q_hard_veto:
@@ -822,6 +899,10 @@ def score_symbol(symbol: str, research: dict) -> dict:
         "recommendation": rec,
         "score": total,
         "approval_gate": gate,
+        # Passed to the executor so the Citadel VIX sizing rule is actually
+        # applied to share counts, not just mentioned in a rationale string.
+        "size_multiplier": _intel.get("size_multiplier", 1.0),
+        "vix": _intel.get("vix"),
         "is_discovery": is_discovery,
         "avg_down_candidate": is_avg_down,
         "score_breakdown": {

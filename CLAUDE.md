@@ -127,16 +127,57 @@ A signal type earns Robinhood access only when ALL of these are met in paper:
 - **Avg Reviewer post-trade score ≥ 6.0**
 - **Manual approval by Alex** — no auto-graduation ever
 
-Run `python3 reviewer.py calibration 30` to check current standing.
+Run `python3 reviewer.py graduation` for the pass/fail verdict against the
+Phase 2B baseline, or `python3 reviewer.py calibration 30` for Judge-vs-Reviewer
+calibration detail.
+
+**`DATA_SUSPECT` trades never count.** Any single-trade P&L beyond ±1000% is a
+data fault, not a result, and is excluded from the win rate in both directions.
+A broker's unadjusted corporate action must never unlock real money.
 
 ## Experiment Timeline
 | Phase | Dates | Status | Decision |
 |-------|-------|--------|----------|
-| Phase 1 — initial paper run | June 16–30, 2026 | Complete | Extended — all realized positions negative; rules overhauled (tiered stops, MA20 entry, 48h cooldown, min hold) |
-| Phase 2 — extended paper run | July 1–7, 2026 | **Active** | Test new ruleset on live market. Need ≥55% win rate to graduate to real money. |
-| Phase 3 — real money (Robinhood) | TBD | Locked | Unlocks only after Phase 2 graduation criteria are met |
+| Phase 1 — initial paper run | June 16–30, 2026 | Complete | Extended — all realized positions negative; rules overhauled on paper but **never implemented in code** |
+| Phase 2 — extended paper run | July 1 – Aug 20, 2026 | **Void — not a valid test** | The overhauled ruleset existed only in this file. Code ran a flat −8% stop, flat 5% sizing, no cooldown, no minimum hold, and an over-counting Judge. Results measure the old ruleset plus defects, not the intended strategy. |
+| Phase 2B — first real test of the ruleset | Aug 20 – Sep 3, 2026 | **Active** | Baseline reset 2026-08-20. First period where the documented rules are actually executing. |
+| Phase 3 — real money (Robinhood) | TBD | Locked | Unlocks only after Phase 2B criteria are met **and** manual approval |
 
-**Decision log**: On 2026-06-29, Alex extended the experiment by 7 days (through July 7) because all 6 closed positions were negative. Root causes identified and ruleset was overhauled. The new MA20 pullback entry strategy, tiered stops, and 30-day minimum hold need at least one full market week to validate before real money goes at risk.
+### Phase 2B baseline — reset 2026-08-20
+
+| Measure | Value at reset |
+|---|---|
+| Reported portfolio value | $579,586.26 (**inflated — includes phantom LBGJ equity**) |
+| Honest portfolio value | **$91,455.93** (LBGJ carried at cost) |
+| Honest return since inception | **−8.54%** |
+| Cash | $71,258.65 (~78% of honest value) |
+| Genuine open positions | AAPL +11.5%, NVDA +13.1%, DDOG +6.8% |
+| Suspect position | LBGJ — 154,903 sh, blocked from trading pending reconciliation |
+| Prior win rate | 38.9% (7 of 18) — measured on the old code |
+| Trades counted toward Phase 2B | **0** — counter starts fresh |
+
+**Why the reset was necessary.** Everything before 2026-08-20 was measured on
+code that contradicted this file, so it cannot validate the ruleset:
+
+1. **Judge scores were inflated up to 2.0 points** — criteria were summed past their own weights. Pre-reset scores are not comparable to post-fix ones, so the "avg Judge ≥ 7.0" criterion had no meaning.
+2. **Phantom equity distorted everything from 2026-08-03.** An unadjusted reverse split restated LBGJ from $0.02 to $3.79 while share count and basis held, adding ~$488K of unrealizable equity.
+3. **The agent was frozen for 2.5 weeks.** That inflated portfolio value pushed cash to a reported 12.3%, tripping the Judge's hard `CASH BELOW 20% FLOOR` veto. **Zero buys placed between 2026-08-03 and 2026-08-20** — every candidate was vetoed. No new calibration data was produced.
+4. **Only buys are scored.** `reviewer.py` reviews buy fills only, so a period of net selling generates no calibration rows regardless of outcome quality.
+
+**Decision date: 2026-09-03.** `graduation-decision.yml` runs automatically at
+21:30 UTC that day and commits a verdict to
+`logs/paper/2026-09-03-graduation-decision.md`. Run it any time with
+`python3 reviewer.py graduation`, or manually via workflow_dispatch.
+
+Expect the occurrence count to be the binding constraint: 15 qualifying trades
+in ten sessions requires roughly 1.5 buys per day, and the tightened gates
+(weight clamp, chase veto, $5 floor, discovery quality veto) deliberately
+approve fewer trades. **A short sample is not a pass** — if occurrences fall
+short on 2026-09-03, extend rather than graduate.
+
+**Decision log**
+- **2026-06-29** — Alex extended by 7 days after all 6 closed positions were negative. Ruleset overhauled in this file. *In hindsight: the overhaul was documentation only; none of it reached the code, so the extension tested nothing new.*
+- **2026-08-20** — Phase 2 declared void and baseline reset. Root causes fixed and merged to `master`: Judge weight clamp, $5 price floor, research-vs-execution price check, tiered stops, conviction sizing, 48h cooldown, 30-day minimum hold, phantom-equity detection, real VIX sizing, earnings-watch veto, insider-buy signal. Phase 2B opened through 2026-09-03. Real money remains locked.
 
 ## Daily Schedule (All times ET, weekdays only)
 
@@ -239,6 +280,36 @@ Current active signals and their hypotheses:
 ## Volatility Position Sizing (Citadel)
 If VIX > 25: multiply all position sizes by 0.5
 If VIX > 35: no new positions, manage existing only
+
+**Now enforced in code.** The VIX level comes from FRED `VIXCLS` via
+`intelligence.py get_fear_greed()` (misleadingly named — it returns the real VIX
+close, not a sentiment index). `research.py load_intelligence_context()` carries
+it into the research output, `judge.py score_volatility()` scores against it, and
+`trade.py` applies the resulting `size_multiplier` to actual share counts.
+Above VIX 35 the Judge issues a hard `VOLATILITY VETO`.
+
+Note: `intelligence.py get_vix()` returns a **VIXY share price**, which is not
+comparable to a VIX index level. Do not use it for these thresholds.
+
+## Intelligence Factors (what the morning scan feeds into decisions)
+`intelligence.py morning` writes `logs/paper/YYYY-MM-DD-intelligence.json`.
+These fields are consumed as decision factors:
+
+| Field | Source | Used for |
+|---|---|---|
+| `fear_greed.vix` | FRED VIXCLS | Volatility score, size multiplier, VIX>35 veto |
+| `fear_greed.score` / `rating` | derived from VIX | Regime context in rationale |
+| `earnings_watch` | Alpaca news keyword scan | 3-day earnings blackout (Hard Rule 9) |
+| `insider_activity` | SEC EDGAR Form 4 | +0.5 quality score for recent insider buys |
+| `market_discovery` | Alpaca most-active / movers | Discovery tickers for the Researcher |
+
+**Known limitation — earnings.** Alpaca has no earnings endpoint on the free
+tier, so both `intelligence.py get_earnings_calendar()` and the Judge's own
+check are keyword scans over news, not a real calendar. The Judge takes the
+union of both for recall and ignores purely backward-looking recaps ("reported
+Q2 results") to cut false positives. A dedicated calendar feed would be strictly
+better and is the recommended next upgrade; until then the blackout is
+best-effort and can miss a report that generated no news.
 
 ## Correlation Check (Bridgewater)
 Before buying a new position, confirm it is not highly correlated

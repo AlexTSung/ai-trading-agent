@@ -32,6 +32,11 @@ except ImportError:
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
 ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
 BASE_URL      = os.getenv("APCA_BASE_URL", "https://paper-api.alpaca.markets")
+
+# Citadel volatility sizing thresholds (CLAUDE.md "Volatility Position Sizing").
+# Evaluated against the real VIX index level from FRED, not a VIXY share price.
+VIX_HALF_SIZE        = 25.0   # above this, halve position sizes
+VIX_NO_NEW_POSITIONS = 35.0   # above this, manage existing only
 DATA_URL      = "https://data.alpaca.markets"
 
 def _headers():
@@ -309,6 +314,99 @@ def _load_intelligence_tickers(max_tickers=15):
     intel_path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-intelligence.json")
     if not os.path.exists(intel_path):
         return []
+    return _extract_discovery_tickers(intel_path)
+
+
+def _intel_path_today():
+    from datetime import date as _date
+    return os.path.join(os.path.dirname(__file__), "logs", "paper",
+                        f"{_date.today().isoformat()}-intelligence.json")
+
+
+def load_intelligence_context() -> dict:
+    """
+    Surface the parts of the morning intelligence run that the pipeline was
+    throwing away.
+
+    intelligence.py fetches the VIX (FRED VIXCLS), a fear/greed reading, an
+    earnings watch and SEC Form 4 insider filings every morning, but research
+    previously opened that file only to harvest discovery tickers. Everything
+    else was written to disk and discarded, which is why the Judge's volatility
+    criterion reported "VIX proxy unavailable" and handed out a free point to
+    every candidate, and why the earnings blackout ran on headlines alone.
+    """
+    ctx = {
+        "available": False,
+        "vix": None,
+        "vix_date": None,
+        "vix_regime": "UNKNOWN",
+        "size_multiplier": 1.0,
+        "fear_greed_score": None,
+        "fear_greed_rating": None,
+        "earnings_watch_symbols": [],
+        "insider_buy_symbols": [],
+        "notes": [],
+    }
+
+    path = _intel_path_today()
+    if not os.path.exists(path):
+        ctx["notes"].append("No intelligence file for today — run intelligence.py morning")
+        return ctx
+
+    try:
+        with open(path) as f:
+            intel = json.load(f)
+    except (OSError, ValueError) as e:
+        ctx["notes"].append(f"Intelligence file unreadable: {e}")
+        return ctx
+
+    ctx["available"] = True
+
+    # ── VIX ───────────────────────────────────────────────────────────────────
+    # get_fear_greed() is misleadingly named: it returns the real VIX close from
+    # FRED (VIXCLS) alongside its 0-100 mapping. That is the authoritative level
+    # for the Citadel sizing thresholds in CLAUDE.md. get_vix() only returns a
+    # VIXY share price, which is not comparable to a VIX level.
+    fg = intel.get("fear_greed") or {}
+    vix = fg.get("vix")
+    if isinstance(vix, (int, float)):
+        ctx["vix"] = float(vix)
+        ctx["vix_date"] = fg.get("vix_date")
+        ctx["fear_greed_score"] = fg.get("score")
+        ctx["fear_greed_rating"] = fg.get("rating")
+        if vix > VIX_NO_NEW_POSITIONS:
+            ctx["vix_regime"] = "EXTREME"
+            ctx["size_multiplier"] = 0.0
+        elif vix > VIX_HALF_SIZE:
+            ctx["vix_regime"] = "ELEVATED"
+            ctx["size_multiplier"] = 0.5
+        else:
+            ctx["vix_regime"] = "NORMAL"
+            ctx["size_multiplier"] = 1.0
+    else:
+        ctx["notes"].append("VIX unavailable in intelligence output")
+
+    # ── Earnings watch ────────────────────────────────────────────────────────
+    ew = intel.get("earnings_watch") or {}
+    ctx["earnings_watch_symbols"] = sorted({
+        item.get("symbol") for item in ew.get("earnings_watch", [])
+        if item.get("symbol")
+    })
+
+    # ── Insider buying (SEC EDGAR Form 4) ─────────────────────────────────────
+    ia = intel.get("insider_activity") or {}
+    ctx["insider_buy_symbols"] = sorted({
+        f.get("symbol") for f in ia.get("insider_filings", [])
+        if f.get("symbol")
+    })
+
+    return ctx
+
+
+def _extract_discovery_tickers(intel_path):
+    """Harvest discovery tickers from the intelligence file."""
+    if not os.path.exists(intel_path):
+        return []
     try:
         with open(intel_path) as f:
             intel = json.load(f)
@@ -511,6 +609,7 @@ def full_research():
         },
         "positions": get_positions(),
         "symbols": {},
+        "intelligence": load_intelligence_context(),
         "discovery_sources": {
             "social_tickers": [t["symbol"] for t in social_tickers],
             "reddit_tickers": [t["symbol"] for t in intel_tickers],

@@ -33,6 +33,19 @@ except ImportError:
 # unadjusted reverse splits do.
 IMPLAUSIBLE_PNL_PCT = 1000.0
 
+# ── Phase 2B baseline (reset 2026-08-20) ──────────────────────────────────────
+# Everything before this date was scored on the pre-clamp Judge scale, which
+# summed criteria past their own weights and inflated every total by up to 2.0
+# points. Those scores are not comparable to post-fix ones, so the graduation
+# decision counts only trades from the baseline forward.
+PHASE2B_BASELINE_DATE = "2026-08-20"
+PHASE2B_DECISION_DATE = "2026-09-03"
+
+GRADUATION_MIN_OCCURRENCES   = 15
+GRADUATION_MIN_WIN_RATE      = 55.0
+GRADUATION_MIN_JUDGE_AVG     = 7.0
+GRADUATION_MIN_REVIEWER_AVG  = 6.0
+
 # ── Auth ─────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
 ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
@@ -263,6 +276,95 @@ def append_calibration_log(trade_results: list, today: str):
                 j, rv, r.get("pnl_pct"), r.get("verdict"), delta
             ])
 
+def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
+    """
+    Evaluate the Paper → Robinhood graduation criteria against trades logged on
+    or after `since`, and render an explicit GRADUATE / DO NOT GRADUATE verdict.
+
+    Only counts trades from the baseline forward. Pre-baseline scores came from
+    the un-clamped Judge and are not comparable. DATA_SUSPECT rows (implausible
+    P&L from unadjusted corporate actions) are excluded entirely — a broker data
+    fault must never satisfy a real-money gate.
+    """
+    path = os.path.join(JOURNAL_DIR, "calibration-log.csv")
+    if not os.path.exists(path):
+        return "# Graduation Decision\n\nNo calibration log found."
+
+    with open(path) as f:
+        all_rows = list(csv.DictReader(f))
+
+    rows    = [r for r in all_rows if r.get("date", "") >= since]
+    suspect = [r for r in rows if r.get("verdict") == "DATA_SUSPECT"]
+    scored  = [r for r in rows if r.get("verdict") not in ("DATA_SUSPECT", "NO_FILL")]
+
+    wins  = [r for r in scored if r["verdict"] == "GOOD_TRADE"]
+    js    = [float(r["judge_score"])    for r in scored if (r.get("judge_score") or "").strip()]
+    rs    = [float(r["reviewer_score"]) for r in scored if (r.get("reviewer_score") or "").strip()]
+
+    n         = len(scored)
+    win_rate  = (len(wins) / n * 100) if n else 0.0
+    judge_avg = mean(js) if js else 0.0
+    rev_avg   = mean(rs) if rs else 0.0
+
+    checks = [
+        ("Occurrences",        n,         GRADUATION_MIN_OCCURRENCES,  f"{n}",              n >= GRADUATION_MIN_OCCURRENCES),
+        ("Win rate",           win_rate,  GRADUATION_MIN_WIN_RATE,     f"{win_rate:.1f}%",  win_rate >= GRADUATION_MIN_WIN_RATE),
+        ("Avg Judge score",    judge_avg, GRADUATION_MIN_JUDGE_AVG,    f"{judge_avg:.2f}",  bool(js) and judge_avg >= GRADUATION_MIN_JUDGE_AVG),
+        ("Avg Reviewer score", rev_avg,   GRADUATION_MIN_REVIEWER_AVG, f"{rev_avg:.2f}",    bool(rs) and rev_avg >= GRADUATION_MIN_REVIEWER_AVG),
+    ]
+    passed = all(ok for *_, ok in checks)
+
+    lines = [
+        f"# Graduation Decision — {date.today().isoformat()}",
+        "",
+        f"**Baseline**: {since} (Phase 2B)",
+        f"**Trades counted**: {n}"
+        + (f"  ·  {len(suspect)} excluded as DATA_SUSPECT" if suspect else ""),
+        "",
+        "## Criteria",
+        "",
+        "| Criterion | Required | Actual | |",
+        "|---|---|---|---|",
+    ]
+    for name, _, req, actual, ok in checks:
+        req_s = f"≥{req:g}" + ("%" if name == "Win rate" else "")
+        lines.append(f"| {name} | {req_s} | {actual} | {'✅' if ok else '❌'} |")
+
+    lines += ["", "## Verdict", ""]
+    if passed:
+        lines += [
+            "**ALL AUTOMATED CRITERIA MET.**",
+            "",
+            "This is *not* an approval. CLAUDE.md requires manual approval by Alex —"
+            " no auto-graduation ever. Review the underlying trades before moving"
+            " any real money to Robinhood.",
+        ]
+    else:
+        failed = [name for name, *_ , ok in checks if not ok]
+        lines += [
+            "**DO NOT GRADUATE.** Phase 3 stays locked.",
+            "",
+            "Failing: " + ", ".join(failed) + ".",
+        ]
+        if n < GRADUATION_MIN_OCCURRENCES:
+            lines.append(
+                f"\nOnly {n} qualifying trade(s) since the baseline. Note that "
+                f"reviewer.py scores buys only, so a period of net selling "
+                f"produces no calibration rows at all."
+            )
+
+    if suspect:
+        lines += [
+            "",
+            "## Excluded as DATA_SUSPECT",
+            "",
+            *(f"- {r['date']} {r['symbol']}: P&L {r['pnl_pct']}% — implausible, "
+              f"likely an unadjusted corporate action" for r in suspect),
+        ]
+
+    return "\n".join(lines)
+
+
 def run_calibration_report(days: int = 30) -> str:
     """Read calibration log and surface systematic biases."""
     if not os.path.exists(CALIBRATION_LOG):
@@ -397,6 +499,10 @@ if __name__ == "__main__":
         days = int(arg2) if arg2 else 30
         print(run_calibration_report(days))
 
+    elif action == "graduation":
+        since = arg2 or PHASE2B_BASELINE_DATE
+        print(run_graduation_decision(since))
+
     elif action == "read" and arg2:
         path = os.path.join(JOURNAL_DIR, f"{arg2}-review.md")
         if os.path.exists(path):
@@ -406,4 +512,5 @@ if __name__ == "__main__":
             print(f"No review for {arg2}")
 
     else:
-        print(json.dumps({"error": f"Unknown action: {action}. Use: eod | calibration [days] | read DATE"}))
+        print(json.dumps({"error": f"Unknown action: {action}. Use: eod | "
+                                   f"calibration [days] | graduation [since] | read DATE"}))
