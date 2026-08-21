@@ -108,12 +108,50 @@ Do not proceed until the user confirms. No exceptions.
 - **Workflow**: Trending tickers feed into Researcher → Judge scores them alongside watchlist
 
 ## Paper → Robinhood Graduation Rules
-A signal type earns Robinhood access only when ALL of these are met in paper:
+
+**The purpose of graduation is to prove the agent is significantly profitable
+before real cash is at risk.** Process discipline is necessary but not
+sufficient — money is gated directly.
+
+Robinhood access is earned only when ALL of these are met in paper:
+
+**Profitability — does it actually make money?**
+- **Net return ≥ +3%** on honest equity since the Phase 2B baseline
+- **Profit factor ≥ 1.5** (gross gains ÷ gross losses)
+- **Expectancy > 0** — mean P&L per trade must be positive
+- **Beats SPY** over the same window
+
+**Process — is the money repeatable rather than lucky?**
 - **15+ occurrences** of the signal type
 - **Win rate ≥ 55%** (Reviewer verdict = GOOD_TRADE)
 - **Avg Judge pre-trade score ≥ 7.0**
 - **Avg Reviewer post-trade score ≥ 6.0**
-- **Manual approval by Alex** — no auto-graduation ever
+
+**Plus: manual approval by Alex** — no auto-graduation ever.
+
+Why both halves. A high win rate proves nothing on its own: 60% winners at +2%
+against 40% losers at −6% clears every process criterion and still loses money.
+Equally, one lucky trade can carry the return while the process is unsound. And
+an agent that trails SPY is worse than an index fund no matter how disciplined
+it looks — that comparison is the honest floor for "ready for real money."
+
+If a profitability input cannot be computed (broker unreachable, no benchmark
+data), the criterion **fails** rather than passing. Never graduate on a number
+you could not verify.
+
+### Quarantined symbols
+Symbols in `reviewer.py QUARANTINED_SYMBOLS` are excluded from **every**
+performance metric — win rate, profit factor, expectancy and return — and are
+marked `QUARANTINED` in the calibration log.
+
+- **LBGJ** is quarantined. It carries ~$474K of equity from a reverse split
+  applied to the quote but never to the position (154,903 shares still held
+  against a $0.0288 basis). It is neither a win nor a loss but a broker data
+  fault, and it must not move a real-money decision in either direction.
+- Quarantined P&L stays in the journals as an audit trail. Excluding a position
+  from measurement is not the same as pretending it did not happen.
+- Removing a symbol from quarantine requires reconciliation with the broker
+  first — never because its P&L happens to look favourable.
 
 Run `python3 reviewer.py graduation` for the pass/fail verdict against the
 Phase 2B baseline, or `python3 reviewer.py calibration 30` for Judge-vs-Reviewer

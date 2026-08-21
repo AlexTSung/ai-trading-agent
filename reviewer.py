@@ -32,6 +32,9 @@ except ImportError:
 # fault rather than a result. Real equity trades do not move 1000% intraday;
 # unadjusted reverse splits do.
 IMPLAUSIBLE_PNL_PCT = 1000.0
+# A long equity fill losing essentially everything by the close is a failed
+# price lookup, not a trade result.
+TOTAL_LOSS_PNL_PCT  = -99.9
 
 # ── Phase 2B baseline (reset 2026-08-20) ──────────────────────────────────────
 # Everything before this date was scored on the pre-clamp Judge scale, which
@@ -45,6 +48,29 @@ GRADUATION_MIN_OCCURRENCES   = 15
 GRADUATION_MIN_WIN_RATE      = 55.0
 GRADUATION_MIN_JUDGE_AVG     = 7.0
 GRADUATION_MIN_REVIEWER_AVG  = 6.0
+
+# ── Profitability gates ───────────────────────────────────────────────────────
+# The four criteria above measure process, not money. A system can clear all of
+# them and still lose: 60% winners at +2% against 40% losers at -6% passes every
+# one. Since the stated purpose of graduation is to show the agent is
+# significantly profitable before real cash is at risk, profit is now gated
+# directly. Tune these numbers — they encode a judgement call, not a law.
+GRADUATION_MIN_RETURN_PCT     = 3.0   # net return on honest equity since baseline
+GRADUATION_MIN_PROFIT_FACTOR  = 1.5   # gross gains / gross losses
+GRADUATION_MIN_EXPECTANCY_PCT = 0.0   # mean P&L per trade must be positive
+GRADUATION_MUST_BEAT_BENCHMARK = True # else buying SPY is the better strategy
+
+# Honest equity at the Phase 2B reset, LBGJ carried at cost basis.
+PHASE2B_BASELINE_EQUITY = 91455.93
+
+# ── Quarantined symbols ───────────────────────────────────────────────────────
+# Excluded from ALL performance measurement — win rate, profit factor,
+# expectancy, return. LBGJ carries ~$474K of equity from a reverse split that
+# was applied to the quote but never to the position (154,903 shares still held
+# against a $0.0288 basis). It is neither a win nor a loss, it is a broker data
+# fault, and it must not influence a real-money decision in either direction.
+# Its P&L is still recorded in the journals for the audit trail.
+QUARANTINED_SYMBOLS = {"LBGJ"}
 
 # ── Auth ─────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
@@ -205,7 +231,15 @@ def score_trade(order: dict, judge_score: float | None) -> dict:
     # logged as a +10,941% GOOD_TRADE — on its own enough to clear the 55%
     # graduation win rate and unlock real money on fictional performance.
     # DATA_SUSPECT keeps it in the record but out of the win/loss counts.
-    if abs(pnl_pct) >= IMPLAUSIBLE_PNL_PCT:
+    if symbol in QUARANTINED_SYMBOLS:
+        # Explicitly held out of performance measurement regardless of P&L size.
+        verdict = "QUARANTINED"
+    elif abs(pnl_pct) >= IMPLAUSIBLE_PNL_PCT or pnl_pct <= TOTAL_LOSS_PNL_PCT:
+        # A long equity position cannot lose ~100% between fill and the close
+        # unless the issuer vanished. The pre-baseline log contains six such
+        # rows — for AAPL, NOK, MSFT and NBIS — several of which were still
+        # held at a profit afterwards. They are sentinels from a failed price
+        # lookup, not results, and they drag expectancy by tens of percent.
         verdict = "DATA_SUSPECT"
 
     return {
@@ -276,6 +310,52 @@ def append_calibration_log(trade_results: list, today: str):
                 j, rv, r.get("pnl_pct"), r.get("verdict"), delta
             ])
 
+def current_honest_equity():
+    """
+    Live equity with quarantined/phantom positions marked to cost basis.
+    Returns None if the broker is unreachable, so the caller reports the
+    criterion as unavailable rather than passing it on a bad number.
+    """
+    try:
+        account   = get_account()
+        positions = get_positions()
+    except Exception:
+        return None
+
+    equity = float(account.get("equity") or account.get("portfolio_value") or 0)
+    for p in positions:
+        if p.get("symbol") not in QUARANTINED_SYMBOLS:
+            continue
+        try:
+            qty   = float(p["qty"])
+            basis = float(p["avg_entry_price"])
+            mkt   = float(p["market_value"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        equity = equity - mkt + (qty * basis)   # restate at cost
+    return equity
+
+
+def benchmark_return(since: str):
+    """
+    SPY total return from `since` to now. If the agent cannot beat buying the
+    index, it is not ready to manage real money regardless of its win rate.
+    Returns None when unavailable.
+    """
+    try:
+        url = f"{DATA_URL}/v2/stocks/SPY/bars"
+        r = requests.get(url, headers=_headers(), timeout=15, params={
+            "timeframe": "1Day", "start": since, "limit": 400, "adjustment": "all",
+        })
+        r.raise_for_status()
+        bars = r.json().get("bars") or []
+        if len(bars) < 2:
+            return None
+        return (bars[-1]["c"] / bars[0]["c"] - 1) * 100
+    except Exception:
+        return None
+
+
 def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
     """
     Evaluate the Paper → Robinhood graduation criteria against trades logged on
@@ -293,9 +373,11 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
     with open(path) as f:
         all_rows = list(csv.DictReader(f))
 
-    rows    = [r for r in all_rows if r.get("date", "") >= since]
-    suspect = [r for r in rows if r.get("verdict") == "DATA_SUSPECT"]
-    scored  = [r for r in rows if r.get("verdict") not in ("DATA_SUSPECT", "NO_FILL")]
+    rows       = [r for r in all_rows if r.get("date", "") >= since]
+    quarantine = [r for r in rows if r.get("symbol") in QUARANTINED_SYMBOLS]
+    rows       = [r for r in rows if r.get("symbol") not in QUARANTINED_SYMBOLS]
+    suspect    = [r for r in rows if r.get("verdict") == "DATA_SUSPECT"]
+    scored     = [r for r in rows if r.get("verdict") not in ("DATA_SUSPECT", "NO_FILL", "QUARANTINED")]
 
     wins  = [r for r in scored if r["verdict"] == "GOOD_TRADE"]
     js    = [float(r["judge_score"])    for r in scored if (r.get("judge_score") or "").strip()]
@@ -306,12 +388,61 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
     judge_avg = mean(js) if js else 0.0
     rev_avg   = mean(rs) if rs else 0.0
 
+    # ── Profitability ─────────────────────────────────────────────────────────
+    # Drop sentinel rows the older reviewer wrote before the guard existed.
+    pnls    = [p for p in (float(r["pnl_pct"]) for r in scored
+                           if (r.get("pnl_pct") or "").strip())
+               if TOTAL_LOSS_PNL_PCT < p < IMPLAUSIBLE_PNL_PCT]
+    gains   = [p for p in pnls if p > 0]
+    losses  = [p for p in pnls if p < 0]
+    gross_g = sum(gains)
+    gross_l = abs(sum(losses))
+
+    if gross_l > 0:
+        profit_factor = gross_g / gross_l
+    elif gross_g > 0:
+        profit_factor = float("inf")   # winners, no losers yet
+    else:
+        profit_factor = 0.0
+
+    expectancy = mean(pnls) if pnls else 0.0
+    equity     = current_honest_equity()
+    ret_pct    = (((equity - PHASE2B_BASELINE_EQUITY) / PHASE2B_BASELINE_EQUITY * 100)
+                  if equity else None)
+    bench_pct  = benchmark_return(since)
+
     checks = [
-        ("Occurrences",        n,         GRADUATION_MIN_OCCURRENCES,  f"{n}",              n >= GRADUATION_MIN_OCCURRENCES),
-        ("Win rate",           win_rate,  GRADUATION_MIN_WIN_RATE,     f"{win_rate:.1f}%",  win_rate >= GRADUATION_MIN_WIN_RATE),
-        ("Avg Judge score",    judge_avg, GRADUATION_MIN_JUDGE_AVG,    f"{judge_avg:.2f}",  bool(js) and judge_avg >= GRADUATION_MIN_JUDGE_AVG),
-        ("Avg Reviewer score", rev_avg,   GRADUATION_MIN_REVIEWER_AVG, f"{rev_avg:.2f}",    bool(rs) and rev_avg >= GRADUATION_MIN_REVIEWER_AVG),
+        ("Occurrences",        f"{n}",
+         f"≥{GRADUATION_MIN_OCCURRENCES}",     n >= GRADUATION_MIN_OCCURRENCES),
+        ("Net return",
+         f"{ret_pct:+.2f}%" if ret_pct is not None else "unavailable",
+         f"≥{GRADUATION_MIN_RETURN_PCT:+.1f}%",
+         ret_pct is not None and ret_pct >= GRADUATION_MIN_RETURN_PCT),
+        ("Profit factor",
+         "∞" if profit_factor == float("inf") else f"{profit_factor:.2f}",
+         f"≥{GRADUATION_MIN_PROFIT_FACTOR}",
+         profit_factor >= GRADUATION_MIN_PROFIT_FACTOR),
+        ("Expectancy / trade", f"{expectancy:+.2f}%",
+         f">{GRADUATION_MIN_EXPECTANCY_PCT:.1f}%",
+         bool(pnls) and expectancy > GRADUATION_MIN_EXPECTANCY_PCT),
+        ("Win rate",           f"{win_rate:.1f}%",
+         f"≥{GRADUATION_MIN_WIN_RATE}%",       win_rate >= GRADUATION_MIN_WIN_RATE),
+        ("Avg Judge score",    f"{judge_avg:.2f}",
+         f"≥{GRADUATION_MIN_JUDGE_AVG}",       bool(js) and judge_avg >= GRADUATION_MIN_JUDGE_AVG),
+        ("Avg Reviewer score", f"{rev_avg:.2f}",
+         f"≥{GRADUATION_MIN_REVIEWER_AVG}",    bool(rs) and rev_avg >= GRADUATION_MIN_REVIEWER_AVG),
     ]
+
+    if GRADUATION_MUST_BEAT_BENCHMARK:
+        beat = (ret_pct is not None and bench_pct is not None and ret_pct > bench_pct)
+        checks.append((
+            "Beat SPY",
+            (f"{ret_pct:+.2f}% vs {bench_pct:+.2f}%"
+             if (ret_pct is not None and bench_pct is not None) else "unavailable"),
+            "agent > SPY",
+            beat,
+        ))
+
     passed = all(ok for *_, ok in checks)
 
     lines = [
@@ -319,16 +450,19 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
         "",
         f"**Baseline**: {since} (Phase 2B)",
         f"**Trades counted**: {n}"
-        + (f"  ·  {len(suspect)} excluded as DATA_SUSPECT" if suspect else ""),
+        + (f"  ·  {len(suspect)} excluded as DATA_SUSPECT" if suspect else "")
+        + (f"  ·  {len(quarantine)} excluded as quarantined" if quarantine else ""),
+        f"**Honest equity**: "
+        + (f"${equity:,.2f}" if equity else "unavailable")
+        + f"  (baseline ${PHASE2B_BASELINE_EQUITY:,.2f})",
         "",
         "## Criteria",
         "",
         "| Criterion | Required | Actual | |",
         "|---|---|---|---|",
     ]
-    for name, _, req, actual, ok in checks:
-        req_s = f"≥{req:g}" + ("%" if name == "Win rate" else "")
-        lines.append(f"| {name} | {req_s} | {actual} | {'✅' if ok else '❌'} |")
+    for name, actual, req, ok in checks:
+        lines.append(f"| {name} | {req} | {actual} | {'✅' if ok else '❌'} |")
 
     lines += ["", "## Verdict", ""]
     if passed:
@@ -340,7 +474,7 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
             " any real money to Robinhood.",
         ]
     else:
-        failed = [name for name, *_ , ok in checks if not ok]
+        failed = [name for name, _, _, ok in checks if not ok]
         lines += [
             "**DO NOT GRADUATE.** Phase 3 stays locked.",
             "",
@@ -361,6 +495,32 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
             *(f"- {r['date']} {r['symbol']}: P&L {r['pnl_pct']}% — implausible, "
               f"likely an unadjusted corporate action" for r in suspect),
         ]
+
+    if quarantine:
+        lines += [
+            "",
+            "## Quarantined — excluded from every metric above",
+            "",
+            f"Symbols: {', '.join(sorted(QUARANTINED_SYMBOLS))}",
+            "",
+            *(f"- {r['date']} {r['symbol']}: P&L {r['pnl_pct']}% — not counted "
+              f"as a win or a loss" for r in quarantine),
+            "",
+            "These are held out deliberately. A broker data fault is not a "
+            "trading result, and it must not move a real-money decision in "
+            "either direction. The P&L stays in the journals as an audit trail.",
+        ]
+
+    lines += [
+        "",
+        "## What these criteria do and do not prove",
+        "",
+        "Occurrences, win rate and the two agent scores measure *process*. "
+        "Net return, profit factor, expectancy and the SPY comparison measure "
+        "*money*. Both sets must pass: a high win rate with small gains and "
+        "large losses is a losing system, and an agent that trails SPY is worse "
+        "than an index fund no matter how disciplined it looks.",
+    ]
 
     return "\n".join(lines)
 
