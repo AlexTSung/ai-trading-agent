@@ -13,6 +13,7 @@ Usage:
 import os
 import sys
 import json
+import re
 from datetime import date, datetime, timedelta
 from statistics import mean
 
@@ -42,8 +43,104 @@ SCORE_GATE_DISCOVERY  = 8.5   # auto-discovered, unknown quality
 DISCOVERY_SOURCES = {"social_screener", "alpaca_most_active", "alpaca_gainers",
                      "market_screener", "news_firehose", "reddit", "congressional"}
 
+MAX_TOTAL_SCORE = 10.0
+assert (W_TECHNICAL + W_NEWS + W_MACRO + W_PORTFOLIO + W_VOLATILITY
+        + W_QUALITY) == MAX_TOTAL_SCORE, "Criterion weights must sum to 10"
+
 # ── Earnings Proximity Veto ───────────────────────────────────────────────────
 EARNINGS_VETO_DAYS = 3  # Auto-veto if earnings within this many days
+
+# Discovery stocks that score zero on quality have no verifiable market cap,
+# profitability, or analyst coverage. A strong chart is not enough on its own.
+DISCOVERY_MIN_QUALITY = 0.5
+
+
+def honest_portfolio_value(account: dict, positions: list) -> float:
+    """
+    Portfolio value with phantom equity marked back to cost basis.
+
+    The cash-reserve percentage divides by portfolio value, so an unadjusted
+    corporate action collapses it: LBGJ marked at $478,650 against a $4,461
+    basis made cash read 12.6% instead of its true 78%, tripping the hard
+    CASH BELOW 20% FLOOR veto on every candidate and freezing all buying from
+    2026-08-03 onward. Reuses the executor's detector so both agents agree on
+    what counts as real.
+    """
+    reported = float(account.get("portfolio_value", 1) or 1)
+    try:
+        from trade import detect_phantom_equity
+        excess = sum(f.get("phantom_amount", 0.0)
+                     for f in detect_phantom_equity(positions or []))
+    except Exception:
+        return reported
+    return max(1.0, reported - excess)
+
+
+# ── Speculative exposure + holiday-week gates (from the options/forex work) ──
+
+SPECULATIVE_CAP_THRESHOLD = 0.5  # < $500M market cap = speculative
+
+def _nth_weekday(year, month, weekday, n):
+    """Return the date of the nth occurrence of weekday (0=Mon) in given month."""
+    first = date(year, month, 1)
+    delta = (weekday - first.weekday()) % 7
+    return first + timedelta(days=delta + 7 * (n - 1))
+
+def _last_weekday(year, month, weekday):
+    """Return the date of the last occurrence of weekday in given month."""
+    last = date(year, month + 1, 1) - timedelta(days=1) if month < 12 else date(year, 12, 31)
+    delta = (last.weekday() - weekday) % 7
+    return last - timedelta(days=delta)
+
+def is_holiday_week() -> tuple:
+    """
+    Return (True, holiday_name) if current trading week (Mon-Fri) contains a major US holiday.
+    Skips speculative trades in holiday weeks due to low liquidity and erratic moves.
+    """
+    today = date.today()
+    week_mon = today - timedelta(days=today.weekday())
+    week_fri = week_mon + timedelta(days=4)
+    y = today.year
+
+    holidays = {
+        "New Year's Day":   date(y, 1, 1),
+        "MLK Day":          _nth_weekday(y, 1, 0, 3),
+        "Presidents Day":   _nth_weekday(y, 2, 0, 3),
+        "Memorial Day":     _last_weekday(y, 5, 0),
+        "Independence Day": date(y, 7, 4),
+        "Labor Day":        _nth_weekday(y, 9, 0, 1),
+        "Thanksgiving":     _nth_weekday(y, 11, 3, 4),
+        "Christmas":        date(y, 12, 25),
+    }
+
+    for name, hday in holidays.items():
+        if week_mon <= hday <= week_fri:
+            return True, name
+    return False, ""
+
+def count_speculative_positions(research: dict) -> int:
+    """Count open positions that are speculative (discovery source or micro/small-cap)."""
+    positions = research.get("positions", [])
+    symbols_data = research.get("symbols", {})
+    count = 0
+    for pos in positions:
+        sym = pos.get("symbol")
+        sym_data = symbols_data.get(sym, {})
+        source = sym_data.get("source", "watchlist")
+        cap_b = (sym_data.get("fundamentals") or {}).get("market_cap_b")
+        is_spec = (source in DISCOVERY_SOURCES) or (cap_b is not None and cap_b < SPECULATIVE_CAP_THRESHOLD)
+        if is_spec:
+            count += 1
+    return count
+
+
+def _clamp(scored: tuple, weight: float) -> tuple:
+    """Clamp a (score, note) pair from a scorer into [0, weight]."""
+    score, note = scored
+    capped = max(0.0, min(float(score), weight))
+    if capped != score:
+        note = f"{note} [capped {score}→{capped} at weight {weight}]"
+    return round(capped, 2), note
 
 def load_today_research():
     today = date.today().isoformat()
@@ -160,7 +257,7 @@ def score_portfolio(research: dict, symbol: str) -> tuple:
 
     try:
         cash      = float(account.get("cash", 0))
-        port_val  = float(account.get("portfolio_value", 1))
+        port_val  = honest_portfolio_value(account, positions)
         cash_pct  = cash / port_val
     except (TypeError, ZeroDivisionError):
         return 1.0, "Portfolio data unavailable"
@@ -226,10 +323,27 @@ def score_portfolio(research: dict, symbol: str) -> tuple:
 
 def score_volatility(research: dict) -> tuple:
     """
-    Score 0–1.5 using VIXY as VIX proxy if available in research,
-    otherwise infer from recent SPY range volatility.
+    Score 0–1.5 from the real VIX level when available, then VIXY trend,
+    then SPY range as a last resort.
     """
-    # Try VIXY as VIX proxy
+    # Authoritative source: the VIX close carried through from intelligence.py
+    # (FRED VIXCLS). Previously this data was fetched every morning and thrown
+    # away, so this branch never ran and every candidate banked a free point.
+    intel = research.get("intelligence") or {}
+    vix   = intel.get("vix")
+    if isinstance(vix, (int, float)):
+        regime = intel.get("vix_regime", "UNKNOWN")
+        if vix > VIX_NO_NEW_POSITIONS:
+            return 0.0, (f"VIX {vix:.1f} > {VIX_NO_NEW_POSITIONS:.0f} — no new "
+                         f"positions, manage existing only ({regime})")
+        if vix > VIX_HALF_SIZE:
+            return 0.25, (f"VIX {vix:.1f} > {VIX_HALF_SIZE:.0f} — elevated "
+                          f"volatility, half sizing applies ({regime})")
+        if vix >= 20:
+            return 0.75, f"VIX {vix:.1f} — moderate volatility ({regime})"
+        return 1.5, f"VIX {vix:.1f} — calm tape, favorable entry ({regime})"
+
+    # Fallback: VIXY trend from the watchlist
     vixy = research.get("symbols", {}).get("VIXY", {})
     tech  = vixy.get("technicals", {})
 
@@ -246,7 +360,8 @@ def score_volatility(research: dict) -> tuple:
     spy_data = research.get("symbols", {}).get("SPY", {})
     return 1.0, "VIX proxy unavailable — neutral volatility assumption (add VIXY to watchlist)"
 
-def score_quality(sym_data: dict, is_discovery: bool) -> tuple:
+def score_quality(sym_data: dict, is_discovery: bool, symbol: str = "",
+                  insider_buy_symbols: list = None) -> tuple:
     """
     Score 0–2.5 based on business quality signals.
     Market cap is the primary filter — every significant loser was small/micro cap.
@@ -328,21 +443,140 @@ def score_quality(sym_data: dict, is_discovery: bool) -> tuple:
     except (ValueError, TypeError):
         pass
 
+    # Insider buying (SEC EDGAR Form 4), carried through from intelligence.py.
+    # Officers and directors buying their own stock with their own money is one
+    # of the few genuinely informative quality signals available for free. This
+    # was fetched every morning and discarded before now.
+    if symbol and symbol in (insider_buy_symbols or []):
+        score += 0.5
+        notes.append(f"INSIDER BUYING: recent Form 4 purchase filed for {symbol}")
+
     score = round(max(0.0, min(score, W_QUALITY)), 2)
     return score, "; ".join(notes) if notes else "No quality data", False
 
 
-def check_earnings_veto(news_items: list, symbol: str) -> tuple:
+# Citadel volatility sizing thresholds, evaluated against the real VIX index.
+VIX_HALF_SIZE        = 25.0
+VIX_NO_NEW_POSITIONS = 35.0
+
+RSI_OVERBOUGHT_GATE   = 60.0   # CLAUDE.md Entry Checklist: RSI > 60 means wait
+MAX_EXTENSION_ABOVE_MA20 = 0.03  # ...and do not chase more than 3% above MA20
+
+
+def check_chase_veto(technicals: dict, symbol: str) -> tuple:
     """
-    Veto if any headline suggests earnings are within 3 days.
-    Heuristic: look for 'earnings' or 'reports' in recent news.
+    Refuse entries that chase strength, per CLAUDE.md Entry Checklist:
+      1. More than 3% above MA20 → wait for a pullback.
+      2. RSI(14) above 60 → overbought, wait.
+
+    Returns (veto: bool, reason: str).
     """
+    if not technicals or "error" in technicals:
+        return False, ""
+
+    rsi  = technicals.get("rsi")
+    ma20 = technicals.get("ma20") or 0
+    last = technicals.get("last_close") or 0
+
+    if rsi is not None and rsi > RSI_OVERBOUGHT_GATE:
+        return True, (f"CHASE VETO: RSI(14) {rsi:.0f} is above "
+                      f"{RSI_OVERBOUGHT_GATE:.0f} — overbought, wait for a pullback")
+
+    if ma20 > 0 and last > 0:
+        extension = (last - ma20) / ma20
+        if extension > MAX_EXTENSION_ABOVE_MA20:
+            return True, (f"CHASE VETO: price ${last:.2f} is {extension:.1%} above "
+                          f"MA20 ${ma20:.2f} (limit "
+                          f"{MAX_EXTENSION_ABOVE_MA20:.0%}) — do not chase")
+
+    return False, ""
+
+
+# Backward-looking phrasing: a recap of a past report is not an upcoming one.
+BACKWARD_EARNINGS_KW = ("reported", "posted", "released", "beat", "missed", "last quarter",
+                        "results showed", "after reporting", "following its")
+FORWARD_EARNINGS_KW  = ("will report", "to report", "is scheduled", "ahead of",
+                        "upcoming", "next week", "due to report", "expected to report",
+                        "previews", "preview", "before the bell", "after the bell")
+
+
+# Fund-holdings language. "Q2" in a 13F story is a reporting period, not an
+# earnings date, and these headlines are the dominant false-positive source.
+PORTFOLIO_NEWS_KW = ("portfolio", "13f", "stake", "stakes", "holdings",
+                     "bets on", "bets big", "exits", "trimmed", "boosted",
+                     "revamps", "ditching")
+
+EARNINGS_PHRASE_KW = ("earnings", "eps", "quarterly results", "reports q",
+                      "quarterly report", "guidance")
+
+
+def _has_phrase(text: str, phrases) -> bool:
+    """
+    Word-boundary match. Plain substring matching is unsafe for short tokens:
+    "eps" matches inside "Steps up", which vetoed AAPL and NVDA on a Broadcom
+    headline containing no earnings content at all.
+    """
+    return any(re.search(rf"\b{re.escape(p)}", text) for p in phrases)
+
+
+def _is_upcoming_earnings(text: str) -> bool:
+    """
+    True only when text plausibly describes an UPCOMING earnings report.
+
+    Rejects fund-holdings stories outright, then requires earnings phrasing that
+    is not purely a recap of a report already published.
+    """
+    t = (text or "").lower()
+    if not t:
+        return False
+    if _has_phrase(t, PORTFOLIO_NEWS_KW):
+        return False
+    if not _has_phrase(t, EARNINGS_PHRASE_KW):
+        return False
+    forward  = _has_phrase(t, FORWARD_EARNINGS_KW)
+    backward = _has_phrase(t, BACKWARD_EARNINGS_KW)
+    return not (backward and not forward)
+
+
+def check_earnings_veto(news_items: list, symbol: str, research: dict = None) -> tuple:
+    """
+    Enforce the 3-day earnings blackout (CLAUDE.md Hard Rule 9).
+
+    Two sources are consulted:
+      1. intelligence.py's earnings watch, which scans 10 articles per symbol
+         each morning. Previously computed and discarded.
+      2. This symbol's own recent news.
+
+    Neither is a true earnings calendar — Alpaca has no earnings endpoint on the
+    free tier, so both are keyword scans over news. Recall is improved by taking
+    the union, and false positives are reduced by ignoring purely backward-looking
+    recaps ("reported Q2 results") unless forward-looking language is also
+    present. A real calendar feed would be strictly better; see CLAUDE.md.
+    """
+    intel = (research or {}).get("intelligence") or {}
+    if symbol in (intel.get("earnings_watch_symbols") or []):
+        # Re-check the triggering headline rather than trusting the flag. The
+        # upstream scan is a loose keyword match: during 13F season it flagged
+        # MSFT, GOOGL, NOK and QCOM on "Q2 Portfolio" headlines and DDOG on a
+        # SpaceX earnings story, vetoing most of the watchlist for no reason.
+        headline = (intel.get("earnings_watch_detail") or {}).get(symbol, "")
+        if _is_upcoming_earnings(headline):
+            return True, (f"EARNINGS VETO: {symbol} flagged by the morning "
+                          f"earnings watch — no entry within "
+                          f"{EARNINGS_VETO_DAYS} trading days of a report")
+
     earnings_kw = ["earnings", "reports q", "quarterly results", "eps report",
                    "earnings report", "reports earnings"]
     for item in (news_items or [])[:10]:
-        headline = (item.get("headline", "") + " " + item.get("summary", "")).lower()
-        if any(kw in headline for kw in earnings_kw):
-            return True, f"Earnings proximity detected in recent news — auto-veto per hard rule #6"
+        text = (item.get("headline", "") + " " + item.get("summary", "")).lower()
+        if not any(kw in text for kw in earnings_kw):
+            continue
+        forward  = any(kw in text for kw in FORWARD_EARNINGS_KW)
+        backward = any(kw in text for kw in BACKWARD_EARNINGS_KW)
+        if backward and not forward:
+            continue  # recap of a report already out — not a blackout trigger
+        return True, (f"EARNINGS VETO: upcoming-earnings language in recent news "
+                      f"for {symbol} — auto-veto per Hard Rule 9")
     return False, ""
 
 DIP_BUY_MIN_SCORE  = 8.0   # Strict gate — dip buys require highest conviction
@@ -590,65 +824,6 @@ def score_dip_buy(symbol: str, research: dict) -> dict:
     }
 
 
-# ── Holiday week check ────────────────────────────────────────────────────────
-def _nth_weekday(year, month, weekday, n):
-    """Return the date of the nth occurrence of weekday (0=Mon) in given month."""
-    first = date(year, month, 1)
-    delta = (weekday - first.weekday()) % 7
-    return first + timedelta(days=delta + 7 * (n - 1))
-
-def _last_weekday(year, month, weekday):
-    """Return the date of the last occurrence of weekday in given month."""
-    last = date(year, month + 1, 1) - timedelta(days=1) if month < 12 else date(year, 12, 31)
-    delta = (last.weekday() - weekday) % 7
-    return last - timedelta(days=delta)
-
-def is_holiday_week() -> tuple:
-    """
-    Return (True, holiday_name) if current trading week (Mon-Fri) contains a major US holiday.
-    Skips speculative trades in holiday weeks due to low liquidity and erratic moves.
-    """
-    today = date.today()
-    week_mon = today - timedelta(days=today.weekday())
-    week_fri = week_mon + timedelta(days=4)
-    y = today.year
-
-    holidays = {
-        "New Year's Day":   date(y, 1, 1),
-        "MLK Day":          _nth_weekday(y, 1, 0, 3),
-        "Presidents Day":   _nth_weekday(y, 2, 0, 3),
-        "Memorial Day":     _last_weekday(y, 5, 0),
-        "Independence Day": date(y, 7, 4),
-        "Labor Day":        _nth_weekday(y, 9, 0, 1),
-        "Thanksgiving":     _nth_weekday(y, 11, 3, 4),
-        "Christmas":        date(y, 12, 25),
-    }
-
-    for name, hday in holidays.items():
-        if week_mon <= hday <= week_fri:
-            return True, name
-    return False, ""
-
-
-# ── Sector concentration check ────────────────────────────────────────────────
-SPECULATIVE_CAP_THRESHOLD = 0.5  # < $500M market cap = speculative
-
-def count_speculative_positions(research: dict) -> int:
-    """Count open positions that are speculative (discovery source or micro/small-cap)."""
-    positions = research.get("positions", [])
-    symbols_data = research.get("symbols", {})
-    count = 0
-    for pos in positions:
-        sym = pos.get("symbol")
-        sym_data = symbols_data.get(sym, {})
-        source = sym_data.get("source", "watchlist")
-        cap_b = (sym_data.get("fundamentals") or {}).get("market_cap_b")
-        is_spec = (source in DISCOVERY_SOURCES) or (cap_b is not None and cap_b < SPECULATIVE_CAP_THRESHOLD)
-        if is_spec:
-            count += 1
-    return count
-
-
 # ── Master Scoring Function ───────────────────────────────────────────────────
 
 def score_symbol(symbol: str, research: dict) -> dict:
@@ -700,7 +875,7 @@ def score_symbol(symbol: str, research: dict) -> dict:
         pass  # Screener not run yet — proceed normally
 
     # Earnings veto (hard rule — bypasses scoring)
-    earnings_veto, earnings_reason = check_earnings_veto(news, symbol)
+    earnings_veto, earnings_reason = check_earnings_veto(news, symbol, research)
     if earnings_veto:
         return {
             "symbol": symbol, "recommendation": "VETO",
@@ -708,44 +883,77 @@ def score_symbol(symbol: str, research: dict) -> dict:
             "criteria": {"earnings_veto": True}
         }
 
+    # Volatility regime veto (CLAUDE.md "Volatility Position Sizing").
+    # Above VIX 35 the rule is manage-existing-only. This never fired before
+    # because the VIX was fetched each morning and then discarded.
+    _intel = research.get("intelligence") or {}
+    _vix   = _intel.get("vix")
+    if isinstance(_vix, (int, float)) and _vix > VIX_NO_NEW_POSITIONS:
+        return {
+            "symbol": symbol, "recommendation": "VETO", "score": 0.0,
+            "rationale": (f"VOLATILITY VETO: VIX {_vix:.1f} exceeds "
+                          f"{VIX_NO_NEW_POSITIONS:.0f} — no new positions, "
+                          f"manage existing only"),
+            "criteria": {"volatility_veto": True, "vix": _vix},
+        }
+
+    # Chase veto (CLAUDE.md Entry Checklist items 1-2). research.py already
+    # computes RSI(14) and MA20, but nothing enforced the "don't chase" rules:
+    # entries were approved at 20-day highs on overbought RSI.
+    chase_veto, chase_reason = check_chase_veto(technicals, symbol)
+    if chase_veto:
+        return {
+            "symbol": symbol, "recommendation": "VETO",
+            "score": 0.0, "rationale": chase_reason,
+            "criteria": {"chase_veto": True, "note": chase_reason},
+        }
+
     # Determine if this is a discovery or watchlist stock
     is_discovery = sym_data.get("source", "watchlist") in DISCOVERY_SOURCES
 
-    # Market cap / profitability: flag speculative status for downstream use
-    funds = sym_data.get("fundamentals", {})
-    cap_b = funds.get("market_cap_b")
-    is_prof = funds.get("is_profitable")
-    is_speculative = is_discovery or (cap_b is not None and cap_b < SPECULATIVE_CAP_THRESHOLD)
+    # Speculative status drives the two gates below and the executor's stop tier.
+    _funds = sym_data.get("fundamentals", {}) or {}
+    _cap_b = _funds.get("market_cap_b")
+    is_speculative = is_discovery or (_cap_b is not None
+                                      and _cap_b < SPECULATIVE_CAP_THRESHOLD)
 
-    # Holiday week veto for speculative stocks — thin liquidity = unpredictable moves
+    # Holiday week veto for speculative names — thin liquidity, erratic moves.
     if is_speculative:
-        in_holiday_week, holiday_name = is_holiday_week()
-        if in_holiday_week:
+        _in_holiday, _holiday = is_holiday_week()
+        if _in_holiday:
             return {
-                "symbol": symbol, "recommendation": "VETO",
-                "score": 0.0,
-                "rationale": f"HOLIDAY_WEEK: {holiday_name} this week — no speculative trades in low-liquidity weeks",
-                "criteria": {"holiday_veto": True, "holiday": holiday_name}
+                "symbol": symbol, "recommendation": "VETO", "score": 0.0,
+                "rationale": (f"HOLIDAY_WEEK: {_holiday} this week — no "
+                              f"speculative trades in low-liquidity weeks"),
+                "criteria": {"holiday_veto": True, "holiday": _holiday},
             }
 
-    # Sector concentration: max 2 speculative positions simultaneously
+    # Concentration cap: at most two speculative positions at once.
     if is_speculative:
-        spec_count = count_speculative_positions(research)
-        if spec_count >= 2:
+        _spec = count_speculative_positions(research)
+        if _spec >= 2:
             return {
-                "symbol": symbol, "recommendation": "VETO",
-                "score": 0.0,
-                "rationale": f"SECTOR_CONCENTRATION: already {spec_count} speculative positions open (max 2)",
-                "criteria": {"concentration_veto": True, "speculative_open": spec_count}
+                "symbol": symbol, "recommendation": "VETO", "score": 0.0,
+                "rationale": (f"SECTOR_CONCENTRATION: already {_spec} "
+                              f"speculative positions open (max 2)"),
+                "criteria": {"concentration_veto": True, "speculative_open": _spec},
             }
 
-    # Score each criterion
-    t_score, t_note = score_technical(technicals)
-    n_score, n_note = score_news(news, sym_data)
-    m_score, m_note = score_macro(research)
-    p_score, p_note = score_portfolio(research, symbol)
-    v_score, v_note = score_volatility(research)
-    q_score, q_note, q_hard_veto = score_quality(sym_data, is_discovery)
+    # Score each criterion, clamped to its declared weight.
+    # The individual scorers were written against an older 3.0/1.5-point scale and
+    # still return values above the current weights (technical up to 3.0 vs
+    # W_TECHNICAL 2.0, macro and volatility up to 1.5 vs 1.0). Summing them raw
+    # inflated every total by as much as 2.0 points and pushed unvetted discovery
+    # stocks over the 8.5 gate. Clamp at the source so the 10-point scale is real.
+    t_score, t_note = _clamp(score_technical(technicals),  W_TECHNICAL)
+    n_score, n_note = _clamp(score_news(news, sym_data),   W_NEWS)
+    m_score, m_note = _clamp(score_macro(research),        W_MACRO)
+    p_score, p_note = _clamp(score_portfolio(research, symbol), W_PORTFOLIO)
+    v_score, v_note = _clamp(score_volatility(research),   W_VOLATILITY)
+    q_score, q_note, q_hard_veto = score_quality(
+        sym_data, is_discovery, symbol,
+        (research.get("intelligence") or {}).get("insider_buy_symbols"),
+    )  # already clamped
 
     # Hard veto: micro-cap discovery stock
     if q_hard_veto:
@@ -788,24 +996,30 @@ def score_symbol(symbol: str, research: dict) -> dict:
             }
         }
 
-    # Additional quality penalties applied to total score
-    quality_penalties = []
-    if cap_b is not None and cap_b < SPECULATIVE_CAP_THRESHOLD:
-        total_penalty = -1.5
-        quality_penalties.append(f"small_cap_${cap_b:.2f}B_penalty_{total_penalty}")
-    elif cap_b is not None and cap_b < 2.0:
-        total_penalty = -0.5
-        quality_penalties.append(f"mid_cap_${cap_b:.1f}B_mild_penalty")
-    else:
-        total_penalty = 0.0
-
-    if is_prof is False:
-        total_penalty += -1.0
-        quality_penalties.append("unprofitable_penalty_-1.0")
-
-    total = round(t_score + n_score + m_score + p_score + v_score + q_score + total_penalty, 2)
-    total = max(0.0, total)
+    total = round(min(t_score + n_score + m_score + p_score + v_score + q_score,
+                      MAX_TOTAL_SCORE), 2)
     is_avg_down = "AVG_DOWN candidate" in p_note
+
+    # Hard veto: unvetted discovery stock with no quality evidence at all.
+    if is_discovery and q_score < DISCOVERY_MIN_QUALITY:
+        return {
+            "symbol": symbol, "recommendation": "VETO",
+            "score": total,
+            "approval_gate": SCORE_GATE_DISCOVERY,
+            "is_discovery": True,
+            "rationale": (
+                f"Discovery quality veto: scored {q_score}/{W_QUALITY} on quality "
+                f"(minimum {DISCOVERY_MIN_QUALITY}). {q_note}"
+            ),
+            "criteria": {
+                "technical":  {"score": t_score, "note": t_note},
+                "news":       {"score": n_score, "note": n_note},
+                "macro":      {"score": m_score, "note": m_note},
+                "portfolio":  {"score": p_score, "note": p_note},
+                "volatility": {"score": v_score, "note": v_note},
+                "quality":    {"score": q_score, "note": q_note, "veto": True},
+            },
+        }
 
     # Source-aware approval threshold
     gate = SCORE_GATE_DISCOVERY if is_discovery else SCORE_GATE_WATCHLIST
@@ -837,9 +1051,12 @@ def score_symbol(symbol: str, research: dict) -> dict:
         "recommendation": rec,
         "score": total,
         "approval_gate": gate,
+        # Passed to the executor so the Citadel VIX sizing rule is actually
+        # applied to share counts, not just mentioned in a rationale string.
+        "size_multiplier": _intel.get("size_multiplier", 1.0),
+        "vix": _intel.get("vix"),
         "is_discovery": is_discovery,
         "is_speculative": is_speculative,
-        "quality_penalties": quality_penalties,
         "avg_down_candidate": is_avg_down,
         "score_breakdown": {
             "technical":  f"{t_score}/{W_TECHNICAL}",
