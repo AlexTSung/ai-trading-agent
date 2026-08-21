@@ -54,6 +54,27 @@ EARNINGS_VETO_DAYS = 3  # Auto-veto if earnings within this many days
 DISCOVERY_MIN_QUALITY = 0.5
 
 
+def honest_portfolio_value(account: dict, positions: list) -> float:
+    """
+    Portfolio value with phantom equity marked back to cost basis.
+
+    The cash-reserve percentage divides by portfolio value, so an unadjusted
+    corporate action collapses it: LBGJ marked at $478,650 against a $4,461
+    basis made cash read 12.6% instead of its true 78%, tripping the hard
+    CASH BELOW 20% FLOOR veto on every candidate and freezing all buying from
+    2026-08-03 onward. Reuses the executor's detector so both agents agree on
+    what counts as real.
+    """
+    reported = float(account.get("portfolio_value", 1) or 1)
+    try:
+        from trade import detect_phantom_equity
+        excess = sum(f.get("phantom_amount", 0.0)
+                     for f in detect_phantom_equity(positions or []))
+    except Exception:
+        return reported
+    return max(1.0, reported - excess)
+
+
 def _clamp(scored: tuple, weight: float) -> tuple:
     """Clamp a (score, note) pair from a scorer into [0, weight]."""
     score, note = scored
@@ -177,7 +198,7 @@ def score_portfolio(research: dict, symbol: str) -> tuple:
 
     try:
         cash      = float(account.get("cash", 0))
-        port_val  = float(account.get("portfolio_value", 1))
+        port_val  = honest_portfolio_value(account, positions)
         cash_pct  = cash / port_val
     except (TypeError, ZeroDivisionError):
         return 1.0, "Portfolio data unavailable"

@@ -279,7 +279,34 @@ def get_orders(status="all", after_date=None):
     return r.json()
 
 # ── Guardrails ────────────────────────────────────────────────────────────────
-def calculate_max_shares(symbol, account, limit_price, pos_pct):
+def honest_portfolio_value(account, positions=None) -> float:
+    """
+    Portfolio value with phantom equity written back down to cost basis.
+
+    Every portfolio-relative rule — conviction sizing, the 20% cash floor, the
+    per-symbol allocation caps — divides by portfolio value. When an unadjusted
+    corporate action inflates one position, all of those rules silently break in
+    the same direction: sizes balloon and the cash percentage collapses. Marking
+    suspect positions back to cost keeps the denominator honest.
+
+    Falls back to the reported value if positions cannot be fetched, so a data
+    outage never silently enlarges position sizes.
+    """
+    reported = float(account.get("portfolio_value", 0) or 0)
+    if positions is None:
+        try:
+            positions = get_positions()
+        except Exception:
+            return reported
+
+    excess = 0.0
+    for flag in detect_phantom_equity(positions):
+        excess += flag.get("phantom_amount", 0.0)
+
+    return max(0.0, reported - excess)
+
+
+def calculate_max_shares(symbol, account, limit_price, pos_pct, positions=None):
     """
     How many shares can we buy given the cash reserve and a position cap.
     pos_pct is the conviction-scaled fraction of portfolio value to deploy.
@@ -287,7 +314,12 @@ def calculate_max_shares(symbol, account, limit_price, pos_pct):
     if limit_price <= 0:
         return 0, f"Invalid limit price ${limit_price} for {symbol}"
 
-    portfolio_value = float(account["portfolio_value"])
+    # Size against honest portfolio value, not the broker's reported figure.
+    # With LBGJ marked at $478,650 against a $4,461 basis, reported value was
+    # $565,534 while the real figure was $91,345 — so every conviction cap came
+    # out 6.2x too large (an 8% "cap" would have been $45,243 of a $91K book).
+    # Phantom collateral was also being levered: buying_power read $1,286,084.
+    portfolio_value = honest_portfolio_value(account, positions)
     min_cash        = portfolio_value * CASH_RESERVE_PCT
 
     # Use buying_power when it is the tighter constraint. Alpaca leaves `cash`
@@ -542,7 +574,7 @@ def close_position(symbol, reason=""):
 
 def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=None,
                         is_dip_buy=False, judge_score=None, research_last_close=None,
-                        watchlist=None, size_multiplier=1.0):
+                        watchlist=None, size_multiplier=1.0, positions=None):
     """
     Full buy flow:
     1. Check market is open
@@ -618,7 +650,8 @@ def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=N
         pct *= size_multiplier
         vix_note = f" | VIX size x{size_multiplier:g}"
 
-    qty, sizing_note = calculate_max_shares(symbol, account, limit_price, pct)
+    qty, sizing_note = calculate_max_shares(symbol, account, limit_price, pct,
+                                            positions)
     if qty == 0:
         return {"error": sizing_note, "symbol": symbol, "action": "SKIPPED"}
 
@@ -947,7 +980,8 @@ def run_trading_session():
                                           judge_score=judge_score,
                                           research_last_close=research_close,
                                           watchlist=watchlist,
-                                          size_multiplier=size_mult)
+                                          size_multiplier=size_mult,
+                                          positions=positions)
             trade["judge_score"] = judge_score
             trade["action"] = "DIP_BUY"
             trade["dip_pct_drop"] = judge_result.get("dip_pct_drop", 0)
@@ -973,7 +1007,8 @@ def run_trading_session():
                                           judge_score=judge_score,
                                           research_last_close=research_close,
                                           watchlist=watchlist,
-                                          size_multiplier=size_mult)
+                                          size_multiplier=size_mult,
+                                          positions=positions)
             trade["judge_score"] = judge_score
             trade["action"] = "BUY"
             results["trades"].append(trade)
@@ -996,7 +1031,8 @@ def run_trading_session():
                                           judge_score=judge_score,
                                           research_last_close=research_close,
                                           watchlist=watchlist,
-                                          size_multiplier=size_mult)
+                                          size_multiplier=size_mult,
+                                          positions=positions)
             trade["judge_score"] = judge_score
             trade["action"] = "AVG_DOWN"
             results["trades"].append(trade)
