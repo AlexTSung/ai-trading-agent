@@ -298,7 +298,19 @@ def get_earnings_calendar(symbols=None, days_ahead=7):
             articles = r.json().get("news", [])
             for a in articles:
                 headline = a.get("headline", "").lower()
-                if any(kw in headline for kw in ["earnings", "results", "quarterly", "q1", "q2", "q3", "q4", "eps", "guidance"]):
+                # Bare "q1".."q4" and "results" match quarterly *portfolio*
+                # filings, not earnings. During 13F season on 2026-08-21 this
+                # vetoed MSFT, GOOGL, NOK and QCOM on hedge-fund 13F headlines
+                # ("TCI Revamps Q2 Portfolio"), and DDOG on a SpaceX earnings
+                # story — effectively the whole watchlist. Require explicit
+                # earnings phrasing and exclude fund-holdings language.
+                EARNINGS_KW = ("earnings", "eps", "quarterly results",
+                               "reports q", "quarterly report", "guidance")
+                NOT_EARNINGS_KW = ("portfolio", "13f", "stake", "stakes",
+                                   "holdings", "bets on", "exits", "trimmed",
+                                   "boosted", "revamps")
+                if (any(kw in headline for kw in EARNINGS_KW)
+                        and not any(kw in headline for kw in NOT_EARNINGS_KW)):
                     results.append({
                         "symbol": sym,
                         "headline": a.get("headline"),

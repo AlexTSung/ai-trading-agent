@@ -387,11 +387,18 @@ def load_intelligence_context() -> dict:
         ctx["notes"].append("VIX unavailable in intelligence output")
 
     # ── Earnings watch ────────────────────────────────────────────────────────
+    # Carry the triggering headline, not just the symbol. The Judge re-checks it
+    # with the same forward/backward-looking filter it applies to a symbol's own
+    # news, so a loose upstream keyword match cannot veto on its own.
     ew = intel.get("earnings_watch") or {}
     ctx["earnings_watch_symbols"] = sorted({
         item.get("symbol") for item in ew.get("earnings_watch", [])
         if item.get("symbol")
     })
+    ctx["earnings_watch_detail"] = {
+        item["symbol"]: item.get("headline", "")
+        for item in ew.get("earnings_watch", []) if item.get("symbol")
+    }
 
     # ── Insider buying (SEC EDGAR Form 4) ─────────────────────────────────────
     ia = intel.get("insider_activity") or {}

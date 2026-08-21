@@ -13,6 +13,7 @@ Usage:
 import os
 import sys
 import json
+import re
 from datetime import date, datetime
 from statistics import mean
 
@@ -434,11 +435,49 @@ def check_chase_veto(technicals: dict, symbol: str) -> tuple:
 
 
 # Backward-looking phrasing: a recap of a past report is not an upcoming one.
-BACKWARD_EARNINGS_KW = ("reported", "posted", "beat", "missed", "last quarter",
+BACKWARD_EARNINGS_KW = ("reported", "posted", "released", "beat", "missed", "last quarter",
                         "results showed", "after reporting", "following its")
 FORWARD_EARNINGS_KW  = ("will report", "to report", "is scheduled", "ahead of",
                         "upcoming", "next week", "due to report", "expected to report",
                         "previews", "preview", "before the bell", "after the bell")
+
+
+# Fund-holdings language. "Q2" in a 13F story is a reporting period, not an
+# earnings date, and these headlines are the dominant false-positive source.
+PORTFOLIO_NEWS_KW = ("portfolio", "13f", "stake", "stakes", "holdings",
+                     "bets on", "bets big", "exits", "trimmed", "boosted",
+                     "revamps", "ditching")
+
+EARNINGS_PHRASE_KW = ("earnings", "eps", "quarterly results", "reports q",
+                      "quarterly report", "guidance")
+
+
+def _has_phrase(text: str, phrases) -> bool:
+    """
+    Word-boundary match. Plain substring matching is unsafe for short tokens:
+    "eps" matches inside "Steps up", which vetoed AAPL and NVDA on a Broadcom
+    headline containing no earnings content at all.
+    """
+    return any(re.search(rf"\b{re.escape(p)}", text) for p in phrases)
+
+
+def _is_upcoming_earnings(text: str) -> bool:
+    """
+    True only when text plausibly describes an UPCOMING earnings report.
+
+    Rejects fund-holdings stories outright, then requires earnings phrasing that
+    is not purely a recap of a report already published.
+    """
+    t = (text or "").lower()
+    if not t:
+        return False
+    if _has_phrase(t, PORTFOLIO_NEWS_KW):
+        return False
+    if not _has_phrase(t, EARNINGS_PHRASE_KW):
+        return False
+    forward  = _has_phrase(t, FORWARD_EARNINGS_KW)
+    backward = _has_phrase(t, BACKWARD_EARNINGS_KW)
+    return not (backward and not forward)
 
 
 def check_earnings_veto(news_items: list, symbol: str, research: dict = None) -> tuple:
@@ -458,9 +497,15 @@ def check_earnings_veto(news_items: list, symbol: str, research: dict = None) ->
     """
     intel = (research or {}).get("intelligence") or {}
     if symbol in (intel.get("earnings_watch_symbols") or []):
-        return True, (f"EARNINGS VETO: {symbol} flagged by the morning earnings "
-                      f"watch — no entry within {EARNINGS_VETO_DAYS} trading days "
-                      f"of a report")
+        # Re-check the triggering headline rather than trusting the flag. The
+        # upstream scan is a loose keyword match: during 13F season it flagged
+        # MSFT, GOOGL, NOK and QCOM on "Q2 Portfolio" headlines and DDOG on a
+        # SpaceX earnings story, vetoing most of the watchlist for no reason.
+        headline = (intel.get("earnings_watch_detail") or {}).get(symbol, "")
+        if _is_upcoming_earnings(headline):
+            return True, (f"EARNINGS VETO: {symbol} flagged by the morning "
+                          f"earnings watch — no entry within "
+                          f"{EARNINGS_VETO_DAYS} trading days of a report")
 
     earnings_kw = ["earnings", "reports q", "quarterly results", "eps report",
                    "earnings report", "reports earnings"]
