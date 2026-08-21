@@ -1,0 +1,203 @@
+{
+  "timestamp": "2026-08-21T14:41:06.051227",
+  "trades": [
+    {
+      "symbol": "NVDA",
+      "action": "SELL",
+      "result": {
+        "_ok": false,
+        "error": "Order rejected (HTTP 403)",
+        "broker_message": "insufficient qty available for order (requested: 25, available: 0)",
+        "status_code": 403,
+        "submitted": {
+          "symbol": "NVDA",
+          "qty": "25",
+          "side": "sell",
+          "type": "limit",
+          "time_in_force": "day",
+          "limit_price": "214.56",
+          "client_order_id": "agent-sell-NVDA-20260821144106"
+        },
+        "_agent_reason": "Sell signal: STRONG_SELL",
+        "_limit_price_used": 214.56,
+        "_urgent_exit": false
+      }
+    }
+  ],
+  "skipped": [
+    {
+      "symbol": "SPY",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "QQQ",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "AAPL",
+      "signal": "STRONG_BUY",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "MSFT",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "GOOGL",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "AMZN",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "TSLA",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "NOK",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "DDOG",
+      "signal": "STRONG_BUY",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SQQQ",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SPXS",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "VIXY",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ASST",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "UUUU",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "PURR",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "CRCL",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "MSTR",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "FCX",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ABUS",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "INTC",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "COLA",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "CFTC",
+      "reason": "object of type 'NoneType' has no len()"
+    },
+    {
+      "symbol": "TO",
+      "reason": "object of type 'NoneType' has no len()"
+    },
+    {
+      "symbol": "IFA",
+      "reason": "object of type 'NoneType' has no len()"
+    },
+    {
+      "symbol": "JD",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    }
+  ],
+  "vetoed_by_judge": [
+    {
+      "symbol": "PYPL",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 83 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "SOXS",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 95 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "TGTX",
+      "signal": "WEAK_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 5.0,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock"
+    }
+  ],
+  "stop_losses": [],
+  "orphan_cancels": [],
+  "exits_attached": [],
+  "blocked_by_rules": [],
+  "phantom_equity": [
+    {
+      "symbol": "LBGJ",
+      "qty": 154903.0,
+      "avg_entry_price": 0.0288,
+      "current_price": 3.0801,
+      "price_ratio": 106.95,
+      "unrealized_plpc": 105.94792,
+      "reported_market_value": 477116.73,
+      "cost_basis": 4461.21,
+      "phantom_amount": 472655.52,
+      "reasons": [
+        "price $3.0801 is 107x its cost basis $0.0288",
+        "unrealized P&L 10,595% exceeds the 1,000% plausibility ceiling",
+        "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
+      ],
+      "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
+    }
+  ]
+}

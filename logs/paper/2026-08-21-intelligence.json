@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-21T14:18:39.221636",
+  "timestamp": "2026-08-21T14:40:10.428423",
   "run_type": "morning_intelligence",
   "fear_greed": {
     "source": "fred_vix_proxy",
@@ -8,16 +8,91 @@
     "score": 65,
     "rating": "Greed",
     "signal": "GREED \u2014 risk-on, watch exits",
-    "timestamp": "2026-08-21T14:18:39.289816"
+    "timestamp": "2026-08-21T14:40:10.506698"
   },
   "vix": {
-    "error": "VIX data unavailable"
+    "symbol": "VIXY",
+    "price": 18.25,
+    "note": "VIXY proxy for VIX"
   },
   "global_markets": {
-    "error": "Expecting value: line 1 column 1 (char 0)"
+    "timestamp": "2026-08-21T14:40:10.601002",
+    "source": "global_etfs",
+    "markets": {
+      "EWJ": {
+        "description": "Japan (Nikkei proxy)",
+        "prev_close": 94.27,
+        "today": 95.03,
+        "change_pct": 0.81,
+        "signal": "UP"
+      },
+      "EWG": {
+        "description": "Germany (DAX proxy)",
+        "prev_close": 43.92,
+        "today": 44.17,
+        "change_pct": 0.57,
+        "signal": "UP"
+      },
+      "FXI": {
+        "description": "China (HSI/CSI proxy)",
+        "prev_close": 35.67,
+        "today": 35.88,
+        "change_pct": 0.57,
+        "signal": "UP"
+      },
+      "EWU": {
+        "description": "UK (FTSE proxy)",
+        "prev_close": 48.54,
+        "today": 48.91,
+        "change_pct": 0.76,
+        "signal": "UP"
+      },
+      "EWZ": {
+        "description": "Brazil (Ibovespa proxy)",
+        "prev_close": 34.14,
+        "today": 34.98,
+        "change_pct": 2.45,
+        "signal": "UP"
+      },
+      "EEM": {
+        "description": "Emerging markets",
+        "prev_close": 66.63,
+        "today": 67.04,
+        "change_pct": 0.62,
+        "signal": "UP"
+      },
+      "GLD": {
+        "description": "Gold",
+        "prev_close": 415.26,
+        "today": 420.5,
+        "change_pct": 1.26,
+        "signal": "UP"
+      },
+      "USO": {
+        "description": "Oil",
+        "prev_close": 134.53,
+        "today": 134.27,
+        "change_pct": -0.19,
+        "signal": "FLAT"
+      },
+      "TLT": {
+        "description": "US 20yr Treasuries (rates proxy)",
+        "prev_close": 82.34,
+        "today": 82.01,
+        "change_pct": -0.4,
+        "signal": "FLAT"
+      },
+      "UUP": {
+        "description": "US Dollar index",
+        "prev_close": 27.92,
+        "today": 27.92,
+        "change_pct": 0.0,
+        "signal": "FLAT"
+      }
+    }
   },
   "macro": {
-    "timestamp": "2026-08-21T14:18:40.157481",
+    "timestamp": "2026-08-21T14:40:10.891671",
     "source": "fred_csv",
     "macro": {
       "FEDFUNDS": {
@@ -59,24 +134,220 @@
     }
   },
   "market_discovery": {
-    "timestamp": "2026-08-21T14:18:40.611135",
+    "timestamp": "2026-08-21T14:40:11.376416",
     "source": "alpaca_discovery",
     "discovery": {
-      "most_active": [],
+      "most_active": [
+        {
+          "symbol": "HOWL",
+          "volume": 191230975,
+          "trade_count": 399594
+        },
+        {
+          "symbol": "GOSS",
+          "volume": 101554138,
+          "trade_count": 93205
+        },
+        {
+          "symbol": "MSTU",
+          "volume": 90208774,
+          "trade_count": 53588
+        },
+        {
+          "symbol": "IBIT",
+          "volume": 56720877,
+          "trade_count": 162310
+        },
+        {
+          "symbol": "CAN",
+          "volume": 52973498,
+          "trade_count": 49072
+        },
+        {
+          "symbol": "LGCL",
+          "volume": 52128278,
+          "trade_count": 36738
+        },
+        {
+          "symbol": "KNRX",
+          "volume": 46183355,
+          "trade_count": 102292
+        },
+        {
+          "symbol": "JUNS",
+          "volume": 42573502,
+          "trade_count": 571403
+        },
+        {
+          "symbol": "INTC",
+          "volume": 38840032,
+          "trade_count": 245592
+        },
+        {
+          "symbol": "MARA",
+          "volume": 38492947,
+          "trade_count": 148513
+        },
+        {
+          "symbol": "TSLL",
+          "volume": 35976869,
+          "trade_count": 57613
+        },
+        {
+          "symbol": "NVDA",
+          "volume": 34987609,
+          "trade_count": 575229
+        },
+        {
+          "symbol": "GAUZ",
+          "volume": 34194075,
+          "trade_count": 76801
+        },
+        {
+          "symbol": "MRNA",
+          "volume": 32746947,
+          "trade_count": 486463
+        },
+        {
+          "symbol": "BITO",
+          "volume": 31670404,
+          "trade_count": 22020
+        },
+        {
+          "symbol": "SNXX",
+          "volume": 29564754,
+          "trade_count": 116082
+        },
+        {
+          "symbol": "SUGP",
+          "volume": 28650323,
+          "trade_count": 332090
+        },
+        {
+          "symbol": "CONL",
+          "volume": 27359002,
+          "trade_count": 62757
+        },
+        {
+          "symbol": "SPCX",
+          "volume": 25825981,
+          "trade_count": 343162
+        },
+        {
+          "symbol": "HOOD",
+          "volume": 24296512,
+          "trade_count": 254347
+        }
+      ],
       "top_gainers": [],
-      "top_losers": []
+      "top_losers": [
+        {
+          "symbol": "MI",
+          "change_pct": -54.63,
+          "price": 3.28
+        },
+        {
+          "symbol": "AFJKR",
+          "change_pct": -39.93,
+          "price": 0.0901
+        },
+        {
+          "symbol": "WZRD",
+          "change_pct": -34.25,
+          "price": 0.6641
+        },
+        {
+          "symbol": "KIDZW",
+          "change_pct": -29,
+          "price": 0.0071
+        },
+        {
+          "symbol": "DAICW",
+          "change_pct": -28.57,
+          "price": 0.002
+        },
+        {
+          "symbol": "CDTG",
+          "change_pct": -27.29,
+          "price": 1.3306
+        },
+        {
+          "symbol": "HDRNW",
+          "change_pct": -26.05,
+          "price": 0.1201
+        },
+        {
+          "symbol": "HOOZ",
+          "change_pct": -23.46,
+          "price": 9.2
+        },
+        {
+          "symbol": "BGLWW",
+          "change_pct": -23.02,
+          "price": 0.0301
+        },
+        {
+          "symbol": "FLUX",
+          "change_pct": -22.3,
+          "price": 0.6371
+        }
+      ]
     }
   },
   "reddit": {
-    "timestamp": "2026-08-21T14:18:41.927683",
+    "timestamp": "2026-08-21T14:40:12.243308",
     "source": "reddit",
     "tickers": []
   },
   "earnings_watch": {
-    "error": "Expecting value: line 1 column 1 (char 0)"
+    "timestamp": "2026-08-21T14:40:12.837690",
+    "earnings_watch": [
+      {
+        "symbol": "AAPL",
+        "headline": "Broadcom Steps up NVIDIA Challenge With Potential $100 Billion AI Financing Deal",
+        "date": "2026-08-21T09:48:32Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "MSFT",
+        "headline": "Chris Hohn\u2019s TCI Revamps Q2 Portfolio, Exits Microsoft and Adds to Alphabet",
+        "date": "2026-08-21T09:43:20Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "NVDA",
+        "headline": "Broadcom Steps up NVIDIA Challenge With Potential $100 Billion AI Financing Deal",
+        "date": "2026-08-21T09:48:32Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "GOOGL",
+        "headline": "Chris Hohn\u2019s TCI Revamps Q2 Portfolio, Exits Microsoft and Adds to Alphabet",
+        "date": "2026-08-21T09:43:20Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "DDOG",
+        "headline": "Consumer Tech (Aug 3-7): SpaceX Released Strong First Earnings, Meta Sued For Harming Children's Mental Health & More",
+        "date": "2026-08-09T14:40:24Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "NOK",
+        "headline": "Citadel Advisors and Millennium Boosted Fabrinet Stakes in Q2 as AI Demand Accelerated",
+        "date": "2026-08-18T15:45:09Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "QCOM",
+        "headline": "Viking Global Bets Big On SpaceX While Ditching CoreWeave, Alphabet in Q2",
+        "date": "2026-08-17T13:04:08Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      }
+    ]
   },
   "insider_activity": {
-    "timestamp": "2026-08-21T14:18:42.403987",
+    "timestamp": "2026-08-21T14:40:13.290059",
     "source": "sec_edgar",
     "insider_filings": [
       {
@@ -183,13 +454,13 @@
       },
       {
         "company": "",
-        "filed": "2026-08-17",
+        "filed": "2026-08-19",
         "form": "4",
         "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
       },
       {
         "company": "",
-        "filed": "2026-08-19",
+        "filed": "2026-08-17",
         "form": "4",
         "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
       },
