@@ -97,18 +97,6 @@ Do not proceed until the user confirms. No exceptions.
                    └─────────────┘
 ```
 
-## Daily Schedule
-| Time | Agent | Script | Action |
-|------|-------|--------|--------|
-| 8:30 AM | Intelligence | `python3 intelligence.py morning` | Fear/Greed, VIX, global markets, macro, Reddit, earnings watch, insider buys |
-| 9:00 AM | Social Screener | `python3 reddit_screener.py scan` | StockTwits + Reddit trending tickers — feeds into Researcher |
-| 9:45 AM | Researcher | `python3 research.py full` | Bars, news, MAs on watchlist + intelligence tickers |
-| 10:00 AM | Judge | `python3 judge.py session` | Score signals with full intelligence context, APPROVE/HOLD/VETO |
-| 10:05 AM | Executor | `python3 trade.py session` | Execute approved trades only |
-| 12:00 PM | Researcher | `python3 research.py midday` | Check open positions, flag stop-loss candidates |
-| 4:15 PM | Reviewer | `python3 reviewer.py eod` | Post-trade scoring + calibration log |
-| 4:30 PM | Journal | `python3 journal.py eod` | Synthesize all agents into daily MD |
-
 ## Social Screener Config (StockTwits)
 - **Source**: StockTwits API — free, no API key required, purpose-built for stock mentions
 - **Why not Reddit**: Reddit now requires a formal developer access application via their Responsible Builder policy. Access is frequently denied unless building on Devvit (Reddit's internal app platform), which runs inside Reddit and cannot extract data to external scripts.
@@ -179,21 +167,38 @@ short on 2026-09-03, extend rather than graduate.
 - **2026-06-29** — Alex extended by 7 days after all 6 closed positions were negative. Ruleset overhauled in this file. *In hindsight: the overhaul was documentation only; none of it reached the code, so the extension tested nothing new.*
 - **2026-08-20** — Phase 2 declared void and baseline reset. Root causes fixed and merged to `master`: Judge weight clamp, $5 price floor, research-vs-execution price check, tiered stops, conviction sizing, 48h cooldown, 30-day minimum hold, phantom-equity detection, real VIX sizing, earnings-watch veto, insider-buy signal. Phase 2B opened through 2026-09-03. Real money remains locked.
 
-## Daily Schedule (All times ET, weekdays only)
+## Daily Schedule — SINGLE SOURCE OF TRUTH (all times ET, weekdays only)
 
-**Where automation actually runs:** GitHub Actions, using GitHub Secrets — not
-on any local machine. The `.github/workflows/*.yml` files are the single source
-of truth for the schedule. `routines.json` is reference material only; no script
-reads it, and times listed there are not what runs.
+**Where automation actually runs:** GitHub Actions, using GitHub Secrets — not on
+any local machine, and not from `routines.json`. The `.github/workflows/*.yml`
+files are authoritative. `routines.json` is reference material only: no script
+reads it, and its times are not what runs.
 
-| ET | Workflow | Cron (UTC) | Runner |
-|------|----------|------------|--------|
-| 9:45 AM | `morning-pipeline.yml` | `45 13 * * 1-5` | `run_github.sh` — intelligence → social → screener → research → judge → executor |
-| 12:00 PM | `midday-pipeline.yml` | `0 16 * * 1-5` | `run_midday_github.sh` — stop-loss + inverse ETF max-hold + midday research |
-| 5:15 PM | `eod-pipeline.yml` | `15 21 * * 1-5` | `run_eod_github.sh` — reviewer → journal (1hr post-close buffer) |
+**Three scheduled jobs, not eight.** Each pipeline runs its steps sequentially
+inside a single job — the agents are not individually scheduled. Any per-agent
+clock time you may remember (8:30 AM intelligence, 10:00 AM judge, 4:15 PM
+reviewer) was aspirational and never existed in cron.
 
-Local equivalents for manual runs: `python3 research.py full`,
-`python3 trade.py session`, `python3 trade.py check-stops`, `python3 journal.py eod`.
+| ET | Workflow / runner | Cron (UTC) | Steps, in order |
+|---|---|---|---|
+| **9:45 AM** | `morning-pipeline.yml`<br>`run_github.sh` | `45 13 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
+| **12:00 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `0 16 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
+| **5:15 PM** | `eod-pipeline.yml`<br>`run_eod_github.sh` | `15 21 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
+| **Sep 3, 5:30 PM** | `graduation-decision.yml` | `30 21 3 9 *` | `reviewer.py graduation` — Phase 2B verdict. Advisory only; manual approval still required. |
+
+Guardrails inside the runners: weekends skip; the morning job aborts after
+11:30 AM ET; the midday job runs only between 10:00 AM and 4:00 PM ET; the EOD
+job refuses to run before 4:00 PM ET. `workflow_dispatch` with `test_mode: true`
+bypasses the time windows on the morning and midday jobs.
+
+Local equivalents for manual runs — these do **not** replace the schedule, they
+just let you inspect state:
+
+```
+python3 research.py full        python3 trade.py check-stops
+python3 trade.py session        python3 trade.py check-phantom
+python3 journal.py eod          python3 reviewer.py graduation
+```
 
 ## Hard Rules (Never Break These)
 1. **Check market status first.** Never place orders when `is_open` is false.

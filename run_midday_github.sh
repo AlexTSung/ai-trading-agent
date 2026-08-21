@@ -32,7 +32,7 @@ fi
 cd "$AGENT_DIR"
 
 # ── GUARDRAIL: only run while the market is open ───────────────────────────────
-# 14:30–20:00 UTC is 10:30 AM–4:00 PM ET during EDT.
+# 14:00–20:00 UTC is 10:00 AM–4:00 PM ET during EDT.
 HOUR_UTC=$(date -u +%H)
 if [ "${TEST_MODE}" != "1" ] && { [ "$HOUR_UTC" -lt 14 ] || [ "$HOUR_UTC" -ge 20 ]; }; then
   echo "GUARDRAIL: outside market hours (${HOUR_UTC}:00 UTC) — skipping (not a failure)."
