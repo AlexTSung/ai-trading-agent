@@ -409,4 +409,6 @@ Sections: Portfolio Status → Market Research (per symbol) → Trades Executed 
 
 ## Lessons Learned
 *(Agent updates this section as patterns emerge from journal review)*
+- [2026-08-24] **high_score_poor_outcome** (seen 2x): Judge score ≥8.0 but outcome POOR_TRADE (2x: AAPL, AAPL). Judge may be overweighting news sentiment. Consider raising APPROVE threshold to 8.0.
+- [2026-08-24] **persistent_judge_overconfidence** (seen 5x): Judge consistently scores -4.8 pts above reviewer (5 trades). Judge is overconfident. Recommend reducing news component weight by 10%.
 - [Date initialized] Beta version launched. All lessons TBD.

@@ -36,12 +36,16 @@ if [ "$HOUR_UTC" -lt 20 ]; then
 fi
 
 echo ""
-echo "--- [1/2] Reviewer ---"
-python3 reviewer.py eod || echo "WARN: reviewer.py failed — continuing to journal"
+echo "--- [1/3] Reviewer ---"
+python3 reviewer.py eod || echo "WARN: reviewer.py failed — continuing"
 
 echo ""
-echo "--- [2/2] Journal ---"
-python3 journal.py eod || echo "WARN: journal.py failed"
+echo "--- [2/3] Journal ---"
+python3 journal.py eod || echo "WARN: journal.py failed — continuing"
+
+echo ""
+echo "--- [3/3] Learning Agent ---"
+python3 learning_agent.py eod || echo "WARN: learning_agent.py failed — non-critical"
 
 echo ""
 echo "=== EOD complete: $(date -u +%H:%M:%S) UTC ==="
