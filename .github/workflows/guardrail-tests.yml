@@ -1,0 +1,61 @@
+name: Guardrail Tests
+
+# Runs the safety regression suite on every push and pull request.
+#
+# This exists because the same protections were lost or broken three times:
+# the LBGJ scoring defect, a wholesale revert of trade.py and judge.py that
+# silently undid eight equities controls, and an authorised stop-loss blocked by
+# the agent's own take-profit orders. Verified: 53 of 54 tests fail against the
+# reverted state, so this workflow would have caught it immediately.
+#
+# No network and no credentials — every test runs against pure functions or
+# source inspection, so it cannot place an order or touch the broker.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Compile every module
+        run: python3 -m py_compile *.py
+
+      - name: Validate shell runners
+        run: for f in *.sh; do bash -n "$f"; done
+
+      - name: Validate workflow YAML
+        run: |
+          python3 -m pip install pyyaml --quiet
+          python3 - <<'PY'
+          import glob, yaml, sys
+          bad = []
+          for f in sorted(glob.glob('.github/workflows/*.yml')):
+              try:
+                  yaml.safe_load(open(f))
+              except Exception as e:
+                  bad.append(f"{f}: {e}")
+          if bad:
+              print("\n".join(bad)); sys.exit(1)
+          print("all workflow YAML parses")
+          PY
+
+      - name: Run guardrail tests
+        run: python3 -m unittest discover -s tests -v
