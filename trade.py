@@ -572,10 +572,44 @@ def close_position(symbol, reason=""):
                          f"${current_price}",
                 "symbol": symbol}
 
+    # Release shares held by existing sell orders before closing.
+    #
+    # OCO take-profit legs reserve the whole position, so a stop-loss or
+    # signal-driven exit is rejected by the broker with "insufficient qty
+    # available for order (requested: 25, available: 0)". That happened live on
+    # 2026-08-21: NVDA hit STRONG_SELL with a confirmed MA20<MA50 thesis break,
+    # the exit was correctly authorised, and the agent's own take-profit orders
+    # blocked it. A position with exits attached could not be risk-managed at
+    # all — the protective orders were preventing protection.
+    released = cancel_sell_orders_for(symbol)
+
     result = place_limit_order(symbol, qty, "sell", limit_price,
                               reason=reason, tif="gtc" if urgent else "day")
     result["_urgent_exit"] = urgent
+    result["_released_orders"] = released
     return result
+
+
+def cancel_sell_orders_for(symbol: str) -> list:
+    """Cancel every open sell order on a symbol so its shares become sellable."""
+    cancelled = []
+    try:
+        open_orders = get_orders(status="open")
+    except Exception as e:
+        return [{"error": f"Could not list open orders: {e}"}]
+
+    for order in open_orders:
+        if order.get("symbol") != symbol or order.get("side") != "sell":
+            continue
+        try:
+            r = requests.delete(f"{BASE_URL}/v2/orders/{order['id']}",
+                                headers=_headers())
+            cancelled.append({"order_id": order["id"],
+                              "client_order_id": order.get("client_order_id"),
+                              "status_code": r.status_code})
+        except Exception as e:
+            cancelled.append({"order_id": order.get("id"), "error": str(e)})
+    return cancelled
 
 def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=None,
                         is_dip_buy=False, judge_score=None, research_last_close=None,
