@@ -1,0 +1,253 @@
+{
+  "timestamp": "2026-08-24T14:26:36.936750",
+  "date": "2026-08-24",
+  "approved": [],
+  "held": [
+    "DDOG"
+  ],
+  "vetoed": [
+    "NVDA",
+    "AAPL",
+    "PYPL",
+    "SOXS",
+    "SLS",
+    "SNOW",
+    "HOOD",
+    "ALC"
+  ],
+  "scores": {
+    "NVDA": {
+      "symbol": "NVDA",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NVDA \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "AAPL": {
+      "symbol": "AAPL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "PYPL": {
+      "symbol": "PYPL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for PYPL \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "DDOG": {
+      "symbol": "DDOG",
+      "recommendation": "HOLD",
+      "score": 5.5,
+      "approval_gate": 7.0,
+      "size_multiplier": 1.0,
+      "vix": 15.13,
+      "is_discovery": false,
+      "is_speculative": false,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "1.5/2.0",
+        "news": "1.5/1.5",
+        "macro": "1.0/1.0",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "0.5/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $254.83 > MA50 $237.82, price between MAs"
+        },
+        "news": {
+          "score": 1.5,
+          "note": "POSITIVE \u2014 4 bullish signals in recent headlines [capped 2.0\u21921.5 at weight 1.5]"
+        },
+        "macro": {
+          "score": 1.0,
+          "note": "RISK-ON \u2014 SPY MA20 $745.63 > MA50 $745.04 [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding DDOG \u2014 price above entry, avg-down not warranted"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 15.1 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.5,
+          "note": "Market cap data unavailable"
+        }
+      },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $254.83 > MA50 $237.82, price between MAs. News: POSITIVE \u2014 4 bullish signals in recent headlines [capped 2.0\u21921.5 at weight 1.5]. Macro: RISK-ON \u2014 SPY MA20 $745.63 > MA50 $745.04 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Already holding DDOG \u2014 price above entry, avg-down not warranted. Volatility: VIX 15.1 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Market cap data unavailable. Source: watchlist | Gate: 7.0.",
+      "_gate_used": 7.0
+    },
+    "SOXS": {
+      "symbol": "SOXS",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 82 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 82 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "SLS": {
+      "symbol": "SLS",
+      "recommendation": "VETO",
+      "score": 5.5,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $12.96 > MA50 $9.90, price between MAs"
+        },
+        "news": {
+          "score": 0.0,
+          "note": "NEGATIVE \u2014 4 bearish signals in recent headlines | PUMP FLAG PENALTY -0.25: SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal befo"
+        },
+        "macro": {
+          "score": 1.0,
+          "note": "RISK-ON \u2014 SPY MA20 $745.63 > MA50 $745.04 [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 78%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 15.1 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.0,
+          "note": "Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+          "veto": true
+        }
+      },
+      "_gate_used": 8.5
+    },
+    "SNOW": {
+      "symbol": "SNOW",
+      "recommendation": "VETO",
+      "score": 7.5,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+      "criteria": {
+        "technical": {
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $260.63 > MA50 $230.45, price $268.01 above both [capped 3.0\u21922.0 at weight 2.0]"
+        },
+        "news": {
+          "score": 1.5,
+          "note": "POSITIVE \u2014 5 bullish signals in recent headlines [capped 2.0\u21921.5 at weight 1.5]"
+        },
+        "macro": {
+          "score": 1.0,
+          "note": "RISK-ON \u2014 SPY MA20 $745.63 > MA50 $745.04 [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 78%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 15.1 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.0,
+          "note": "Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+          "veto": true
+        }
+      },
+      "_gate_used": 8.5
+    },
+    "HOOD": {
+      "symbol": "HOOD",
+      "recommendation": "VETO",
+      "score": 7.0,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $106.95 > MA50 $94.58, price between MAs"
+        },
+        "news": {
+          "score": 1.5,
+          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives"
+        },
+        "macro": {
+          "score": 1.0,
+          "note": "RISK-ON \u2014 SPY MA20 $745.63 > MA50 $745.04 [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 78%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 15.1 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.0,
+          "note": "Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+          "veto": true
+        }
+      },
+      "_gate_used": 8.5
+    },
+    "ALC": {
+      "symbol": "ALC",
+      "recommendation": "VETO",
+      "score": 7.0,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $68.09 > MA50 $66.67, price between MAs"
+        },
+        "news": {
+          "score": 1.5,
+          "note": "POSITIVE \u2014 2 bullish signals in recent headlines [capped 2.0\u21921.5 at weight 1.5]"
+        },
+        "macro": {
+          "score": 1.0,
+          "note": "RISK-ON \u2014 SPY MA20 $745.63 > MA50 $745.04 [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 78%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 15.1 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.0,
+          "note": "Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+          "veto": true
+        }
+      },
+      "_gate_used": 8.5
+    }
+  }
+}
