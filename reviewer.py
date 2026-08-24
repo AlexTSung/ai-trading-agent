@@ -8,6 +8,8 @@ Usage:
   python reviewer.py eod                  # Score all of today's trades
   python reviewer.py read 2026-06-15      # Read a past review
   python reviewer.py calibration          # Compare Judge vs Reviewer scores (last 30 days)
+  python reviewer.py roundtrips          # FIFO-matched closed trades + realized metrics
+  python reviewer.py graduation          # GRADUATE / DO NOT GRADUATE verdict
 """
 
 import os
@@ -55,6 +57,7 @@ GRADUATION_MIN_REVIEWER_AVG  = 6.0
 # one. Since the stated purpose of graduation is to show the agent is
 # significantly profitable before real cash is at risk, profit is now gated
 # directly. Tune these numbers — they encode a judgement call, not a law.
+GRADUATION_MIN_ROUND_TRIPS    = 10    # closed entry->exit pairs to fit against
 GRADUATION_MIN_RETURN_PCT     = 3.0   # net return on honest equity since baseline
 GRADUATION_MIN_PROFIT_FACTOR  = 1.5   # gross gains / gross losses
 GRADUATION_MIN_EXPECTANCY_PCT = 0.0   # mean P&L per trade must be positive
@@ -310,6 +313,154 @@ def append_calibration_log(trade_results: list, today: str):
                 j, rv, r.get("pnl_pct"), r.get("verdict"), delta
             ])
 
+def fetch_filled_orders(since: str) -> list:
+    """
+    Every filled order since `since`, oldest first, following pagination.
+
+    Alpaca caps a page at 500, so a long window needs several requests. Uses the
+    broker as the source of truth rather than trade-log.csv, which is known to be
+    incomplete: it duplicates the 2026-06-16 fills three times each and is
+    missing the buy legs for OUST, FCEL, CADL, TSLA, AMD and QCOM.
+    """
+    out, cursor, seen = [], since, set()
+    for _ in range(20):                      # hard bound on pagination
+        r = requests.get(f"{BASE_URL}/v2/orders", headers=_headers(), timeout=20,
+                         params={"status": "closed", "after": cursor,
+                                 "limit": 500, "direction": "asc"})
+        r.raise_for_status()
+        page = r.json()
+        fresh = [o for o in page
+                 if o.get("id") not in seen
+                 and o.get("status") in ("filled", "partially_filled")
+                 and float(o.get("filled_qty") or 0) > 0]
+        if not page:
+            break
+        for o in fresh:
+            seen.add(o["id"])
+        out.extend(fresh)
+        if len(page) < 500:
+            break
+        last = page[-1].get("filled_at") or page[-1].get("submitted_at")
+        if not last or last == cursor:
+            break
+        cursor = last
+    out.sort(key=lambda o: o.get("filled_at") or "")
+    return out
+
+
+def build_round_trips(orders: list) -> tuple:
+    """
+    FIFO-match buys to sells and return (round_trips, unmatched_sells).
+
+    A round trip is one completed decision: capital in, capital out. This is the
+    only honest basis for profit factor and expectancy. The Reviewer's per-fill
+    score measures fill-to-close drift on the entry day, which never sees
+    whether the exit was any good and judges a 30-day hold on its first
+    afternoon.
+
+    Quarantined symbols are skipped entirely.
+    """
+    from collections import defaultdict, deque
+
+    lots = defaultdict(deque)     # symbol -> deque of [qty, price, filled_at]
+    trips, unmatched = [], []
+
+    for o in orders:
+        sym = o.get("symbol")
+        if not sym or sym in QUARANTINED_SYMBOLS:
+            continue
+        try:
+            qty   = float(o["filled_qty"])
+            price = float(o["filled_avg_price"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        when = (o.get("filled_at") or "")[:10]
+
+        if o.get("side") == "buy":
+            lots[sym].append([qty, price, when])
+            continue
+
+        # Sell: consume open lots oldest-first.
+        remaining = qty
+        while remaining > 0 and lots[sym]:
+            lot = lots[sym][0]
+            take = min(remaining, lot[0])
+            entry, exit_ = lot[1], price
+            if entry > 0:
+                trips.append({
+                    "symbol":     sym,
+                    "qty":        round(take, 4),
+                    "entry_date": lot[2],
+                    "exit_date":  when,
+                    "entry":      round(entry, 4),
+                    "exit":       round(exit_, 4),
+                    "pnl_dollar": round((exit_ - entry) * take, 2),
+                    "pnl_pct":    round((exit_ / entry - 1) * 100, 2),
+                    "hold_days":  _days_between(lot[2], when),
+                })
+            lot[0] -= take
+            remaining -= take
+            if lot[0] <= 1e-9:
+                lots[sym].popleft()
+
+        if remaining > 1e-9:
+            # Sold more than we can account for — the entry predates the window.
+            unmatched.append({"symbol": sym, "qty": round(remaining, 4),
+                              "exit_date": when, "exit": round(price, 4)})
+
+    return trips, unmatched
+
+
+def _days_between(a: str, b: str) -> int:
+    try:
+        return (date.fromisoformat(b) - date.fromisoformat(a)).days
+    except (ValueError, TypeError):
+        return 0
+
+
+def round_trip_metrics(trips: list) -> dict:
+    """Realized profit factor, expectancy and win rate over closed trades."""
+    pnls  = [t["pnl_pct"] for t in trips]
+    dols  = [t["pnl_dollar"] for t in trips]
+    wins  = [p for p in pnls if p > 0]
+    losses = [p for p in pnls if p < 0]
+    gross_g, gross_l = sum(wins), abs(sum(losses))
+
+    if gross_l > 0:
+        pf = gross_g / gross_l
+    elif gross_g > 0:
+        pf = float("inf")
+    else:
+        pf = 0.0
+
+    return {
+        "count":         len(trips),
+        "win_rate":      (len(wins) / len(pnls) * 100) if pnls else 0.0,
+        "profit_factor": pf,
+        "expectancy":    mean(pnls) if pnls else 0.0,
+        "net_dollar":    sum(dols),
+        "avg_win":       mean(wins) if wins else 0.0,
+        "avg_loss":      mean(losses) if losses else 0.0,
+        "avg_hold_days": mean([t["hold_days"] for t in trips]) if trips else 0.0,
+        "best":          max(trips, key=lambda t: t["pnl_pct"]) if trips else None,
+        "worst":         min(trips, key=lambda t: t["pnl_pct"]) if trips else None,
+    }
+
+
+def write_round_trip_log(trips: list) -> str:
+    """Persist closed trades so the learning loop has a durable record."""
+    path = os.path.join(JOURNAL_DIR, "round-trips.csv")
+    os.makedirs(JOURNAL_DIR, exist_ok=True)
+    cols = ["symbol", "entry_date", "exit_date", "qty", "entry", "exit",
+            "pnl_dollar", "pnl_pct", "hold_days"]
+    with open(path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=cols)
+        w.writeheader()
+        for t in sorted(trips, key=lambda t: t["exit_date"]):
+            w.writerow({c: t[c] for c in cols})
+    return path
+
+
 def current_honest_equity():
     """
     Live equity with quarantined/phantom positions marked to cost basis.
@@ -388,44 +539,50 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
     judge_avg = mean(js) if js else 0.0
     rev_avg   = mean(rs) if rs else 0.0
 
-    # ── Profitability ─────────────────────────────────────────────────────────
-    # Drop sentinel rows the older reviewer wrote before the guard existed.
-    pnls    = [p for p in (float(r["pnl_pct"]) for r in scored
-                           if (r.get("pnl_pct") or "").strip())
-               if TOTAL_LOSS_PNL_PCT < p < IMPLAUSIBLE_PNL_PCT]
-    gains   = [p for p in pnls if p > 0]
-    losses  = [p for p in pnls if p < 0]
-    gross_g = sum(gains)
-    gross_l = abs(sum(losses))
-
-    if gross_l > 0:
-        profit_factor = gross_g / gross_l
-    elif gross_g > 0:
-        profit_factor = float("inf")   # winners, no losers yet
+    # ── Profitability, measured on CLOSED ROUND TRIPS ─────────────────────────
+    # Entry-day drift on buy fills is not profitability: it never sees the exit.
+    # Profit factor, expectancy and realized win rate now come from FIFO-matched
+    # entry->exit pairs. If the broker is unreachable the metrics stay empty and
+    # the criteria fail rather than passing on a proxy.
+    try:
+        trips, unmatched = build_round_trips(fetch_filled_orders(since))
+        write_round_trip_log(trips)
+    except Exception as e:
+        trips, unmatched = [], []
+        rt_error = str(e)
     else:
-        profit_factor = 0.0
+        rt_error = None
 
-    expectancy = mean(pnls) if pnls else 0.0
-    equity     = current_honest_equity()
+    rt            = round_trip_metrics(trips)
+    profit_factor = rt["profit_factor"]
+    expectancy    = rt["expectancy"]
+    realized_wr   = rt["win_rate"]
+    equity        = current_honest_equity()
     ret_pct    = (((equity - PHASE2B_BASELINE_EQUITY) / PHASE2B_BASELINE_EQUITY * 100)
                   if equity else None)
     bench_pct  = benchmark_return(since)
 
     checks = [
-        ("Occurrences",        f"{n}",
+        ("Occurrences (scored buys)", f"{n}",
          f"≥{GRADUATION_MIN_OCCURRENCES}",     n >= GRADUATION_MIN_OCCURRENCES),
+        ("Closed round trips", f"{rt['count']}",
+         f"≥{GRADUATION_MIN_ROUND_TRIPS}",
+         rt["count"] >= GRADUATION_MIN_ROUND_TRIPS),
         ("Net return",
          f"{ret_pct:+.2f}%" if ret_pct is not None else "unavailable",
          f"≥{GRADUATION_MIN_RETURN_PCT:+.1f}%",
          ret_pct is not None and ret_pct >= GRADUATION_MIN_RETURN_PCT),
-        ("Profit factor",
+        ("Profit factor (realized)",
          "∞" if profit_factor == float("inf") else f"{profit_factor:.2f}",
          f"≥{GRADUATION_MIN_PROFIT_FACTOR}",
-         profit_factor >= GRADUATION_MIN_PROFIT_FACTOR),
-        ("Expectancy / trade", f"{expectancy:+.2f}%",
+         bool(trips) and profit_factor >= GRADUATION_MIN_PROFIT_FACTOR),
+        ("Expectancy / round trip", f"{expectancy:+.2f}%",
          f">{GRADUATION_MIN_EXPECTANCY_PCT:.1f}%",
-         bool(pnls) and expectancy > GRADUATION_MIN_EXPECTANCY_PCT),
-        ("Win rate",           f"{win_rate:.1f}%",
+         bool(trips) and expectancy > GRADUATION_MIN_EXPECTANCY_PCT),
+        ("Realized win rate", f"{realized_wr:.1f}%",
+         f"≥{GRADUATION_MIN_WIN_RATE}%",
+         bool(trips) and realized_wr >= GRADUATION_MIN_WIN_RATE),
+        ("Reviewer win rate",  f"{win_rate:.1f}%",
          f"≥{GRADUATION_MIN_WIN_RATE}%",       win_rate >= GRADUATION_MIN_WIN_RATE),
         ("Avg Judge score",    f"{judge_avg:.2f}",
          f"≥{GRADUATION_MIN_JUDGE_AVG}",       bool(js) and judge_avg >= GRADUATION_MIN_JUDGE_AVG),
@@ -511,13 +668,46 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
             "either direction. The P&L stays in the journals as an audit trail.",
         ]
 
+    if trips:
+        lines += [
+            "",
+            "## Closed round trips",
+            "",
+            f"Net realized: **${rt['net_dollar']:+,.2f}** over {rt['count']} trades  ·  "
+            f"avg win {rt['avg_win']:+.2f}%  ·  avg loss {rt['avg_loss']:+.2f}%  ·  "
+            f"avg hold {rt['avg_hold_days']:.0f}d",
+            "",
+            "| Exit | Symbol | Qty | Entry | Exit | P&L $ | P&L % | Held |",
+            "|---|---|---|---|---|---|---|---|",
+        ]
+        for t in sorted(trips, key=lambda t: t["exit_date"])[-25:]:
+            lines.append(
+                f"| {t['exit_date']} | {t['symbol']} | {t['qty']:g} | "
+                f"{t['entry']:.2f} | {t['exit']:.2f} | {t['pnl_dollar']:+,.2f} | "
+                f"{t['pnl_pct']:+.2f}% | {t['hold_days']}d |")
+        lines.append("")
+        lines.append("Full history: `logs/paper/round-trips.csv`")
+    elif rt_error:
+        lines += ["", f"*Round-trip data unavailable: {rt_error}*"]
+    else:
+        lines += ["", "*No closed round trips in this window — nothing realized "
+                      "to measure. Profitability criteria fail by default.*"]
+
+    if unmatched:
+        lines += [
+            "",
+            f"**{len(unmatched)} sell(s) had no matching entry in this window** "
+            f"(position opened before {since}); excluded from realized metrics: "
+            + ", ".join(f"{u['symbol']} x{u['qty']:g}" for u in unmatched[:8]),
+        ]
+
     lines += [
         "",
         "## What these criteria do and do not prove",
         "",
         "Occurrences, win rate and the two agent scores measure *process*. "
         "Net return, profit factor, expectancy and the SPY comparison measure "
-        "*money*. Both sets must pass: a high win rate with small gains and "
+        "*money*, and they are measured on closed round trips rather than entry-day drift. Both sets must pass: a high win rate with small gains and "
         "large losses is a losing system, and an agent that trails SPY is worse "
         "than an index fund no matter how disciplined it looks.",
     ]
@@ -659,6 +849,21 @@ if __name__ == "__main__":
         days = int(arg2) if arg2 else 30
         print(run_calibration_report(days))
 
+    elif action == "roundtrips":
+        _since = arg2 or PHASE2B_BASELINE_DATE
+        try:
+            _trips, _unm = build_round_trips(fetch_filled_orders(_since))
+        except Exception as _e:
+            print(json.dumps({"error": f"Could not reach the broker: {_e}",
+                              "since": _since}, indent=2))
+            sys.exit(1)
+        _p = write_round_trip_log(_trips)
+        _m = round_trip_metrics(_trips)
+        print(json.dumps({"since": _since, "metrics": {
+            k: (None if v is None else v) for k, v in _m.items()
+            if k not in ("best", "worst")},
+            "unmatched_sells": _unm, "log": _p}, indent=2, default=str))
+
     elif action == "graduation":
         since = arg2 or PHASE2B_BASELINE_DATE
         print(run_graduation_decision(since))
@@ -673,4 +878,4 @@ if __name__ == "__main__":
 
     else:
         print(json.dumps({"error": f"Unknown action: {action}. Use: eod | "
-                                   f"calibration [days] | graduation [since] | read DATE"}))
+                                   f"calibration [days] | graduation [since] | roundtrips [since] | read DATE"}))
