@@ -48,4 +48,12 @@ echo "--- [3/3] Learning Agent ---"
 python3 learning_agent.py eod || echo "WARN: learning_agent.py failed — non-critical"
 
 echo ""
+echo "--- Trade learnings (per-source, per-tier, hold time, veto cost) ---"
+# Evidence only — changes no parameter. judge.py's LEARNING_TIERS decides how
+# much of this may affect scoring.
+python3 learning_analytics.py \
+  | tee "$LOG_DIR/$DATE-learnings.md" \
+  || echo "WARN: learning_analytics.py failed — non-critical"
+
+echo ""
 echo "=== EOD complete: $(date -u +%H:%M:%S) UTC ==="

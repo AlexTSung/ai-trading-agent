@@ -554,3 +554,134 @@ class TestGraduationGate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Learning analytics — what the trade record can actually tell us
+# ══════════════════════════════════════════════════════════════════════════════
+import learning_analytics as la   # noqa: E402
+
+
+def _trip(sym, pnl_pct, hold_days=10, entry_date="2026-08-01",
+          exit_date="2026-08-11", entry=100.0):
+    return {"symbol": sym, "entry_date": entry_date, "exit_date": exit_date,
+            "entry": entry, "exit": entry * (1 + pnl_pct / 100),
+            "pnl_pct": pnl_pct, "pnl_dollar": pnl_pct, "hold_days": hold_days,
+            "tier": la.tier_of(sym)}
+
+
+class TestAnalyticsSummary(unittest.TestCase):
+
+    def test_summary_metrics(self):
+        s = la.summarize([_trip("A", 10.0), _trip("B", -5.0)])
+        self.assertEqual(s["n"], 2)
+        self.assertAlmostEqual(s["win_rate"], 50.0)
+        self.assertAlmostEqual(s["profit_factor"], 2.0)
+        self.assertAlmostEqual(s["expectancy"], 2.5)
+
+    def test_empty_input_is_safe(self):
+        self.assertEqual(la.summarize([])["n"], 0)
+
+    def test_confidence_labels_scale_with_n(self):
+        self.assertEqual(la.confidence(2), "anecdote")
+        self.assertEqual(la.confidence(6), "suggestive")
+        self.assertEqual(la.confidence(25), "actionable")
+
+    def test_tier_mapping_matches_the_executor(self):
+        for sym in ("AAPL", "DDOG", "NOK", "SQQQ"):
+            with self.subTest(symbol=sym):
+                self.assertEqual(la.tier_of(sym), trade.tier_for(sym))
+
+
+class TestAnalyticsQuestions(unittest.TestCase):
+    """Each test is one of the questions the analytics module exists to answer."""
+
+    def test_discovery_vs_watchlist_is_separated(self):
+        trips = [dict(_trip("AAA", -8.0), is_discovery=True),
+                 dict(_trip("BBB", -6.0), is_discovery=True),
+                 dict(_trip("AAPL", 12.0), is_discovery=False)]
+        out = la.analyse_source(trips)
+        self.assertEqual(out["discovery"]["n"], 2)
+        self.assertEqual(out["watchlist"]["n"], 1)
+        self.assertLess(out["discovery"]["expectancy"],
+                        out["watchlist"]["expectancy"])
+
+    def test_stop_effectiveness_splits_stopped_from_survivors(self):
+        trips = [dict(_trip("AAPL", -20.5), stopped_out=True),
+                 dict(_trip("AAPL", 15.0), stopped_out=False)]
+        out = la.analyse_tier_stops(trips)
+        self.assertEqual(out["TIER1"]["stopped_out"]["n"], 1)
+        self.assertEqual(out["TIER1"]["not_stopped"]["n"], 1)
+        self.assertAlmostEqual(out["TIER1"]["stopped_share"], 0.5)
+
+    def test_cutting_winners_early_is_detectable(self):
+        """Winners held far shorter than losers is the pattern to surface."""
+        trips = [_trip("A", 8.0, hold_days=2), _trip("B", 6.0, hold_days=3),
+                 _trip("C", -9.0, hold_days=40), _trip("D", -7.0, hold_days=35)]
+        out = la.analyse_hold_time(trips)
+        self.assertLess(out["avg_hold_winners"], out["avg_hold_losers"])
+
+    def test_judge_score_correlation_is_computed(self):
+        trips = [dict(_trip("A", 10.0), judge_score=9.0),
+                 dict(_trip("B", 5.0), judge_score=8.0),
+                 dict(_trip("C", -5.0), judge_score=7.0)]
+        out = la.analyse_judge_calibration(trips)
+        self.assertIsNotNone(out["correlation"])
+        self.assertGreater(out["correlation"], 0.9, "monotonic data must correlate")
+
+    def test_pearson_handles_degenerate_input(self):
+        self.assertEqual(la.pearson([1, 2], [1, 2])[0], None, "n<3 is undefined")
+        self.assertEqual(la.pearson([1, 1, 1], [1, 2, 3])[0], None, "zero variance")
+
+    def test_regime_split(self):
+        trips = [_trip("A", 5.0, entry_date="2026-08-01"),
+                 _trip("B", -5.0, entry_date="2026-08-02")]
+        regime = {"2026-08-01": "RISK_ON", "2026-08-02": "RISK_OFF"}
+        out = la.analyse_regime(trips, regime)
+        self.assertEqual(out["RISK_ON"]["n"], 1)
+        self.assertEqual(out["RISK_OFF"]["n"], 1)
+
+
+class TestVetoOpportunityCost(unittest.TestCase):
+    """
+    With almost every candidate vetoed, forward returns on rejected names are
+    the only evidence about whether the gates are calibrated or just too tight.
+    """
+
+    def test_forward_return_is_measured_in_calendar_days(self):
+        prices = {"X": {"2026-08-03": 100.0, "2026-08-08": 90.0}}
+        vetoes = [{"date": "2026-08-03", "symbol": "X", "reason": "chase"}]
+        out = la.analyse_veto_cost(vetoes, prices, horizons=(5,))
+        self.assertAlmostEqual(out["chase"]["5d"]["avg_forward_return"], -10.0)
+        self.assertEqual(out["chase"]["5d"]["avg_actual_gap_days"], 5)
+
+    def test_sparse_history_does_not_mislabel_a_distant_observation(self):
+        """
+        Indexing "the 5th later observation" compared a 5-day horizon against a
+        50-day gap on the real, sparse research history. Out-of-tolerance
+        observations must be dropped, not relabelled.
+        """
+        prices = {"X": {"2026-06-30": 100.0, "2026-08-21": 130.0}}
+        vetoes = [{"date": "2026-06-30", "symbol": "X", "reason": "chase"}]
+        out = la.analyse_veto_cost(vetoes, prices, horizons=(5,))
+        self.assertEqual(out, {}, "a 52-day gap cannot stand in for a 5-day horizon")
+
+    def test_nearest_date_respects_tolerance(self):
+        series = {"2026-08-01": 1.0, "2026-08-06": 1.0, "2026-08-30": 1.0}
+        self.assertEqual(la._nearest_date(series, "2026-08-01", 5), "2026-08-06")
+        self.assertIsNone(la._nearest_date(series, "2026-08-01", 100))
+
+    def test_veto_reasons_are_classified(self):
+        cases = [("CHASE VETO: RSI(14) 83 is above 60", "chase"),
+                 ("EARNINGS VETO: NVDA flagged", "earnings"),
+                 ("Discovery quality veto: scored 0.0/2.5", "discovery_quality"),
+                 ("CASH BELOW 20% FLOOR (12%)", "cash_floor"),
+                 ("something unrecognised", "other")]
+        for text, expected in cases:
+            with self.subTest(text=text[:24]):
+                self.assertEqual(la._veto_class(text), expected)
+
+    def test_report_renders_with_no_data(self):
+        """The EOD pipeline must not crash on an empty record."""
+        rendered = la.render(la.build(round_trips=[]))
+        self.assertIn("Trade Learnings", rendered)
