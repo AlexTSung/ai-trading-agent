@@ -34,14 +34,21 @@ echo "════════════════════════�
 TRADE_EXIT=$?
 echo "[$(date)] Trade run finished (exit: $TRADE_EXIT)" >> "$LOG_FILE"
 
-# Step 2: Optimizer — tune weights from accumulated journal data
-# Runs after every session so the agent learns continuously
+# Step 2: Graduation checker + post-trade learning loop
+# Learns from every closed trade: adjusts weights, deprioritizes losing pairs,
+# updates graduation progress report
+echo "[$(date)] Running graduation checker + learning loop..." >> "$LOG_FILE"
+/usr/bin/python3 forex_graduation.py eod >> "$LOG_FILE" 2>&1
+GRAD_EXIT=$?
+echo "[$(date)] Graduation + learning finished (exit: $GRAD_EXIT)" >> "$LOG_FILE"
+
+# Step 3: Optimizer — pattern detection + additional weight tuning
 echo "[$(date)] Running optimizer (daily weight tuning)..." >> "$LOG_FILE"
 /usr/bin/python3 forex_optimizer.py daily >> "$LOG_FILE" 2>&1
 OPT_EXIT=$?
 echo "[$(date)] Optimizer finished (exit: $OPT_EXIT)" >> "$LOG_FILE"
 
-# Step 3: Weekly strategy scrape (Sundays only)
+# Step 4: Weekly strategy scrape (Sundays only)
 DAY_OF_WEEK=$(date +%u)  # 1=Mon ... 7=Sun
 if [ "$DAY_OF_WEEK" = "7" ]; then
     echo "[$(date)] Sunday — running weekly strategy scrape..." >> "$LOG_FILE"

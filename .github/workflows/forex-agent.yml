@@ -67,6 +67,14 @@ jobs:
             patterns)     python3 forex_optimizer.py patterns ;;
           esac
 
+      - name: Graduation checker + post-trade learning
+        if: github.event.inputs.mode == '' || github.event.inputs.mode == 'full'
+        env:
+          OANDA_API_KEY:    ${{ secrets.OANDA_API_KEY }}
+          OANDA_ACCOUNT_ID: ${{ secrets.OANDA_ACCOUNT_ID }}
+          OANDA_ENV:        practice
+        run: python3 forex_graduation.py eod
+
       - name: Run optimizer (tune weights from journal)
         if: github.event.inputs.mode == '' || github.event.inputs.mode == 'full'
         env:
@@ -97,6 +105,8 @@ jobs:
             logs/forex/*_scan.json \
             logs/forex/*_trades.json \
             logs/forex/*_reflection.md \
+            logs/forex/graduation-*.md \
+            logs/forex/learning_log.jsonl \
             forex_config.json \
             strategies/forex_learnings.md 2>/dev/null || true
 
