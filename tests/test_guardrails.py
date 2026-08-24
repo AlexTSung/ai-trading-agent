@@ -360,11 +360,59 @@ class TestLearnedHintRails(unittest.TestCase):
         self._write_hints(scope="oanda_forex", approve_threshold=9.0)
         self.assertEqual(judge.load_learned_hints()["applied"], {})
 
-    def test_rail2_small_sample_holds_everything_back(self):
-        self._write_trips(12)
+    def test_rail2_observe_tier_applies_nothing(self):
+        """Below the first tier nothing may change, but patterns still record."""
+        self._write_trips(3)
         self._write_hints(scope="alpaca_equities", approve_threshold=8.0,
                           news_weight_adj=0.81)
-        self.assertEqual(judge.load_learned_hints()["applied"], {})
+        result = judge.load_learned_hints()
+        self.assertEqual(result["applied"], {})
+        self.assertEqual(result["tier"], "observe")
+
+    def test_tier_ladder_scales_the_allowed_band(self):
+        expected = [(3, "observe", 0.0), (5, "advisory", 0.03),
+                    (10, "active", 0.06), (20, "active", 0.10),
+                    (30, "confident", 0.15), (500, "confident", 0.15)]
+        for sample, tier, band in expected:
+            with self.subTest(sample=sample):
+                self.assertEqual(judge.learning_tier(sample), (tier, band))
+
+    def test_advisory_tier_records_weights_without_applying_them(self):
+        self._write_trips(6)
+        self._write_hints(scope="alpaca_equities", news_weight_adj=0.81)
+        result = judge.load_learned_hints()
+        self.assertEqual(result["tier"], "advisory")
+        self.assertNotIn("news_weight_mult", result["applied"])
+        self.assertTrue(any("ADVISORY" in n for n in result["notes"]))
+
+    def test_weight_band_tightens_on_smaller_samples(self):
+        """The same raw hint must move less when the evidence is thinner."""
+        self._write_hints(scope="alpaca_equities", news_weight_adj=0.50)
+        self._write_trips(10)
+        at10 = judge.load_learned_hints()["applied"]["news_weight_mult"]
+        self._write_trips(30)
+        at30 = judge.load_learned_hints()["applied"]["news_weight_mult"]
+        self.assertGreater(at10, at30, "10 trips must permit a smaller move than 30")
+        self.assertAlmostEqual(at10, 0.94, places=2)
+        self.assertAlmostEqual(at30, 0.85, places=2)
+
+    def test_risk_reducing_gate_acts_from_the_advisory_tier(self):
+        """Tightening on thin evidence is prudent; loosening never is."""
+        self._write_trips(6)
+        self._write_hints(scope="alpaca_equities", approve_threshold=8.0)
+        self.assertEqual(
+            judge.load_learned_hints()["applied"].get("watchlist_gate"), 8.0)
+
+    def test_wilson_interval_widens_on_small_samples(self):
+        lo5, hi5 = judge.wilson_interval(3, 5)
+        lo50, hi50 = judge.wilson_interval(30, 50)
+        self.assertGreater(hi5 - lo5, hi50 - lo50)
+        self.assertGreater(hi5 - lo5, 0.35, "5 trips cannot distinguish skill from luck")
+
+    def test_wilson_interval_rejects_nonsense(self):
+        self.assertEqual(judge.wilson_interval(None, 10), (None, None))
+        self.assertEqual(judge.wilson_interval(11, 10), (None, None))
+        self.assertEqual(judge.wilson_interval(1, 0), (None, None))
 
     def test_rail3_gate_may_tighten(self):
         self._write_trips(50)

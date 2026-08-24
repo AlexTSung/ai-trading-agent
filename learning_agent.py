@@ -188,6 +188,48 @@ def detect_patterns(trades, judge_lines):
 
 # ── weight hint update ────────────────────────────────────────────────────────
 
+def load_round_trips():
+    """Realized P&L percentages from logs/paper/round-trips.csv, or None."""
+    path = LOG_DIR / "round-trips.csv"
+    if not path.exists():
+        return None
+    out = []
+    try:
+        with path.open() as f:
+            for row in csv.DictReader(f):
+                try:
+                    out.append(float(row["pnl_pct"]))
+                except (KeyError, TypeError, ValueError):
+                    continue
+    except OSError:
+        return None
+    return out
+
+
+def report_round_trip_observations():
+    """
+    Print what the latest closed trades say, at every sample size.
+
+    Observation is separated from adjustment on purpose. Recording a pattern
+    after each round trip costs nothing and builds the record; changing a
+    parameter on that same evidence is what overfits. The Judge decides how much
+    of this is allowed to affect scoring, based on its own tier rules.
+    """
+    rt = load_round_trips()
+    if not rt:
+        print("  [round trips] none on record yet")
+        return
+    wins = [p for p in rt if p > 0]
+    losses = [p for p in rt if p < 0]
+    gross_l = abs(sum(losses))
+    pf = (sum(wins) / gross_l) if gross_l else float("inf") if wins else 0.0
+    print(f"  [round trips] {len(rt)} closed  |  win rate "
+          f"{len(wins)/len(rt)*100:.0f}%  |  expectancy {sum(rt)/len(rt):+.2f}%"
+          f"  |  profit factor {pf:.2f}")
+    print(f"  [round trips] last 5: "
+          + ", ".join(f"{p:+.1f}%" for p in rt[-5:]))
+
+
 def update_weight_hints(patterns):
     hints = {}
     if WEIGHTS_LOG.exists():
@@ -205,6 +247,14 @@ def update_weight_hints(patterns):
             hints["approve_threshold"] = max(hints.get("approve_threshold", 7.0), 8.0)
 
     # Scope tag: the consuming Judge refuses hints that are not its own.
+    # Carry the realized sample forward so the Judge can size its own
+    # confidence interval. Round trips are the honest unit: a calibration row
+    # scores an entry on its first afternoon and never sees the exit.
+    rt = load_round_trips()
+    if rt is not None:
+        hints["round_trips"] = len(rt)
+        hints["wins"] = sum(1 for t in rt if t > 0)
+
     hints["scope"] = HINT_SCOPE
     hints["last_updated"] = date.today().isoformat()
     hints["total_trades"]  = sum(1 for p in patterns if p["id"] == "win_rate_summary" for _ in range(p["count"]))
@@ -330,6 +380,8 @@ def main():
         return
 
     print(f"  Loaded {len(trades)} trade records, {len(judge_lines)} judge entries.")
+
+    report_round_trip_observations()
 
     patterns = detect_patterns(trades, judge_lines)
     hints    = update_weight_hints(patterns)

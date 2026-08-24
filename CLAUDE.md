@@ -267,13 +267,42 @@ references to `forex_config.json` or `logs/forex/`.
 them only under all four of:
 
 1. **Scope** — file must be tagged `alpaca_equities`.
-2. **Sample** — at least 30 **closed round trips** on record. Calibration rows
-   are not enough; an entry-day score never saw its own exit.
+2. **Graduated sample** — the *size* of any adjustment scales with the number of
+   **closed round trips** (see below). Calibration rows are not enough; an
+   entry-day score never saw its own exit.
 3. **Tighten-only** — a learned gate may rise above the documented floor, never
    fall below it. A loop that can lower its own bar will do exactly that to book
    more apparent wins.
-4. **Clamp + log** — weight multipliers bounded to ±15%, and every applied hint
-   is printed in the judge report each run, applied or not.
+4. **Clamp + log** — weight multipliers bounded by the tier band, and every
+   applied hint is printed in the judge report each run, applied or not.
+
+### Learning cadence — observe fast, adjust in proportion
+
+| Closed round trips | Tier | Weight band | What happens |
+|---|---|---|---|
+| every trip | — | — | pattern recorded, printed by `learning_agent.py` |
+| 1–4 | `observe` | none | nothing applied |
+| 5–9 | `advisory` | ±3% | risk-**reducing** gate changes apply; weights advisory only |
+| 10–19 | `active` | ±6% | small weight nudges take effect |
+| 20–29 | `active` | ±10% | |
+| 30+ | `confident` | ±15% | full band |
+
+**Observation is separated from adjustment on purpose.** Recording what each
+round trip implies costs nothing and builds the record. Changing a parameter on
+that same evidence is what overfits. So the agent notices immediately and moves
+slowly.
+
+**The asymmetry is deliberate.** Risk-*reducing* changes (raising a gate) apply
+from the advisory tier, because reacting quickly to losses is prudent.
+Risk-*increasing* changes need more evidence, because reacting quickly to wins
+is how a run of luck becomes policy.
+
+**Why not act hard at 5 trips.** The judge report prints a Wilson 95% confidence
+interval next to every hint. At 5 round trips a 60% observed win rate spans
+**23%–88%** — an interval containing both "excellent" and "losing". At 30 it
+narrows to 42%–75%. Small nudges on thin evidence are fine; betting the strategy
+on it is not. A raw −50% weight hint is throttled to −6% at 10 trips and only
+reaches −15% at 30.
 
 `learning_agent.py` may append to the **Lessons Learned** section of this file
 and nothing else. It cannot edit Hard Rules or graduation criteria.

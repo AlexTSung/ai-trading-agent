@@ -63,10 +63,10 @@ DISCOVERY_MIN_QUALITY = 0.5
 #   1. SCOPE — a hint file not tagged alpaca_equities is refused outright. The
 #      OANDA judge scores carry/momentum/session; applying its lessons here
 #      would be meaningless, and vice versa.
-#   2. SAMPLE — nothing applies until there are enough CLOSED round trips to fit
-#      against. The current file was fitted on 24 calibration rows of which ~6
-#      are corrupt sentinels and 1 is quarantined, with 0 since the baseline.
-#      A weight tuned on that is noise.
+#   2. SAMPLE — the allowed adjustment scales with the number of CLOSED round
+#      trips (see LEARNING_TIERS). Patterns are recorded after every single
+#      round trip, advisory from 5, small nudges apply from 10, and the full
+#      band only at 30. A flat on/off gate meant no learning for months.
 #   3. TIGHTEN-ONLY — a learned gate may rise above the documented floor but
 #      never fall below it. Otherwise the loop's cheapest way to book more
 #      "wins" is to lower its own bar, and risk limits would erode silently.
@@ -75,9 +75,54 @@ DISCOVERY_MIN_QUALITY = 0.5
 #      behaviour is always visible in the artefact rather than buried in JSON.
 HINTS_PATH        = os.path.join(ROOT, "logs", "learnings", "alpaca_judge_hints.json")
 HINTS_SCOPE       = "alpaca_equities"
-HINTS_MIN_SAMPLE  = 30      # closed round trips required before any hint applies
-HINTS_WEIGHT_BAND = 0.15    # weight multipliers clamped to 1 +/- this
 ROUND_TRIPS_PATH  = os.path.join(JOURNAL_DIR, "round-trips.csv")
+# ── Graduated learning tiers ──────────────────────────────────────────────────
+# A single 30-trip on/off gate meant no learning at all for months at the
+# current trade rate. Instead the ALLOWED ADJUSTMENT scales with the sample, so
+# iteration is fast while the size of any single change stays proportional to
+# the evidence behind it.
+#
+#   (min_round_trips, max_weight_deviation, tier_name)
+#
+# Why not act hard at 5: with 5 trips a 60% observed win rate carries a 95%
+# confidence interval of roughly 23%-88%. That interval contains both "excellent"
+# and "losing", so a large parameter move fitted on it is fitting noise. Small
+# nudges are fine; betting the strategy is not.
+LEARNING_TIERS = (
+    (5,  0.03, "advisory"),    # observe + report; weights recorded, not applied
+    (10, 0.06, "active"),      # small nudges take effect
+    (20, 0.10, "active"),
+    (30, 0.15, "confident"),   # full band
+)
+HINTS_WEIGHT_BAND_MAX = LEARNING_TIERS[-1][1]   # widest band any tier may use
+
+
+def learning_tier(sample: int) -> tuple:
+    """Return (tier_name, max_weight_deviation) for a given round-trip count."""
+    tier, band = "observe", 0.0
+    for threshold, allowed, name in LEARNING_TIERS:
+        if sample >= threshold:
+            tier, band = name, allowed
+    return tier, band
+
+
+def wilson_interval(wins, n, z: float = 1.96) -> tuple:
+    """
+    95% Wilson score interval for a win rate. Reported alongside every applied
+    hint so the width of the uncertainty is visible, not just the point estimate.
+    """
+    try:
+        wins, n = int(wins), int(n)
+    except (TypeError, ValueError):
+        return None, None
+    if n <= 0 or wins < 0 or wins > n:
+        return None, None
+    p = wins / n
+    denom = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / denom
+    margin = (z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5)) / denom
+    return max(0.0, centre - margin), min(1.0, centre + margin)
+
 
 
 def _closed_round_trip_count() -> int:
@@ -108,32 +153,54 @@ def load_learned_hints() -> dict:
         return out
 
     sample = _closed_round_trip_count()
-    if sample < HINTS_MIN_SAMPLE:
+    tier, band = learning_tier(sample)
+    out["tier"], out["sample"], out["band"] = tier, sample, band
+
+    if tier == "observe":
         out["notes"].append(
-            f"Hints held back: {sample} closed round trips, need "
-            f"{HINTS_MIN_SAMPLE} before tuning on them")
+            f"OBSERVE tier: {sample} closed round trip(s), need "
+            f"{LEARNING_TIERS[0][0]} before any adjustment. Patterns are still "
+            f"recorded every round trip.")
         return out
 
-    # Gate: tighten only.
+    # ── Risk-reducing changes may act on a small sample; risk-increasing ones
+    # may not. Reacting fast to losses is prudent; reacting fast to wins is how
+    # a run of luck becomes a policy. The gate can only ever tighten.
     thr = hints.get("approve_threshold")
     if isinstance(thr, (int, float)):
         if thr > SCORE_GATE_WATCHLIST:
             out["applied"]["watchlist_gate"] = round(float(thr), 2)
+            out["notes"].append(
+                f"Gate tightened to {thr} — risk-reducing, allowed at {tier} tier")
         else:
             out["notes"].append(
-                f"Gate hint {thr} ignored — would loosen the {SCORE_GATE_WATCHLIST} floor")
+                f"Gate hint {thr} ignored — would loosen the "
+                f"{SCORE_GATE_WATCHLIST} floor")
 
-    # News weight: clamped band.
+    # ── Weight nudges scale with sample size instead of switching on at 30.
     adj = hints.get("news_weight_adj")
     if isinstance(adj, (int, float)):
-        lo, hi = 1 - HINTS_WEIGHT_BAND, 1 + HINTS_WEIGHT_BAND
-        clamped = max(lo, min(float(adj), hi))
-        if clamped != adj:
+        if tier == "advisory":
             out["notes"].append(
-                f"News weight hint {adj:.2f} clamped to {clamped:.2f}")
-        out["applied"]["news_weight_mult"] = round(clamped, 3)
+                f"News weight hint {adj:.2f} is ADVISORY at {sample} round trips "
+                f"— recorded, not applied. Needs "
+                f"{LEARNING_TIERS[1][0]} to take effect.")
+        else:
+            lo, hi = 1 - band, 1 + band
+            clamped = max(lo, min(float(adj), hi))
+            if abs(clamped - adj) > 1e-9:
+                out["notes"].append(
+                    f"News weight hint {adj:.2f} clamped to {clamped:.2f} "
+                    f"(±{band:.0%} band at {sample} round trips)")
+            out["applied"]["news_weight_mult"] = round(clamped, 3)
 
-    out["notes"].append(f"Fitted on {sample} closed round trips")
+    lo_ci, hi_ci = wilson_interval(hints.get("wins"), sample)
+    if lo_ci is not None:
+        out["notes"].append(
+            f"Win rate 95% CI on {sample} trips: {lo_ci:.0%}–{hi_ci:.0%}"
+            + ("  (too wide to distinguish skill from luck)"
+               if hi_ci - lo_ci > 0.35 else ""))
+    out["notes"].append(f"{tier.upper()} tier — fitted on {sample} closed round trips")
     return out
 
 
