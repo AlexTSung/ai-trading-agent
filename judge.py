@@ -55,6 +55,88 @@ EARNINGS_VETO_DAYS = 3  # Auto-veto if earnings within this many days
 DISCOVERY_MIN_QUALITY = 0.5
 
 
+# ── Learned hints (Alpaca equities only) ──────────────────────────────────────
+# learning_agent.py writes logs/learnings/alpaca_judge_hints.json after each EOD.
+# Those hints were being computed and never read — the same fate as the VIX and
+# earnings data before them. They are consumed here, under four hard rails:
+#
+#   1. SCOPE — a hint file not tagged alpaca_equities is refused outright. The
+#      OANDA judge scores carry/momentum/session; applying its lessons here
+#      would be meaningless, and vice versa.
+#   2. SAMPLE — nothing applies until there are enough CLOSED round trips to fit
+#      against. The current file was fitted on 24 calibration rows of which ~6
+#      are corrupt sentinels and 1 is quarantined, with 0 since the baseline.
+#      A weight tuned on that is noise.
+#   3. TIGHTEN-ONLY — a learned gate may rise above the documented floor but
+#      never fall below it. Otherwise the loop's cheapest way to book more
+#      "wins" is to lower its own bar, and risk limits would erode silently.
+#   4. CLAMP + LOG — weight adjustments are bounded to a narrow band and every
+#      applied hint is reported in the judge output, so a change to trading
+#      behaviour is always visible in the artefact rather than buried in JSON.
+HINTS_PATH        = os.path.join(ROOT, "logs", "learnings", "alpaca_judge_hints.json")
+HINTS_SCOPE       = "alpaca_equities"
+HINTS_MIN_SAMPLE  = 30      # closed round trips required before any hint applies
+HINTS_WEIGHT_BAND = 0.15    # weight multipliers clamped to 1 +/- this
+ROUND_TRIPS_PATH  = os.path.join(JOURNAL_DIR, "round-trips.csv")
+
+
+def _closed_round_trip_count() -> int:
+    """Completed entry->exit pairs on record. The honest sample size."""
+    try:
+        with open(ROUND_TRIPS_PATH) as f:
+            return max(0, sum(1 for _ in f) - 1)   # minus header
+    except OSError:
+        return 0
+
+
+def load_learned_hints() -> dict:
+    """
+    Return {"applied": {...}, "notes": [...]} — never raises.
+    `applied` is empty unless every rail is satisfied.
+    """
+    out = {"applied": {}, "notes": []}
+    try:
+        with open(HINTS_PATH) as f:
+            hints = json.load(f)
+    except (OSError, ValueError):
+        return out
+
+    scope = hints.get("scope")
+    if scope != HINTS_SCOPE:
+        out["notes"].append(
+            f"Hints refused: scope {scope!r} is not {HINTS_SCOPE!r}")
+        return out
+
+    sample = _closed_round_trip_count()
+    if sample < HINTS_MIN_SAMPLE:
+        out["notes"].append(
+            f"Hints held back: {sample} closed round trips, need "
+            f"{HINTS_MIN_SAMPLE} before tuning on them")
+        return out
+
+    # Gate: tighten only.
+    thr = hints.get("approve_threshold")
+    if isinstance(thr, (int, float)):
+        if thr > SCORE_GATE_WATCHLIST:
+            out["applied"]["watchlist_gate"] = round(float(thr), 2)
+        else:
+            out["notes"].append(
+                f"Gate hint {thr} ignored — would loosen the {SCORE_GATE_WATCHLIST} floor")
+
+    # News weight: clamped band.
+    adj = hints.get("news_weight_adj")
+    if isinstance(adj, (int, float)):
+        lo, hi = 1 - HINTS_WEIGHT_BAND, 1 + HINTS_WEIGHT_BAND
+        clamped = max(lo, min(float(adj), hi))
+        if clamped != adj:
+            out["notes"].append(
+                f"News weight hint {adj:.2f} clamped to {clamped:.2f}")
+        out["applied"]["news_weight_mult"] = round(clamped, 3)
+
+    out["notes"].append(f"Fitted on {sample} closed round trips")
+    return out
+
+
 def honest_portfolio_value(account: dict, positions: list) -> float:
     """
     Portfolio value with phantom equity marked back to cost basis.
@@ -946,7 +1028,9 @@ def score_symbol(symbol: str, research: dict) -> dict:
     # inflated every total by as much as 2.0 points and pushed unvetted discovery
     # stocks over the 8.5 gate. Clamp at the source so the 10-point scale is real.
     t_score, t_note = _clamp(score_technical(technicals),  W_TECHNICAL)
-    n_score, n_note = _clamp(score_news(news, sym_data),   W_NEWS)
+    _hints = load_learned_hints()
+    _news_w = W_NEWS * _hints["applied"].get("news_weight_mult", 1.0)
+    n_score, n_note = _clamp(score_news(news, sym_data),   _news_w)
     m_score, m_note = _clamp(score_macro(research),        W_MACRO)
     p_score, p_note = _clamp(score_portfolio(research, symbol), W_PORTFOLIO)
     v_score, v_note = _clamp(score_volatility(research),   W_VOLATILITY)
@@ -1021,8 +1105,11 @@ def score_symbol(symbol: str, research: dict) -> dict:
             },
         }
 
-    # Source-aware approval threshold
+    # Source-aware approval threshold, with a learned tightening if one applies.
     gate = SCORE_GATE_DISCOVERY if is_discovery else SCORE_GATE_WATCHLIST
+    _learned_gate = _hints["applied"].get("watchlist_gate")
+    if _learned_gate and not is_discovery:
+        gate = max(gate, _learned_gate)
 
     if total >= gate:
         rec = "APPROVE"
@@ -1054,6 +1141,7 @@ def score_symbol(symbol: str, research: dict) -> dict:
         # Passed to the executor so the Citadel VIX sizing rule is actually
         # applied to share counts, not just mentioned in a rationale string.
         "size_multiplier": _intel.get("size_multiplier", 1.0),
+        "learned_hints": _hints,
         "vix": _intel.get("vix"),
         "is_discovery": is_discovery,
         "is_speculative": is_speculative,
@@ -1157,8 +1245,17 @@ def run_judge_session() -> dict:
     md_lines = [f"# Judge Report — {today}\n",
                 f"**Approved**: {', '.join(results['approved']) or 'None'}",
                 f"**Held**: {', '.join(results['held']) or 'None'}",
-                f"**Vetoed**: {', '.join(results['vetoed']) or 'None'}\n",
-                "---\n"]
+                f"**Vetoed**: {', '.join(results['vetoed']) or 'None'}\n"]
+
+    # Learned hints are reported every run, applied or not. A change to trading
+    # behaviour must be visible in the artefact, not buried in a JSON file.
+    _h = load_learned_hints()
+    md_lines.append("**Learned hints (alpaca_equities)**: "
+                    + (", ".join(f"{k}={v}" for k, v in _h["applied"].items())
+                       if _h["applied"] else "none applied"))
+    for _n in _h["notes"]:
+        md_lines.append(f"  - {_n}")
+    md_lines.append("\n---\n")
     for sym, scored in results["scores"].items():
         md_lines.append(format_judge_report(scored))
         md_lines.append("\n---\n")

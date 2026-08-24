@@ -25,7 +25,12 @@ LEARN_DIR.mkdir(parents=True, exist_ok=True)
 
 MONTHLY_LOG = LEARN_DIR / f"learnings-{date.today().strftime('%Y-%m')}.md"
 CAL_LOG     = LOG_DIR / "calibration-log.csv"
-WEIGHTS_LOG = LEARN_DIR / "judge_weight_hints.json"
+# Namespaced per agent. A generic "judge_weight_hints.json" in a shared folder
+# is one careless import away from applying equities lessons to forex, where the
+# criteria are entirely different (carry/momentum/session vs news/macro/quality).
+WEIGHTS_LOG = LEARN_DIR / "alpaca_judge_hints.json"
+LEGACY_WEIGHTS_LOG = LEARN_DIR / "judge_weight_hints.json"
+HINT_SCOPE = "alpaca_equities"
 
 MODE = sys.argv[1] if len(sys.argv) > 1 else "eod"
 
@@ -187,6 +192,8 @@ def update_weight_hints(patterns):
     hints = {}
     if WEIGHTS_LOG.exists():
         hints = json.loads(WEIGHTS_LOG.read_text())
+    elif LEGACY_WEIGHTS_LOG.exists():
+        hints = json.loads(LEGACY_WEIGHTS_LOG.read_text())   # one-time migration
 
     for p in patterns:
         if p["action"] == "reduce_news_weight":
@@ -197,6 +204,8 @@ def update_weight_hints(patterns):
         if p["action"] == "raise_approve_threshold":
             hints["approve_threshold"] = max(hints.get("approve_threshold", 7.0), 8.0)
 
+    # Scope tag: the consuming Judge refuses hints that are not its own.
+    hints["scope"] = HINT_SCOPE
     hints["last_updated"] = date.today().isoformat()
     hints["total_trades"]  = sum(1 for p in patterns if p["id"] == "win_rate_summary" for _ in range(p["count"]))
     WEIGHTS_LOG.write_text(json.dumps(hints, indent=2))

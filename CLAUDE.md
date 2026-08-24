@@ -238,6 +238,51 @@ python3 trade.py session        python3 trade.py check-phantom
 python3 journal.py eod          python3 reviewer.py graduation
 ```
 
+## Two Agents, Two Judges — Never Share Scoring State
+
+This repo hosts two independent trading agents. They share infrastructure
+patterns but **must not share scoring state or learned parameters**.
+
+| | Alpaca equities | OANDA forex |
+|---|---|---|
+| Judge | `judge.py` | `forex_judge.py` |
+| Criteria | technical, news, macro, portfolio, volatility, quality | carry, momentum, technical, session, volatility, risk_reward |
+| Executor | `trade.py` | `forex_trade.py` |
+| Learned params | `logs/learnings/alpaca_judge_hints.json` (`scope: alpaca_equities`) | `forex_config.json` |
+| Logs | `logs/paper/` | `logs/forex/` |
+
+Only `technical` and `volatility` even share a name, and they measure different
+things. A carry score is meaningless for AAPL; an RSI-on-daily-bars reading does
+not transfer to a 4-hour FX chart. Applying one agent's learned weights to the
+other would silently corrupt both.
+
+**Enforcement.** Every hints file carries a `scope` tag and the consuming Judge
+refuses a file whose scope is not its own. Verified: `forex_judge.py`,
+`forex_optimizer.py` and `forex_trade.py` contain zero references to
+`alpaca_judge_hints.json` or `logs/learnings/`, and `judge.py` contains zero
+references to `forex_config.json` or `logs/forex/`.
+
+### Learned hints — four rails
+`learning_agent.py` proposes adjustments after each EOD. `judge.py` consumes
+them only under all four of:
+
+1. **Scope** — file must be tagged `alpaca_equities`.
+2. **Sample** — at least 30 **closed round trips** on record. Calibration rows
+   are not enough; an entry-day score never saw its own exit.
+3. **Tighten-only** — a learned gate may rise above the documented floor, never
+   fall below it. A loop that can lower its own bar will do exactly that to book
+   more apparent wins.
+4. **Clamp + log** — weight multipliers bounded to ±15%, and every applied hint
+   is printed in the judge report each run, applied or not.
+
+`learning_agent.py` may append to the **Lessons Learned** section of this file
+and nothing else. It cannot edit Hard Rules or graduation criteria.
+
+### File ownership
+Two agents have already collided on these files, silently reverting safety
+controls. Whoever edits a file outside their own column above must **rebase, not
+regenerate** — and run the guardrail checks before pushing.
+
 ## Hard Rules (Never Break These)
 1. **Check market status first.** Never place orders when `is_open` is false.
 2. **No market orders. Buy pullbacks, not breakouts.** Entry limit orders must target MA20 support levels or RSI < 45 conditions — not just ask − 0.3%. A cosmetic 0.3% discount on a stock at a 20-day high is still a bad entry. Wait for the stock to pull back to a natural support level before entering. Formula when entering: `limit = MA20 × 0.995` (0.5% below MA20 support) for pullback entries, or `ask × 0.997` only when the stock is already below MA20 (value entry).
