@@ -27,9 +27,10 @@ Overall win rate: 29% (7W / 5L / 12N of 24 trades). Below 55% graduation thresho
 ```json
 {
   "approve_threshold": 8.0,
-  "news_weight_adj": 0.81,
+  "news_weight_adj": 0.7290000000000001,
   "last_updated": "2026-08-24",
-  "total_trades": 24
+  "total_trades": 24,
+  "scope": "alpaca_equities"
 }
 ```
 
