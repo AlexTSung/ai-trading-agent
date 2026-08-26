@@ -292,9 +292,14 @@ def score_volatility(r: dict) -> tuple[float, dict]:
         if lo <= atr_pips <= hi:
             raw = 1.0
             details["atr_regime"] = "healthy"
-        elif atr_pips < lo * 0.5:
+        elif atr_pips < lo * 0.35:
+            # Genuinely dead market — don't trade
             raw = 0.3
             details["atr_regime"] = "too_quiet"
+        elif atr_pips < lo * 0.60:
+            # Quiet but normal for overnight/Tokyo session — still tradeable
+            raw = 0.55
+            details["atr_regime"] = "quiet_ok"
         elif atr_pips > hi * 1.5:
             raw = 0.4
             details["atr_regime"] = "too_volatile"
