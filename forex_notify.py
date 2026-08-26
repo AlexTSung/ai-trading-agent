@@ -21,7 +21,7 @@ OPP_LOG = os.path.join(LOG_DIR, f"opportunities-{date.today().strftime('%Y-%m')}
 os.makedirs(LOG_DIR, exist_ok=True)
 
 NOTIFY_EMAIL = os.getenv("NOTIFY_EMAIL", "alex.sung@youversion.com")
-GMAIL_USER   = os.getenv("GMAIL_USER",   "alex.sung@youversion.com")
+GMAIL_USER   = os.getenv("GMAIL_USER",   "onfire4jc@gmail.com")
 GMAIL_APP_PW = os.getenv("GMAIL_APP_PASSWORD", "")
 GATE         = 7.0
 DRY_CHECK    = "--check" in sys.argv
