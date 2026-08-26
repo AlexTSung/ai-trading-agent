@@ -820,3 +820,72 @@ class TestOptionsManagementRules(unittest.TestCase):
                 strat = builder(S=100.0, T=40 / 365, sigma=0.30)
                 self.assertIsNotNone(strat["max_loss"])
                 self.assertGreater(strat["max_loss"], 0)
+
+
+class TestDeltaStrikeSelection(unittest.TestCase):
+    """
+    Strikes were a fixed 10% OTM, which ignores volatility: 10% is ~1.6 SD at
+    15% IV and ~0.4 SD at 100% IV, so the same structure carried wildly
+    different assignment odds. Delta targeting holds the odds constant instead.
+    """
+
+    T = 40 / 365
+
+    def test_target_delta_is_achieved_across_volatility_regimes(self):
+        from options_pricing import bsm_greeks
+        for iv in (0.15, 0.30, 0.60, 1.00):
+            for kind in ("call", "put"):
+                with self.subTest(iv=iv, type=kind):
+                    K = ostrat.strike_for_delta(100.0, self.T, iv,
+                                                ostrat.SHORT_STRIKE_DELTA, kind)
+                    d = abs(bsm_greeks(100.0, K, self.T,
+                                       ostrat.RISK_FREE_RATE, iv, kind)["delta"])
+                    self.assertAlmostEqual(d, ostrat.SHORT_STRIKE_DELTA, delta=0.03)
+
+    def test_strikes_widen_as_volatility_rises(self):
+        low = ostrat.strike_for_delta(100.0, self.T, 0.15, 0.16, "call")
+        high = ostrat.strike_for_delta(100.0, self.T, 1.00, 0.16, "call")
+        self.assertGreater(high, low, "a 16-delta call must sit further out at high IV")
+
+    def test_degenerate_inputs_fall_back_rather_than_returning_nonsense(self):
+        for sigma, T in ((0.0, self.T), (0.30, 0.0), (-1.0, self.T)):
+            with self.subTest(sigma=sigma, T=T):
+                K = ostrat.strike_for_delta(100.0, T, sigma, 0.16, "call")
+                self.assertGreater(K, 0)
+                self.assertLess(K, 1000)
+
+    def test_condor_wings_stay_outside_the_short_strikes(self):
+        for iv in (0.15, 0.30, 0.60, 1.00):
+            with self.subTest(iv=iv):
+                strikes = [l["strike"] for l in
+                           ostrat.build_iron_condor(100.0, self.T, iv)["legs"]]
+                self.assertEqual(strikes, sorted(strikes),
+                                 "legs must be ordered long put < short put < short call < long call")
+                self.assertEqual(len(set(strikes)), 4, "no duplicate strikes")
+
+    def test_delta_mode_sells_further_out_than_fixed_offsets_at_high_iv(self):
+        """
+        At 60% IV a fixed 10% offset sells ~0.30-delta strikes — a higher credit
+        bought with roughly double the breach probability. The better headline
+        reward/risk is compensation for risk, not a better trade.
+        """
+        from options_pricing import bsm_greeks
+        d = ostrat.build_iron_condor(100.0, self.T, 0.60)
+        f = ostrat.build_iron_condor(100.0, self.T, 0.60, use_delta=False)
+
+        def breach(strat):
+            legs = {l["type"]: l["strike"] for l in strat["legs"]}
+            dp = abs(bsm_greeks(100.0, legs["short_put"], self.T,
+                                ostrat.RISK_FREE_RATE, 0.60, "put")["delta"])
+            dc = abs(bsm_greeks(100.0, legs["short_call"], self.T,
+                                ostrat.RISK_FREE_RATE, 0.60, "call")["delta"])
+            return dp + dc
+
+        self.assertLess(breach(d), breach(f) * 0.7,
+                        "delta mode must carry materially lower breach probability")
+
+    def test_delta_mode_makes_low_iv_condors_viable(self):
+        """A fixed-offset condor at 15% IV collects too little to clear 0.25 R/R."""
+        d = ostrat.build_iron_condor(100.0, self.T, 0.15)
+        f = ostrat.build_iron_condor(100.0, self.T, 0.15, use_delta=False)
+        self.assertGreater(d["reward_risk"], f["reward_risk"])

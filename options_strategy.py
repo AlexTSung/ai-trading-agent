@@ -36,12 +36,67 @@ DTE_MIN_ENTRY = 21
 DTE_MAX_ENTRY = 60
 DTE_TARGET    = 45   # preferred entry when the chain offers a choice
 
+# ── Delta-based strike selection ──────────────────────────────────────────────
+# Strikes were chosen by a fixed 10% OTM offset, which ignores volatility
+# entirely: 10% is inside one standard deviation on a high-IV name and far
+# outside it on a quiet one, so the same nominal offset gave wildly different
+# assignment probabilities. Published premium-selling practice sizes by delta
+# instead — a ~16-delta short strike sits roughly one standard deviation out and
+# has about an 84% chance of expiring worthless, whatever the underlying's vol.
+SHORT_STRIKE_DELTA = 0.16   # target |delta| for short legs
+WING_DELTA         = 0.05   # target |delta| for protective wings
+
+
+def strike_for_delta(S: float, T: float, sigma: float, target_delta: float,
+                     option_type: str, r: float = None) -> float:
+    """
+    Strike whose |delta| is closest to target_delta, found by bisection on the
+    Black-Scholes delta (monotonic in strike, so bisection is safe).
+
+    Returns a whole-dollar strike. Falls back to a fixed percentage offset if
+    inputs are degenerate, so a bad IV reading cannot produce a nonsense strike.
+    """
+    r = RISK_FREE_RATE if r is None else r
+    if S <= 0 or T <= 0 or sigma <= 0 or not (0 < target_delta < 1):
+        offset = 0.10 if option_type == "call" else -0.10
+        return round(S * (1 + offset), 0)
+
+    def abs_delta(K):
+        try:
+            return abs(bsm_greeks(S, K, T, r, sigma, option_type)["delta"])
+        except Exception:
+            return 0.0
+
+    # Calls: delta falls as strike rises. Puts: |delta| falls as strike falls.
+    if option_type == "call":
+        lo, hi = S, S * 3.0
+    else:
+        lo, hi = S * 0.05, S
+
+    for _ in range(60):
+        mid = (lo + hi) / 2.0
+        d = abs_delta(mid)
+        if abs(d - target_delta) < 1e-4:
+            break
+        if option_type == "call":
+            if d > target_delta:
+                lo = mid          # too much delta -> move strike further out
+            else:
+                hi = mid
+        else:
+            if d > target_delta:
+                hi = mid          # too much delta -> move strike lower
+            else:
+                lo = mid
+    strike = round((lo + hi) / 2.0, 0)
+    return max(1.0, strike)
+
 
 # ── Strategy builders ─────────────────────────────────────────────────────────
 
 def build_iron_condor(S: float, T: float, sigma: float,
                       call_wing: float = 0.10, put_wing: float = 0.10,
-                      wing_width: float = 0.05) -> dict:
+                      wing_width: float = 0.05, use_delta: bool = True) -> dict:
     """
     Iron Condor: short OTM strangle + long OTM wing protection.
 
@@ -67,10 +122,22 @@ def build_iron_condor(S: float, T: float, sigma: float,
     """
     r = RISK_FREE_RATE
 
-    K_long_put   = round(S * (1 - put_wing - wing_width), 0)
-    K_short_put  = round(S * (1 - put_wing), 0)
-    K_short_call = round(S * (1 + call_wing), 0)
-    K_long_call  = round(S * (1 + call_wing + wing_width), 0)
+    # Delta-selected strikes when IV is usable, else the legacy fixed offsets.
+    # A fixed 10% offset is ~1.6 SD at 15% IV and ~0.4 SD at 100% IV, so it gave
+    # the same structure wildly different assignment odds across underlyings.
+    if use_delta and sigma > 0 and T > 0:
+        K_short_put  = strike_for_delta(S, T, sigma, SHORT_STRIKE_DELTA, "put")
+        K_short_call = strike_for_delta(S, T, sigma, SHORT_STRIKE_DELTA, "call")
+        K_long_put   = strike_for_delta(S, T, sigma, WING_DELTA, "put")
+        K_long_call  = strike_for_delta(S, T, sigma, WING_DELTA, "call")
+        # Wings must sit outside the shorts; fall back if the chain collapses.
+        if not (K_long_put < K_short_put < K_short_call < K_long_call):
+            use_delta = False
+    if not (use_delta and sigma > 0 and T > 0):
+        K_long_put   = round(S * (1 - put_wing - wing_width), 0)
+        K_short_put  = round(S * (1 - put_wing), 0)
+        K_short_call = round(S * (1 + call_wing), 0)
+        K_long_call  = round(S * (1 + call_wing + wing_width), 0)
 
     # Prices per share
     lp  = bsm_price(S, K_long_put,   T, r, sigma, "put")
@@ -124,7 +191,8 @@ def build_iron_condor(S: float, T: float, sigma: float,
 
 
 def build_short_strangle(S: float, T: float, sigma: float,
-                         call_otm: float = 0.10, put_otm: float = 0.10) -> dict:
+                         call_otm: float = 0.10, put_otm: float = 0.10,
+                         use_delta: bool = True) -> dict:
     """
     Short Strangle: sell OTM call + sell OTM put. Undefined risk.
 
@@ -135,8 +203,12 @@ def build_short_strangle(S: float, T: float, sigma: float,
     Gamma negative, Theta positive, Vega negative.
     """
     r = RISK_FREE_RATE
-    K_put  = round(S * (1 - put_otm), 0)
-    K_call = round(S * (1 + call_otm), 0)
+    if use_delta and sigma > 0 and T > 0:
+        K_put  = strike_for_delta(S, T, sigma, SHORT_STRIKE_DELTA, "put")
+        K_call = strike_for_delta(S, T, sigma, SHORT_STRIKE_DELTA, "call")
+    else:
+        K_put  = round(S * (1 - put_otm), 0)
+        K_call = round(S * (1 + call_otm), 0)
 
     put_price  = bsm_price(S, K_put,  T, r, sigma, "put")
     call_price = bsm_price(S, K_call, T, r, sigma, "call")

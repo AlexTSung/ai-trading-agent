@@ -181,6 +181,8 @@ premium selling is working.
 | Sell premium | IV Rank ≥ 60 | IV exceeds subsequent realized vol ~85% of the time by 2–4 vol points; filtering on high IVR captures more of that spread |
 | Buy premium | IV Rank ≤ 20 | only when volatility is genuinely compressed |
 | No position | IV Rank 21–59 | no edge in either direction |
+| Short strikes | ~16 delta (≈1 SD, ~84% expire worthless) |
+| Wings | ~5 delta |
 | Structure | defined risk only | `passes_risk_filters` rejects undefined `max_loss`, so `short_strangle` is built but never traded |
 | Entry window | 21–60 DTE, target 45 | inside 21 days gamma accelerates; past 60 theta is too slow |
 | Direction | condor neutral, put spread bullish, call spread bearish | |
@@ -188,16 +190,34 @@ premium selling is working.
 | Reward/risk | ≥ 0.25 | at least $0.25 credit per $1 at risk |
 | Theta | must be positive on credit structures | time decay has to be working for us |
 | Profit target | close at 50% of max profit | |
-| Loss stop | 1× credit collected | never lose more than the premium taken in |
+| Loss stop | 1× credit collected | never lose more than the premium taken in — **stricter than the 2× credit in published mechanics.** A tighter stop on an ~84%-win-rate strategy cuts positions that would have recovered; it also caps the tail. Revisit once the round-trip record can measure which costs more. |
 | Time stop | review at 21 DTE, force close at 7 | gamma risk is explosive near expiry |
 | Concurrency | max 5 open positions | |
 | Drawdown halt | stop new trades if monthly drawdown > 3.6% | |
 
 **Improvements to consider, in order of expected value:**
-1. **Delta-based strike selection.** Strikes are currently set by fixed % OTM
-   (10%). Published practice sizes by delta — ~16-delta short strikes, roughly
-   one standard deviation, ~84% chance of expiring worthless. A fixed 10% is far
-   too close in a high-IV name and needlessly far in a quiet one.
+1. ~~Delta-based strike selection~~ — **done.** Short legs target ~16 delta and
+   wings ~5 delta (`SHORT_STRIKE_DELTA`, `WING_DELTA`), found by bisection on
+   Black-Scholes delta. A fixed 10% offset was ~1.6 SD at 15% IV and ~0.4 SD at
+   100% IV, so the same structure carried very different assignment odds. Pass
+   `use_delta=False` for the legacy behaviour.
+
+   Measured at 40 DTE on a $100 underlying:
+
+   | IV | 16Δ call | 16Δ put | fixed 10% |
+   |---|---|---|---|
+   | 15% | 106 (+6%) | 96 (−4%) | 110 / 90 |
+   | 30% | 112 (+12%) | 92 (−8%) | 110 / 90 |
+   | 60% | 125 (+25%) | 84 (−16%) | 110 / 90 |
+   | 100% | 148 (+48%) | 76 (−24%) | 110 / 90 |
+
+   At 60% IV the fixed offset sells ~0.26/0.36-delta strikes — a **~62% chance
+   one side is breached** versus ~32% on delta strikes. Its higher headline
+   reward/risk (1.11 vs 0.33) is compensation for that risk, not a better trade.
+   Conversely at 15% IV the fixed condor collects $0.09 for a 0.018 reward/risk
+   and would be rejected by the 0.25 filter, while the delta condor collects
+   $0.60 at 0.251 and is tradeable.
+
 2. **Schedule it.** Equities and forex run in GitHub Actions; options runs only
    from local `run_options*.sh`, so it only manages positions when a laptop is
    on. Short options are the *least* safe thing to monitor intermittently.
