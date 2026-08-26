@@ -11,11 +11,18 @@ that produced them instead of to "the agent".
 
 Usage:
   python3 version.py show                       # current version
-  python3 version.py verify                     # VERSION == CLAUDE.md == CHANGELOG
+  python3 version.py verify                     # EQUITIES_VERSION == CLAUDE.md == EQUITIES_CHANGELOG
   python3 version.py surface                    # files that constitute a version
-  python3 version.py bump patch --reason "..."   # edit VERSION + CHANGELOG stub
+  python3 version.py bump patch --reason "..."   # edit EQUITIES_VERSION + EQUITIES_CHANGELOG stub
   python3 version.py rollback 1.0.0             # DRY RUN — prints what would change
   python3 version.py rollback 1.0.0 --confirm    # actually restore
+
+This versions the ALPACA EQUITIES + OPTIONS agent only. The OANDA forex agent
+has its own VERSION/CHANGELOG.md at repo root with its own v1.0.0 tag — see
+CLAUDE.md's "Two Agents, Two Judges" section. A single shared version file
+would violate that rule, so the files here are deliberately namespaced
+(EQUITIES_VERSION, EQUITIES_CHANGELOG.md) and tags are prefixed
+(equities-v1.0.0), never a bare "vX.Y.Z" that could collide with forex's.
 """
 
 import os
@@ -24,8 +31,8 @@ import subprocess
 import sys
 
 ROOT           = os.path.dirname(os.path.abspath(__file__))
-VERSION_FILE   = os.path.join(ROOT, "VERSION")
-CHANGELOG_FILE = os.path.join(ROOT, "CHANGELOG.md")
+VERSION_FILE   = os.path.join(ROOT, "EQUITIES_VERSION")
+CHANGELOG_FILE = os.path.join(ROOT, "EQUITIES_CHANGELOG.md")
 CLAUDE_FILE    = os.path.join(ROOT, "CLAUDE.md")
 
 SEMVER_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
@@ -70,20 +77,37 @@ def parse(version: str) -> tuple:
 # The one exception inside logs/ is learned parameters. A v1.0.0 rollback that
 # left v1.4's learned Judge weights in place would not be v1.0.0 behaviour, so
 # those ARE part of the surface.
+#
+# The second exclusion is the FOREX agent's own files. "*.py" and "*.sh" match
+# by filename anywhere in the repo, with no awareness of which agent owns the
+# file — so on first pass this glob quietly caught forex_judge.py,
+# forex_trade.py, forex_config.json, run_forex.py/.sh and
+# .github/workflows/forex-agent.yml. That is the exact cross-agent bleed
+# CLAUDE.md's "Two Agents, Two Judges" rule exists to prevent, just committed
+# by the tooling meant to keep versions apart instead of a person: an equities
+# rollback would have silently reverted forex's code and its own learned
+# parameters. EXCLUDED_GLOBS is checked before VERSIONED_GLOBS and wins.
+EXCLUDED_GLOBS = (
+    "forex_*.py",
+    "run_forex*.py",
+    "run_forex*.sh",
+    "forex_config.json",
+    ".github/workflows/forex-agent.yml",
+)
+
 VERSIONED_GLOBS = (
     "*.py",
     "tests/*.py",
     "CLAUDE.md",
     "watchlist.json",
-    "forex_config.json",
     "routines.json",
     "journal-template.md",
     "requirements.txt",
     "*.sh",
     ".github/workflows/*.yml",
     "logs/learnings/*.json",       # learned parameters ARE strategy
-    "VERSION",
-    "CHANGELOG.md",
+    "EQUITIES_VERSION",
+    "EQUITIES_CHANGELOG.md",
 )
 
 
@@ -111,6 +135,10 @@ def version_surface(ref: str = None) -> list:
         # parameters, which are matched explicitly below.
         if path.startswith("logs/") and not path.startswith("logs/learnings/"):
             continue
+        # Forex-owned files never belong to this agent's surface, no matter how
+        # broad the include globs below are. Checked first, so it always wins.
+        if any(fnmatch.fnmatch(path, g) for g in EXCLUDED_GLOBS):
+            continue
         if any(fnmatch.fnmatch(path, g) for g in VERSIONED_GLOBS):
             keep.append(path)
     return sorted(keep)
@@ -120,7 +148,8 @@ def version_surface(ref: str = None) -> list:
 
 def declared_versions() -> dict:
     """Version as stated by each source of truth, for drift detection."""
-    found = {"VERSION": get_version(), "CLAUDE.md": None, "CHANGELOG.md": None}
+    found = {"EQUITIES_VERSION": get_version(), "CLAUDE.md": None,
+             "EQUITIES_CHANGELOG.md": None}
 
     try:
         with open(CLAUDE_FILE) as f:
@@ -135,7 +164,7 @@ def declared_versions() -> dict:
         with open(CHANGELOG_FILE) as f:
             m = re.search(r"^##\s*\[v?(\d+\.\d+\.\d+)\]", f.read(), re.MULTILINE)
             if m:
-                found["CHANGELOG.md"] = m.group(1)
+                found["EQUITIES_CHANGELOG.md"] = m.group(1)
     except OSError:
         pass
 
@@ -151,7 +180,8 @@ def verify() -> tuple:
     if len(set(found.values())) != 1:
         detail = ", ".join(f"{k}={v}" for k, v in found.items())
         return False, f"Version drift — {detail}"
-    return True, f"v{found['VERSION']} consistent across VERSION, CLAUDE.md, CHANGELOG.md"
+    return True, (f"v{found['EQUITIES_VERSION']} consistent across EQUITIES_VERSION, "
+                  f"CLAUDE.md, EQUITIES_CHANGELOG.md")
 
 
 # ── Bumping ───────────────────────────────────────────────────────────────────
@@ -169,13 +199,14 @@ def next_version(current: str, level: str) -> str:
 
 def bump(level: str, reason: str) -> str:
     """
-    Write the new version to VERSION, CLAUDE.md and a CHANGELOG stub.
+    Write the new version to EQUITIES_VERSION, CLAUDE.md and an
+    EQUITIES_CHANGELOG.md stub.
 
     Deliberately does NOT commit or tag. A version bump is a claim about what
     changed; it should be reviewed in a diff like any other change.
     """
     if not reason or not reason.strip():
-        raise ValueError("A bump needs a reason — it goes in the CHANGELOG")
+        raise ValueError("A bump needs a reason — it goes in EQUITIES_CHANGELOG.md")
 
     current = get_version()
     new = next_version(current, level)
@@ -219,17 +250,35 @@ def rollback(target: str, confirm: bool = False) -> dict:
     Uncommitted changes are refused rather than overwritten: a rollback that
     silently discards work in progress is not recoverable.
     """
-    ref = target if target.startswith("v") else f"v{target}"
+    # Try, in order: the equities-prefixed tag, the target as given (a raw
+    # commit or an already-prefixed ref), then a bare "vX.Y.Z" as a last
+    # resort. The bare form is tried last, not first, because a bare "v1.0.0"
+    # is the OANDA forex agent's tag on this repo, not this agent's — trying it
+    # first would silently roll equities code back to whatever commit forex
+    # happened to tag under the same number.
+    candidates = [f"equities-v{target}", target, f"v{target}"]
+    ref = None
+    for candidate in candidates:
+        probe = _git("rev-parse", "--verify", "--quiet",
+                     f"{candidate}^{{commit}}", check=False)
+        if probe.returncode == 0:
+            ref = candidate
+            break
 
-    probe = _git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}", check=False)
-    if probe.returncode != 0:
-        probe = _git("rev-parse", "--verify", "--quiet", f"{target}^{{commit}}",
-                     check=False)
-        if probe.returncode != 0:
-            return {"ok": False,
-                    "error": f"No such tag or commit: {target}",
-                    "available": _git("tag", "-l").stdout.split()}
-        ref = target
+    if ref is None:
+        return {"ok": False,
+                "error": f"No such tag or commit: {target}",
+                "available": _git("tag", "-l").stdout.split()}
+
+    if ref == f"v{target}" and ref != f"equities-v{target}":
+        # Resolved only via the bare fallback — flag it rather than silently
+        # rolling this agent's code back to whatever a same-numbered forex tag
+        # points to.
+        return {"ok": False,
+                "error": (f"'{ref}' is not an equities tag (expected "
+                         f"'equities-v{target}'). Refusing to guess which "
+                         f"agent's v{target} you meant — this repo has two."),
+                "available": _git("tag", "-l").stdout.split()}
 
     dirty = [l for l in _git("status", "--porcelain").stdout.splitlines() if l.strip()]
     if dirty and not confirm:
@@ -305,8 +354,8 @@ def main():
         except ValueError as e:
             print(f"error: {e}")
             sys.exit(2)
-        print(f"Bumped to v{new}. Edit CHANGELOG.md, then commit and tag:")
-        print(f"  git commit -am \"...\" && git tag -a v{new} -m \"v{new}\"")
+        print(f"Bumped to v{new}. Edit EQUITIES_CHANGELOG.md, then commit and tag:")
+        print(f"  git commit -am \"...\" && git tag -a equities-v{new} -m \"equities-v{new}\"")
 
     elif action == "rollback":
         if len(args) < 2:

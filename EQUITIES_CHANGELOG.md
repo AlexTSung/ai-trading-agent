@@ -1,6 +1,15 @@
-# Changelog
+# Equities + Options Agent — Changelog
 
-All notable changes to the trading agent's **strategy and rules**, not just its code.
+All notable changes to the **Alpaca equities and options agent's** strategy
+and rules, not just its code.
+
+**Scope note.** This repo hosts two independent agents (see CLAUDE.md's "Two
+Agents, Two Judges"). The OANDA forex agent has its own `VERSION` /
+`CHANGELOG.md` and its own `v1.0.0` tag at repo root, created independently.
+Sharing one version number across both would violate the same
+no-shared-state rule that keeps their Judges separate, so this file and
+`EQUITIES_VERSION` are namespaced, and every tag for this agent is prefixed
+`equities-v` (e.g. `equities-v1.0.0`) rather than a bare `vX.Y.Z`.
 
 This file exists because a strategy change makes the performance record before
 and after it incomparable. Phase 2 had to be declared void for precisely that
@@ -72,7 +81,7 @@ has one closed round trip.
 - Open: AAPL +10.27%, DDOG +5.10%. Closed in Phase 2B: NVDA +9.06% (+$436.75)
 - LBGJ quarantined, `TRADING_BLOCKED`, ~$502K of phantom equity excluded
 - Watchlist 25 symbols across tech, power, healthcare, energy, staples
-- **167 guardrail tests**, every new gate mutation-verified
+- **184 guardrail tests**, every new gate mutation-verified
 - Real money (Robinhood): **locked**
 
 ### Comparability

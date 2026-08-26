@@ -897,10 +897,56 @@ class TestVersioning(unittest.TestCase):
     def test_strategy_defining_files_are_in_the_surface(self):
         surface = set(version.version_surface())
         for path in ("CLAUDE.md", "watchlist.json", "trade.py", "judge.py",
-                     "research.py", "reviewer.py", "forex_config.json",
+                     "research.py", "reviewer.py",
                      "tests/test_guardrails.py"):
             with self.subTest(path=path):
                 self.assertIn(path, surface)
+
+    def test_forex_owned_files_are_excluded_from_the_equities_surface(self):
+        """
+        THE bug the collision exposed. "*.py", "*.sh" and the workflow glob
+        match by filename anywhere in the repo, with no notion of which agent
+        owns the file — on first build this silently caught forex_judge.py,
+        forex_trade.py, forex_config.json, run_forex.py/.sh and the forex
+        workflow. An equities rollback would have reverted forex's code and its
+        learned parameters too: exactly the cross-agent bleed CLAUDE.md's "Two
+        Agents, Two Judges" rule exists to prevent, committed by the tooling
+        instead of a person.
+        """
+        surface = set(version.version_surface())
+        forex_owned = ("forex_judge.py", "forex_trade.py", "forex_optimizer.py",
+                       "forex_config.json", "run_forex.py", "run_forex.sh",
+                       "run_forex_manage.sh",
+                       ".github/workflows/forex-agent.yml")
+        for path in forex_owned:
+            with self.subTest(path=path):
+                self.assertNotIn(path, surface)
+
+    def test_excluded_globs_win_over_included_globs(self):
+        """
+        The exclusion check must run before, and override, the include check.
+        forex_judge.py is the case that matters: it also matches the broad
+        "*.py" include glob, so excluding it only works because
+        version_surface() checks EXCLUDED_GLOBS first and `continue`s.
+        forex_config.json needs no such defense — it was removed from the
+        include list outright and matches no include glob at all.
+        """
+        import fnmatch
+        self.assertTrue(
+            any(fnmatch.fnmatch("forex_judge.py", g) for g in version.EXCLUDED_GLOBS))
+        self.assertTrue(
+            any(fnmatch.fnmatch("forex_judge.py", g) for g in version.VERSIONED_GLOBS),
+            "forex_judge.py must still match an include glob for this test to "
+            "prove the exclusion — not just be absent from both lists")
+
+        self.assertTrue(
+            any(fnmatch.fnmatch("forex_config.json", g)
+                for g in version.EXCLUDED_GLOBS))
+        self.assertFalse(
+            any(fnmatch.fnmatch("forex_config.json", g)
+                for g in version.VERSIONED_GLOBS),
+            "forex_config.json should not need the exclusion at all — it was "
+            "removed from the include list rather than merely excluded")
 
     def _clean_repo_git(self):
         """A stubbed git where the tag exists and the tree is clean."""
@@ -965,9 +1011,14 @@ class TestVersioning(unittest.TestCase):
 
     def test_baseline_tag_exists(self):
         """
-        v1.0.0 is the declared MVP baseline, so the tag has to be there for a
-        rollback to have anything to return to. Skipped where tags are
-        unavailable (a shallow or tagless clone).
+        equities-v1.0.0 is the declared MVP baseline, so the tag has to be
+        there for a rollback to have anything to return to. Skipped where tags
+        are unavailable (a shallow or tagless clone).
+
+        Must be the equities-prefixed tag, not a bare v1.0.0: this repo also
+        hosts the OANDA forex agent, which tagged its own baseline as a bare
+        v1.0.0 first. Asserting the bare tag here would pass by coincidence
+        against the wrong agent's release.
         """
         try:
             tags = version._git("tag", "-l").stdout.split()
@@ -975,7 +1026,50 @@ class TestVersioning(unittest.TestCase):
             self.skipTest(f"git tags unavailable: {e}")
         if not tags:
             self.skipTest("no tags in this clone")
-        self.assertIn("v1.0.0", tags)
+        self.assertIn("equities-v1.0.0", tags)
+
+    def test_rollback_never_resolves_the_bare_forex_tag_silently(self):
+        """
+        THE collision this repo actually hit. A bare `v1.0.0` exists and
+        belongs to the forex agent. rollback("1.0.0") must resolve to
+        `equities-v1.0.0` when it exists, and must refuse — not silently
+        succeed against the wrong commit — if only the bare tag is found.
+        """
+        def only_bare_tag_exists(*args, **kw):
+            if args[0] == "rev-parse":
+                ref = args[3]
+                if ref.startswith("v1.0.0"):
+                    return mock.Mock(returncode=0, stdout="deadbeef\n")
+                return mock.Mock(returncode=1, stdout="")
+            if args[0] == "tag":
+                return mock.Mock(returncode=0, stdout="v1.0.0\n")
+            return mock.Mock(returncode=0, stdout="")
+
+        with mock.patch.object(version, "_git", side_effect=only_bare_tag_exists):
+            out = version.rollback("1.0.0")
+        self.assertFalse(out.get("ok"), out)
+        self.assertIn("not an equities tag", out.get("error", ""))
+
+    def test_rollback_prefers_the_equities_tag_when_both_exist(self):
+        seen_refs = []
+
+        def both_tags_exist(*args, **kw):
+            if args[0] == "rev-parse":
+                seen_refs.append(args[3])
+                return mock.Mock(returncode=0, stdout="deadbeef\n")
+            if args[0] == "status":
+                return mock.Mock(returncode=0, stdout="")
+            if args[0] in ("ls-files", "ls-tree"):
+                return mock.Mock(returncode=0, stdout="trade.py\n")
+            if args[0] == "diff":
+                return mock.Mock(returncode=0, stdout="")
+            return mock.Mock(returncode=0, stdout="")
+
+        with mock.patch.object(version, "_git", side_effect=both_tags_exist):
+            out = version.rollback("1.0.0")
+        self.assertEqual(out.get("target"), "equities-v1.0.0")
+        self.assertEqual(seen_refs[0], "equities-v1.0.0^{commit}",
+                         "must probe the equities tag before any other form")
 
     def test_rollback_rejects_an_unknown_target(self):
         out = version.rollback("99.99.99")
