@@ -800,6 +800,126 @@ class TestOptionsRiskFilters(unittest.TestCase):
         self.assertIn("0.25", why)
 
 
+class TestRoundTripWindow(unittest.TestCase):
+    """
+    The graduation round-trip count could never rise above zero.
+
+    fetch_filled_orders(since) filters on Alpaca's `after`, which matches
+    submitted_at, not fill time. Passing the Phase 2B baseline straight through
+    returned only orders SUBMITTED after 2026-08-20 — but every position open at
+    the baseline was bought in June or July, so build_round_trips() saw sells
+    with no open lot and dropped them all into `unmatched`.
+
+    Live consequence: NVDA closed 2026-08-26 at +9.06%, the first realized Phase
+    2B trade and a winner, and counted zero. Occurrences would have read 0 on the
+    2026-09-03 decision date regardless of how the agent traded.
+    """
+
+    BUY_JUN = {"symbol": "NVDA", "side": "buy", "filled_qty": "25",
+               "filled_avg_price": "192.81", "filled_at": "2026-06-29T13:31:00Z",
+               "status": "filled", "id": "buy-jun"}
+    SELL_AUG = {"symbol": "NVDA", "side": "sell", "filled_qty": "25",
+                "filled_avg_price": "210.28", "filled_at": "2026-08-26T14:26:43Z",
+                "status": "filled", "id": "sell-aug"}
+
+    def test_the_bug_a_short_window_loses_the_entry_leg(self):
+        """Baseline behaviour: fetching only post-baseline orders finds no trip."""
+        trips, unmatched = reviewer.build_round_trips([self.SELL_AUG])
+        self.assertEqual(trips, [], "no buy leg in window, so no round trip")
+        self.assertEqual(len(unmatched), 1, "the winner lands in unmatched")
+
+    def test_full_history_matches_the_trip(self):
+        trips, unmatched = reviewer.build_round_trips([self.BUY_JUN, self.SELL_AUG])
+        self.assertEqual(len(trips), 1)
+        self.assertEqual(unmatched, [])
+        t = trips[0]
+        self.assertEqual(t["entry_date"], "2026-06-29")
+        self.assertEqual(t["exit_date"], "2026-08-26")
+        self.assertAlmostEqual(t["pnl_pct"], 9.06, places=1)
+        self.assertAlmostEqual(t["pnl_dollar"], 436.75, places=2)
+
+    def test_window_filters_on_exit_date_not_entry_date(self):
+        """
+        A position bought in July and sold in Phase 2B is a Phase 2B result —
+        the exit is the decision being scored. Filtering on entry would discard
+        it; filtering on exit keeps it.
+        """
+        with mock.patch.object(reviewer, "fetch_filled_orders",
+                               return_value=[self.BUY_JUN, self.SELL_AUG]):
+            in_window, all_trips, unmatched = reviewer.round_trips_closed_since(
+                "2026-08-20")
+        self.assertEqual(len(all_trips), 1)
+        self.assertEqual(len(in_window), 1,
+                         "exit on 2026-08-26 is inside a window opening 08-20")
+        self.assertEqual(unmatched, [])
+
+    def test_fetch_is_called_with_the_lookback_not_the_window(self):
+        """
+        THE bug, asserted directly. Mocking only the return value is not enough:
+        a mock that ignores its argument passes whether the code fetches from the
+        lookback or from `since`, so it cannot detect a regression to the short
+        window. Assert the argument.
+        """
+        seen = {}
+
+        def fake(since):
+            seen["since"] = since
+            # Mimic Alpaca: `after` filters on submitted_at, so a narrow window
+            # returns only the sell and the entry leg is invisible.
+            return [o for o in (self.BUY_JUN, self.SELL_AUG)
+                    if o["filled_at"][:10] >= since]
+
+        with mock.patch.object(reviewer, "fetch_filled_orders", side_effect=fake):
+            in_window, all_trips, unmatched = reviewer.round_trips_closed_since(
+                "2026-08-20")
+
+        self.assertEqual(seen["since"], reviewer.ROUND_TRIP_LOOKBACK_START,
+                         "must fetch the full history, not the reporting window")
+        self.assertEqual(len(in_window), 1, "the NVDA winner must be counted")
+        self.assertEqual(unmatched, [], "no orphaned sell once the buy is in scope")
+
+    def test_trips_closed_before_the_window_are_excluded(self):
+        """The window still has to mean something — old exits must not count."""
+        early_sell = dict(self.SELL_AUG, filled_at="2026-07-15T14:00:00Z",
+                          id="sell-jul")
+        with mock.patch.object(reviewer, "fetch_filled_orders",
+                               return_value=[self.BUY_JUN, early_sell]):
+            in_window, all_trips, _ = reviewer.round_trips_closed_since(
+                "2026-08-20")
+        self.assertEqual(len(all_trips), 1)
+        self.assertEqual(in_window, [], "exit predates the window")
+
+    def test_lookback_reaches_back_far_enough_for_open_positions(self):
+        """
+        Every position open at the baseline was bought in June. A lookback that
+        started at the baseline would reintroduce the original bug.
+        """
+        self.assertLess(reviewer.ROUND_TRIP_LOOKBACK_START,
+                        reviewer.PHASE2B_BASELINE_DATE)
+        self.assertLessEqual(reviewer.ROUND_TRIP_LOOKBACK_START, "2026-06-16",
+                            "must predate the first paper fill (2026-06-16)")
+
+    def test_lookback_never_shortens_the_requested_window(self):
+        """A caller asking for an older window must not get a newer fetch."""
+        captured = {}
+
+        def fake(since):
+            captured["since"] = since
+            return []
+
+        with mock.patch.object(reviewer, "fetch_filled_orders", side_effect=fake):
+            reviewer.round_trips_closed_since("2026-01-01")
+        self.assertEqual(captured["since"], "2026-01-01")
+
+    def test_metrics_see_the_recovered_trip(self):
+        trips, _ = reviewer.build_round_trips([self.BUY_JUN, self.SELL_AUG])
+        m = reviewer.round_trip_metrics(trips)
+        self.assertEqual(m["count"], 1)
+        self.assertEqual(m["win_rate"], 100.0)
+        self.assertAlmostEqual(m["net_dollar"], 436.75, places=2)
+        self.assertEqual(m["avg_hold_days"], 58)
+
+
 class TestOptionsExecutionCost(unittest.TestCase):
     """
     Every price in options_strategy is a Black-Scholes mid. Until now the risk
