@@ -801,6 +801,172 @@ class TestOptionsRiskFilters(unittest.TestCase):
         self.assertIn("0.25", why)
 
 
+class TestMacroRegimeSizing(unittest.TestCase):
+    """
+    CLAUDE.md's Dalio rule — "In risk-off: reduce max long position size from 5%
+    to 2.5%, require STRONG_BUY only" — was documented and announced but never
+    implemented. score_macro returned 0.0 and printed "(half sizing applies)"
+    while `size_multiplier` came only from the VIX ladder, so the Judge was
+    reporting a risk control that did not exist and the book ran full size into a
+    downtrend. That is the phantom-risk failure mode, and it is the same class of
+    defect as check_option_liquidity having zero call sites.
+    """
+
+    def test_risk_on_preserves_conviction_tiers(self):
+        """Hard Rule 6's 8/5/3% must survive — the ceiling is risk-off only."""
+        for conviction in (0.08, 0.05, 0.03):
+            for regime in ("RISK_ON", "NEUTRAL"):
+                with self.subTest(conviction=conviction, regime=regime):
+                    pct, _ = trade.regime_adjusted_position_pct(conviction, regime, 1.0)
+                    self.assertAlmostEqual(pct, conviction)
+
+    def test_risk_off_caps_at_two_and_a_half_percent(self):
+        for conviction in (0.08, 0.05, 0.03):
+            with self.subTest(conviction=conviction):
+                pct, notes = trade.regime_adjusted_position_pct(
+                    conviction, "RISK_OFF", 1.0)
+                self.assertAlmostEqual(pct, trade.RISK_OFF_MAX_POSITION_PCT)
+                self.assertTrue(any("RISK-OFF" in n for n in notes))
+
+    def test_ceiling_is_a_min_not_an_assignment(self):
+        """
+        THE subtle bug to avoid. If the VIX ladder already cut a 3% position to
+        1.5%, entering risk-off must not raise it back to the 2.5% ceiling.
+        Combining two risk reducers can never increase exposure.
+        """
+        pct, _ = trade.regime_adjusted_position_pct(0.03, "RISK_OFF", 0.5)
+        self.assertAlmostEqual(pct, 0.015)
+        self.assertLess(pct, trade.RISK_OFF_MAX_POSITION_PCT)
+
+    def test_risk_reducers_compose_monotonically(self):
+        """No combination of regime and VIX may exceed the plain conviction size."""
+        for conviction in (0.08, 0.05, 0.03):
+            base, _ = trade.regime_adjusted_position_pct(conviction, "RISK_ON", 1.0)
+            for regime in ("RISK_ON", "NEUTRAL", "RISK_OFF"):
+                for vixm in (1.0, 0.5, 0.25):
+                    with self.subTest(conviction=conviction, regime=regime, vix=vixm):
+                        pct, _ = trade.regime_adjusted_position_pct(
+                            conviction, regime, vixm)
+                        self.assertLessEqual(pct, base + 1e-12)
+
+    def test_the_naive_formula_would_have_flattened_conviction(self):
+        """
+        Guards against the proposed fix, not just the original bug. Treating a
+        multiplier as a fraction of capital and applying the 2.5% cap outside the
+        risk-off branch collapses every tier to 2.5% in EVERY regime.
+        """
+        def naive(base_capital, vix_multiplier, judge_signal):
+            final = vix_multiplier
+            if judge_signal == "RISK_OFF":
+                final = vix_multiplier * 0.5
+            return min(base_capital * final, base_capital * 0.025)
+
+        cap = 91118.79
+        sizes = {naive(cap, v, r)
+                 for v in (1.0, 0.5) for r in ("RISK_ON", "RISK_OFF")}
+        self.assertEqual(len(sizes), 1, "naive form gives one size for everything")
+        self.assertAlmostEqual(sizes.pop(), cap * 0.025, places=2)
+
+        ours = {round(trade.regime_adjusted_position_pct(c, r, v)[0], 6)
+                for c in (0.08, 0.05, 0.03)
+                for r in ("RISK_ON", "RISK_OFF") for v in (1.0, 0.5)}
+        self.assertGreater(len(ours), 1, "ours must still discriminate conviction")
+
+    def test_unknown_regime_does_not_unlock_full_size_silently(self):
+        """An absent regime is NEUTRAL, and NEUTRAL never exceeds conviction."""
+        pct, _ = trade.regime_adjusted_position_pct(0.08, "NEUTRAL", 1.0)
+        self.assertAlmostEqual(pct, 0.08)
+        self.assertEqual(judge.macro_regime({}), "NEUTRAL",
+                         "missing SPY data must not read as RISK_ON")
+
+    def test_regime_is_derived_from_the_same_branch_as_the_score(self):
+        """
+        One source of truth. The report saying "half sizing applies" while the
+        executor sized full is exactly what splitting them caused.
+        """
+        cases = [
+            ({"signal": "WEAK_BUY",    "ma20": 750.0, "ma50": 740.0}, "RISK_ON"),
+            ({"signal": "STRONG_SELL", "ma20": 745.87, "ma50": 745.02}, "RISK_OFF"),
+            ({"signal": "HOLD",        "ma20": 740.0, "ma50": 750.0}, "RISK_OFF"),
+            ({"signal": "HOLD",        "ma20": 750.0, "ma50": 740.0}, "NEUTRAL"),
+        ]
+        for tech, expected in cases:
+            research_blob = {"symbols": {"SPY": {"technicals": tech}}}
+            with self.subTest(tech=tech):
+                score, _ = judge.score_macro(research_blob)
+                regime = judge.macro_regime(research_blob)
+                self.assertEqual(regime, expected)
+                if regime == "RISK_OFF":
+                    self.assertEqual(score, 0.0)
+                elif regime == "RISK_ON":
+                    self.assertEqual(score, 1.5)
+
+    def test_risk_off_requires_strong_buy(self):
+        self.assertEqual(trade.RISK_OFF_REQUIRED_SIGNAL, "STRONG_BUY")
+
+    def test_weaker_signals_are_blocked_before_sizing_in_risk_off(self):
+        """
+        A trade that must not happen should not be sized. The gate runs before
+        calculate_max_shares, so no order is generated at all.
+        """
+        with mock.patch.object(trade, "get_market_status", return_value={"is_open": True}), \
+             mock.patch.object(trade, "is_buyable", return_value=(True, "ok")), \
+             mock.patch.object(trade, "get_latest_ask", return_value=100.0), \
+             mock.patch.object(trade, "calculate_max_shares") as sizer, \
+             mock.patch.object(trade, "place_limit_order") as placer:
+            for signal in ("WEAK_BUY", "HOLD", "BUY"):
+                with self.subTest(signal=signal):
+                    out = trade.buy_with_guardrails(
+                        "CEG", signal, {"cash": "70000", "buying_power": "70000"},
+                        research_limit_price=99.0, judge_score=8.0,
+                        macro_regime="RISK_OFF", positions=[])
+                    self.assertEqual(out.get("action"), "SKIPPED")
+                    self.assertIn("REGIME BLOCK", out.get("error", ""))
+            sizer.assert_not_called()
+            placer.assert_not_called()
+
+    def test_strong_buy_still_passes_the_regime_gate_in_risk_off(self):
+        with mock.patch.object(trade, "get_market_status", return_value={"is_open": True}), \
+             mock.patch.object(trade, "is_buyable", return_value=(True, "ok")), \
+             mock.patch.object(trade, "get_latest_ask", return_value=100.0), \
+             mock.patch.object(trade, "calculate_max_shares",
+                               return_value=(10, "sized")), \
+             mock.patch.object(trade, "place_limit_order",
+                               return_value={"_ok": True, "id": "o1"}):
+            out = trade.buy_with_guardrails(
+                "CEG", "STRONG_BUY", {"cash": "70000", "buying_power": "70000"},
+                research_limit_price=99.0, judge_score=8.0,
+                macro_regime="RISK_OFF", positions=[])
+        self.assertEqual(out.get("action"), "BUY")
+
+    def test_risk_on_does_not_gate_on_signal_strength(self):
+        """The STRONG_BUY-only requirement is a risk-off rule, not a global one."""
+        with mock.patch.object(trade, "get_market_status", return_value={"is_open": True}), \
+             mock.patch.object(trade, "is_buyable", return_value=(True, "ok")), \
+             mock.patch.object(trade, "get_latest_ask", return_value=100.0), \
+             mock.patch.object(trade, "calculate_max_shares",
+                               return_value=(10, "sized")), \
+             mock.patch.object(trade, "place_limit_order",
+                               return_value={"_ok": True, "id": "o1"}):
+            out = trade.buy_with_guardrails(
+                "CEG", "WEAK_BUY", {"cash": "70000", "buying_power": "70000"},
+                research_limit_price=99.0, judge_score=8.0,
+                macro_regime="RISK_ON", positions=[])
+        self.assertEqual(out.get("action"), "BUY")
+
+    def test_vix_block_still_takes_precedence(self):
+        """Regression: the regime gate must not have displaced the VIX 35 block."""
+        with mock.patch.object(trade, "get_market_status", return_value={"is_open": True}), \
+             mock.patch.object(trade, "is_buyable", return_value=(True, "ok")), \
+             mock.patch.object(trade, "get_latest_ask", return_value=100.0):
+            out = trade.buy_with_guardrails(
+                "CEG", "STRONG_BUY", {"cash": "70000", "buying_power": "70000"},
+                research_limit_price=99.0, judge_score=8.0,
+                size_multiplier=0.0, macro_regime="RISK_ON", positions=[])
+        self.assertEqual(out.get("action"), "SKIPPED")
+        self.assertIn("VOLATILITY BLOCK", out.get("error", ""))
+
+
 class TestRestingEntryOrders(unittest.TestCase):
     """
     Entry limits were time-in-force "day", so a patient bid at MA20 x 0.995

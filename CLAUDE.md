@@ -495,6 +495,54 @@ Before any trading session, note the macro regime:
 - In risk-off: reduce max long position size from 5% to 2.5%, require STRONG_BUY only
 - In risk-on: normal rules apply
 
+**Now enforced in code.** `judge.py macro_regime()` derives `RISK_ON` /
+`RISK_OFF` / `NEUTRAL` from the same branch `score_macro()` scores, so the
+score, the rationale string and the position size cannot disagree. It is passed
+to the executor, where `trade.regime_adjusted_position_pct()` applies the 2.5%
+ceiling and `buy_with_guardrails` blocks anything weaker than STRONG_BUY.
+
+Until 2026-08-26 **neither half existed.** `score_macro` returned 0.0 and
+printed `(half sizing applies)`, but nothing read the regime — `size_multiplier`
+came only from the VIX ladder — so the Judge announced a risk control that was
+never applied and the book ran full conviction size into a downtrend. A message
+claiming a limit it does not enforce is worse than no message: it reads as
+protection in the log while the exposure is unchanged.
+
+### How the risk reducers compose
+
+Order matters, and **every step may only lower the number**:
+
+| Step | Rule | Effect |
+|---|---|---|
+| 1 | Conviction (Hard Rule 6) | 8% / 5% / 3% by Judge score |
+| 2 | VIX ladder (Citadel) | × 0.5 above VIX 25, blocked above 35 |
+| 3 | Risk-off ceiling (Dalio) | `min(result, 2.5%)` |
+
+Step 3 is a **`min`, not an assignment**. If the VIX ladder has already cut a 3%
+position to 1.5%, entering risk-off must not raise it back to 2.5% — combining
+two risk reducers can never increase exposure.
+
+**The naive form is wrong and is guarded by a test.** Writing
+`size = capital × multiplier` capped at 2.5% conflates a *multiplier* (0.5–1.0)
+with a *fraction of capital*: it computes 50–100% of the book, so the 2.5% cap
+binds in every case and flattens the 8/5/3% tiers to one size for every
+trade — including in risk-on, where the Dalio ceiling should not apply at all.
+
+Measured on honest equity of $91,118.79:
+
+| Judge score | Conviction | Risk-on | Risk-off |
+|---|---|---|---|
+| ≥ 9.0 | 8% | $7,290 | **$2,278** |
+| 7.5–8.9 | 5% | $4,556 | **$2,278** |
+| 7.0–7.4 | 3% | $2,734 | **$2,278** |
+
+**Known limitation — the regime signal is noisy.** MA20 vs MA50 flips on any
+crossing however small. On 2026-08-26 SPY's MA20 was $745.87 against an MA50 of
+$745.02 — a **0.11%** gap deciding whether the entire book sizes at 8% or 2.5%.
+A 200-day SMA confirmation or a hysteresis band would make the regime stable;
+neither is implemented. VIX is also a *lagging* volatility measure — it spikes
+during and after a decline, not before — so both regime inputs are reactive.
+
 ## Bearish Market Playbook
 When the market is in a downtrend (SPY MA20 < MA50), don't sit in cash — deploy bearish instruments.
 

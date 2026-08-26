@@ -375,6 +375,26 @@ def score_news(news_items: list, sym_data=None) -> tuple:
 
     return base_score, note
 
+def macro_regime(research: dict) -> str:
+    """
+    "RISK_ON" | "RISK_OFF" | "NEUTRAL" — the regime the executor sizes against.
+
+    Derived from the same branch score_macro uses, so the score, the rationale
+    string and the position size can never disagree. Keeping them as one source
+    is the point: the previous split let the report say "half sizing applies"
+    while the executor sized full.
+
+    Unavailable data returns NEUTRAL rather than RISK_ON — an unknown regime must
+    not silently unlock full size.
+    """
+    score, _ = score_macro(research)
+    if score >= 1.5:
+        return "RISK_ON"
+    if score <= 0.0:
+        return "RISK_OFF"
+    return "NEUTRAL"
+
+
 def score_macro(research: dict) -> tuple:
     """Score 0–1.5 based on SPY macro regime from research data."""
     spy_data = research.get("symbols", {}).get("SPY", {})
@@ -1222,6 +1242,11 @@ def score_symbol(symbol: str, research: dict) -> dict:
         # Passed to the executor so the Citadel VIX sizing rule is actually
         # applied to share counts, not just mentioned in a rationale string.
         "size_multiplier": _intel.get("size_multiplier", 1.0),
+        # Same reason. score_macro printed "(half sizing applies)" while nothing
+        # read the regime, so the Dalio rule existed only in the rationale text.
+        # The executor now applies the 2.5% ceiling and the STRONG_BUY-only gate
+        # off this field.
+        "macro_regime": macro_regime(research),
         "learned_hints": _hints,
         "vix": _intel.get("vix"),
         "is_discovery": is_discovery,
