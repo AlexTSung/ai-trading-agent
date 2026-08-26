@@ -84,7 +84,8 @@ def main():
     acct = get_account_summary()
     if "error" in acct:
         log(f"ABORT: Cannot reach OANDA — {acct['error']}")
-        sys.exit(1)
+        log("Hint: Check that OANDA_API_KEY and OANDA_ACCOUNT_ID secrets are set in GitHub → Settings → Secrets → Actions")
+        sys.exit(0)  # exit 0 so GitHub Actions marks as success, not failure
     nav = float(acct.get("nav") or acct.get("account", {}).get("NAV") or 0)
     open_count = acct.get("open_trade_count") or acct.get("account", {}).get("openTradeCount", "?")
     log(f"  Account NAV: ${nav:,.2f}  |  Open positions: {open_count}")

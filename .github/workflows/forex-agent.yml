@@ -3,11 +3,11 @@ name: Forex Trading Agent
 on:
   schedule:
     # 4× daily at key session transitions (UTC):
-    #   12:00 UTC = 7-8AM ET  — London midpoint, momentum setups
-    #   17:00 UTC = 12-1PM ET — London/NY overlap, highest liquidity
-    #   22:00 UTC = 5-6PM ET  — After NY close, Asia pre-open carry entries
-    #   04:00 UTC = 11PM ET   — Tokyo session, JPY/AUD carry pairs
-    - cron: '0 4,12,17,22 * * 1-5'   # Mon-Fri only (FX closed weekends)
+    #   04:00 UTC = 11PM ET  — Tokyo session, JPY/AUD carry pairs
+    #   12:00 UTC = 8AM ET   — London midpoint, momentum setups
+    #   17:00 UTC = 1PM ET   — London/NY overlap, highest liquidity
+    #   22:00 UTC = 6PM ET   — After NY close, Asia pre-open carry entries
+    - cron: '0 4,12,17,22 * * 1-5'   # Mon-Fri only
     # Weekly strategy learner — Sunday 08:00 UTC (before Monday open)
     - cron: '0 8 * * 0'
   workflow_dispatch:
@@ -41,17 +41,31 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.12'
+          cache: 'pip'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Verify secrets are set
+        run: |
+          if [ -z "${{ secrets.OANDA_API_KEY }}" ]; then
+            echo "ERROR: OANDA_API_KEY secret is not set in this repo."
+            echo "Go to: Settings → Secrets → Actions → New repository secret"
+            exit 1
+          fi
+          if [ -z "${{ secrets.OANDA_ACCOUNT_ID }}" ]; then
+            echo "ERROR: OANDA_ACCOUNT_ID secret is not set in this repo."
+            exit 1
+          fi
+          echo "Secrets OK."
 
       - name: Run forex agent
         env:
@@ -73,7 +87,8 @@ jobs:
           esac
 
       - name: Graduation checker + post-trade learning
-        if: github.event.inputs.mode == '' || github.event.inputs.mode == 'full'
+        if: always() && (github.event.inputs.mode == '' || github.event.inputs.mode == 'full')
+        continue-on-error: true
         env:
           OANDA_API_KEY:    ${{ secrets.OANDA_API_KEY }}
           OANDA_ACCOUNT_ID: ${{ secrets.OANDA_ACCOUNT_ID }}
@@ -81,7 +96,8 @@ jobs:
         run: python3 forex_graduation.py eod
 
       - name: Run optimizer (tune weights from journal)
-        if: github.event.inputs.mode == '' || github.event.inputs.mode == 'full'
+        if: always() && (github.event.inputs.mode == '' || github.event.inputs.mode == 'full')
+        continue-on-error: true
         env:
           OANDA_API_KEY:    ${{ secrets.OANDA_API_KEY }}
           OANDA_ACCOUNT_ID: ${{ secrets.OANDA_ACCOUNT_ID }}
@@ -90,6 +106,7 @@ jobs:
 
       - name: Weekly strategy scrape (Sundays)
         if: github.event.schedule == '0 8 * * 0'
+        continue-on-error: true
         env:
           OANDA_API_KEY:    ${{ secrets.OANDA_API_KEY }}
           OANDA_ACCOUNT_ID: ${{ secrets.OANDA_ACCOUNT_ID }}
@@ -115,24 +132,24 @@ jobs:
             forex_config.json \
             strategies/forex_learnings.md 2>/dev/null || true
 
-          # Only commit if something changed
           if ! git diff --cached --quiet; then
             TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
             git commit -m "agent: forex run ${TIMESTAMP}"
-            git push origin HEAD || echo "WARN: push failed (non-critical — logs saved as artifact)"
+            git push origin HEAD || echo "WARN: push failed — logs saved as artifact"
           else
             echo "No changes to commit."
           fi
 
       - name: Upload logs as artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: forex-logs-${{ github.run_number }}
           path: |
             logs/forex/trade_journal.json
             logs/forex/*_verdicts.json
             logs/forex/*_scan.json
+            logs/forex/graduation-*.md
             forex_config.json
           retention-days: 30
           if-no-files-found: ignore
