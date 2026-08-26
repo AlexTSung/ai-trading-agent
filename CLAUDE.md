@@ -1,6 +1,66 @@
 # Trading Agent — CLAUDE.md
+> **Version:** v1.0.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
+
+## Versioning — every strategy change gets a number
+
+`VERSION` is the single source of truth. `CLAUDE.md` (the line above) and
+`CHANGELOG.md` must agree with it; `python3 version.py verify` asserts all three
+match and a guardrail test fails if they drift.
+
+**Why this exists.** A strategy change makes the performance record before and
+after it incomparable. Phase 2 had to be voided for exactly that reason — the
+Judge's weights changed, every score shifted by up to 2.0 points, and the
+"avg Judge ≥ 7.0" criterion silently stopped meaning anything for seven weeks.
+Every pipeline output now carries `agent_version`, so results are attributable
+to the ruleset that produced them.
+
+| Level | When | Test to apply |
+|---|---|---|
+| **MAJOR** `X.0.0` | Record before/after is **not comparable**: baseline reset, phase voided, Judge scale or weights changed, graduation criteria changed, guardrail removed, **any Hard Rule loosened**, new book or broker, real money enabled | *Would I have to reset the baseline to measure this honestly?* |
+| **MINOR** `0.X.0` | New capability, safe with the existing record: new signal or factor, new watchlist symbols, a gate **tightened**, a documented-but-unimplemented rule now enforced, new tooling | *Does this add or tighten without invalidating past results?* |
+| **PATCH** `0.0.X` | Correctness fixes restoring intended behaviour: wrong log message, broken date window, doc corrected to match code, tests | *Was the intent always this, and the code simply wrong?* |
+
+**Loosening is always MAJOR; tightening is MINOR.** Lowering a documented floor
+changes what the agent will trade, so results collected under the stricter rule
+no longer apply. Same asymmetry as the learned-hint rails.
+
+**A MAJOR bump must state whether the baseline resets** — in the CHANGELOG entry
+and in the Experiment Timeline below. A MAJOR change without that note is how
+Phase 2 became unmeasurable.
+
+```
+python3 version.py show                            # current version
+python3 version.py verify                          # check for drift
+python3 version.py bump minor --reason "..."       # edits VERSION, CLAUDE.md, CHANGELOG stub
+git commit -am "..." && git tag -a v1.1.0 -m "v1.1.0"
+```
+
+`bump` deliberately does not commit or tag. A version bump is a claim about what
+changed and should be reviewed in a diff like any other change.
+
+### Reverting to a previous version
+
+```
+python3 version.py rollback 1.0.0            # DRY RUN — lists what would change
+python3 version.py rollback 1.0.0 --confirm  # apply
+```
+
+**`git checkout v1.0.0` is the wrong command.** 343 files under `logs/` are
+tracked, so a plain checkout would roll the journals, verdicts and trade logs
+back too — destroying the performance record you rolled back in order to study.
+
+`version.py rollback` restores only the **version surface**: code, `CLAUDE.md`,
+`watchlist.json`, `forex_config.json`, workflows, tests, and learned parameters
+under `logs/learnings/`. Learned weights are included on purpose — a v1.0.0
+rollback that kept v1.4's learned parameters would not reproduce v1.0.0
+behaviour. Everything else under `logs/` is left untouched.
+
+It refuses to run with a dirty working tree rather than overwriting uncommitted
+work, and dry-run is the default. After applying: review `git status`, run
+`python3 -m unittest discover -s tests`, and commit the revert as its own change
+with a PATCH or MAJOR bump depending on what it undoes.
 
 ## Identity & Mission
 You are a trading agent managing THREE books — paper equities, paper options, and one real-money account. Your job is to grow both portfolios through disciplined, research-driven decisions. You must NEVER confuse these accounts. Every order must be confirmed against the correct account before execution.

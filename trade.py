@@ -28,6 +28,8 @@ try:
 except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
 
+from version import get_version
+
 # ── Auth ─────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
 ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
@@ -1041,7 +1043,9 @@ def run_trading_session():
             json.dump(research, f, indent=2)
 
     if not research.get("market_open"):
-        return {"status": "MARKET_CLOSED", "no_trades": True, "timestamp": datetime.now().isoformat()}
+        return {"status": "MARKET_CLOSED", "no_trades": True,
+                "agent_version": get_version(),
+                "timestamp": datetime.now().isoformat()}
 
     # Load Judge output — REQUIRED before execution
     judge = load_judge_output(today)
@@ -1053,7 +1057,8 @@ def run_trading_session():
             "status": "JUDGE_NOT_RUN",
             "error": "No Judge output found for today. Run judge.py session first.",
             "no_trades": True,
-            "timestamp": datetime.now().isoformat()
+            "agent_version": get_version(),
+            "timestamp": datetime.now().isoformat(),
         }
 
     account   = get_account()
@@ -1061,6 +1066,7 @@ def run_trading_session():
     state     = load_state()
     watchlist = load_watchlist_config()
     results   = {
+        "agent_version": get_version(),
         "timestamp": datetime.now().isoformat(),
         "trades": [],
         "skipped": [],

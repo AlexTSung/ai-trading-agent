@@ -28,6 +28,8 @@ try:
 except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
 
+from version import get_version
+
 # ── Auth ────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
 ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
@@ -676,6 +678,7 @@ def full_research():
         print(f"  [research] Discovered: {[t['symbol'] for t in extra_items]}", file=sys.stderr)
 
     results = {
+        "agent_version": get_version(),
         "timestamp": datetime.now().isoformat(),
         "market_open": clock.get("is_open", False),
         "next_open": clock.get("next_open", ""),
@@ -780,6 +783,7 @@ def midday_check():
     clock     = get_market_status()
 
     results = {
+        "agent_version": get_version(),
         "timestamp": datetime.now().isoformat(),
         "market_open": clock.get("is_open", False),
         "account": {

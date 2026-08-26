@@ -35,6 +35,7 @@ os.environ.setdefault("APCA_API_SECRET_KEY", "test")
 import judge          # noqa: E402
 import reviewer       # noqa: E402
 import research      # noqa: E402
+import version       # noqa: E402
 import trade          # noqa: E402
 
 
@@ -799,6 +800,201 @@ class TestOptionsRiskFilters(unittest.TestCase):
             weak, account_equity=91000.0, leg_quotes=self._tight_quotes(weak))
         self.assertFalse(ok)
         self.assertIn("0.25", why)
+
+
+class TestVersioning(unittest.TestCase):
+    """
+    A strategy change makes the performance record before and after it
+    incomparable. Phase 2 was voided for exactly that reason: the Judge's
+    weights changed, every score shifted by up to 2.0 points, and the
+    "avg Judge >= 7.0" criterion silently stopped meaning anything for seven
+    weeks. A version number and a comparability note would have caught it.
+
+    These tests guard the versioning system itself, because the repo's most
+    frequent failure is documentation drifting from code.
+    """
+
+    def test_version_is_valid_semver(self):
+        self.assertRegex(version.get_version(), r"^\d+\.\d+\.\d+$")
+
+    def test_all_three_sources_agree(self):
+        """VERSION, CLAUDE.md and CHANGELOG.md must not drift apart."""
+        ok, msg = version.verify()
+        self.assertTrue(ok, msg)
+
+    def test_bump_arithmetic(self):
+        cases = [
+            ("1.0.0", "patch", "1.0.1"),
+            ("1.0.0", "minor", "1.1.0"),
+            ("1.0.0", "major", "2.0.0"),
+            ("1.4.7", "minor", "1.5.0"),   # minor resets patch
+            ("1.4.7", "major", "2.0.0"),   # major resets both
+        ]
+        for current, level, expected in cases:
+            with self.subTest(current=current, level=level):
+                self.assertEqual(version.next_version(current, level), expected)
+
+    def test_bump_rejects_an_unknown_level(self):
+        with self.assertRaises(ValueError):
+            version.next_version("1.0.0", "hotfix")
+
+    def test_bump_requires_a_reason(self):
+        """The reason is what makes the CHANGELOG worth reading."""
+        for bad in ("", "   ", None):
+            with self.subTest(reason=bad):
+                with self.assertRaises(ValueError):
+                    version.bump("patch", bad)
+
+    def test_malformed_version_file_does_not_crash_a_trading_run(self):
+        """
+        get_version() is called from every pipeline writer. An unstamped
+        journal is a smaller loss than a session that fails to execute.
+        """
+        with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+            f.write("not-a-version")
+            bad_path = f.name
+        try:
+            with mock.patch.object(version, "VERSION_FILE", bad_path):
+                self.assertEqual(version.get_version(), "0.0.0-unknown")
+            with mock.patch.object(version, "VERSION_FILE", "/nonexistent/VERSION"):
+                self.assertEqual(version.get_version(), "0.0.0-unknown")
+        finally:
+            os.unlink(bad_path)
+
+    def test_pipeline_outputs_are_version_stamped(self):
+        """
+        Results have to be attributable to the ruleset that produced them.
+        Every top-level pipeline output carries agent_version.
+        """
+        for mod in (research, judge, trade, reviewer):
+            with self.subTest(module=mod.__name__):
+                self.assertTrue(hasattr(mod, "get_version"),
+                                f"{mod.__name__} cannot stamp its output")
+                self.assertEqual(mod.get_version(), version.get_version())
+
+    # ── The version surface ──────────────────────────────────────────────────
+
+    def test_logs_are_not_in_the_version_surface(self):
+        """
+        THE rollback trap. 343 files under logs/ are tracked, so a plain
+        `git checkout v1.0.0` would roll the journals, verdicts and trade logs
+        back too — destroying the performance record you rolled back in order to
+        study. Only learned parameters are restored.
+        """
+        surface = version.version_surface()
+        log_paths = [p for p in surface if p.startswith("logs/")]
+        self.assertTrue(all(p.startswith("logs/learnings/") for p in log_paths),
+                        f"performance record would be reverted: {log_paths}")
+
+    def test_learned_parameters_are_in_the_surface(self):
+        """
+        A v1.0.0 rollback that kept v1.4's learned Judge weights would not
+        reproduce v1.0.0 behaviour. Learned weights are strategy.
+        """
+        surface = version.version_surface()
+        self.assertIn("logs/learnings/alpaca_judge_hints.json", surface)
+
+    def test_strategy_defining_files_are_in_the_surface(self):
+        surface = set(version.version_surface())
+        for path in ("CLAUDE.md", "watchlist.json", "trade.py", "judge.py",
+                     "research.py", "reviewer.py", "forex_config.json",
+                     "tests/test_guardrails.py"):
+            with self.subTest(path=path):
+                self.assertIn(path, surface)
+
+    def _clean_repo_git(self):
+        """A stubbed git where the tag exists and the tree is clean."""
+        def fake(*args, **kw):
+            if args[0] == "rev-parse":
+                return mock.Mock(returncode=0, stdout="abc123\n")
+            if args[0] == "status":
+                return mock.Mock(returncode=0, stdout="")
+            if args[0] in ("ls-files", "ls-tree"):
+                return mock.Mock(returncode=0,
+                                 stdout="trade.py\nCLAUDE.md\n"
+                                        "logs/paper/2026-08-25.md\n"
+                                        "logs/learnings/alpaca_judge_hints.json\n")
+            if args[0] == "diff":
+                return mock.Mock(returncode=0, stdout="trade.py\n")
+            return mock.Mock(returncode=0, stdout="")
+        return fake
+
+    def test_rollback_is_dry_run_by_default(self):
+        """Reverting files is destructive; it must be opt-in."""
+        with mock.patch.object(version, "_git", side_effect=self._clean_repo_git()):
+            out = version.rollback("1.0.0")
+        self.assertTrue(out.get("dry_run"), out)
+        self.assertNotIn("restored", out)
+        self.assertIn("to_apply", out)
+
+    def test_rollback_does_not_checkout_on_a_dry_run(self):
+        calls = []
+
+        def recording(*args, **kw):
+            calls.append(args[0])
+            return self._clean_repo_git()(*args, **kw)
+
+        with mock.patch.object(version, "_git", side_effect=recording):
+            version.rollback("1.0.0")
+        self.assertNotIn("checkout", calls, "dry run must not modify the tree")
+
+    def test_rollback_reports_logs_are_preserved(self):
+        with mock.patch.object(version, "_git", side_effect=self._clean_repo_git()):
+            out = version.rollback("1.0.0")
+        self.assertTrue(out.get("logs_preserved"))
+
+    def test_rollback_excludes_the_journal_from_what_it_restores(self):
+        """
+        End to end on the surface computation: a tracked journal file must not
+        appear among the paths handed to git checkout.
+        """
+        captured = {}
+
+        def recording(*args, **kw):
+            if args[0] == "checkout":
+                captured["paths"] = list(args[3:])
+            return self._clean_repo_git()(*args, **kw)
+
+        with mock.patch.object(version, "_git", side_effect=recording):
+            version.rollback("1.0.0", confirm=True)
+
+        self.assertIn("paths", captured, "confirm should have run a checkout")
+        self.assertNotIn("logs/paper/2026-08-25.md", captured["paths"])
+        self.assertIn("logs/learnings/alpaca_judge_hints.json", captured["paths"])
+        self.assertIn("trade.py", captured["paths"])
+
+    def test_baseline_tag_exists(self):
+        """
+        v1.0.0 is the declared MVP baseline, so the tag has to be there for a
+        rollback to have anything to return to. Skipped where tags are
+        unavailable (a shallow or tagless clone).
+        """
+        try:
+            tags = version._git("tag", "-l").stdout.split()
+        except Exception as e:                     # pragma: no cover
+            self.skipTest(f"git tags unavailable: {e}")
+        if not tags:
+            self.skipTest("no tags in this clone")
+        self.assertIn("v1.0.0", tags)
+
+    def test_rollback_rejects_an_unknown_target(self):
+        out = version.rollback("99.99.99")
+        self.assertFalse(out.get("ok"))
+        self.assertIn("No such tag or commit", out.get("error", ""))
+
+    def test_rollback_refuses_to_overwrite_uncommitted_work(self):
+        dirty = ["M  trade.py", "?? scratch.py"]
+        with mock.patch.object(version, "_git") as g:
+            def fake(*args, **kw):
+                if args[0] == "rev-parse":
+                    return mock.Mock(returncode=0, stdout="abc123\n")
+                if args[0] == "status":
+                    return mock.Mock(returncode=0, stdout="\n".join(dirty))
+                return mock.Mock(returncode=0, stdout="")
+            g.side_effect = fake
+            out = version.rollback("1.0.0", confirm=True)
+        self.assertFalse(out.get("ok"))
+        self.assertIn("not clean", out.get("error", ""))
 
 
 class TestMacroRegimeSizing(unittest.TestCase):

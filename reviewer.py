@@ -30,6 +30,8 @@ try:
 except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
 
+from version import get_version
+
 # A single-trade P&L beyond this magnitude (in percent) is treated as a data
 # fault rather than a result. Real equity trades do not move 1000% intraday;
 # unadjusted reverse splits do.
@@ -858,7 +860,10 @@ def run_eod_review() -> dict:
             for sym, scored in raw.get("scores", {}).items():
                 judge_data[sym] = scored.get("score")
 
-    results  = {"date": today, "timestamp": datetime.now().isoformat(), "trades": []}
+    results  = {"date": today,
+                "agent_version": get_version(),
+                "timestamp": datetime.now().isoformat(),
+                "trades": []}
     filled   = [o for o in orders if o.get("status") in ("filled", "partially_filled") and o.get("side") == "buy"]
 
     for order in filled:

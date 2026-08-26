@@ -17,6 +17,8 @@ import re
 from datetime import date, datetime, timedelta
 from statistics import mean
 
+from version import get_version
+
 # ── Paths ─────────────────────────────────────────────────────────────────────
 ROOT         = os.path.dirname(os.path.abspath(__file__))
 JOURNAL_DIR  = os.path.join(ROOT, "logs", "paper")
@@ -1306,6 +1308,7 @@ def run_judge_session() -> dict:
     symbols_data = research.get("symbols", {})
     today        = date.today().isoformat()
     results      = {
+        "agent_version": get_version(),
         "timestamp": datetime.now().isoformat(),
         "date": today,
         "approved": [],

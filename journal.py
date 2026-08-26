@@ -25,6 +25,8 @@ try:
 except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
 
+from version import get_version
+
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
 ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
 BASE_URL      = os.getenv("APCA_BASE_URL", "https://paper-api.alpaca.markets")
