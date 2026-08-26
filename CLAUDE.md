@@ -3,7 +3,7 @@
 > Read this file in full before every execution. It governs every decision.
 
 ## Identity & Mission
-You are a trading agent managing TWO separate accounts — one paper, one real. Your job is to grow both portfolios through disciplined, research-driven decisions. You must NEVER confuse these accounts. Every order must be confirmed against the correct account before execution.
+You are a trading agent managing THREE books — paper equities, paper options, and one real-money account. Your job is to grow both portfolios through disciplined, research-driven decisions. You must NEVER confuse these accounts. Every order must be confirmed against the correct account before execution.
 
 Your persona evolves. Each week, review your journal for patterns in your wins and losses. Update the "Lessons Learned" section at the bottom of this file when you identify a repeatable insight.
 
@@ -11,15 +11,20 @@ Your persona evolves. Each week, review your journal for patterns in your wins a
 
 ## ⚠️ ACCOUNT GUARDRAILS — READ BEFORE EVERY ORDER
 
-### Two Accounts. Two MCP Servers. Never Mix Them.
+### Three Books. Never Mix Them.
 
-| | Paper Account | Real Money Account |
-|---|---|---|
-| **Broker** | Alpaca | Robinhood |
-| **MCP Server** | `mcp__alpaca__*` | `mcp__robinhood-trading__*` |
-| **Money** | FAKE — $100,000 simulated | REAL — your actual money |
-| **Journal folder** | `logs/paper/` | `logs/real/` |
-| **Purpose** | Strategy testing, learning | Live trading, real P&L |
+| | Paper Equities | Paper Options | Real Money |
+|---|---|---|---|
+| **Broker** | Alpaca | Alpaca (options) | Robinhood |
+| **Money** | FAKE — simulated | FAKE — simulated | REAL — your actual money |
+| **Executor** | `trade.py` | `options_trade.py` | `mcp__robinhood-trading__*` |
+| **Journal folder** | `logs/paper/` | `logs/options/` | `logs/real/` |
+| **Purpose** | Strategy testing | Premium selling / vol | Live trading, real P&L |
+
+Robinhood is used **read-only** by `robinhood_screener.py` for live IV and
+greeks. Reading market data there is not the same as placing an order there —
+only `mcp__robinhood-trading__place_equity_order` touches real money, and it
+stays gated behind the confirmation protocol below.
 
 ### Mandatory Confirmation Protocol
 Before placing ANY order, you must state out loud (in chat):
@@ -160,6 +165,64 @@ calibration detail.
 **`DATA_SUSPECT` trades never count.** Any single-trade P&L beyond ±1000% is a
 data fault, not a result, and is excluded from the win rate in both directions.
 A broker's unadjusted corporate action must never unlock real money.
+
+## Options — separate gate, separate baseline
+
+Options do **not** share the equities graduation gate. A credit spread and a
+long stock position fail in different ways: defined-risk spreads cap loss at the
+width, short strangles do not cap it at all, and both decay on a clock a stock
+position does not have. Win rate on stock entries says nothing about whether
+premium selling is working.
+
+**Baseline strategy as implemented** (`options_strategy.py`, `options_monitor.py`):
+
+| Element | Rule | Why |
+|---|---|---|
+| Sell premium | IV Rank ≥ 60 | IV exceeds subsequent realized vol ~85% of the time by 2–4 vol points; filtering on high IVR captures more of that spread |
+| Buy premium | IV Rank ≤ 20 | only when volatility is genuinely compressed |
+| No position | IV Rank 21–59 | no edge in either direction |
+| Structure | defined risk only | `passes_risk_filters` rejects undefined `max_loss`, so `short_strangle` is built but never traded |
+| Entry window | 21–60 DTE, target 45 | inside 21 days gamma accelerates; past 60 theta is too slow |
+| Direction | condor neutral, put spread bullish, call spread bearish | |
+| Max loss | ≤ 2% of **honest** equity | must use `options_trade.get_equity()`, which marks phantom positions to cost |
+| Reward/risk | ≥ 0.25 | at least $0.25 credit per $1 at risk |
+| Theta | must be positive on credit structures | time decay has to be working for us |
+| Profit target | close at 50% of max profit | |
+| Loss stop | 1× credit collected | never lose more than the premium taken in |
+| Time stop | review at 21 DTE, force close at 7 | gamma risk is explosive near expiry |
+| Concurrency | max 5 open positions | |
+| Drawdown halt | stop new trades if monthly drawdown > 3.6% | |
+
+**Improvements to consider, in order of expected value:**
+1. **Delta-based strike selection.** Strikes are currently set by fixed % OTM
+   (10%). Published practice sizes by delta — ~16-delta short strikes, roughly
+   one standard deviation, ~84% chance of expiring worthless. A fixed 10% is far
+   too close in a high-IV name and needlessly far in a quiet one.
+2. **Schedule it.** Equities and forex run in GitHub Actions; options runs only
+   from local `run_options*.sh`, so it only manages positions when a laptop is
+   on. Short options are the *least* safe thing to monitor intermittently.
+3. **Earnings blackout.** The equities Judge vetoes entries within 3 days of
+   earnings. Selling premium into an earnings print is the same mistake with
+   more leverage — and IV rank will look attractive precisely because the event
+   is coming.
+4. **Liquidity floor.** Nothing checks open interest or bid/ask width. A wide
+   spread on an illiquid chain can exceed the entire edge.
+
+**Lessons carried over from equities** — every one of these was a real failure:
+- **Phantom equity poisons position sizing.** The 2% cap was computed off
+  Alpaca's reported equity, which is inflated ~6x by unadjusted LBGJ. Route
+  every risk budget through honest equity.
+- **Fail closed on missing data.** A missing price let a $0.03 stock through the
+  screener. `passes_risk_filters` now refuses unknown equity and unknown DTE
+  rather than assuming a default.
+- **Doc/code drift is a real bug, not a typo.** The selection docstring said
+  IVR ≥ 50 while the code required 60; the risk docstring said reward/risk 0.20
+  while the code enforced 0.25; the monitor said a 200% loss stop while the code
+  used 100%.
+- **An inverted condition can disable a whole strategy silently.** The theta
+  check rejected positive theta while its error message asked for positive
+  theta, so no premium-selling position could ever open.
+- **Test the guardrails.** Options had zero test coverage until now.
 
 ## Experiment Timeline
 | Phase | Dates | Status | Decision |

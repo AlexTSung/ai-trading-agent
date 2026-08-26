@@ -685,3 +685,138 @@ class TestVetoOpportunityCost(unittest.TestCase):
         """The EOD pipeline must not crash on an empty record."""
         rendered = la.render(la.build(round_trips=[]))
         self.assertIn("Trade Learnings", rendered)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Options — same failure classes as the equities side, previously untested
+# ══════════════════════════════════════════════════════════════════════════════
+import options_strategy as ostrat    # noqa: E402
+import options_monitor as omon       # noqa: E402
+
+
+class TestOptionsRiskFilters(unittest.TestCase):
+
+    # Credit structures carry POSITIVE theta in this codebase's convention.
+    DEFINED = {"strategy": "bull_put_spread", "max_loss": 4.0,
+               "reward_risk": 0.30, "theta": 0.0135, "dte": 40}
+
+    def test_unknown_equity_is_refused_not_guessed(self):
+        """
+        The 2% cap defaulted to a hardcoded $25,000 account. Sizing risk against
+        an account that does not exist is worse than refusing to size it.
+        """
+        for bad in (None, 0, -1):
+            with self.subTest(equity=bad):
+                ok, why = ostrat.passes_risk_filters(self.DEFINED, account_equity=bad)
+                self.assertFalse(ok)
+                self.assertIn("equity unknown", why.lower())
+
+    def test_undefined_max_loss_is_rejected(self):
+        """short_strangle reports max_loss None — unlimited. It must not pass."""
+        strangle = ostrat.build_short_strangle(S=100.0, T=40/365, sigma=0.30)
+        strangle["strategy"] = "short_strangle"
+        self.assertIsNone(strangle["max_loss"], "strangle risk is unbounded")
+        ok, why = ostrat.passes_risk_filters(strangle, account_equity=91000.0)
+        self.assertFalse(ok)
+        self.assertIn("max loss", why.lower())
+
+    def test_two_percent_cap_scales_with_equity(self):
+        """A $4.00-wide spread is $400 per contract: fine at $91K, not at $10K."""
+        ok_big, _ = ostrat.passes_risk_filters(self.DEFINED, account_equity=91000.0)
+        ok_small, why = ostrat.passes_risk_filters(self.DEFINED, account_equity=10000.0)
+        self.assertTrue(ok_big)
+        self.assertFalse(ok_small)
+        self.assertIn("2%", why)
+
+    def test_phantom_equity_would_have_inflated_the_cap_sixfold(self):
+        reported, honest = 559288.0, 91295.0
+        self.assertGreater(reported * 0.02, 10000)
+        self.assertLess(honest * 0.02, 2000)
+
+    def test_credit_structures_are_not_rejected_for_having_positive_theta(self):
+        """
+        The theta condition was inverted: `theta >= 0` rejected, so every iron
+        condor, put spread, call spread and strangle was refused by a filter
+        whose own message said positive theta was what it wanted. The options
+        pipeline could not open a single premium-selling position.
+        """
+        for name, builder in (("iron_condor", ostrat.build_iron_condor),
+                              ("bull_put_spread", ostrat.build_bull_put_spread),
+                              ("bear_call_spread", ostrat.build_bear_call_spread)):
+            with self.subTest(strategy=name):
+                strat = builder(S=100.0, T=40 / 365, sigma=0.30)
+                strat["strategy"] = name
+                self.assertGreater(strat["theta"], 0, "credit theta must be positive")
+                ok, why = ostrat.passes_risk_filters(strat, account_equity=91000.0)
+                self.assertTrue(ok, f"{name} rejected: {why}")
+
+    def test_missing_dte_is_refused_not_crashed(self):
+        """`None < 21` raises TypeError rather than failing the check."""
+        no_dte = dict(self.DEFINED)
+        no_dte.pop("dte")
+        ok, why = ostrat.passes_risk_filters(no_dte, account_equity=91000.0)
+        self.assertFalse(ok)
+        self.assertIn("DTE", why)
+
+    def test_entry_window_is_enforced(self):
+        for dte, should_pass in ((15, False), (40, True), (75, False)):
+            with self.subTest(dte=dte):
+                strat = dict(self.DEFINED, dte=dte)
+                ok, _ = ostrat.passes_risk_filters(strat, account_equity=91000.0)
+                self.assertEqual(ok, should_pass)
+
+    def test_weak_reward_risk_is_rejected(self):
+        weak = dict(self.DEFINED, reward_risk=0.10)
+        ok, why = ostrat.passes_risk_filters(weak, account_equity=91000.0)
+        self.assertFalse(ok)
+        self.assertIn("0.25", why)
+
+
+class TestOptionsStrategySelection(unittest.TestCase):
+
+    def _screen(self, ivr, trend="neutral"):
+        # Mirrors the dict options_screener.py emits (IV values as percents).
+        return {"symbol": "TEST", "price": 100.0, "hv30": 25.0,
+                "current_iv": 30.0, "iv_rank": ivr, "iv_pct": ivr,
+                "trend": trend, "expiry_target": "2026-10-16", "dte": 40}
+
+    def test_premium_is_sold_only_when_iv_is_rich(self):
+        self.assertIsNotNone(ostrat.select_strategy(self._screen(65)))
+
+    def test_neutral_iv_zone_is_skipped(self):
+        """IVR 21-59 has no edge in either direction — take no position."""
+        for ivr in (25, 40, 55):
+            with self.subTest(ivr=ivr):
+                self.assertIsNone(ostrat.select_strategy(self._screen(ivr)))
+
+    def test_premium_is_bought_only_when_iv_is_compressed(self):
+        self.assertIsNotNone(ostrat.select_strategy(self._screen(15)))
+
+    def test_degenerate_inputs_are_refused(self):
+        for bad in ({"dte": 0}, {"current_iv": 0}, {"price": 0}):
+            with self.subTest(bad=bad):
+                self.assertIsNone(
+                    ostrat.select_strategy(dict(self._screen(65), **bad)))
+
+
+class TestOptionsManagementRules(unittest.TestCase):
+    """Published premium-selling management: 50% profit, exit by 21 DTE."""
+
+    def test_profit_target_is_fifty_percent(self):
+        self.assertAlmostEqual(omon.PROFIT_TARGET, 0.50)
+
+    def test_gamma_zone_thresholds(self):
+        self.assertEqual(omon.DTE_WARN, 21)
+        self.assertEqual(omon.DTE_FORCE_CLOSE, 7)
+        self.assertLess(omon.DTE_FORCE_CLOSE, omon.DTE_WARN)
+
+    def test_loss_stop_never_exceeds_credit_collected(self):
+        self.assertLessEqual(omon.LOSS_STOP, 1.00)
+
+    def test_defined_risk_structures_report_a_finite_max_loss(self):
+        for builder in (ostrat.build_iron_condor, ostrat.build_bull_put_spread,
+                        ostrat.build_bear_call_spread):
+            with self.subTest(builder=builder.__name__):
+                strat = builder(S=100.0, T=40 / 365, sigma=0.30)
+                self.assertIsNotNone(strat["max_loss"])
+                self.assertGreater(strat["max_loss"], 0)

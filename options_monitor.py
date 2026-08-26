@@ -4,7 +4,7 @@ options_monitor.py — 30-minute options position health monitor.
 
 Checks every position for:
   1. DTE danger zones (≤21 days: gamma risk, ≤7 days: force close)
-  2. P&L thresholds (≥50% profit → take, ≥200% loss → stop)
+  2. P&L thresholds (≥50% profit → take, ≥100% of credit lost → stop)
   3. Delta drift (position has become too directional — may need roll)
   4. IV crush/spike (significant vol change since entry)
   5. Earnings proximity (close or flag before earnings announcement)

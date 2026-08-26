@@ -9,12 +9,17 @@ Implements the volatility spread strategies from Natenberg Ch 7-8:
   - Vertical Spreads: defined-risk directional plays
   - Calendar Spread: sell near-term, buy longer-term; long time spread
 
-Strategy selection framework (Natenberg Ch 8 / Figure 8-19):
-  IV Rank ≥ 50 + no direction → Iron Condor (sell premium, negative gamma/vega)
-  IV Rank ≥ 50 + bullish       → Bull Put Spread (credit)
-  IV Rank ≥ 50 + bearish       → Bear Call Spread (credit)
-  IV Rank ≤ 25 + no direction  → Long Straddle / Strangle (buy premium)
-  IV Rank 25-50                → Calendar Spread (long time spread)
+Strategy selection as implemented (see select_strategy for the live thresholds):
+  IV Rank ≥ 60 + no direction → Iron Condor (sell premium, negative gamma/vega)
+  IV Rank ≥ 60 + bullish      → Bull Put Spread (credit)
+  IV Rank ≥ 60 + bearish      → Bear Call Spread (credit)
+  IV Rank ≤ 20 + no direction → Long Straddle (buy premium)
+  IV Rank 21-59               → No position
+
+Note: calendar spreads are described in Natenberg but are NOT implemented here,
+and the 21-59 band takes no position rather than selling a time spread. Entry is
+gated to 21-60 DTE; short_strangle is built but always rejected by
+passes_risk_filters because its risk is undefined.
 """
 
 import math
@@ -22,6 +27,14 @@ from typing import Optional
 from options_pricing import bsm_greeks, spread_greeks, bsm_price
 
 RISK_FREE_RATE = 0.053
+
+# ── Entry window ──────────────────────────────────────────────────────────────
+# Published premium-selling practice enters at 30-45 DTE and manages out by 21.
+# 21-60 is the accepted band: inside 21 days gamma accelerates sharply, beyond
+# 60 theta decay is too slow to pay for the risk held.
+DTE_MIN_ENTRY = 21
+DTE_MAX_ENTRY = 60
+DTE_TARGET    = 45   # preferred entry when the chain offers a choice
 
 
 # ── Strategy builders ─────────────────────────────────────────────────────────
@@ -88,6 +101,7 @@ def build_iron_condor(S: float, T: float, sigma: float,
     net_greeks = spread_greeks(legs)
 
     return {
+        "dte":         round(T * 365),
         "strategy":    "iron_condor",
         "legs":        [
             {"type": "long_put",   "strike": K_long_put,   "price": round(lp, 2)},
@@ -138,6 +152,7 @@ def build_short_strangle(S: float, T: float, sigma: float,
     net_greeks = spread_greeks(legs)
 
     return {
+        "dte":         round(T * 365),
         "strategy":   "short_strangle",
         "legs":       [
             {"type": "short_put",  "strike": K_put,  "price": round(put_price, 2)},
@@ -179,6 +194,7 @@ def build_long_straddle(S: float, T: float, sigma: float) -> dict:
     net_greeks = spread_greeks(legs)
 
     return {
+        "dte":         round(T * 365),
         "strategy":  "long_straddle",
         "legs":      [
             {"type": "long_call", "strike": K, "price": round(call_price, 2)},
@@ -220,6 +236,7 @@ def build_bull_put_spread(S: float, T: float, sigma: float,
     net_greeks = spread_greeks(legs)
 
     return {
+        "dte":         round(T * 365),
         "strategy":    "bull_put_spread",
         "legs":        [
             {"type": "short_put", "strike": K_short, "price": round(sp, 2)},
@@ -260,6 +277,7 @@ def build_bear_call_spread(S: float, T: float, sigma: float,
     net_greeks = spread_greeks(legs)
 
     return {
+        "dte":         round(T * 365),
         "strategy":    "bear_call_spread",
         "legs":        [
             {"type": "short_call", "strike": K_short, "price": round(sc, 2)},
@@ -325,6 +343,7 @@ def build_butterfly_spread(S: float, T: float, sigma: float,
     net_greeks = spread_greeks(legs)
 
     return {
+        "dte":         round(T * 365),
         "strategy":    "butterfly",
         "legs":        [
             {"type": "long_call",   "strike": K_low,    "price": round(p_low, 2)},
@@ -463,11 +482,20 @@ def select_strategy(screen_result: dict) -> Optional[dict]:
     Select optimal strategy based on IV rank + trend signal.
 
     Decision matrix (Natenberg Ch 8):
-      IVR ≥ 50, neutral → Iron Condor (defined risk premium selling)
-      IVR ≥ 50, bullish → Bull Put Spread (credit, bullish bias)
-      IVR ≥ 50, bearish → Bear Call Spread (credit, bearish bias)
-      IVR ≤ 25, any     → Long Straddle (buy premium for big move)
-      IVR 25-50         → Skip (no strong edge)
+      IVR ≥ 60, neutral → Iron Condor (defined risk premium selling)
+      IVR ≥ 60, bullish → Bull Put Spread (credit, bullish bias)
+      IVR ≥ 60, bearish → Bear Call Spread (credit, bearish bias)
+      IVR ≤ 20, any     → Long Straddle (buy premium for big move)
+      IVR 21-59         → Skip (no strong edge)
+
+    These thresholds are deliberately stricter than the commonly cited IVR > 50
+    for selling premium: 60 to sell, 20 to buy. The published edge is that
+    implied volatility exceeds subsequent realized volatility roughly 85% of the
+    time by 2-4 vol points, and that premium sellers filtering on IVR > 50
+    capture more of it than sellers who do not filter. Requiring 60 trades fewer
+    setups for a larger average edge, which suits a strategy being validated on
+    a small sample. Do not loosen these without evidence from the round-trip
+    record — see CLAUDE.md on learned-hint rails.
 
     For paper trading: prefer defined-risk strategies (iron condor over short strangle).
     """
@@ -522,16 +550,22 @@ def select_strategy(screen_result: dict) -> Optional[dict]:
 
 # ── Risk checks ───────────────────────────────────────────────────────────────
 
-def passes_risk_filters(strat: dict, account_equity: float = 25000.0) -> tuple[bool, str]:
+def passes_risk_filters(strat: dict, account_equity: float = None) -> tuple[bool, str]:
     """
     Basic risk gate before placing any order.
 
     Rules:
       1. Max loss per trade ≤ 2% of account equity
-      2. Reward/risk ≥ 0.20 (at least $0.20 credit per $1 at risk)
+      2. Reward/risk ≥ 0.25 (at least $0.25 credit per $1 at risk)
       3. Must have positive theta (time working for us on credit strategies)
       4. DTE between 21 and 60 (sweet spot for theta decay vs gamma risk)
     """
+    # No silent default. A hardcoded $25,000 fallback sized risk against an
+    # account that does not exist; refuse rather than guess.
+    if account_equity is None or account_equity <= 0:
+        return False, ("Account equity unknown — cannot size the 2% max-loss cap. "
+                       "Pass honest equity from options_trade.get_equity().")
+
     max_loss = strat.get("max_loss")
     if max_loss is None:
         return False, "Undefined max loss — use defined-risk structure in paper trading"
@@ -547,17 +581,32 @@ def passes_risk_filters(strat: dict, account_equity: float = 25000.0) -> tuple[b
     if rr is not None and rr < 0.25:
         return False, f"Reward/risk {rr:.2f} < 0.25 minimum (Bielfeldt: fold weak hands)"
 
-    theta = strat.get("theta", 0)
+    # Theta sign. The builders return POSITIVE theta for credit structures —
+    # time decay working in our favour, which is the whole point of selling
+    # premium. The condition here was inverted (`theta >= 0` rejected), so every
+    # iron condor, put spread, call spread and strangle was refused by a filter
+    # whose own error message said positive theta was what it wanted. The
+    # options pipeline could not open a single premium-selling position.
+    theta = strat.get("theta")
     strategy = strat.get("strategy", "")
-    if strategy in ("bull_put_spread", "bear_call_spread", "iron_condor", "short_strangle"):
-        if theta >= 0:
-            return False, f"Expected positive theta for premium-selling strategy, got {theta:.4f}"
+    if strategy in ("bull_put_spread", "bear_call_spread", "iron_condor",
+                    "short_strangle"):
+        if not isinstance(theta, (int, float)):
+            return False, "Theta unavailable — cannot confirm time decay favours us"
+        if theta <= 0:
+            return False, (f"Premium-selling structure needs positive theta, "
+                           f"got {theta:.4f}")
 
-    dte = strat.get("dte", 0)
-    if dte < 21:
-        return False, f"DTE {dte} < 21 — too close to expiry (gamma risk)"
-    if dte > 60:
-        return False, f"DTE {dte} > 60 — theta decay too slow"
+    # DTE. The builders do not always populate this, and `None < 21` raises a
+    # TypeError rather than failing the check, so missing DTE is rejected
+    # explicitly instead of crashing the run.
+    dte = strat.get("dte")
+    if not isinstance(dte, (int, float)):
+        return False, "DTE unknown — cannot verify the 21-60 day entry window"
+    if dte < DTE_MIN_ENTRY:
+        return False, f"DTE {dte} < {DTE_MIN_ENTRY} — too close to expiry (gamma risk)"
+    if dte > DTE_MAX_ENTRY:
+        return False, f"DTE {dte} > {DTE_MAX_ENTRY} — theta decay too slow"
 
     return True, "OK"
 

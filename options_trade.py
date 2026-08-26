@@ -52,8 +52,30 @@ def get_account() -> dict:
 
 
 def get_equity() -> float:
+    """
+    Account equity with phantom positions marked back to cost basis.
+
+    Every options risk control divides by this number — the 2% max-loss cap in
+    passes_risk_filters and the 3.6% monthly drawdown halt in run_options.py.
+    Alpaca reports equity of ~$559K against a true ~$91K because LBGJ carries
+    roughly $470K from a reverse split applied to the quote but never to the
+    position. Sizing off the reported figure makes a "2% cap" $11,180 on a book
+    actually worth $91K — 6x too large — and lifts the drawdown halt out of reach.
+
+    Falls back to the reported figure if positions cannot be read, so a data
+    outage can never silently enlarge the risk budget.
+    """
     acct = get_account()
-    return float(acct.get("equity", 0))
+    reported = float(acct.get("equity", 0) or 0)
+    try:
+        from trade import detect_phantom_equity
+        r = requests.get(f"{BASE_URL}/v2/positions", headers=_headers(), timeout=15)
+        r.raise_for_status()
+        excess = sum(f.get("phantom_amount", 0.0)
+                     for f in detect_phantom_equity(r.json()))
+    except Exception:
+        return reported
+    return max(0.0, reported - excess)
 
 
 # ── Contract lookup ───────────────────────────────────────────────────────────
