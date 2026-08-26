@@ -350,8 +350,126 @@ def check_positions_for_management() -> list[dict]:
 
 # ── Journal ───────────────────────────────────────────────────────────────────
 
-def log_options_trade(strat: dict, orders: list[dict], journal_path: str):
-    """Append trade details to the options journal."""
+def fetch_leg_quotes(contracts: list[dict]) -> Optional[list[dict]]:
+    """
+    Live bid/ask for each resolved leg, in leg order, for execution costing.
+
+    options_screener.check_option_liquidity existed but was never called from
+    any pipeline, so no option order had ever been costed or liquidity-checked
+    against a real quote. Every price the gates saw was a Black-Scholes mid.
+
+    Returns None if ANY leg's quote is unusable — a partial set would be
+    silently blended into an "estimate" that looks measured. See
+    options_strategy.execution_cost, which requires all-or-nothing.
+    """
+    from options_screener import check_option_liquidity
+
+    quotes = []
+    for leg in contracts:
+        sym = leg.get("symbol")
+        if not sym:
+            return None
+        try:
+            q = check_option_liquidity(sym)
+        except Exception as e:
+            _log(f"  Quote fetch failed for {sym}: {e}")
+            return None
+        bid, ask = q.get("bid", 0), q.get("ask", 0)
+        if not (isinstance(bid, (int, float)) and isinstance(ask, (int, float))
+                and bid > 0 and ask > bid):
+            _log(f"  No usable quote for {sym} (bid={bid}, ask={ask})")
+            return None
+        quotes.append({"symbol": sym, "bid": float(bid), "ask": float(ask)})
+
+    return quotes
+
+
+def open_short_vol_positions(journal_dir: str = None) -> list[dict]:
+    """
+    Short-premium strategies still open, for the aggregate concentration cap.
+
+    Alpaca reports option positions per contract, not per strategy, so a four-
+    leg iron condor appears as four unrelated rows with no shared max loss. The
+    strategy-level risk only exists in our own journal. This joins the two: a
+    journalled strategy is still open if any of its leg contracts is still held.
+
+    Returns [{symbol, strategy, max_loss_per_contract, qty}]. Entries whose max
+    loss was never journalled are returned with max_loss_per_contract=None —
+    aggregate_short_vol_check refuses rather than treating them as zero risk.
+    """
+    from options_strategy import SHORT_PREMIUM_STRATEGIES
+
+    journal_dir = journal_dir or os.path.join(os.path.dirname(__file__),
+                                              "logs", "options")
+    held = {p.get("symbol") for p in get_option_positions() if p.get("symbol")}
+    if not held:
+        return []
+
+    # This month and last — a 21-60 DTE entry cannot still be open beyond that.
+    today = date.today()
+    months = {today.strftime("%Y-%m"),
+              (today.replace(day=1) - timedelta(days=1)).strftime("%Y-%m")}
+
+    open_positions = []
+    seen = set()
+    for month in sorted(months, reverse=True):
+        path = os.path.join(journal_dir, f"trades-{month}.jsonl")
+        if not os.path.exists(path):
+            continue
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if entry.get("strategy") not in SHORT_PREMIUM_STRATEGIES:
+                    continue
+
+                leg_syms = {
+                    o.get("symbol") for o in (entry.get("orders") or [])
+                    if isinstance(o, dict) and o.get("symbol")
+                }
+                if not (leg_syms & held):
+                    continue
+
+                key = (entry.get("symbol"), entry.get("expiry"), entry.get("strategy"))
+                if key in seen:
+                    continue
+                seen.add(key)
+
+                max_loss = entry.get("max_loss_after_costs")
+                if not isinstance(max_loss, (int, float)):
+                    max_loss = entry.get("max_loss")
+
+                open_positions.append({
+                    "symbol":   entry.get("symbol"),
+                    "strategy": entry.get("strategy"),
+                    "expiry":   entry.get("expiry"),
+                    "max_loss_per_contract": (
+                        round(max_loss * 100, 2)
+                        if isinstance(max_loss, (int, float)) else None
+                    ),
+                    "qty": entry.get("qty", 1),
+                })
+
+    return open_positions
+
+
+def log_options_trade(strat: dict, orders: list[dict], journal_path: str,
+                      costs: dict = None, scenarios: dict = None,
+                      qty: int = 1):
+    """
+    Append trade details to the options journal.
+
+    costs/scenarios come from options_strategy.net_of_cost_metrics and
+    scenario_analysis. They are recorded because the entry-time record is the
+    only place the execution cost and loss-tail shape can be compared against
+    the realised round trip later — reviewer.py cannot reconstruct either from
+    fills alone.
+    """
     import os
     os.makedirs(os.path.dirname(journal_path), exist_ok=True)
 
@@ -364,6 +482,7 @@ def log_options_trade(strat: dict, orders: list[dict], journal_path: str):
         "dte":       strat.get("dte"),
         "net_credit": strat.get("net_credit") or -strat.get("net_debit", 0),
         "max_loss":  strat.get("max_loss"),
+        "qty":       qty,
         "legs":      strat.get("legs"),
         "orders":    orders,
         "greeks": {
@@ -373,6 +492,23 @@ def log_options_trade(strat: dict, orders: list[dict], journal_path: str):
             "vega":  strat.get("vega"),
         }
     }
+
+    if costs:
+        entry.update({
+            "exec_cost_per_contract": costs.get("exec_cost_per_contract"),
+            "exec_cost_source":       costs.get("exec_cost_source"),
+            "cost_pct_of_credit":     costs.get("cost_pct_of_credit"),
+            "max_loss_after_costs":   costs.get("max_loss_after_costs"),
+            "reward_risk_net":        costs.get("reward_risk_net"),
+            "widest_leg_spread_pct":  costs.get("widest_leg_spread_pct"),
+        })
+
+    if scenarios:
+        entry.update({
+            "avg_shortfall_per_contract": scenarios.get("avg_shortfall_per_contract"),
+            "max_shortfall_per_contract": scenarios.get("max_shortfall_per_contract"),
+            "losing_scenario_fraction":   scenarios.get("losing_scenario_fraction"),
+        })
 
     with open(journal_path, "a") as f:
         f.write(json.dumps(entry) + "\n")

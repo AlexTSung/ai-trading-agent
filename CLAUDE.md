@@ -186,14 +186,54 @@ premium selling is working.
 | Structure | defined risk only | `passes_risk_filters` rejects undefined `max_loss`, so `short_strangle` is built but never traded |
 | Entry window | 21–60 DTE, target 45 | inside 21 days gamma accelerates; past 60 theta is too slow |
 | Direction | condor neutral, put spread bullish, call spread bearish | |
-| Max loss | ≤ 2% of **honest** equity | must use `options_trade.get_equity()`, which marks phantom positions to cost |
-| Reward/risk | ≥ 0.25 | at least $0.25 credit per $1 at risk |
+| No-arbitrage bounds | structure must satisfy its own static bounds | first gate; a credit ≥ the width securing it means a corrupt input, not a good fill |
+| Max loss | ≤ 2% of **honest** equity, **net of execution cost** | must use `options_trade.get_equity()`, which marks phantom positions to cost |
+| Reward/risk | ≥ 0.25 **net of execution cost** | at least $0.25 credit per $1 at risk, measured at prices we can transact at |
+| Leg liquidity | bid-ask ≤ 15% of mid, when quotes are real | a wide spread can exceed the entire edge |
 | Theta | must be positive on credit structures | time decay has to be working for us |
 | Profit target | close at 50% of max profit | |
 | Loss stop | 1× credit collected | never lose more than the premium taken in — **stricter than the 2× credit in published mechanics.** A tighter stop on an ~84%-win-rate strategy cuts positions that would have recovered; it also caps the tail. Revisit once the round-trip record can measure which costs more. |
 | Time stop | review at 21 DTE, force close at 7 | gamma risk is explosive near expiry |
 | Concurrency | max 5 open positions | |
+| Short-vol concurrency | max 3 open short-premium positions | they are one position in a volatility spike |
+| Short-vol aggregate risk | ≤ 6% of honest equity, summed | five 2% trades were never bounded to 6% |
+| Short-vol correlation | one short-premium position per underlying group | SPY/QQQ/IWM/DIA/VOO/IVV/VTI count as one |
 | Drawdown halt | stop new trades if monthly drawdown > 3.6% | |
+
+### Execution cost is not a rounding error
+
+Every price in `options_strategy.py` is a Black-Scholes theoretical value — a
+mid. We cannot transact at a mid: selling a spread means hitting the bid on the
+short legs and paying the ask on the long ones, and again in reverse when the
+position closes (which it does — at 21 DTE or +50%, not at expiry). A four-leg
+condor crosses **eight** spreads over a round trip.
+
+Measured on the current builders at 45 DTE, 16-delta shorts:
+
+| Underlying | IV | Credit | Est. cost | Cost as % of credit | Reward/risk gross → net |
+|---|---|---|---|---|---|
+| $150 | 25% | $1.75 | $0.28 | 16% | 0.28 → **0.22** |
+| $250 | 35% | $3.89 | $0.65 | 17% | 0.30 → **0.24** |
+| $60 | 30% | $0.92 | $0.15 | 16% | 0.30 → **0.24** |
+| $500 | 22% | $4.79 | $0.81 | 17% | 0.28 → **0.22** |
+
+**Every one of those clears the 0.25 bar on mids and fails it on transactable
+prices.** The gate was measuring a price that does not exist.
+
+The bar was **not** lowered to compensate. A structure whose edge does not
+survive its own execution cost had no edge, and the tighten-only rail forbids
+dropping a documented floor to book more trades. The fix is real quotes:
+`fetch_leg_quotes()` costs the trade against live bid/ask, and a liquid contract
+at a 2% spread costs ~$6/contract instead of the ~$28 fallback estimate — the
+same condor then passes. **Fetching quotes is what unlocks trades, not
+weakening the gate.**
+
+Contracts are now resolved *before* the risk gate rather than after, because a
+quote needs a contract symbol. When quotes are unreachable the fallback is
+deliberately pessimistic — a 10%-of-mid spread, the widest we would knowingly
+accept — so an unpriceable chain rejects a trade we might have taken rather than
+accepting one we would have refused. A cost that is half measured and half
+estimated is reported as `estimate`, never blended.
 
 **Improvements to consider, in order of expected value:**
 1. ~~Delta-based strike selection~~ — **done.** Short legs target ~16 delta and
@@ -225,8 +265,27 @@ premium selling is working.
    earnings. Selling premium into an earnings print is the same mistake with
    more leverage — and IV rank will look attractive precisely because the event
    is coming.
-4. **Liquidity floor.** Nothing checks open interest or bid/ask width. A wide
-   spread on an illiquid chain can exceed the entire edge.
+4. ~~Liquidity floor~~ — **done.** `options_screener.check_option_liquidity()`
+   already applied a 15%-of-mid ceiling but **was never called from any
+   pipeline**, so no option order had ever been liquidity-checked or costed
+   against a real quote. `fetch_leg_quotes()` now wires it into the gate. Open
+   interest is still unchecked — spread width is a proxy for it, not a
+   substitute.
+5. **Vol-regime gate on selling.** High IV rank is our entry signal, but it
+   reads the same after a spike has peaked (good) and while one is still
+   expanding (Volmageddon). The equities side already gates on real VIX
+   (`intelligence.py`, half size > 25, no new positions > 35); options ignores
+   it entirely. Reusing that plumbing is the next highest-value change.
+
+### Reference sources read for the options strategy
+
+Findings applied, with what each did and did not support:
+
+| Source | Applied | Not applicable |
+|---|---|---|
+| Wang, Pennock, Rothschild & Devanur, *Designing Expressive and Liquid Financial Options Markets* (ICAIF '24) | §4.3's measured spreads motivated execution-cost accounting; the §3 No Arbitrage Principle and Definition 1 dominance became `validate_no_arbitrage()` | The LP itself is a **market-maker** tool. It found 296 violations across 356 DJI markets at an average **$2.28** profit each — real, and worth nothing to a price taker paying retail commissions. We use the bounds to check our own arithmetic, not to hunt arbitrage. |
+| Aurum, *Arbitrage hedge fund primer* (Jan 2025) | Short-vol section's risk controls — strict position limits and diversification across assets, given that "increased correlations during market stress" collapse separate positions into one — became the aggregate short-vol cap and correlation grouping. Volmageddon (−90% in a day) is why the cap is on **aggregate** risk, not per trade. | Volatility arbitrage, dispersion, convertible and dividend arbitrage all require dynamic hedging, OTC access, or a replication book. Tail protection is a portfolio overlay whose cost only makes sense against a large long book. None are price-taker strategies. |
+| Bemporad, Bellucci & Gabbriellini, *Dynamic option hedging via stochastic MPC* (Quantitative Finance 2014) | §4.1.2's shortfall objectives (eqs 23–24) motivated `avg_shortfall_per_contract` — variance penalises a better-than-expected outcome as hard as a worse one, which is the wrong shape for a short-premium book | The SMPC method is **dealer-side replication**. Its own §5.1 result is that for plain vanilla options SMPC performs comparably to ordinary delta hedging (errors within ±€0.13 of each other), so the machinery buys nothing without exotics. Worth noting: even **weekly** rebalancing left ±€2.5 of hedging error on a €6.20 ATM call — ~40% of premium. An unhedged short position carries *more* residual risk than that, which is the quantitative case for the defined-risk-only rule we already have. |
 
 **Lessons carried over from equities** — every one of these was a real failure:
 - **Phantom equity poisons position sizing.** The 2% cap was computed off
@@ -242,7 +301,19 @@ premium selling is working.
 - **An inverted condition can disable a whole strategy silently.** The theta
   check rejected positive theta while its error message asked for positive
   theta, so no premium-selling position could ever open.
-- **Test the guardrails.** Options had zero test coverage until now.
+- **A written guardrail that nothing calls is not a guardrail.**
+  `check_option_liquidity()` had the right threshold and the right docstring and
+  zero call sites. Grep for the caller, not just the function.
+- **A per-trade cap does not bound a correlated book.** Five positions each
+  capped at 2% is 10% of equity behind one risk factor. The equities side had
+  had a correlation check since the beginning; options never got one.
+- **Fail loudly on a missing field, not plausibly.** `scenario_analysis`
+  defaulted a missing `underlying` to 0, putting every simulated price below
+  every breakeven, and reported nine consecutive max-loss scenarios with no
+  error. A wrong answer that looks like an answer is worse than a crash.
+- **Test the guardrails.** Options had zero test coverage until now; the suite
+  is at 122 tests, and each new gate was mutation-tested to confirm the test
+  fails when the gate is removed.
 
 ## Experiment Timeline
 | Phase | Dates | Status | Decision |
