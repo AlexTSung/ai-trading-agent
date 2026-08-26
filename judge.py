@@ -390,7 +390,21 @@ def score_macro(research: dict) -> tuple:
     if signal in ("STRONG_BUY", "WEAK_BUY") and ma20 > ma50:
         return 1.5, f"RISK-ON — SPY MA20 ${ma20:.2f} > MA50 ${ma50:.2f}"
     elif signal in ("STRONG_SELL", "WEAK_SELL") or ma20 < ma50:
-        return 0.0, f"RISK-OFF — SPY MA20 ${ma20:.2f} < MA50 ${ma50:.2f} (half sizing applies)"
+        # State the reason that actually fired. The message used to assert
+        # "MA20 < MA50" unconditionally, so on 2026-08-26 it reported
+        # "RISK-OFF — SPY MA20 $745.87 < MA50 $745.02" — MA20 was ABOVE MA50 and
+        # the real trigger was SPY's STRONG_SELL signal (price 738.06 below the
+        # MA50). Reading the journal you would conclude the MAs had crossed when
+        # they had not. Same class of defect as the doc/code drift already in
+        # Lessons Learned: a log line that contradicts its own inputs.
+        cross = f"MA20 ${ma20:.2f} {'<' if ma20 < ma50 else '>='} MA50 ${ma50:.2f}"
+        if ma20 < ma50 and signal in ("STRONG_SELL", "WEAK_SELL"):
+            why = f"SPY {signal} and {cross}"
+        elif ma20 < ma50:
+            why = f"SPY {cross}"
+        else:
+            why = f"SPY signal {signal} (price below MA50) despite {cross}"
+        return 0.0, f"RISK-OFF — {why}"
     else:
         return 0.75, "NEUTRAL macro regime"
 

@@ -103,6 +103,55 @@ def get_market_status():
     return r.json()
 
 # ── Technical Analysis ───────────────────────────────────────────────────────
+# ── Entry limit reachability ──────────────────────────────────────────────────
+# Thresholds in ATR units. ATR is the average daily range, so a gap measured in
+# ATRs is roughly "how many normal days of movement away is this price".
+LIMIT_LIKELY_ATR    = 1.0    # inside one normal day's range
+LIMIT_PLAUSIBLE_ATR = 2.5    # a few days of drift would reach it
+
+
+def entry_limit_reachability(last: float, limit_price: float, atr: float):
+    """
+    How likely a resting entry limit is to actually trade.
+
+    Returns (gap_pct, atr_distance, label).
+
+    The limit price itself is CLAUDE.md Hard Rule 2's formula and is not changed
+    here. What this adds is a measure of whether that price is reachable: a
+    stock 6% above its MA20 needs a 6.5% pullback to fill, and a bid at that
+    level may simply never be touched.
+
+    A percentage gap is not comparable across underlyings — 5% is five normal
+    days for a 1%-ATR utility and just over one day for a 4%-ATR growth name.
+    ATR normalises that.
+
+    A missing or zero ATR yields "UNKNOWN" rather than an optimistic guess.
+    Fail-closed on missing data is the rule a $0.03 stock broke once already.
+    """
+    if not isinstance(last, (int, float)) or last <= 0:
+        return None, None, "UNKNOWN"
+    if not isinstance(limit_price, (int, float)) or limit_price <= 0:
+        return None, None, "UNKNOWN"
+
+    gap_pct = round((last - limit_price) / last * 100, 2)
+
+    if isinstance(atr, (int, float)) and atr > 0:
+        atr_distance = round((last - limit_price) / atr, 2)
+    else:
+        atr_distance = None
+
+    if gap_pct <= 0:
+        # Already at or below the target — this is a value entry, not a wait.
+        return gap_pct, atr_distance, "AT_OR_BELOW"
+    if atr_distance is None:
+        return gap_pct, atr_distance, "UNKNOWN"
+    if atr_distance <= LIMIT_LIKELY_ATR:
+        return gap_pct, atr_distance, "LIKELY"
+    if atr_distance <= LIMIT_PLAUSIBLE_ATR:
+        return gap_pct, atr_distance, "PLAUSIBLE"
+    return gap_pct, atr_distance, "UNLIKELY"
+
+
 def compute_technicals(bars_data):
     """
     Full technical analysis suite:
@@ -219,6 +268,24 @@ def compute_technicals(bars_data):
     if macd_bullish:   entry_score += 25   # momentum confirming
     if vol_spike:      entry_score += 20   # institutional volume
 
+    # ── Entry limit and how reachable it is ───────────────────────────────────
+    # The limit itself is CLAUDE.md Hard Rule 2's formula, unchanged: MA20 x
+    # 0.995, i.e. 0.5% below MA20 support. What was missing is any measure of
+    # whether that price is actually likely to trade. A stock 6% above its MA20
+    # needs a 6.5% pullback to fill, and a day-limit order at that level simply
+    # expires unfilled every session — which is what cancel_orphan_exits exists
+    # to clean up after.
+    #
+    # ATR is the natural yardstick: it is the average daily range, so the gap to
+    # the limit measured in ATRs is roughly "how many normal days of movement
+    # away is this". A gap inside 1 ATR is ordinary noise and fills often; past
+    # ~2.5 ATR it needs a genuine trend change, not a wiggle. Expressing the gap
+    # in percent alone is not comparable across a 1%-ATR utility and a 4%-ATR
+    # growth name.
+    limit_price = round(ma20 * 0.995, 2)
+    limit_gap_pct, limit_atr_distance, reachability = entry_limit_reachability(
+        last, limit_price, atr)
+
     return {
         "ma20":             round(ma20, 4),
         "ma50":             round(ma50, 4),
@@ -239,7 +306,10 @@ def compute_technicals(bars_data):
         "atr_pct":          atr_pct,
         "entry_score":          entry_score,
         "entry_quality":        "EXCELLENT" if entry_score >= 70 else "GOOD" if entry_score >= 45 else "FAIR" if entry_score >= 25 else "POOR",
-        "limit_price":          round(ma20 * 0.995, 2),
+        "limit_price":          limit_price,
+        "limit_gap_pct":        limit_gap_pct,
+        "limit_atr_distance":   limit_atr_distance,
+        "limit_reachability":   reachability,
         "prev_close":           round(prev_close, 4),
         "was_above_ma50_yest":  was_above_ma50_yest,
         "was_above_ma20_yest":  was_above_ma20_yest,

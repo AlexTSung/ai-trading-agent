@@ -34,6 +34,7 @@ os.environ.setdefault("APCA_API_SECRET_KEY", "test")
 
 import judge          # noqa: E402
 import reviewer       # noqa: E402
+import research      # noqa: E402
 import trade          # noqa: E402
 
 
@@ -798,6 +799,253 @@ class TestOptionsRiskFilters(unittest.TestCase):
             weak, account_equity=91000.0, leg_quotes=self._tight_quotes(weak))
         self.assertFalse(ok)
         self.assertIn("0.25", why)
+
+
+class TestRestingEntryOrders(unittest.TestCase):
+    """
+    Entry limits were time-in-force "day", so a patient bid at MA20 x 0.995
+    expired at the close every session it was not touched. On a name trading 5%
+    above its MA20 that is every session — cancel_orphan_exits existed
+    specifically to clean up the abandoned OCO legs of "day-limit buys that
+    expired unfilled". Five sessions to 2026-08-26 produced zero fills.
+
+    GTC lets the bid rest. The limit price is unchanged, so this is strictly more
+    patience, not a worse entry. The new risk is a stale bid filling after the
+    thesis broke, which is what revalidate_resting_entries guards.
+    """
+
+    def _order(self, sym="CEG", days_old=0, cid=None):
+        ts = (datetime.now() - timedelta(days=days_old)).isoformat()
+        return {"id": f"ord-{sym}", "symbol": sym, "side": "buy",
+                "client_order_id": cid if cid is not None else f"agent-buy-{sym}-x",
+                "submitted_at": ts}
+
+    def _research(self, sym="CEG", ma20=100.0, ma50=90.0, earnings=()):
+        return {"symbols": {sym: {"technicals": {"ma20": ma20, "ma50": ma50}}},
+                "intelligence": {"earnings_watch_symbols": list(earnings)}}
+
+    def test_entries_rest_rather_than_expiring_nightly(self):
+        self.assertEqual(trade.ENTRY_ORDER_TIF, "gtc",
+                         "a day order cannot catch a pullback that arrives tomorrow")
+
+    def test_a_valid_bid_is_kept(self):
+        keep, why = trade.resting_entry_verdict(self._order(), self._research())
+        self.assertTrue(keep, why)
+
+    def test_stale_bid_is_cancelled(self):
+        keep, why = trade.resting_entry_verdict(
+            self._order(days_old=trade.ENTRY_ORDER_MAX_AGE_DAYS + 1), self._research())
+        self.assertFalse(keep)
+        self.assertIn("max age", why)
+
+    def test_bid_is_cancelled_when_earnings_approach(self):
+        """A resting bid would fill straight into the print (Hard Rule 9)."""
+        keep, why = trade.resting_entry_verdict(
+            self._order(), self._research(earnings=("CEG",)))
+        self.assertFalse(keep)
+        self.assertIn("earnings", why.lower())
+
+    def test_bid_is_cancelled_on_thesis_break(self):
+        """MA20 below MA50 is no longer a pullback in an uptrend."""
+        keep, why = trade.resting_entry_verdict(
+            self._order(), self._research(ma20=90.0, ma50=100.0))
+        self.assertFalse(keep)
+        self.assertIn("thesis break", why.lower())
+
+    def test_chase_veto_does_not_cancel_a_resting_bid(self):
+        """
+        A chase veto means price rose AWAY from our bid. A resting bid below the
+        market is exactly the order we want then — cancelling on it would mean
+        only ever bidding for stocks that are already falling.
+        """
+        r = self._research(ma20=100.0, ma50=90.0)
+        r["symbols"]["CEG"]["technicals"].update({"rsi": 78, "last_close": 130.0})
+        keep, why = trade.resting_entry_verdict(self._order(), r)
+        self.assertTrue(keep, f"should still rest: {why}")
+
+    def test_unreadable_timestamp_cancels_rather_than_assuming_fresh(self):
+        bad = self._order()
+        bad["submitted_at"] = "not-a-date"
+        keep, why = trade.resting_entry_verdict(bad, self._research())
+        self.assertFalse(keep)
+        self.assertIn("age", why.lower())
+
+    def test_only_agent_placed_buys_are_touched(self):
+        """A manual or third-party order is not ours to cancel."""
+        with mock.patch.object(trade.requests, "delete") as d:
+            actions = trade.revalidate_resting_entries(
+                [self._order(days_old=99, cid="manual-order-1"),
+                 dict(self._order(), side="sell")],
+                self._research())
+        self.assertEqual(actions, [])
+        d.assert_not_called()
+
+    def test_cancelled_orders_are_reported_with_a_reason(self):
+        with mock.patch.object(trade.requests, "delete") as d:
+            d.return_value = mock.Mock(status_code=204)
+            actions = trade.revalidate_resting_entries(
+                [self._order(days_old=99)], self._research())
+        self.assertEqual(len(actions), 1)
+        self.assertEqual(actions[0]["action"], "CANCELLED")
+        self.assertIn("reason", actions[0])
+
+
+class TestEntryLimitReachability(unittest.TestCase):
+    """
+    The limit price is Hard Rule 2's formula (MA20 x 0.995) and is unchanged.
+    What was missing is any measure of whether that price is likely to trade. A
+    percentage gap is not comparable across a 1%-ATR utility and a 4%-ATR growth
+    name; ATR is the average daily range, so the gap measured in ATRs answers
+    "how many normal days of movement away is this".
+    """
+
+    def test_gap_is_measured_in_atr_not_just_percent(self):
+        """
+        The same 5% gap is five normal days for a 1%-ATR utility and just over
+        one day for a 4%-ATR growth name. Percent alone cannot tell them apart.
+        """
+        _, quiet_dist, quiet_label = research.entry_limit_reachability(100.0, 95.0, 1.0)
+        _, wild_dist,  wild_label  = research.entry_limit_reachability(100.0, 95.0, 4.0)
+        self.assertEqual(quiet_dist, 5.0)
+        self.assertEqual(wild_dist, 1.25)
+        self.assertEqual(quiet_label, "UNLIKELY")
+        self.assertEqual(wild_label, "PLAUSIBLE")
+
+    def test_labels_against_the_live_2026_08_26_values(self):
+        cases = [
+            # (last, ma20, atr, expected label)
+            (321.57, 311.35, 7.4043, "PLAUSIBLE"),   # AAPL, 3.7% gap = 1.59 ATR
+            (244.43, 255.92, 9.00,   "AT_OR_BELOW"), # DDOG, already below MA20
+            (208.76, 202.73, 7.2814, "LIKELY"),      # NVDA, 3.0% above MA20
+            (100.00, 90.00,  1.00,   "UNLIKELY"),    # 10% away, quiet name
+        ]
+        for last, ma20, atr, expected in cases:
+            limit = round(ma20 * 0.995, 2)
+            with self.subTest(last=last, ma20=ma20, atr=atr):
+                _, _, label = research.entry_limit_reachability(last, limit, atr)
+                self.assertEqual(label, expected)
+
+    def test_at_or_below_takes_precedence_over_atr(self):
+        """Price already under the target is a value entry, not a wait."""
+        gap, _, label = research.entry_limit_reachability(95.0, 99.50, 2.0)
+        self.assertLessEqual(gap, 0)
+        self.assertEqual(label, "AT_OR_BELOW")
+
+    def test_missing_atr_is_unknown_not_a_guess(self):
+        """A zero or absent ATR must not silently become LIKELY."""
+        for atr in (0, None, "n/a"):
+            with self.subTest(atr=atr):
+                _, dist, label = research.entry_limit_reachability(100.0, 95.0, atr)
+                self.assertIsNone(dist)
+                self.assertEqual(label, "UNKNOWN")
+
+    def test_degenerate_price_is_refused(self):
+        for last, limit in ((0, 95.0), (-1, 95.0), (100.0, 0), (100.0, None)):
+            with self.subTest(last=last, limit=limit):
+                self.assertEqual(
+                    research.entry_limit_reachability(last, limit, 2.0)[2], "UNKNOWN")
+
+    def test_limit_formula_is_unchanged(self):
+        """
+        Hard Rule 2's entry price is MA20 x 0.995. Reachability reporting must
+        not have moved the price itself — that would be chasing by another name.
+        """
+        self.assertAlmostEqual(round(311.35 * 0.995, 2), 309.79, places=2)
+
+
+class TestMacroRegimeMessage(unittest.TestCase):
+    """
+    On 2026-08-26 the Judge reported "RISK-OFF — SPY MA20 $745.87 < MA50
+    $745.02". MA20 was ABOVE MA50; the real trigger was SPY's STRONG_SELL signal
+    (price 738.06, below the MA50). The verdict was defensible, the stated reason
+    was false, and a reader of the journal would conclude the MAs had crossed.
+    """
+
+    def _r(self, signal, ma20, ma50):
+        return {"symbols": {"SPY": {"technicals": {
+            "signal": signal, "ma20": ma20, "ma50": ma50}}}}
+
+    def test_the_live_case_no_longer_claims_a_cross_that_did_not_happen(self):
+        score, note = judge.score_macro(self._r("STRONG_SELL", 745.87, 745.02))
+        self.assertEqual(score, 0.0, "STRONG_SELL is still risk-off")
+        self.assertNotIn("$745.87 < MA50", note)
+        self.assertIn("STRONG_SELL", note)
+
+    def test_a_genuine_cross_is_still_described_as_a_cross(self):
+        _, note = judge.score_macro(self._r("HOLD", 740.0, 750.0))
+        self.assertIn("<", note)
+        self.assertIn("RISK-OFF", note)
+
+    def test_risk_on_is_unchanged(self):
+        score, note = judge.score_macro(self._r("WEAK_BUY", 750.0, 740.0))
+        self.assertEqual(score, 1.5)
+        self.assertIn("RISK-ON", note)
+
+
+class TestWatchlistExpansion(unittest.TestCase):
+    """
+    The watchlist was ~100% mega-cap tech plus inverse ETFs. On 2026-08-26 every
+    tech name showed MA20 < MA50 while energy (+22% YTD), consumer defensives
+    (+13.3%), industrials and utilities led. Five sessions produced zero buys
+    because the universe had no pullback setups — not because the gates misfired.
+    """
+
+    NEW = ("CEG", "VST", "GEV", "LLY", "MRK", "ARGX", "COP", "DTM", "DT", "TGT")
+
+    def setUp(self):
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                            "watchlist.json")
+        with open(path) as f:
+            self.cfg = json.load(f)
+        self.by_sym = {e["symbol"]: e for e in self.cfg["watchlist"]}
+
+    def test_all_ten_candidates_are_present(self):
+        for sym in self.NEW:
+            with self.subTest(symbol=sym):
+                self.assertIn(sym, self.by_sym)
+
+    def test_each_new_name_is_tradeable_and_capped(self):
+        for sym in self.NEW:
+            e = self.by_sym[sym]
+            with self.subTest(symbol=sym):
+                self.assertGreater(e["max_allocation_pct"], 0,
+                                   "a 0% cap would silently make it unbuyable")
+                self.assertLessEqual(e["max_allocation_pct"], 8,
+                                     "Hard Rule 6 caps a single position at 8%")
+
+    def test_high_beta_names_are_not_left_on_the_speculative_stop(self):
+        """
+        Tier 3's 10% stop is defined for "speculative, market cap < $10B". A
+        $60B+ utility or a $700B pharma defaulting into it was a
+        misclassification — and a 10% stop on a high-ATR name like GEV is taken
+        out by ordinary noise.
+        """
+        for sym in ("CEG", "VST", "GEV", "LLY", "MRK", "ARGX", "DT"):
+            with self.subTest(symbol=sym):
+                self.assertEqual(trade.tier_for(sym), "TIER2")
+                self.assertEqual(trade.stop_pct_for(sym), trade.STOP_PCT_TIER2)
+
+    def test_correlated_pairs_are_flagged_in_config(self):
+        """CEG and VST are one bet; DT is the same industry as the open DDOG."""
+        self.assertEqual(self.by_sym["CEG"].get("correlation_group"),
+                         self.by_sym["VST"].get("correlation_group"))
+        self.assertIsNotNone(self.by_sym["CEG"].get("correlation_group"))
+        self.assertIn("DDOG", self.by_sym["DT"]["notes"],
+                      "the DDOG overlap has to be visible where sizing happens")
+
+    def test_the_universe_is_no_longer_only_tech(self):
+        self.assertGreaterEqual(len(self.cfg["watchlist"]), 24)
+
+    def test_inverse_etfs_keep_their_tight_stop(self):
+        """Regression: the tier edit must not have disturbed the 5% inverse stop."""
+        for sym in ("SQQQ", "SPXS", "SOXS"):
+            with self.subTest(symbol=sym):
+                self.assertEqual(trade.tier_for(sym), "INVERSE")
+
+    def test_tier1_compounders_are_unchanged(self):
+        for sym in ("AAPL", "MSFT", "GOOGL", "AMZN", "NVDA"):
+            with self.subTest(symbol=sym):
+                self.assertEqual(trade.tier_for(sym), "TIER1")
 
 
 class TestRoundTripWindow(unittest.TestCase):

@@ -58,7 +58,15 @@ MAX_PRICE_DEVIATION = 0.10
 # A single -8% stop was applied to every symbol regardless of tier, which forced
 # blue-chip compounders out on ordinary volatility.
 TIER1_SYMBOLS = {"AAPL", "MSFT", "GOOGL", "AMZN", "NVDA"}
-TIER2_SYMBOLS = {"DDOG", "TSLA", "QCOM"}
+# Tier 2 is CLAUDE.md's "growth/mid-cap, higher-beta names where 8-10% swings
+# are normal" — a 12% stop. Tier 3's 10% stop is defined for "speculative, and
+# any stock with market cap < $10B", so a $60B+ utility or a $700B pharma landing
+# in Tier 3 by default was a misclassification, not a deliberate tightening: a
+# 10% stop on a high-ATR name like GEV gets taken out by ordinary noise, which
+# is how you end up cutting flowers and watering weeds.
+TIER2_SYMBOLS = {"DDOG", "TSLA", "QCOM",
+                 # Added 2026-08-26 with the research-scour watchlist expansion.
+                 "CEG", "VST", "GEV", "LLY", "MRK", "ARGX", "DT"}
 INVERSE_ETFS  = {"SQQQ", "SPXS", "SOXS"}
 
 STOP_PCT_TIER1   = -0.20
@@ -70,6 +78,25 @@ STOP_PCT_INVERSE = -0.05
 SIZE_BY_SCORE = ((9.0, 0.08), (7.5, 0.05), (7.0, 0.03))
 
 # ── Holding-period rules (CLAUDE.md Hard Rules 4, 5) ──────────────────────────
+# ── Resting entry orders ──────────────────────────────────────────────────────
+# Entry limits were placed time-in-force "day", so a patient bid at MA20 x 0.995
+# expired at the close every session it was not touched. On a name trading 5%
+# above its MA20 that is every session, which is why cancel_orphan_exits had to
+# clean up abandoned OCO legs from "day-limit buys that expired unfilled".
+#
+# GTC lets the bid rest and catch the pullback we are actually waiting for. The
+# limit price is unchanged — this is strictly more patience, not a higher entry.
+#
+# The risk GTC introduces is a stale bid: an order resting for weeks can fill on
+# a gap down long after the thesis broke, which is catching a falling knife by
+# automation. So resting entries are re-validated every session and cancelled on
+# age, on an earnings blackout, or on a technical breakdown. They are NOT
+# cancelled merely because the symbol failed the chase veto today — a chase veto
+# means price rose away from our bid, and a resting bid below the market is
+# exactly the order we want in that case.
+ENTRY_ORDER_TIF           = "gtc"
+ENTRY_ORDER_MAX_AGE_DAYS  = 5      # a 21-60 DTE thesis does not survive longer unwatched
+
 REENTRY_COOLDOWN_HOURS = 48    # No re-entry for 48h after a stop-out
 MIN_HOLD_DAYS          = 30    # High-conviction positions get 30 days
 MIN_HOLD_SCORE         = 8.0   # ...if the Judge scored them >= this
@@ -696,19 +723,21 @@ def buy_with_guardrails(symbol, signal_strength, account, research_limit_price=N
 
     reason = (f"Signal: {signal_strength} | {price_note} | Limit: ${limit_price:.2f} | "
               f"{sizing_note} | Tier {tier_for(symbol)} stop "
-              f"{stop_pct_for(symbol):.0%}{vix_note}")
-    order  = place_limit_order(symbol, qty, "buy", limit_price, reason=reason)
+              f"{stop_pct_for(symbol):.0%}{vix_note} | TIF {ENTRY_ORDER_TIF}")
+    order  = place_limit_order(symbol, qty, "buy", limit_price, reason=reason,
+                               tif=ENTRY_ORDER_TIF)
 
     if not order_succeeded(order):
         return {"symbol": symbol, "action": "BUY_REJECTED", "qty": qty,
                 "limit_price": limit_price, "order": order, "note": reason}
 
-    # Exits are deliberately NOT placed here. This is a day limit order that may
-    # never fill; placing GTC sell legs against shares we do not own left naked
-    # sell orders live overnight and risked a double-sell against the tiered stop.
+    # Exits are deliberately NOT placed here. The entry may never fill; placing
+    # GTC sell legs against shares we do not own left naked sell orders live
+    # overnight and risked a double-sell against the tiered stop.
     # ensure_exits_for_positions() attaches exits once a fill is confirmed.
     return {"symbol": symbol, "action": "BUY", "qty": qty, "limit_price": limit_price,
-            "order": order, "exits": "deferred_until_fill", "note": reason}
+            "order": order, "exits": "deferred_until_fill",
+            "tif": ENTRY_ORDER_TIF, "note": reason}
 
 def place_oco_exits(symbol, qty, entry_price):
     """
@@ -798,6 +827,122 @@ def cancel_orphan_exits(positions, open_orders):
     return cancelled
 
 
+def order_age_days(timestamp: str, now: datetime = None):
+    """
+    Age of an order in whole days, or None if the timestamp cannot be read.
+
+    Alpaca stamps orders like "2026-08-26T14:26:42.997003235Z" — a trailing Z
+    and NANOSECOND precision, which datetime.fromisoformat rejects (it accepts
+    3 or 6 fractional digits, not 9). Naive local timestamps show up in tests
+    and fixtures. Both shapes have to work, and anything else must return None
+    so the caller can fail closed rather than treat an unknown age as fresh.
+    """
+    if not isinstance(timestamp, str) or not timestamp.strip():
+        return None
+
+    text = timestamp.strip().replace("Z", "+00:00")
+    # Truncate over-long fractional seconds to microseconds.
+    if "." in text:
+        head, _, tail = text.partition(".")
+        digits = ""
+        for ch in tail:
+            if ch.isdigit():
+                digits += ch
+            else:
+                break
+        text = f"{head}.{digits[:6]}{tail[len(digits):]}"
+
+    try:
+        ts = datetime.fromisoformat(text)
+    except (ValueError, TypeError):
+        return None
+
+    now = now or datetime.now()
+    # Compare like with like: an aware timestamp needs an aware reference.
+    if ts.tzinfo is not None and now.tzinfo is None:
+        now = now.astimezone()
+    elif ts.tzinfo is None and now.tzinfo is not None:
+        ts = ts.replace(tzinfo=now.tzinfo)
+
+    try:
+        return (now - ts).days
+    except TypeError:
+        return None
+
+
+def resting_entry_verdict(order: dict, research: dict,
+                          now: datetime = None) -> tuple:
+    """
+    Whether a resting GTC entry order should stay on the book.
+
+    Returns (keep: bool, reason: str).
+
+    Cancels on:
+      - age past ENTRY_ORDER_MAX_AGE_DAYS
+      - the symbol entering an earnings blackout (Hard Rule 9); IV and price both
+        gap on a print, and a resting bid would fill straight into the event
+      - the technical thesis breaking down (MA20 crossing below MA50)
+
+    Deliberately does NOT cancel on a chase veto. A chase veto means price rose
+    away from our bid; a resting bid below the market is precisely the order we
+    want then. Cancelling on it would guarantee we only ever bid for stocks that
+    are already falling.
+    """
+    now = now or datetime.now()
+    sym = order.get("symbol", "")
+
+    submitted = order.get("submitted_at") or order.get("created_at") or ""
+    if submitted:
+        age_days = order_age_days(submitted, now=now)
+        if age_days is None:
+            # An unparseable timestamp is not evidence the order is fresh.
+            return False, "could not read order age — cancelling rather than assuming"
+        if age_days >= ENTRY_ORDER_MAX_AGE_DAYS:
+            return False, (f"resting {age_days}d ≥ {ENTRY_ORDER_MAX_AGE_DAYS}d "
+                           f"max age — thesis is stale")
+
+    intel = (research or {}).get("intelligence") or {}
+    earnings = {s.upper() for s in (intel.get("earnings_watch_symbols") or [])}
+    if sym.upper() in earnings:
+        return False, "earnings blackout (Hard Rule 9) — would fill into the print"
+
+    tech = ((research or {}).get("symbols", {}).get(sym) or {}).get("technicals") or {}
+    ma20, ma50 = tech.get("ma20"), tech.get("ma50")
+    if isinstance(ma20, (int, float)) and isinstance(ma50, (int, float)):
+        if ma20 < ma50:
+            return False, (f"thesis break: MA20 ${ma20:.2f} < MA50 ${ma50:.2f} — "
+                           f"no longer a pullback in an uptrend")
+
+    return True, "still valid — bid rests"
+
+
+def revalidate_resting_entries(open_orders, research, now=None) -> list:
+    """
+    Re-check every resting agent BUY order and cancel the ones that no longer
+    deserve to be on the book. Returns the cancellation audit trail.
+    """
+    actions = []
+    for order in open_orders or []:
+        if order.get("side") != "buy":
+            continue
+        # Only touch orders this agent placed.
+        if not str(order.get("client_order_id") or "").startswith("agent-buy-"):
+            continue
+
+        keep, reason = resting_entry_verdict(order, research, now=now)
+        if keep:
+            actions.append({"symbol": order.get("symbol"), "action": "KEPT",
+                            "order_id": order.get("id"), "reason": reason})
+            continue
+
+        r = requests.delete(f"{BASE_URL}/v2/orders/{order['id']}",
+                            headers=_headers())
+        actions.append({"symbol": order.get("symbol"), "action": "CANCELLED",
+                        "order_id": order.get("id"), "reason": reason,
+                        "status_code": r.status_code})
+    return actions
+
+
 def cancel_all_orders():
     r = requests.delete(f"{BASE_URL}/v2/orders", headers=_headers())
     return {"status_code": r.status_code, "result": "All open orders cancelled"}
@@ -861,6 +1006,7 @@ def run_trading_session():
         "vetoed_by_judge": [],
         "stop_losses": [],
         "orphan_cancels": [],
+        "resting_entries": [],
         "exits_attached": [],
         "blocked_by_rules": [],
         "phantom_equity": [],
@@ -875,11 +1021,22 @@ def run_trading_session():
     if phantom:
         results["phantom_equity"] = phantom
 
-    # 0. Cancel OCO exit orders left over from day-limit buys that expired unfilled
+    # 0. Cancel OCO exit orders left over from buys that expired unfilled
     open_orders = get_orders(status="open")
     orphan_cancels = cancel_orphan_exits(positions, open_orders)
     if orphan_cancels:
         results["orphan_cancels"] = orphan_cancels
+
+    # 0b. Re-validate resting GTC entry bids. Entries rest across sessions now so
+    # a patient limit at MA20 support can actually catch a pullback instead of
+    # expiring nightly — but a bid left unattended can fill into an earnings
+    # print or after the trend has broken, so each one is re-checked every run.
+    resting = revalidate_resting_entries(open_orders, research)
+    if resting:
+        results["resting_entries"] = resting
+        # Orders we just cancelled must not count as "already pending" below.
+        cancelled_ids = {a["order_id"] for a in resting if a["action"] == "CANCELLED"}
+        open_orders = [o for o in open_orders if o.get("id") not in cancelled_ids]
 
     # 1. Stop-losses always run first — not subject to Judge
     stop_triggers = check_stop_loss(positions, state)
