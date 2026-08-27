@@ -6,11 +6,15 @@
 set -e
 AGENT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG_DIR="$AGENT_DIR/logs/paper"
-DATE=$(date +%Y-%m-%d)
+
+# Computed in US/Eastern, not UTC — see the GUARDRAIL G2 comment below and
+# run_eod_github.sh for why a UTC-only computation breaks across a scheduler
+# delay that crosses midnight UTC, and drifts by an hour across DST.
+DATE=$(TZ="America/New_York" date +%Y-%m-%d)
 
 mkdir -p "$LOG_DIR"
 
-echo "=== Trading Agent Run: $DATE $(date -u +%H:%M:%S) UTC ==="
+echo "=== Trading Agent Run: $DATE $(TZ="America/New_York" date +%H:%M:%S) ET ==="
 
 # Keys must be injected by GitHub Actions via secrets — never hardcoded
 if [ -z "$APCA_API_KEY_ID" ] || [ -z "$APCA_API_SECRET_KEY" ]; then
@@ -22,7 +26,7 @@ fi
 export APCA_BASE_URL="https://paper-api.alpaca.markets"
 
 # Weekend check
-DAY=$(date +%u)
+DAY=$(TZ="America/New_York" date +%u)
 if [ "$DAY" -ge 6 ]; then
   echo "Weekend (day $DAY) — skipping pipeline."
   exit 0
@@ -36,13 +40,23 @@ if [ -f "$LOG_DIR/$DATE.json" ]; then
   exit 0
 fi
 
-# ── GUARDRAIL G2: Time window ─────────────────────────────────────────────
+# ── GUARDRAIL G2: Time window — must be at or before 11:30 AM ET ─────────
 # Skip time check when TEST_MODE=1 (for manual workflow_dispatch runs only)
+#
+# Derived directly from the America/New_York zone, not a fixed UTC offset.
+# The old "15:30 UTC" threshold assumed EDT (UTC-4); during EST it is off by
+# an hour, and — the failure mode that actually hit the EOD guardrail on
+# 2026-08-27 — a scheduler delay that pushes HOUR_UTC/MIN_UTC across midnight
+# UTC makes MINS wrap back to a small number, which this check would read as
+# "still morning" and run again on the wrong side of midnight. See
+# run_eod_github.sh for the concrete incident. %-H/%-M are unpadded to avoid
+# bash treating a leading-zero hour or minute (e.g. "08") as an invalid octal
+# literal and crashing the arithmetic.
 if [ "${TEST_MODE}" != "1" ]; then
-  HOUR_UTC=$(date -u +%H)
-  MIN_UTC=$(date -u +%M)
-  MINS=$((HOUR_UTC * 60 + MIN_UTC))
-  if [ "$MINS" -gt $((15 * 60 + 30)) ]; then
+  HOUR_ET=$(TZ="America/New_York" date +%-H)
+  MIN_ET=$(TZ="America/New_York" date +%-M)
+  MINS_ET=$((HOUR_ET * 60 + MIN_ET))
+  if [ "$MINS_ET" -gt $((11 * 60 + 30)) ]; then
     echo "GUARDRAIL G2: Past 11:30 AM ET — skipping pipeline (not a failure)."
     exit 0
   fi
@@ -84,4 +98,4 @@ python3 trade.py session
 
 echo ""
 echo "--- [7/7] Done ---"
-echo "=== Morning pipeline complete: $(date -u +%H:%M:%S) UTC ==="
+echo "=== Morning pipeline complete: $(TZ="America/New_York" date +%H:%M:%S) ET ==="
