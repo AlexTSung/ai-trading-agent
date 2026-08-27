@@ -9,11 +9,15 @@
 set -e
 AGENT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG_DIR="$AGENT_DIR/logs/paper"
-DATE=$(date +%Y-%m-%d)
+
+# Computed in US/Eastern, not UTC — see the GUARDRAIL comment below and
+# run_eod_github.sh for why a UTC-only computation breaks across a scheduler
+# delay that crosses midnight UTC, and drifts by an hour across DST.
+DATE=$(TZ="America/New_York" date +%Y-%m-%d)
 
 mkdir -p "$LOG_DIR"
 
-echo "=== Midday Risk Check: $DATE $(date -u +%H:%M:%S) UTC ==="
+echo "=== Midday Risk Check: $DATE $(TZ="America/New_York" date +%H:%M:%S) ET ==="
 
 if [ -z "$APCA_API_KEY_ID" ] || [ -z "$APCA_API_SECRET_KEY" ]; then
   echo "ERROR: APCA_API_KEY_ID or APCA_API_SECRET_KEY not set."
@@ -23,7 +27,7 @@ fi
 
 export APCA_BASE_URL="https://paper-api.alpaca.markets"
 
-DAY=$(date +%u)
+DAY=$(TZ="America/New_York" date +%u)
 if [ "$DAY" -ge 6 ]; then
   echo "Weekend (day $DAY) — skipping midday check."
   exit 0
@@ -31,11 +35,17 @@ fi
 
 cd "$AGENT_DIR"
 
-# ── GUARDRAIL: only run while the market is open ───────────────────────────────
-# 14:00–20:00 UTC is 10:00 AM–4:00 PM ET during EDT.
-HOUR_UTC=$(date -u +%H)
-if [ "${TEST_MODE}" != "1" ] && { [ "$HOUR_UTC" -lt 14 ] || [ "$HOUR_UTC" -ge 20 ]; }; then
-  echo "GUARDRAIL: outside market hours (${HOUR_UTC}:00 UTC) — skipping (not a failure)."
+# ── GUARDRAIL: only run while the market is open (10:00 AM–4:00 PM ET) ─────
+# Derived directly from the America/New_York zone rather than a fixed UTC
+# offset. The old "14:00-20:00 UTC" window was only correct during EDT — in
+# EST it would skip an hour of real market-open time — and a delayed run
+# crossing midnight UTC could read as hour 00-01 and be wrongly excluded here
+# too, exactly as happened to the EOD guard on 2026-08-27 (see
+# run_eod_github.sh). %-H is unpadded to avoid bash reading a leading-zero
+# hour like "08" as an invalid octal literal and crashing the comparison.
+HOUR_ET=$(TZ="America/New_York" date +%-H)
+if [ "${TEST_MODE}" != "1" ] && { [ "$HOUR_ET" -lt 10 ] || [ "$HOUR_ET" -ge 16 ]; }; then
+  echo "GUARDRAIL: outside market hours (${HOUR_ET}:00 ET) — skipping (not a failure)."
   exit 0
 fi
 
@@ -58,4 +68,4 @@ python3 research.py midday > "$LOG_DIR/$DATE-midday.json" \
   || echo "WARN: research.py midday failed — stop checks above still applied"
 
 echo ""
-echo "=== Midday check complete: $(date -u +%H:%M:%S) UTC ==="
+echo "=== Midday check complete: $(TZ="America/New_York" date +%H:%M:%S) ET ==="
