@@ -1,4 +1,4 @@
-# Learning Agent Report — 2026-08-25
+# Learning Agent Report — 2026-08-29
 
 ## Performance Summary
 | Metric | Value |
@@ -27,8 +27,8 @@ Overall win rate: 29% (7W / 5L / 12N of 24 trades). Below 55% graduation thresho
 ```json
 {
   "approve_threshold": 8.0,
-  "news_weight_adj": 0.6561000000000001,
-  "last_updated": "2026-08-25",
+  "news_weight_adj": 0.6,
+  "last_updated": "2026-08-29",
   "total_trades": 24,
   "scope": "alpaca_equities"
 }
