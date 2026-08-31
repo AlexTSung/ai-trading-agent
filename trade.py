@@ -29,6 +29,7 @@ except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
 
 from version import get_version
+from market_time import et_today_iso, et_now
 
 # ── Auth ─────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
@@ -1025,7 +1026,7 @@ def run_trading_session():
     Reads today's research AND judge output.
     Only executes trades approved by the Judge with score >= 7.0.
     """
-    today        = date.today().isoformat()
+    today        = et_today_iso()
     logs_dir     = os.path.join(os.path.dirname(__file__), "logs", "paper")
     research_path = os.path.join(logs_dir, f"{today}.json")
 
@@ -1045,7 +1046,7 @@ def run_trading_session():
     if not research.get("market_open"):
         return {"status": "MARKET_CLOSED", "no_trades": True,
                 "agent_version": get_version(),
-                "timestamp": datetime.now().isoformat()}
+                "timestamp": et_now().isoformat()}
 
     # Load Judge output — REQUIRED before execution
     judge = load_judge_output(today)
@@ -1058,7 +1059,7 @@ def run_trading_session():
             "error": "No Judge output found for today. Run judge.py session first.",
             "no_trades": True,
             "agent_version": get_version(),
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": et_now().isoformat(),
         }
 
     account   = get_account()
@@ -1067,7 +1068,7 @@ def run_trading_session():
     watchlist = load_watchlist_config()
     results   = {
         "agent_version": get_version(),
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": et_now().isoformat(),
         "trades": [],
         "skipped": [],
         "vetoed_by_judge": [],
@@ -1393,7 +1394,7 @@ if __name__ == "__main__":
         print(json.dumps(cancel_all_orders(), indent=2))
 
     elif action == "orders":
-        today = date.today().isoformat()
+        today = et_today_iso()
         print(json.dumps(get_orders(status="all", after_date=today), indent=2))
 
     elif action == "account":

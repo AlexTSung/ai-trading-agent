@@ -41,6 +41,20 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.0.1] — unreleased
+
+**PATCH** — Fix naive UTC clock mislabelled as ET across the daily pipeline (journal, reviewer, research, judge, trade, learning_agent, learning_analytics); restores intended behavior, no strategy change
+
+### Strategy / CLAUDE.md changes
+- 
+
+### Code changes
+- 
+
+### Comparability
+- Does this invalidate the prior performance record? yes / no — why
+
+
 ## [v1.0.0] — 2026-08-26
 
 **MAJOR** — MVP baseline. First version where the documented ruleset and the

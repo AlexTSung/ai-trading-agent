@@ -18,6 +18,7 @@ from datetime import date, datetime, timedelta
 from statistics import mean
 
 from version import get_version
+from market_time import et_today, et_today_iso, et_now
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 ROOT         = os.path.dirname(os.path.abspath(__file__))
@@ -248,7 +249,7 @@ def is_holiday_week() -> tuple:
     Return (True, holiday_name) if current trading week (Mon-Fri) contains a major US holiday.
     Skips speculative trades in holiday weeks due to low liquidity and erratic moves.
     """
-    today = date.today()
+    today = et_today()
     week_mon = today - timedelta(days=today.weekday())
     week_fri = week_mon + timedelta(days=4)
     y = today.year
@@ -294,7 +295,7 @@ def _clamp(scored: tuple, weight: float) -> tuple:
     return round(capped, 2), note
 
 def load_today_research():
-    today = date.today().isoformat()
+    today = et_today_iso()
     path  = os.path.join(JOURNAL_DIR, f"{today}.json")
     if not os.path.exists(path):
         # Try the root-level journal dir for backwards compat
@@ -305,7 +306,7 @@ def load_today_research():
         return json.load(f)
 
 def load_today_judge():
-    today = date.today().isoformat()
+    today = et_today_iso()
     path  = os.path.join(JOURNAL_DIR, f"{today}-judge.json")
     if not os.path.exists(path):
         return {}
@@ -1035,7 +1036,7 @@ def score_symbol(symbol: str, research: dict) -> dict:
     # Social pump veto — load today's screener output and check pump_risk
     try:
         import json as _json
-        _today = __import__("datetime").date.today().isoformat()
+        _today = et_today_iso()
         _social_path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{_today}-social.json")
         if os.path.exists(_social_path):
             with open(_social_path) as _f:
@@ -1306,10 +1307,10 @@ def run_judge_session() -> dict:
         return {"error": "No research data found for today. Run research.py full first."}
 
     symbols_data = research.get("symbols", {})
-    today        = date.today().isoformat()
+    today        = et_today_iso()
     results      = {
         "agent_version": get_version(),
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": et_now().isoformat(),
         "date": today,
         "approved": [],
         "held": [],

@@ -17,13 +17,15 @@ from datetime import date, datetime
 from collections import defaultdict
 from pathlib import Path
 
+from market_time import et_today, et_today_iso
+
 ROOT      = Path(__file__).parent
 LOG_DIR   = ROOT / "logs" / "paper"
 CLAUDE_MD = ROOT / "CLAUDE.md"
 LEARN_DIR = ROOT / "logs" / "learnings"
 LEARN_DIR.mkdir(parents=True, exist_ok=True)
 
-MONTHLY_LOG = LEARN_DIR / f"learnings-{date.today().strftime('%Y-%m')}.md"
+MONTHLY_LOG = LEARN_DIR / f"learnings-{et_today().strftime('%Y-%m')}.md"
 CAL_LOG     = LOG_DIR / "calibration-log.csv"
 # Namespaced per agent. A generic "judge_weight_hints.json" in a shared folder
 # is one careless import away from applying equities lessons to forex, where the
@@ -256,7 +258,7 @@ def update_weight_hints(patterns):
         hints["wins"] = sum(1 for t in rt if t > 0)
 
     hints["scope"] = HINT_SCOPE
-    hints["last_updated"] = date.today().isoformat()
+    hints["last_updated"] = et_today_iso()
     hints["total_trades"]  = sum(1 for p in patterns if p["id"] == "win_rate_summary" for _ in range(p["count"]))
     WEIGHTS_LOG.write_text(json.dumps(hints, indent=2))
     return hints
@@ -273,7 +275,7 @@ def update_claude_lessons(patterns, new_lessons_only=True):
     if lessons_marker not in text:
         return
 
-    today = date.today().isoformat()
+    today = et_today_iso()
     new_entries = []
 
     for p in patterns:
@@ -309,7 +311,7 @@ def write_monthly_report(patterns, trades, hints):
     wr = (wins / total * 100) if total else 0
 
     lines = [
-        f"# Learning Agent Report — {date.today().isoformat()}",
+        f"# Learning Agent Report — {et_today_iso()}",
         f"",
         f"## Performance Summary",
         f"| Metric | Value |",
@@ -370,7 +372,7 @@ def get_pretrade_context(symbol: str, n: int = 3) -> str:
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main():
-    print(f"[{date.today()}] Learning agent — mode: {MODE}")
+    print(f"[{et_today()}] Learning agent — mode: {MODE}")
 
     trades      = load_calibration()
     judge_lines = load_judge_lines()

@@ -29,6 +29,7 @@ except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
 
 from version import get_version
+from market_time import et_today_iso, et_now
 
 # ── Auth ────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
@@ -343,8 +344,7 @@ def _load_social_tickers(max_tickers=10):
     safe_to_judge=True and not already on the watchlist.
     This is the missing link — social tickers must flow into Researcher.
     """
-    from datetime import date as _date
-    today = _date.today().isoformat()
+    today = et_today_iso()
     social_path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-social.json")
     if not os.path.exists(social_path):
         return []
@@ -381,8 +381,7 @@ def _load_intelligence_tickers(max_tickers=15):
     - Top gainers under 8% move (momentum without pump risk)
     - Reddit trending (when available)
     """
-    from datetime import date as _date
-    today = _date.today().isoformat()
+    today = et_today_iso()
     intel_path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-intelligence.json")
     if not os.path.exists(intel_path):
         return []
@@ -390,9 +389,8 @@ def _load_intelligence_tickers(max_tickers=15):
 
 
 def _intel_path_today():
-    from datetime import date as _date
     return os.path.join(os.path.dirname(__file__), "logs", "paper",
-                        f"{_date.today().isoformat()}-intelligence.json")
+                        f"{et_today_iso()}-intelligence.json")
 
 
 def load_intelligence_context() -> dict:
@@ -545,8 +543,7 @@ def _load_dip_tickers():
     Load 25%+ single-day drop candidates from today's screener output.
     These bypass normal signal filtering in the Judge — dip scoring path used instead.
     """
-    from datetime import date as _date
-    today = _date.today().isoformat()
+    today = et_today_iso()
     path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-screener.json")
     if not os.path.exists(path):
         return []
@@ -579,8 +576,7 @@ def _load_dip_tickers():
 
 def _load_screener_tickers(max_tickers=15):
     """Load top candidates from today's full market screener output."""
-    from datetime import date as _date
-    today = _date.today().isoformat()
+    today = et_today_iso()
     path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-screener.json")
     if not os.path.exists(path):
         return []
@@ -679,7 +675,7 @@ def full_research():
 
     results = {
         "agent_version": get_version(),
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": et_now().isoformat(),
         "market_open": clock.get("is_open", False),
         "next_open": clock.get("next_open", ""),
         "account": {
@@ -784,7 +780,7 @@ def midday_check():
 
     results = {
         "agent_version": get_version(),
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": et_now().isoformat(),
         "market_open": clock.get("is_open", False),
         "account": {
             "cash": account.get("cash"),
@@ -825,7 +821,7 @@ if __name__ == "__main__":
         from datetime import date
         _log_dir = os.path.join(os.path.dirname(__file__), "logs", "paper")
         os.makedirs(_log_dir, exist_ok=True)
-        _out_path = os.path.join(_log_dir, f"{date.today().isoformat()}.json")
+        _out_path = os.path.join(_log_dir, f"{et_today_iso()}.json")
         with open(_out_path, "w") as _f:
             json.dump(data, _f, indent=2)
         print(json.dumps(data, indent=2))

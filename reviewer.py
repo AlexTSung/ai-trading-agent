@@ -18,6 +18,7 @@ import json
 import csv
 import requests
 from datetime import date, datetime, timedelta
+from market_time import et_today, et_today_iso, et_now
 from statistics import mean
 
 # ── Load .env ────────────────────────────────────────────────────────────────
@@ -107,7 +108,7 @@ def _check_auth():
 # ── Data Fetchers ─────────────────────────────────────────────────────────────
 
 def get_orders_today():
-    today = date.today().isoformat()
+    today = et_today_iso()
     r = requests.get(f"{BASE_URL}/v2/orders",
                      headers=_headers(),
                      params={"status": "all", "after": today, "limit": 100})
@@ -660,7 +661,7 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
     passed = all(ok for *_, ok in checks)
 
     lines = [
-        f"# Graduation Decision — {date.today().isoformat()}",
+        f"# Graduation Decision — {et_today_iso()}",
         "",
         f"**Baseline**: {since} (Phase 2B)",
         f"**Trades counted**: {n}"
@@ -783,7 +784,7 @@ def run_calibration_report(days: int = 30) -> str:
         rows   = list(reader)
 
     # Filter to last N days
-    cutoff = (date.today() - timedelta(days=days)).isoformat()
+    cutoff = (et_today() - timedelta(days=days)).isoformat()
     rows   = [r for r in rows if r["date"] >= cutoff and r["delta"] != ""]
 
     if not rows:
@@ -848,7 +849,7 @@ def run_calibration_report(days: int = 30) -> str:
 # ── EOD Session ───────────────────────────────────────────────────────────────
 
 def run_eod_review() -> dict:
-    today     = date.today().isoformat()
+    today     = et_today_iso()
     orders    = get_orders_today()
 
     # Load judge scores for today
@@ -862,7 +863,7 @@ def run_eod_review() -> dict:
 
     results  = {"date": today,
                 "agent_version": get_version(),
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": et_now().isoformat(),
                 "trades": []}
     filled   = [o for o in orders if o.get("status") in ("filled", "partially_filled") and o.get("side") == "buy"]
 

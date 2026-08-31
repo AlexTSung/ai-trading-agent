@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v1.0.0
+> **Version:** v1.0.1
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -766,6 +766,7 @@ Sections: Portfolio Status → Market Research (per symbol) → Trades Executed 
 
 ## Lessons Learned
 *(Agent updates this section as patterns emerge from journal review)*
+- [2026-08-31] **naive_clock_mislabelled_as_ET**: journal.py/reviewer.py/research.py/judge.py/trade.py/learning_agent.py used `date.today()`/`datetime.now()` for filenames and printed the result labelled "ET" — but that reads the runner's clock, UTC on GitHub Actions. On 2026-08-28 a delayed EOD run (actual time 11:09 PM ET) filed itself as `2026-08-29.md` and printed "Generated: 2026-08-29 03:09:48 ET", a UTC timestamp one day off and falsely labelled. The bash guards were already fixed to compute in `America/New_York`; the Python layer underneath them was not, so the mismatch just moved down a layer. Fixed via a shared `market_time.py` (`et_today()`/`et_now()`, zoneinfo-based) used everywhere "today" determines a filename or cross-script lookup. Left untouched on purpose: self-consistent naive pairs (48h cooldown timestamps, min-hold entry dates, client-order-id uniqueness suffixes) where both the write and the read use the same naive clock — touching only one side there would raise `TypeError: can't subtract offset-naive and offset-aware datetimes`, a new crash for no benefit.
 - [2026-08-24] **high_score_poor_outcome** (seen 2x): Judge score ≥8.0 but outcome POOR_TRADE (2x: AAPL, AAPL). Judge may be overweighting news sentiment. Consider raising APPROVE threshold to 8.0.
 - [2026-08-24] **persistent_judge_overconfidence** (seen 5x): Judge consistently scores -4.8 pts above reviewer (5 trades). Judge is overconfident. Recommend reducing news component weight by 10%.
 - [Date initialized] Beta version launched. All lessons TBD.

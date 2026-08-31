@@ -37,6 +37,8 @@ import reviewer       # noqa: E402
 import research      # noqa: E402
 import version       # noqa: E402
 import trade          # noqa: E402
+import market_time    # noqa: E402
+import journal        # noqa: E402
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1255,6 +1257,67 @@ class TestMacroRegimeSizing(unittest.TestCase):
                 size_multiplier=0.0, macro_regime="RISK_ON", positions=[])
         self.assertEqual(out.get("action"), "SKIPPED")
         self.assertIn("VOLATILITY BLOCK", out.get("error", ""))
+
+
+class TestMarketTime(unittest.TestCase):
+    """
+    The bash guards (run_eod_github.sh etc.) were fixed to compute the trading
+    day in US/Eastern. The Python layer underneath them still used naive
+    date.today()/datetime.now(), which reads the RUNNER's clock — UTC on GitHub
+    Actions. That agreed with ET on every ordinary run, and broke exactly the
+    way the bash bug did: on 2026-08-28 the EOD job actually ran at 11:09 PM ET,
+    but journal.py printed "Generated: 2026-08-29 03:09:48 ET" — a UTC
+    timestamp mislabelled as ET, filed under the wrong calendar day — and wrote
+    it to logs/paper/2026-08-29.md while run_eod_github.sh's own (correctly ET-
+    based) $DATE was 2026-08-28. The bash G1 idempotency check greps for
+    "$DATE.md" and would never find a file the Python layer named a day later.
+    """
+
+    def _fake_et_now(self):
+        """The exact failing moment: 03:09:48 UTC on 2026-08-29 == 23:09:48 ET
+        on 2026-08-28."""
+        from zoneinfo import ZoneInfo
+        return datetime(2026, 8, 29, 3, 9, 48, tzinfo=ZoneInfo("UTC")).astimezone(
+            market_time.EASTERN)
+
+    def test_the_live_incident_resolves_to_the_correct_trading_day(self):
+        with mock.patch.object(market_time, "et_now", side_effect=self._fake_et_now):
+            self.assertEqual(market_time.et_today_iso(), "2026-08-28",
+                             "03:09 UTC on the 29th is 11:09 PM ET on the 28th")
+
+    def test_the_live_incident_no_longer_mislabels_the_timestamp(self):
+        with mock.patch.object(market_time, "et_now", side_effect=self._fake_et_now):
+            label = market_time.et_timestamp()
+        self.assertIn("2026-08-28", label)
+        self.assertNotIn("2026-08-29", label)
+        self.assertTrue(label.endswith("ET"))
+
+    def test_et_today_matches_et_today_iso(self):
+        self.assertEqual(market_time.et_today().isoformat(), market_time.et_today_iso())
+
+    def test_et_now_is_timezone_aware(self):
+        self.assertIsNotNone(market_time.et_now().tzinfo,
+                             "a naive datetime is exactly the bug being fixed")
+
+    def test_journal_and_reviewer_share_the_same_today_source(self):
+        """
+        journal.py and reviewer.py must agree with each other and with the bash
+        wrapper's $DATE — that agreement is the whole point. If they drift, the
+        G1 idempotency check silently stops working again.
+        """
+        with mock.patch.object(market_time, "et_now", side_effect=self._fake_et_now):
+            self.assertEqual(journal.et_today_iso(), "2026-08-28")
+            self.assertEqual(reviewer.et_today_iso(), "2026-08-28")
+
+    def test_pipeline_modules_import_the_shared_helper_not_bare_datetime(self):
+        """
+        Guards against a future edit quietly reintroducing date.today() in one
+        module while the others move on. All must resolve through market_time.
+        """
+        for mod in (journal, reviewer, research, judge, trade):
+            with self.subTest(module=mod.__name__):
+                self.assertTrue(hasattr(mod, "et_today_iso"),
+                                f"{mod.__name__} lost its market_time import")
 
 
 class TestRestingEntryOrders(unittest.TestCase):
