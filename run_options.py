@@ -56,8 +56,18 @@ WATCHLIST = [
 ]
 
 MAX_POSITIONS     = 5        # cap concurrent open options positions
-MAX_SCANNED       = 15       # symbols to evaluate per run (rate-limit conscious)
-TOP_N_CANDIDATES  = 5        # top screener candidates to consider
+# WATCHLIST has 18 symbols; MAX_SCANNED=15 silently dropped the last three
+# (JPM, BAC, GS) every run without ever screening them. Raised to cover the
+# full declared watchlist — this widens what gets EVALUATED, not what passes
+# the risk gates below.
+MAX_SCANNED       = len(WATCHLIST)
+# Only ever fed 5 candidates into strategy selection, exactly equal to
+# MAX_POSITIONS. Many of the top-IVR names fail later on execution cost,
+# liquidity, or the no-arbitrage check, so evaluating only 5 meant a bad
+# quote on the top candidate could end the run with nothing tried. Widening
+# to 8 gives the same gates more candidates to find a good one among, without
+# loosening any of them.
+TOP_N_CANDIDATES  = 8        # top screener candidates to consider
 DRY_RUN_DEFAULT   = False    # flip to True to default to paper-scan only
 
 LOG_DIR  = os.path.join(os.path.dirname(__file__), "logs", "options")

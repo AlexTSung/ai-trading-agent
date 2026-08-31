@@ -41,6 +41,20 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.1.0] — unreleased
+
+**MINOR** — Widen the trade funnel without loosening any risk gate: fix a silently-dead discovery channel (NameError swallowed by a broad except, zero tickers reaching the Judge from Alpaca most-active/gainers/Reddit every day), widen options MAX_SCANNED to cover the full watchlist and TOP_N_CANDIDATES above the position cap, and schedule the options pipeline in GitHub Actions for the first time. Also adds redundant same-window cron triggers to morning/midday/EOD so a GitHub Actions scheduler delay (observed 3.5-9h) can no longer zero out a whole trading day.
+
+### Strategy / CLAUDE.md changes
+- 
+
+### Code changes
+- 
+
+### Comparability
+- Does this invalidate the prior performance record? yes / no — why
+
+
 ## [v1.0.1] — unreleased
 
 **PATCH** — Fix naive UTC clock mislabelled as ET across the daily pipeline (journal, reviewer, research, judge, trade, learning_agent, learning_analytics); restores intended behavior, no strategy change

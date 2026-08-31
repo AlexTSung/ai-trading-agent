@@ -38,6 +38,7 @@ import research      # noqa: E402
 import version       # noqa: E402
 import trade          # noqa: E402
 import market_time    # noqa: E402
+import run_options    # noqa: E402
 import journal        # noqa: E402
 
 
@@ -1257,6 +1258,110 @@ class TestMacroRegimeSizing(unittest.TestCase):
                 size_multiplier=0.0, macro_regime="RISK_ON", positions=[])
         self.assertEqual(out.get("action"), "SKIPPED")
         self.assertIn("VOLATILITY BLOCK", out.get("error", ""))
+
+
+class TestDiscoveryTickerExtraction(unittest.TestCase):
+    """
+    _extract_discovery_tickers(intel_path) was called with no max_tickers
+    argument, while the function referenced that name unconditionally at
+    `return tickers[:max_tickers]`. Every call raised NameError, caught by a
+    broad `except Exception`, always returning []. Alpaca most-active, top
+    gainers and Reddit trending — the entire discovery channel fed by the
+    morning intelligence scan — silently contributed zero tickers, every day,
+    with no error surfaced anywhere.
+    """
+
+    def _fake_intel(self, n_active=3, n_gainers=3, n_reddit=3):
+        import tempfile, json
+        data = {
+            "market_discovery": {"discovery": {
+                "most_active": [{"symbol": f"SYM{i}", "volume": 1000 + i}
+                                for i in range(n_active)],
+                "top_gainers": [{"symbol": f"GAIN{i}", "change_pct": 3.0, "price": 10.0}
+                               for i in range(n_gainers)],
+            }},
+            "reddit": {"tickers": [{"symbol": f"RDT{i}", "reddit_mentions": 10}
+                                   for i in range(n_reddit)]},
+        }
+        f = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+        json.dump(data, f)
+        f.close()
+        self.addCleanup(os.unlink, f.name)
+        return f.name
+
+    def test_the_bug_no_longer_returns_empty(self):
+        path = self._fake_intel()
+        result = research._extract_discovery_tickers(path)
+        self.assertGreater(len(result), 0,
+                           "discovery tickers must not silently be empty")
+
+    def test_max_tickers_is_actually_a_parameter(self):
+        """Calling with no second argument must not raise NameError internally."""
+        path = self._fake_intel(n_active=20, n_gainers=10, n_reddit=5)
+        try:
+            result = research._extract_discovery_tickers(path)
+        except NameError:
+            self.fail("max_tickers must be a real parameter, not a free variable")
+        self.assertLessEqual(len(result), 15, "default cap should still apply")
+
+    def test_caller_threads_max_tickers_through(self):
+        """_load_intelligence_tickers must pass its own max_tickers onward."""
+        with mock.patch.object(research, "_extract_discovery_tickers") as ex:
+            ex.return_value = []
+            with mock.patch("os.path.exists", return_value=True):
+                research._load_intelligence_tickers(max_tickers=7)
+        ex.assert_called_once()
+        self.assertEqual(ex.call_args.kwargs.get("max_tickers"), 7)
+
+    def test_sources_are_interleaved_not_concatenated(self):
+        """
+        A full most-active batch (up to 20) must not crowd out every gainer
+        and Reddit ticker before either gets a look. Concatenate-then-truncate
+        did exactly that once most_active's slice was widened to 20.
+        """
+        path = self._fake_intel(n_active=20, n_gainers=10, n_reddit=5)
+        result = research._extract_discovery_tickers(path, max_tickers=15)
+        sources = {t["source"] for t in result}
+        self.assertEqual(sources, {"alpaca_most_active", "alpaca_gainers", "reddit"},
+                         f"expected all three sources represented, got {sources}")
+
+    def test_duplicate_symbols_across_sources_are_deduped(self):
+        import tempfile, json
+        data = {
+            "market_discovery": {"discovery": {
+                "most_active": [{"symbol": "DUP", "volume": 999}],
+                "top_gainers": [{"symbol": "DUP", "change_pct": 2.0, "price": 20.0}],
+            }},
+            "reddit": {"tickers": []},
+        }
+        f = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+        json.dump(data, f); f.close()
+        self.addCleanup(os.unlink, f.name)
+        result = research._extract_discovery_tickers(f.name)
+        self.assertEqual(sum(1 for t in result if t["symbol"] == "DUP"), 1)
+
+    def test_missing_file_returns_empty_not_an_exception(self):
+        self.assertEqual(research._extract_discovery_tickers("/no/such/path.json"), [])
+
+
+class TestOptionsFunnelWidening(unittest.TestCase):
+    """
+    MAX_SCANNED=15 against an 18-symbol WATCHLIST silently dropped the last
+    three symbols (JPM, BAC, GS) every run — they were never screened, not
+    filtered by any gate. TOP_N_CANDIDATES=5 fed exactly MAX_POSITIONS
+    candidates into strategy selection, so one bad quote could end a run
+    with nothing tried even when better candidates existed further down the
+    ranked list.
+    """
+
+    def test_max_scanned_covers_the_full_watchlist(self):
+        self.assertGreaterEqual(run_options.MAX_SCANNED, len(run_options.WATCHLIST),
+                                "no watchlist symbol should go unscreened")
+
+    def test_top_n_candidates_exceeds_the_position_cap(self):
+        """More candidates than open slots gives the risk gates room to reject
+        some and still find a tradeable one."""
+        self.assertGreater(run_options.TOP_N_CANDIDATES, run_options.MAX_POSITIONS)
 
 
 class TestMarketTime(unittest.TestCase):

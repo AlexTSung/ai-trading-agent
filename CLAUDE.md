@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v1.0.1
+> **Version:** v1.1.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -339,9 +339,13 @@ estimated is reported as `estimate`, never blended.
    and would be rejected by the 0.25 filter, while the delta condor collects
    $0.60 at 0.251 and is tradeable.
 
-2. **Schedule it.** Equities and forex run in GitHub Actions; options runs only
-   from local `run_options*.sh`, so it only manages positions when a laptop is
-   on. Short options are the *least* safe thing to monitor intermittently.
+2. ~~Schedule it~~ — **done.** Equities and forex ran in GitHub Actions; options
+   ran only from local `run_options*.sh` with a hardcoded machine path, so it
+   only managed positions when a laptop happened to be on. Short options are
+   the *least* safe thing to monitor intermittently. `run_options_github.sh` +
+   `.github/workflows/options-pipeline.yml` schedule it the same way, with the
+   same 9:35–11:30 AM ET window and redundant-trigger pattern as the equities
+   morning pipeline (see Daily Schedule below).
 3. **Earnings blackout.** The equities Judge vetoes entries within 3 days of
    earnings. Selling premium into an earnings print is the same mistake with
    more leverage — and IV rank will look attractive precisely because the event
@@ -447,22 +451,40 @@ any local machine, and not from `routines.json`. The `.github/workflows/*.yml`
 files are authoritative. `routines.json` is reference material only: no script
 reads it, and its times are not what runs.
 
-**Three scheduled jobs, not eight.** Each pipeline runs its steps sequentially
+**Four scheduled jobs, not nine.** Each pipeline runs its steps sequentially
 inside a single job — the agents are not individually scheduled. Any per-agent
 clock time you may remember (8:30 AM intelligence, 10:00 AM judge, 4:15 PM
 reviewer) was aspirational and never existed in cron.
 
+**Multiple cron entries per job are redundant attempts, not extra runs.**
+GitHub Actions scheduled triggers are not guaranteed to fire on time —
+delays of 3.5–9 hours have actually happened on this repo, and a single
+morning trigger landing after the 11:30 AM ET cutoff meant the *entire
+trading day* got zero research and zero trades, not a late one. Every extra
+cron below sits inside the same legal window its job already enforces; the
+first one to land inside the window runs the pipeline, and every trigger
+after that is a free no-op — the morning/EOD/options jobs check an
+idempotency marker before doing any work, and the midday job's checks
+(`check-stops`, `check-phantom`) are read-check-act operations where running
+more often is strictly better, not just delay insurance.
+
 | ET | Workflow / runner | Cron (UTC) | Steps, in order |
 |---|---|---|---|
-| **9:45 AM** | `morning-pipeline.yml`<br>`run_github.sh` | `45 13 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
-| **12:00 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `0 16 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
-| **5:15 PM** | `eod-pipeline.yml`<br>`run_eod_github.sh` | `15 21 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
+| **9:45 AM** (+3 backups to 11:15) | `morning-pipeline.yml`<br>`run_github.sh` | `45 13`, `15 14`, `45 14`, `15 15 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
+| **9:40 AM** (+2 backups to 11:10) | `options-pipeline.yml`<br>`run_options_github.sh` | `40 13`, `10 14`, `10 15 * * 1-5` | `run_options.py` — manage existing positions, then screen the options watchlist for new defined-risk trades. Same 9:35–11:30 AM ET window as equities morning: IV rank and the chain are freshest right after open. Existed only as a local `run_options*.sh` tied to one machine before this. |
+| **10:30 AM, 12:00 PM, 2:00 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `30 14`, `0 16`, `0 18 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
+| **5:15 PM** (+1 backup at 6:00 PM) | `eod-pipeline.yml`<br>`run_eod_github.sh` | `15 21`, `0 22 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
 | **Sep 3, 5:30 PM** | `graduation-decision.yml` | `30 21 3 9 *` | `reviewer.py graduation` — Phase 2B verdict. Advisory only; manual approval still required. |
 
-Guardrails inside the runners: weekends skip; the morning job aborts after
-11:30 AM ET; the midday job runs only between 10:00 AM and 4:00 PM ET; the EOD
-job refuses to run before 4:00 PM ET. `workflow_dispatch` with `test_mode: true`
-bypasses the time windows on the morning and midday jobs.
+Guardrails inside the runners: weekends skip; the morning and options jobs
+abort after 11:30 AM ET; the midday job runs only between 10:00 AM and 4:00 PM
+ET; the EOD job refuses to run before 4:00 PM ET. Every one of these is
+computed from the **real US/Eastern wall-clock time** (`TZ="America/New_York"
+date`, or `market_time.py` in the Python layer) rather than the runner's UTC
+clock compared against a fixed offset — the earlier UTC-offset version broke
+the instant a delayed run crossed midnight UTC, and separately drifted an hour
+every time DST changed twice a year. `workflow_dispatch` with `test_mode: true`
+bypasses the time windows on the morning, midday and options jobs.
 
 Local equivalents for manual runs — these do **not** replace the schedule, they
 just let you inspect state:
@@ -766,6 +788,7 @@ Sections: Portfolio Status → Market Research (per symbol) → Trades Executed 
 
 ## Lessons Learned
 *(Agent updates this section as patterns emerge from journal review)*
+- [2026-08-31] **discovery_channel_silently_dead**: `_extract_discovery_tickers(intel_path)` referenced `max_tickers` at `return tickers[:max_tickers]` without ever receiving it as a parameter — every call raised `NameError`, caught by a broad `except Exception`, and returned `[]`. Alpaca most-active, top gainers, and Reddit trending — the entire discovery channel fed by the morning intelligence scan — contributed exactly zero tickers to the Judge, every single day, with no error surfaced anywhere the journal or logs would show it. Found while widening the discovery funnel for more trade occurrences; the funnel had a hole in it, not just a narrow opening. Fixed: the parameter now exists, per-source slices widened to match what `get_market_discovery()` already fetches, and sources are interleaved round-robin rather than concatenated-then-truncated — the latter meant a full most-active batch alone could still crowd out every gainer and Reddit ticker once its slice was widened. **The general lesson, again**: a broad `except Exception: return []` at the boundary of a function is exactly where a real bug goes to hide — it looks like "gracefully handling missing data" in the code and reads as "no candidates today" in the log, and those are indistinguishable without instrumentation that says which one happened.
 - [2026-08-31] **naive_clock_mislabelled_as_ET**: journal.py/reviewer.py/research.py/judge.py/trade.py/learning_agent.py used `date.today()`/`datetime.now()` for filenames and printed the result labelled "ET" — but that reads the runner's clock, UTC on GitHub Actions. On 2026-08-28 a delayed EOD run (actual time 11:09 PM ET) filed itself as `2026-08-29.md` and printed "Generated: 2026-08-29 03:09:48 ET", a UTC timestamp one day off and falsely labelled. The bash guards were already fixed to compute in `America/New_York`; the Python layer underneath them was not, so the mismatch just moved down a layer. Fixed via a shared `market_time.py` (`et_today()`/`et_now()`, zoneinfo-based) used everywhere "today" determines a filename or cross-script lookup. Left untouched on purpose: self-consistent naive pairs (48h cooldown timestamps, min-hold entry dates, client-order-id uniqueness suffixes) where both the write and the read use the same naive clock — touching only one side there would raise `TypeError: can't subtract offset-naive and offset-aware datetimes`, a new crash for no benefit.
 - [2026-08-24] **high_score_poor_outcome** (seen 2x): Judge score ≥8.0 but outcome POOR_TRADE (2x: AAPL, AAPL). Judge may be overweighting news sentiment. Consider raising APPROVE threshold to 8.0.
 - [2026-08-24] **persistent_judge_overconfidence** (seen 5x): Judge consistently scores -4.8 pts above reviewer (5 trades). Judge is overconfident. Recommend reducing news component weight by 10%.

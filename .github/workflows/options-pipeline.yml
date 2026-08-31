@@ -1,0 +1,78 @@
+name: Options Trading Pipeline
+
+on:
+  schedule:
+    # Same window and redundant-trigger pattern as morning-pipeline.yml: a
+    # primary target inside 9:35-11:30 AM ET, plus backups so a GitHub
+    # Actions scheduler delay (observed on this repo: 3.5-9h) can't zero out
+    # an entire day. run_options_github.sh's GUARDRAIL G1 makes every trigger
+    # after the first a free no-op once one succeeds.
+    #
+    # This workflow did not exist before. CLAUDE.md's options-improvements
+    # list has said "Schedule it" since the strategy was first written down —
+    # equities and forex ran in GitHub Actions, options only ever ran from a
+    # local run_options.sh tied to one machine being on. Short options are the
+    # LEAST safe thing to monitor intermittently.
+    - cron: '40 13 * * 1-5'   # 9:40 AM ET target
+    - cron: '10 14 * * 1-5'   # 10:10 AM ET backup
+    - cron: '10 15 * * 1-5'   # 11:10 AM ET backup — last chance before the 11:30 cutoff
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Skip the market-hours guardrail (for testing)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  options-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run options pipeline
+        env:
+          APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
+          APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
+          TEST_MODE: ${{ github.event.inputs.test_mode == 'true' && '1' || '0' }}
+        run: |
+          chmod +x run_options_github.sh
+          bash run_options_github.sh
+
+      - name: Commit logs back to repo
+        if: always()
+        run: |
+          git config user.name "Trading Agent"
+          git config user.email "agent@youversion.com"
+          git add logs/options/
+          git diff --staged --quiet || git commit -m "chore: options run $(TZ='America/New_York' date +%Y-%m-%d)"
+          # Rebase AFTER committing — the pipeline writes new files before this
+          # step runs, so rebasing first fails on unstaged changes.
+          git pull --rebase origin ${{ github.ref_name }} || true
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload options log as artifact
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: options-log-${{ github.run_id }}
+          path: logs/options/
+          retention-days: 30

@@ -2,8 +2,13 @@ name: EOD Trading Pipeline
 
 on:
   schedule:
-    # 21:15 UTC = 5:15 PM ET (EDT, UTC-4) - after market close + 1hr buffer
-    - cron: '15 21 * * 1-5'
+    # 21:15 UTC = 5:15 PM ET (EDT, UTC-4) - after market close + 1hr buffer.
+    # One backup trigger, same pattern as morning/midday: GUARDRAIL G1
+    # (idempotency — skip if today's EOD already ran) makes it a free no-op
+    # once the primary succeeds, so this only adds a second chance if the
+    # first is delayed or the runner never starts.
+    - cron: '15 21 * * 1-5'   # 5:15 PM ET target
+    - cron: '0 22 * * 1-5'    # 6:00 PM ET backup
   workflow_dispatch:
 
 jobs:
@@ -42,7 +47,7 @@ jobs:
           git config user.name "Trading Agent"
           git config user.email "agent@youversion.com"
           git add logs/paper/ logs/learnings/ CLAUDE.md
-          git diff --staged --quiet || git commit -m "chore: trading logs $(date +%Y-%m-%d) EOD + learnings"
+          git diff --staged --quiet || git commit -m "chore: trading logs $(TZ='America/New_York' date +%Y-%m-%d) EOD + learnings"
           # Rebase AFTER committing — pipeline writes new files before this step runs.
           git pull --rebase origin ${{ github.ref_name }} || true
           git push

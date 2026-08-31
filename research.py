@@ -16,6 +16,7 @@ import sys
 import json
 import requests
 from datetime import datetime, timedelta
+from itertools import zip_longest
 from statistics import mean
 
 # ── Load .env ────────────────────────────────────────────────────────────────
@@ -385,7 +386,7 @@ def _load_intelligence_tickers(max_tickers=15):
     intel_path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-intelligence.json")
     if not os.path.exists(intel_path):
         return []
-    return _extract_discovery_tickers(intel_path)
+    return _extract_discovery_tickers(intel_path, max_tickers=max_tickers)
 
 
 def _intel_path_today():
@@ -480,24 +481,42 @@ def load_intelligence_context() -> dict:
     return ctx
 
 
-def _extract_discovery_tickers(intel_path):
-    """Harvest discovery tickers from the intelligence file."""
+def _extract_discovery_tickers(intel_path, max_tickers=15):
+    """
+    Harvest discovery tickers from the intelligence file.
+
+    Was called as _extract_discovery_tickers(intel_path) with no max_tickers
+    argument, while this function referenced the name unconditionally at
+    `return tickers[:max_tickers]`. Every call raised NameError, and the
+    broad `except Exception` below swallowed it and returned []. Alpaca
+    most-active, top gainers, and Reddit trending — an entire discovery
+    channel from the morning intelligence scan — silently reached the Judge
+    as zero tickers, every single day. Reproduced directly: calling this
+    with a minimal fake intelligence.json logs "2 discovery tickers: [...]"
+    immediately followed by "name 'max_tickers' is not defined" and returns
+    [] regardless of what was found.
+
+    Also widens the per-source slices to match what intelligence.py's
+    get_market_discovery() already fetches (top=20 most-active, top=10
+    movers) — the old [:10]/[:5] discarded roughly half of data already
+    paid for with an API call, for no reason tied to any risk control.
+    """
     if not os.path.exists(intel_path):
         return []
     try:
         with open(intel_path) as f:
             intel = json.load(f)
-        tickers = []
         seen = set()
 
         # Alpaca most-active — most reliable daily discovery source
         discovery = intel.get("market_discovery", {}).get("discovery", {})
-        for s in discovery.get("most_active", [])[:10]:
+        most_active = []
+        for s in discovery.get("most_active", [])[:20]:
             sym = s.get("symbol", "")
             if not sym or len(sym) > 5 or sym in seen:
                 continue
             seen.add(sym)
-            tickers.append({
+            most_active.append({
                 "symbol": sym,
                 "description": f"Alpaca most-active — {s.get('volume', 0):,} shares traded",
                 "max_allocation_pct": 3,
@@ -505,13 +524,14 @@ def _extract_discovery_tickers(intel_path):
             })
 
         # Top gainers filtered to < 8% (not a pump)
-        for s in discovery.get("top_gainers", [])[:5]:
+        gainers = []
+        for s in discovery.get("top_gainers", [])[:10]:
             sym = s.get("symbol", "")
             price = s.get("price", 0)
             if not sym or len(sym) > 5 or sym in seen or (price and price < 5):
                 continue
             seen.add(sym)
-            tickers.append({
+            gainers.append({
                 "symbol": sym,
                 "description": f"Top gainer +{s.get('change_pct', 0)}% today",
                 "max_allocation_pct": 3,
@@ -519,17 +539,32 @@ def _extract_discovery_tickers(intel_path):
             })
 
         # Reddit trending tickers (bonus when available)
+        reddit = []
         for t in intel.get("reddit", {}).get("tickers", [])[:5]:
             sym = t.get("symbol", "")
             if not sym or len(sym) > 5 or sym in seen:
                 continue
             seen.add(sym)
-            tickers.append({
+            reddit.append({
                 "symbol": sym,
                 "description": f"Reddit trending — {t.get('reddit_mentions', 0)} mentions",
                 "max_allocation_pct": 3,
                 "source": "reddit",
             })
+
+        # Interleaved round-robin, not concatenate-then-truncate. Most-active
+        # alone can return up to 20 candidates; appending it first and slicing
+        # to max_tickers meant a full most-active batch silently crowded out
+        # every gainer and Reddit ticker before either ever got a look. A
+        # single wide source is not the same as diverse discovery, and the
+        # trades that most need this channel — surprising movers, not the
+        # mega-caps that dominate most-active every day — are exactly the ones
+        # a naive concatenation starves.
+        tickers = []
+        for group in zip_longest(most_active, gainers, reddit):
+            for t in group:
+                if t is not None:
+                    tickers.append(t)
 
         print(f"  [intel loader] {len(tickers)} discovery tickers: {[t['symbol'] for t in tickers]}", file=sys.stderr)
         return tickers[:max_tickers]
