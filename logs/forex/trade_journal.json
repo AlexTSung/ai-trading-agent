@@ -441,7 +441,90 @@
     },
     "environment": "practice",
     "opened_at": "2026-08-31T10:46:36.681418+00:00",
-    "unrealized_pl": -41.2306,
+    "unrealized_pl": 277.3901,
     "current_price": 159.752
+  },
+  {
+    "status": "open",
+    "event": "open",
+    "pair": "USD_JPY",
+    "direction": "LONG",
+    "trade_id": "212",
+    "units": 500000,
+    "entry_price": 159.871,
+    "stop_price": 159.09307,
+    "tp1_price": 161.38936,
+    "score": 8.11,
+    "confluence": null,
+    "size_multiplier": 1.5,
+    "factors": {
+      "carry": {
+        "score": 1.0,
+        "weight": 1.77,
+        "detail": {
+          "carry_pct": 5.15,
+          "carry_signal": "LONG",
+          "raw_score": 1.0
+        }
+      },
+      "momentum": {
+        "score": 1.0,
+        "weight": 2.41,
+        "detail": {
+          "h4_momentum": "bullish",
+          "daily_momentum": "bullish",
+          "hp_signal": "LONG",
+          "ma_cross": "bullish",
+          "above_ma20": true,
+          "signals": 5,
+          "raw_score": 1.0
+        }
+      },
+      "technical": {
+        "score": 0.5,
+        "weight": 2.71,
+        "detail": {
+          "rsi14": "ok_at_64.3",
+          "macd": "bullish",
+          "pivot": "above_pivot",
+          "points": 3,
+          "raw_score": 0.5
+        }
+      },
+      "session": {
+        "score": 1.0,
+        "weight": 0.89,
+        "detail": {
+          "session_quality": "london_ny_overlap",
+          "utc_hour": 13,
+          "raw_score": 1.0
+        }
+      },
+      "volatility": {
+        "score": 0.7,
+        "weight": 1.33,
+        "detail": {
+          "spread_pips": 1.5,
+          "spread_ok": true,
+          "atr_pips": 25.5,
+          "atr_regime": "borderline",
+          "raw_score": 0.7
+        }
+      },
+      "risk_reward": {
+        "score": 0.85,
+        "weight": 0.89,
+        "detail": {
+          "rr_ratio": 2.0,
+          "stop_pips": 77,
+          "tp1_pips": 154,
+          "raw_score": 0.85
+        }
+      }
+    },
+    "environment": "practice",
+    "opened_at": "2026-08-31T13:10:15.368320+00:00",
+    "unrealized_pl": -56.3017,
+    "current_price": 159.871
   }
 ]
