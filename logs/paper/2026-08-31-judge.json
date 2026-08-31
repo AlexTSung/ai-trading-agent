@@ -1,0 +1,150 @@
+{
+  "timestamp": "2026-08-31T19:25:41.612749",
+  "date": "2026-08-31",
+  "approved": [],
+  "held": [
+    "DDOG"
+  ],
+  "vetoed": [
+    "AAPL",
+    "PYPL",
+    "SQQQ",
+    "SOXS",
+    "PANW",
+    "ANF",
+    "TEAM"
+  ],
+  "scores": {
+    "AAPL": {
+      "symbol": "AAPL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "PYPL": {
+      "symbol": "PYPL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 88 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 88 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "DDOG": {
+      "symbol": "DDOG",
+      "recommendation": "HOLD",
+      "score": 5.0,
+      "approval_gate": 7.0,
+      "size_multiplier": 1.0,
+      "learned_hints": {
+        "applied": {},
+        "notes": [
+          "OBSERVE tier: 0 closed round trip(s), need 5 before any adjustment. Patterns are still recorded every round trip."
+        ],
+        "tier": "observe",
+        "sample": 0,
+        "band": 0.0
+      },
+      "vix": 14.43,
+      "is_discovery": false,
+      "is_speculative": false,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "2.0/2.0",
+        "news": "1.5/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "0.0/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "0.5/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $258.15 > MA50 $242.62, price $264.38 above both [capped 3.0\u21922.0 at weight 2.0]"
+        },
+        "news": {
+          "score": 1.5,
+          "note": "POSITIVE \u2014 3 bullish signals in recent headlines [capped 2.0\u21921.5 at weight 1.5]"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY MA20 $745.76 < MA50 $744.63 (half sizing applies)"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding DDOG \u2014 price above entry, avg-down not warranted"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 14.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.5,
+          "note": "Market cap data unavailable"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $258.15 > MA50 $242.62, price $264.38 above both [capped 3.0\u21922.0 at weight 2.0]. News: POSITIVE \u2014 3 bullish signals in recent headlines [capped 2.0\u21921.5 at weight 1.5]. Macro: RISK-OFF \u2014 SPY MA20 $745.76 < MA50 $744.63 (half sizing applies). Portfolio: Already holding DDOG \u2014 price above entry, avg-down not warranted. Volatility: VIX 14.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Market cap data unavailable. Source: watchlist | Gate: 7.0.",
+      "_gate_used": 7.0
+    },
+    "SQQQ": {
+      "symbol": "SQQQ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 79 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 79 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "SOXS": {
+      "symbol": "SOXS",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 88 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 88 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "PANW": {
+      "symbol": "PANW",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for PANW \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "ANF": {
+      "symbol": "ANF",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for ANF \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "TEAM": {
+      "symbol": "TEAM",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    }
+  }
+}
