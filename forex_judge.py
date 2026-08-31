@@ -271,6 +271,7 @@ def score_volatility(r: dict) -> tuple[float, dict]:
         "EUR_USD": 2.0, "GBP_USD": 3.0, "USD_JPY": 2.5,
         "USD_CHF": 3.0, "AUD_USD": 3.0, "USD_CAD": 3.5, "NZD_USD": 4.0,
         "EUR_GBP": 2.5, "EUR_JPY": 3.5, "GBP_JPY": 5.0, "AUD_JPY": 4.0,
+            "NZD_JPY": 4.5, "CAD_JPY": 4.5,
     }
     max_spread = MAX_SPREAD.get(pair, 4.0)
 
@@ -287,6 +288,7 @@ def score_volatility(r: dict) -> tuple[float, dict]:
             "USD_CHF": (35, 85), "AUD_USD": (35, 90), "USD_CAD": (40, 100),
             "NZD_USD": (35, 85), "EUR_GBP": (20, 60), "EUR_JPY": (60, 150),
             "GBP_JPY": (80, 200), "AUD_JPY": (55, 140),
+            "NZD_JPY": (50, 130), "CAD_JPY": (50, 130),
         }
         lo, hi = HEALTHY_ATR.get(pair, (30, 150))
         if lo <= atr_pips <= hi:
@@ -429,8 +431,13 @@ def judge_pair(r: dict) -> dict:
 
     # Hard disqualifiers (G-series guardrails)
     disqualifiers = []
-    if is_deprioritized:
-        disqualifiers.append(f"LEARNED_deprioritized_{pair}_0_wins_in_3+_trades")
+    # Deprioritized pairs: raised gate (7.5) + half-size instead of hard block.
+    # USD_CHF has 0W/2L history but is scoring 7.8+; let it earn its way back
+    # with extra caution rather than being permanently frozen.
+    deprioritized_gate = 7.5
+    is_deprioritized_gate = is_deprioritized and score < deprioritized_gate
+    if is_deprioritized_gate:
+        disqualifiers.append(f"DEPRIORITIZED_{pair}_needs_{deprioritized_gate}_got_{score}")
 
     # G10: technical score gate — need meaningful technical confirmation
     if technical_s < 0.40:
@@ -456,6 +463,7 @@ def judge_pair(r: dict) -> dict:
             "EUR_USD": 2.0, "GBP_USD": 3.0, "USD_JPY": 2.5,
             "USD_CHF": 3.0, "AUD_USD": 3.0, "USD_CAD": 3.5, "NZD_USD": 4.0,
             "EUR_GBP": 2.5, "EUR_JPY": 3.5, "GBP_JPY": 5.0, "AUD_JPY": 4.0,
+            "NZD_JPY": 4.5, "CAD_JPY": 4.5,
         }
         if spread > MAX_SPREAD.get(pair, 4.0):
             disqualifiers.append(f"G8_spread_too_wide_{spread}pips")
@@ -485,7 +493,7 @@ def judge_pair(r: dict) -> dict:
         verdict = "SKIP"
         reason = f"score_{score}_below_gate_{effective_gate}"
 
-    # Size multiplier
+    # Size multiplier — deprioritized pairs that clear the 7.5 gate get half-size
     if verdict in ("STRONG_BUY", "STRONG_SELL"):
         size_multiplier = 2.0
     elif score >= GATE_LARGE_SIZE:
@@ -494,6 +502,8 @@ def judge_pair(r: dict) -> dict:
         size_multiplier = 1.0
     else:
         size_multiplier = 0.0
+    if is_deprioritized and size_multiplier > 0:
+        size_multiplier = min(size_multiplier, 0.5)  # half-size until 1st win
 
     return {
         "pair": r.get("pair"),

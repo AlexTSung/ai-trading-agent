@@ -31,6 +31,7 @@ MAJOR_PAIRS = [
 ]
 CROSS_PAIRS = [
     "EUR_GBP", "EUR_JPY", "GBP_JPY", "AUD_JPY",
+    "NZD_JPY", "CAD_JPY",  # JPY carry pairs — same regime as winning AUD/JPY, EUR/JPY
 ]
 ALL_PAIRS = MAJOR_PAIRS + CROSS_PAIRS
 
@@ -44,11 +45,13 @@ MAX_SPREAD_PIPS = {
     "EUR_USD": 2.0, "GBP_USD": 2.5, "USD_JPY": 2.0, "USD_CHF": 3.0,
     "AUD_USD": 2.5, "USD_CAD": 3.0, "NZD_USD": 3.0,
     "EUR_GBP": 3.0, "EUR_JPY": 3.5, "GBP_JPY": 4.0, "AUD_JPY": 3.5,
+    "NZD_JPY": 4.0, "CAD_JPY": 4.0,
 }
 
 # Pip size per pair
 PIP_SIZE = {
     "USD_JPY": 0.01, "EUR_JPY": 0.01, "GBP_JPY": 0.01, "AUD_JPY": 0.01,
+    "NZD_JPY": 0.01, "CAD_JPY": 0.01,
 }
 def get_pip_size(pair):
     return PIP_SIZE.get(pair, 0.0001)
