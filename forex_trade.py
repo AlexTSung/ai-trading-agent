@@ -113,6 +113,15 @@ def count_open_positions():
     return len(trades.get("trades", []))
 
 
+def get_open_pairs() -> set:
+    """Return set of instrument names currently held (open trades)."""
+    trades = get_open_trades()
+    if isinstance(trades, dict) and "error" in trades:
+        return set()
+    trade_list = trades if isinstance(trades, list) else trades.get("trades", [])
+    return {t.get("instrument") for t in trade_list if t.get("instrument")}
+
+
 def check_daily_outcome_limit() -> dict:
     """
     Principle: 2 wins OR 2 losses today = stop trading for the rest of the session.
@@ -611,9 +620,16 @@ def execute_verdicts(target_pair: str = None) -> list:
 
     results = []
     slots_available = MAX_OPEN_PAIRS - open_count
+    open_pairs = get_open_pairs()  # G2b: same-pair duplicate guard
 
     for verdict in tradeable[:slots_available]:
         pair = verdict.get("pair")
+
+        # G2b: Skip if we already hold this pair — prevents double-entry on back-to-back runs
+        if pair in open_pairs:
+            print(f"  G2b: {pair} already open — skipping duplicate entry")
+            continue
+
         print(f"  Placing {verdict['direction']} on {pair} | score={verdict['score']} | env={OANDA_ENV}")
         result = place_order(verdict, equity)
         results.append(result)
@@ -623,6 +639,7 @@ def execute_verdicts(target_pair: str = None) -> list:
 
         if result.get("status") == "filled":
             print(f"  ✓ Filled: {pair} @ {result.get('entry_price')} | units={result.get('units')} | stop={result.get('stop_price')}")
+            open_pairs.add(pair)  # block same pair in later iterations this run
         else:
             print(f"  ✗ Failed: {pair} — {result.get('error')}")
 

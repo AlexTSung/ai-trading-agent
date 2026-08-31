@@ -13,6 +13,23 @@ git checkout master          # return to latest
 
 ---
 
+## v1.1.0 — 2026-08-31 (Accelerated Learning)
+
+**Goal: faster trade accumulation toward the 30-trade graduation target.**
+
+### Added
+- **NZD/JPY, CAD/JPY** added to `CROSS_PAIRS` — same JPY carry thesis as winning AUD/JPY and EUR/JPY; 2 additional qualifying candidates per run
+- Pip sizes, ATR healthy ranges, and spread limits wired for both new pairs
+
+### Changed
+- **USD/CHF re-enabled** with raised gate (7.5 vs 7.0) and half-size (0.5×) until first win. Was hard-blocked despite scoring 7.84; caution tax replaces permanent freeze.
+- **G2b same-pair duplicate guard** — `execute_verdicts` now checks `get_open_pairs()` before placing; skips any pair already held. Prevents today's double USD/JPY entry (two positions opened 2h apart on same pair).
+
+### No baseline reset
+All changes are additive (new pairs) or tightening (higher USD/CHF gate, duplicate block). Past results remain valid.
+
+---
+
 ## v1.0.0 — 2026-08-26 (MVP / Phase 3 Baseline)
 
 **First production-ready version of the autonomous forex agent.**
