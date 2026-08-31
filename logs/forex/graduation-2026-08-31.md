@@ -38,11 +38,11 @@
 | USD_CHF | 0 | 2 | $-550.34 | -15.3 | ⛔ Deprioritized |
 
 ## What the Agent Learned (5 adjustments)
-- ⬇️ **carry** weight: 1.89 → 1.701 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
-- ⬇️ **momentum** weight: 2.468 → 2.268 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
-- ⬇️ **session** weight: 0.946 → 0.851 — avg score 0.33 in wins vs 0.75 in losses — not predictive (delta=-0.42)
-- ⬇️ **volatility** weight: 1.417 → 1.275 — avg score 0.23 in wins vs 0.70 in losses — not predictive (delta=-0.47)
-- ⬇️ **risk_reward** weight: 0.946 → 0.851 — avg score 0.33 in wins vs 0.85 in losses — not predictive (delta=-0.52)
+- ⬇️ **carry** weight: 1.833 → 1.65 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
+- ⬇️ **momentum** weight: 2.444 → 2.244 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
+- ⬇️ **session** weight: 0.917 → 0.825 — avg score 0.33 in wins vs 0.75 in losses — not predictive (delta=-0.42)
+- ⬇️ **volatility** weight: 1.374 → 1.237 — avg score 0.23 in wins vs 0.70 in losses — not predictive (delta=-0.47)
+- ⬇️ **risk_reward** weight: 0.917 → 0.825 — avg score 0.33 in wins vs 0.85 in losses — not predictive (delta=-0.52)
 
 ## Direction Bias
 - Long win rate:  0.6
@@ -52,12 +52,12 @@
 ## Updated Judge Weights
 ```json
 {
-  "carry": 1.833,
-  "momentum": 2.444,
-  "technical": 2.515,
-  "session": 0.917,
-  "volatility": 1.374,
-  "risk_reward": 0.917
+  "carry": 1.775,
+  "momentum": 2.414,
+  "technical": 2.705,
+  "session": 0.887,
+  "volatility": 1.331,
+  "risk_reward": 0.887
 }
 ```
 
