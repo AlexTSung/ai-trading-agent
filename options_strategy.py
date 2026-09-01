@@ -46,6 +46,40 @@ DTE_TARGET    = 45   # preferred entry when the chain offers a choice
 SHORT_STRIKE_DELTA = 0.16   # target |delta| for short legs
 WING_DELTA         = 0.05   # target |delta| for protective wings
 
+# ── Execution cost ───────────────────────────────────────────────────────────
+# Every price in this module is a Black-Scholes theoretical value — i.e. a mid.
+# We cannot transact at a mid. Selling a spread means hitting the bid on the
+# short legs and paying the ask on the long ones, and again in reverse when the
+# position is closed (which it usually is: check_positions_for_management exits
+# at DTE 21 or +50% of credit, not at expiry).
+#
+# Wang, Pennock, Rothschild & Devanur, "Designing Expressive and Liquid
+# Financial Options Markets" (ICAIF '24) §4.3 measured closing quotes on all
+# option series of the 30 DJI constituents: mean bid-ask spread of 78 cents per
+# series, which their consolidating market maker tightened to 40 cents. That is
+# the cost of crossing, and on a four-leg structure it is paid eight times over
+# a round trip.
+#
+# We do NOT hardcode 78 cents. An absolute figure measured across every
+# moneyness and maturity of 30 stocks is meaningless applied to a 45-DTE
+# 16-delta SPY put. Instead:
+#   - prefer real per-leg bid/ask when the caller supplies quotes;
+#   - otherwise fall back to a *relative* estimate — a spread equal to
+#     SPREAD_FRACTION_OF_MID_FALLBACK of the leg's own mid. 10% is the
+#     tradeable-option rule of thumb already stated in
+#     options_screener.check_option_liquidity, so the fallback is the widest
+#     spread we would knowingly accept rather than an average.
+# The fallback is deliberately pessimistic: it should make us reject a trade we
+# would have taken, never accept one we would have refused.
+SPREAD_FRACTION_OF_MID_FALLBACK = 0.10
+MIN_HALF_SPREAD                 = 0.005   # half of the $0.01 minimum tick
+ROUND_TRIP_CROSSINGS            = 2       # open + close
+
+# Liquidity floor, same threshold options_screener.check_option_liquidity
+# already applies per contract. That function was dead code — never called from
+# any pipeline — so no option order has ever been checked against it.
+MAX_LEG_SPREAD_PCT = 15.0
+
 
 def strike_for_delta(S: float, T: float, sigma: float, target_delta: float,
                      option_type: str, r: float = None) -> float:
@@ -435,6 +469,242 @@ def build_butterfly_spread(S: float, T: float, sigma: float,
     }
 
 
+# ── Execution cost ────────────────────────────────────────────────────────────
+
+def _leg_count(strat: dict) -> int:
+    """
+    Number of contracts crossed, counting ratio legs by their quantity.
+    A butterfly's `short_call2` leg is two contracts and costs two spreads.
+    """
+    n = 0
+    for leg in strat.get("legs", []) or []:
+        n += 2 if str(leg.get("type", "")).endswith("2") else 1
+    return n
+
+
+def execution_cost(strat: dict, leg_quotes: list[dict] = None) -> dict:
+    """
+    Round-trip cost of crossing the bid-ask spread on every leg, per share.
+
+    Args:
+        strat: strategy dict from a build_*() function.
+        leg_quotes: optional list of per-leg quote dicts in the same order as
+            strat["legs"], each with "bid" and "ask". Supply these from
+            options_screener.check_option_liquidity for a measured cost. When
+            omitted the relative fallback is used and `source` says so.
+
+    Returns:
+        {cost_per_share, cost_per_contract, source, per_leg, widest_spread_pct}
+
+    `source` is "measured" only when a usable quote was supplied for EVERY leg.
+    A partial set is not blended with estimates — a cost that is half measured
+    and half guessed is neither, and reporting it as measured would be a lie.
+    """
+    legs = strat.get("legs", []) or []
+    if not legs:
+        return {"cost_per_share": 0.0, "cost_per_contract": 0.0,
+                "source": "no_legs", "per_leg": [], "widest_spread_pct": None}
+
+    quotes_usable = False
+    if leg_quotes and len(leg_quotes) == len(legs):
+        quotes_usable = all(
+            isinstance(q, dict)
+            and isinstance(q.get("bid"), (int, float)) and q["bid"] > 0
+            and isinstance(q.get("ask"), (int, float)) and q["ask"] > q["bid"]
+            for q in leg_quotes
+        )
+
+    per_leg = []
+    widest_pct = 0.0
+    total = 0.0
+    for i, leg in enumerate(legs):
+        multiple = 2 if str(leg.get("type", "")).endswith("2") else 1
+        if quotes_usable:
+            bid, ask = leg_quotes[i]["bid"], leg_quotes[i]["ask"]
+            mid = (bid + ask) / 2.0
+            half = (ask - bid) / 2.0
+            pct = (ask - bid) / mid * 100 if mid > 0 else 999.0
+        else:
+            mid = float(leg.get("price", 0.0) or 0.0)
+            half = max(MIN_HALF_SPREAD, SPREAD_FRACTION_OF_MID_FALLBACK / 2.0 * mid)
+            pct = SPREAD_FRACTION_OF_MID_FALLBACK * 100
+
+        widest_pct = max(widest_pct, pct)
+        leg_cost = half * multiple * ROUND_TRIP_CROSSINGS
+        total += leg_cost
+        per_leg.append({
+            "type":        leg.get("type"),
+            "strike":      leg.get("strike"),
+            "mid":         round(mid, 4),
+            "half_spread": round(half, 4),
+            "contracts":   multiple,
+            "round_trip_cost": round(leg_cost, 4),
+        })
+
+    return {
+        "cost_per_share":    round(total, 4),
+        "cost_per_contract": round(total * 100, 2),
+        "source":            "measured" if quotes_usable else "estimate",
+        "per_leg":           per_leg,
+        "widest_spread_pct": round(widest_pct, 1),
+    }
+
+
+def net_of_cost_metrics(strat: dict, leg_quotes: list[dict] = None) -> dict:
+    """
+    Restate a strategy's economics after execution cost.
+
+    Cost comes out of the credit AND is added to the loss: we receive less than
+    the theoretical credit going in and pay away more than the theoretical loss
+    getting out. Reward/risk therefore falls on both numerator and denominator,
+    which is why applying the haircut to the credit alone understates it.
+    """
+    cost = execution_cost(strat, leg_quotes)
+    c    = cost["cost_per_share"]
+
+    credit = strat.get("net_credit")
+    debit  = strat.get("net_debit")
+    max_profit = strat.get("max_profit")
+    max_loss   = strat.get("max_loss")
+
+    out = {
+        "exec_cost_per_share":    c,
+        "exec_cost_per_contract": cost["cost_per_contract"],
+        "exec_cost_source":       cost["source"],
+        "widest_leg_spread_pct":  cost["widest_spread_pct"],
+    }
+
+    if credit is not None:
+        out["net_credit_after_costs"] = round(credit - c, 4)
+    if debit is not None:
+        out["net_debit_after_costs"] = round(debit + c, 4)
+
+    mp = (max_profit - c) if isinstance(max_profit, (int, float)) else None
+    ml = (max_loss   + c) if isinstance(max_loss,   (int, float)) else None
+    out["max_profit_after_costs"] = round(mp, 4) if mp is not None else None
+    out["max_loss_after_costs"]   = round(ml, 4) if ml is not None else None
+    out["reward_risk_net"] = (
+        round(mp / ml, 4) if (mp is not None and ml is not None and ml > 0) else None
+    )
+    # Share of the theoretical credit consumed by crossing. Reported so a
+    # marginal structure is visibly marginal in the journal, not just rejected.
+    if isinstance(credit, (int, float)) and credit > 0:
+        out["cost_pct_of_credit"] = round(c / credit * 100, 1)
+    return out
+
+
+# ── Static no-arbitrage validation ────────────────────────────────────────────
+# Wang et al. §4.3 found arbitrage violations in 296 of 356 consolidated DJI
+# option markets built from real closing quotes — violations are the norm, not
+# the exception. Their No Arbitrage Principle (§3, after Definition 1) is that a
+# portfolio guaranteed a non-negative payoff must have a non-negative cost.
+#
+# We are a price taker; the ~$2.28 average violation they measured is not a
+# trade for us. What the principle gives us is a free correctness check on our
+# OWN numbers. Every structure below has bounds it cannot violate unless an
+# input is corrupt — a stale IV, a zero T, a strike ordering that collapsed. A
+# credit larger than the width of the spread that secures it is not a great
+# fill, it is arithmetic that did not happen. Fail closed rather than send it.
+
+def validate_no_arbitrage(strat: dict) -> tuple[bool, str]:
+    """
+    Check a constructed strategy against the static no-arbitrage bounds its own
+    structure implies. Returns (ok, reason).
+
+    This validates our pricing, not the market's. A violation means the strategy
+    dict is internally inconsistent and must not be traded.
+    """
+    strategy = strat.get("strategy", "")
+    legs     = strat.get("legs", []) or []
+    if not legs:
+        return False, "No legs — nothing to validate"
+
+    strikes = [leg.get("strike") for leg in legs]
+    if any(not isinstance(k, (int, float)) or k <= 0 for k in strikes):
+        return False, "Non-positive or missing strike — corrupt structure"
+
+    prices = [leg.get("price") for leg in legs]
+    if any(not isinstance(p, (int, float)) or p < 0 for p in prices):
+        return False, "Negative or missing leg price — corrupt pricing input"
+
+    credit = strat.get("net_credit")
+    debit  = strat.get("net_debit")
+
+    if strategy in ("bull_put_spread", "bear_call_spread"):
+        # Vertical credit spread: short leg dominates the long leg, so its price
+        # must be the greater of the two, and the credit cannot exceed the
+        # strike width — that width is the entire liability being sold.
+        by_type = {leg["type"]: leg for leg in legs}
+        short_leg = next((l for t, l in by_type.items() if t.startswith("short")), None)
+        long_leg  = next((l for t, l in by_type.items() if t.startswith("long")),  None)
+        if short_leg is None or long_leg is None:
+            return False, "Vertical spread missing a short or long leg"
+        width = abs(short_leg["strike"] - long_leg["strike"])
+        if width <= 0:
+            return False, "Vertical spread has zero strike width"
+        if short_leg["price"] < long_leg["price"]:
+            return False, (f"Dominated leg priced above dominant leg "
+                           f"({short_leg['type']} {short_leg['price']:.2f} < "
+                           f"{long_leg['type']} {long_leg['price']:.2f}) — "
+                           f"violates portfolio dominance")
+        if credit is None or credit <= 0:
+            return False, f"Credit spread with non-positive credit ({credit})"
+        if credit >= width:
+            return False, (f"Credit {credit:.2f} ≥ strike width {width:.2f} — "
+                           f"riskless profit is impossible; pricing input is wrong")
+
+    elif strategy == "iron_condor":
+        by_type = {leg["type"]: leg for leg in legs}
+        needed = ("long_put", "short_put", "short_call", "long_call")
+        if not all(t in by_type for t in needed):
+            return False, "Iron condor missing one of its four legs"
+        lp, sp, sc, lc = (by_type[t]["strike"] for t in needed)
+        if not (lp < sp < sc < lc):
+            return False, (f"Iron condor strikes out of order "
+                           f"({lp} < {sp} < {sc} < {lc} required)")
+        put_width  = sp - lp
+        call_width = lc - sc
+        if credit is None or credit <= 0:
+            return False, f"Iron condor with non-positive credit ({credit})"
+        # Only one side can finish in the money, so the binding bound is the
+        # narrower wing.
+        if credit >= min(put_width, call_width):
+            return False, (f"Credit {credit:.2f} ≥ narrower wing width "
+                           f"{min(put_width, call_width):.2f} — riskless profit "
+                           f"is impossible; pricing input is wrong")
+
+    elif strategy == "butterfly":
+        # Convexity: the middle strike must be equidistant enough that the
+        # long-butterfly debit is positive but below the wing width. Merton's
+        # convexity condition on option prices in strike.
+        ks = sorted(strikes)
+        if len(ks) != 3:
+            return False, "Butterfly must have exactly three strikes"
+        low, mid, high = ks
+        if not (low < mid < high):
+            return False, f"Butterfly strikes not strictly increasing ({ks})"
+        if debit is None or debit <= 0:
+            return False, (f"Long butterfly with non-positive debit ({debit}) — "
+                           f"would be a free option, violating convexity")
+        if debit >= (mid - low):
+            return False, (f"Butterfly debit {debit:.2f} ≥ wing width "
+                           f"{mid - low:.2f} — cannot exceed max payoff")
+
+    elif strategy == "long_straddle":
+        if debit is None or debit <= 0:
+            return False, f"Long straddle with non-positive debit ({debit})"
+        # Both legs must carry value; a zero-priced leg means T or sigma
+        # collapsed and the greeks below are meaningless.
+        if min(prices) <= 0:
+            return False, "Straddle leg priced at zero — degenerate T or sigma"
+
+    elif strategy == "short_strangle":
+        if credit is None or credit <= 0:
+            return False, f"Short strangle with non-positive credit ({credit})"
+
+    return True, "OK"
+
+
 # ── Pre-trade scenario analysis (Gary Bielfeldt / Tony Saliba) ─────────────────
 
 def scenario_analysis(strat: dict, stock_moves: list[float] = None) -> dict:
@@ -457,7 +727,20 @@ def scenario_analysis(strat: dict, stock_moves: list[float] = None) -> dict:
     if stock_moves is None:
         stock_moves = [-0.20, -0.15, -0.10, -0.05, 0.0, +0.05, +0.10, +0.15, +0.20]
 
-    S         = strat.get("underlying", 0)
+    # `underlying` is stamped by select_strategy, not by the build_*()
+    # functions. Defaulting it to 0 made every simulated price 0, which is
+    # below every breakeven, so a strategy dict that skipped the selector
+    # reported nine consecutive max-loss scenarios and a 100% losing fraction
+    # with no error. A scenario analysis that cannot see the spot price has
+    # nothing to say — raise instead of inventing a loss.
+    S = strat.get("underlying")
+    if not isinstance(S, (int, float)) or S <= 0:
+        raise ValueError(
+            "scenario_analysis needs strat['underlying'] (spot price); got "
+            f"{S!r}. Pass a strategy from select_strategy(), or stamp the "
+            "underlying before calling."
+        )
+
     max_profit = strat.get("max_profit", 0) or 0
     max_loss   = strat.get("max_loss", 0) or 0
     strategy   = strat.get("strategy", "")
@@ -536,6 +819,32 @@ def scenario_analysis(strat: dict, stock_moves: list[float] = None) -> dict:
     best  = max(scenarios, key=lambda x: x["pl"])
     flat  = next((s for s in scenarios if s["move"] == " +0%"), scenarios[len(scenarios)//2])
 
+    # ── Shortfall statistics ─────────────────────────────────────────────────
+    # Bemporad, Bellucci & Gabbriellini, "Dynamic option hedging via stochastic
+    # model predictive control based on scenario simulation" (Quantitative
+    # Finance 2014) §4.1.2 offers shortfall objectives (eqs 23-24) as
+    # alternatives to the minimum-variance one it solves by default. The
+    # distinction matters to us: variance penalises a scenario that comes in
+    # *better* than expected exactly as hard as one that comes in worse.
+    # Shortfall penalises only the losing side.
+    #
+    # worst_case alone is one point on the curve and says nothing about how
+    # much of the distribution is losing. flat_case is the opposite bias — the
+    # scenario a premium seller most wants to look at. Average shortfall across
+    # the losing scenarios sits between them and is the honest number for a
+    # short-premium book, where the shape of the loss tail is the whole risk.
+    #
+    # These are equal-weighted over an arbitrary grid of moves, not
+    # probability-weighted, so read them as relative severity between
+    # structures, not as an expected loss.
+    losing = [s for s in scenarios if s["pl"] < 0]
+    if losing:
+        avg_shortfall = sum(s["pl"] for s in losing) / len(losing)
+        max_shortfall = min(s["pl"] for s in losing)
+    else:
+        avg_shortfall = 0.0
+        max_shortfall = 0.0
+
     return {
         "strategy":  strategy,
         "symbol":    strat.get("symbol", ""),
@@ -544,6 +853,12 @@ def scenario_analysis(strat: dict, stock_moves: list[float] = None) -> dict:
         "best_case":  best,
         "flat_case":  flat,
         "max_defined_loss_per_contract": round((max_loss or net_debit) * 100, 2),
+        # Per contract, negative = loss. Scenario grid is equal-weighted.
+        "avg_shortfall_per_contract": round(avg_shortfall, 2),
+        "max_shortfall_per_contract": round(max_shortfall, 2),
+        "losing_scenario_count":      len(losing),
+        "scenario_count":             len(scenarios),
+        "losing_scenario_fraction":   round(len(losing) / len(scenarios), 3) if scenarios else None,
     }
 
 
@@ -622,15 +937,24 @@ def select_strategy(screen_result: dict) -> Optional[dict]:
 
 # ── Risk checks ───────────────────────────────────────────────────────────────
 
-def passes_risk_filters(strat: dict, account_equity: float = None) -> tuple[bool, str]:
+def passes_risk_filters(strat: dict, account_equity: float = None,
+                        leg_quotes: list[dict] = None) -> tuple[bool, str]:
     """
     Basic risk gate before placing any order.
 
     Rules:
-      1. Max loss per trade ≤ 2% of account equity
-      2. Reward/risk ≥ 0.25 (at least $0.25 credit per $1 at risk)
-      3. Must have positive theta (time working for us on credit strategies)
-      4. DTE between 21 and 60 (sweet spot for theta decay vs gamma risk)
+      1. Structure must satisfy its own static no-arbitrage bounds
+      2. Max loss per trade ≤ 2% of account equity (net of execution cost)
+      3. Reward/risk ≥ 0.25 NET OF EXECUTION COST
+      4. Per-leg bid-ask spread ≤ 15% of mid when quotes are available
+      5. Must have positive theta (time working for us on credit strategies)
+      6. DTE between 21 and 60 (sweet spot for theta decay vs gamma risk)
+
+    Args:
+        leg_quotes: optional per-leg {"bid","ask"} in strat["legs"] order, from
+            options_screener.check_option_liquidity. Without them the execution
+            cost is a pessimistic estimate and the liquidity check is skipped —
+            pass them whenever the chain is reachable.
     """
     # No silent default. A hardcoded $25,000 fallback sized risk against an
     # account that does not exist; refuse rather than guess.
@@ -638,20 +962,55 @@ def passes_risk_filters(strat: dict, account_equity: float = None) -> tuple[bool
         return False, ("Account equity unknown — cannot size the 2% max-loss cap. "
                        "Pass honest equity from options_trade.get_equity().")
 
+    # Static no-arbitrage bounds first. If the structure's own arithmetic is
+    # inconsistent, every number downstream — max loss, reward/risk, greeks —
+    # is derived from a corrupt input and there is nothing to gate on.
+    arb_ok, arb_reason = validate_no_arbitrage(strat)
+    if not arb_ok:
+        return False, f"No-arbitrage violation: {arb_reason}"
+
     max_loss = strat.get("max_loss")
     if max_loss is None:
         return False, "Undefined max loss — use defined-risk structure in paper trading"
 
-    max_loss_per_contract = max_loss * 100  # per contract (100 shares)
+    # Execution cost. Both the loss cap and the reward/risk bar are measured
+    # against what we can actually transact at, not the theoretical mid.
+    costs = net_of_cost_metrics(strat, leg_quotes)
+    cost_note = (f"exec cost ${costs['exec_cost_per_contract']:.0f}/contract "
+                 f"({costs['exec_cost_source']})")
+
+    max_loss_after = costs["max_loss_after_costs"]
+    if max_loss_after is None:
+        return False, "Could not compute max loss net of execution cost"
+
+    max_loss_per_contract = max_loss_after * 100  # per contract (100 shares)
     max_allowed = account_equity * 0.02
 
     if max_loss_per_contract > max_allowed:
-        return False, f"Max loss ${max_loss_per_contract:.0f} > 2% account (${max_allowed:.0f})"
+        return False, (f"Max loss ${max_loss_per_contract:.0f} > 2% account "
+                       f"(${max_allowed:.0f}) — {cost_note}")
 
-    # Bielfeldt: raise the minimum reward/risk bar — only play strong hands
-    rr = strat.get("reward_risk")
-    if rr is not None and rr < 0.25:
-        return False, f"Reward/risk {rr:.2f} < 0.25 minimum (Bielfeldt: fold weak hands)"
+    # Liquidity floor. Only enforceable with real quotes; an estimated spread
+    # would just be checking the fallback constant against itself.
+    if costs["exec_cost_source"] == "measured":
+        widest = costs["widest_leg_spread_pct"]
+        if widest is not None and widest > MAX_LEG_SPREAD_PCT:
+            return False, (f"Widest leg spread {widest:.1f}% > {MAX_LEG_SPREAD_PCT:.0f}% "
+                           f"of mid — illiquid contract")
+
+    # Bielfeldt: raise the minimum reward/risk bar — only play strong hands.
+    # Measured NET of execution cost. On mid prices a 45-DTE 16-delta iron
+    # condor clears 0.25 by a hair; crossing eight spreads over the round trip
+    # consumes 16-26% of the credit and puts it under the bar. The gate is not
+    # loosened to compensate — a structure whose edge does not survive its own
+    # execution cost had no edge, and CLAUDE.md's tighten-only rail forbids
+    # lowering a documented floor to book more trades.
+    rr_net = costs["reward_risk_net"]
+    rr_gross = strat.get("reward_risk")
+    if rr_net is not None and rr_net < 0.25:
+        gross_note = f" (gross {rr_gross:.2f})" if isinstance(rr_gross, (int, float)) else ""
+        return False, (f"Reward/risk net of costs {rr_net:.2f} < 0.25 minimum"
+                       f"{gross_note} — {cost_note}")
 
     # Theta sign. The builders return POSITIVE theta for credit structures —
     # time decay working in our favour, which is the whole point of selling
@@ -680,7 +1039,127 @@ def passes_risk_filters(strat: dict, account_equity: float = None) -> tuple[bool
     if dte > DTE_MAX_ENTRY:
         return False, f"DTE {dte} > {DTE_MAX_ENTRY} — theta decay too slow"
 
-    return True, "OK"
+    return True, f"OK — {cost_note}, reward/risk net {rr_net if rr_net is not None else 'n/a'}"
+
+
+# ── Aggregate short-volatility exposure ───────────────────────────────────────
+# Aurum, "Arbitrage hedge fund primer" (January 2025), short volatility /
+# alternative risk premia section: short vol produces "small, consistent gains
+# interrupted by occasional large losses during extreme events", and names
+# February 2018 'Volmageddon' — short-vol exchange-traded products losing up to
+# 90% of their value in a single day — alongside 2008 and March 2020. Its stated
+# risk controls are upper-bounded losses, strict position limits, stop-losses,
+# and diversification across assets.
+#
+# We have the first (defined-risk only) and the third (stop at -100% of credit).
+# We did not have the second or fourth at the portfolio level. run_options.py
+# capped concurrent positions at 5 and passes_risk_filters caps each at 2% of
+# equity, so the pipeline could hold 10% of equity of max loss, every dollar of
+# it short premium on correlated underlyings.
+#
+# The primer's own explanation of why that is worse than it looks: "Increased
+# correlations during market stress can reduce the benefits of strategies
+# relying on low correlations." Five separately-sized short-vol positions are
+# one position in a spike, so the per-trade cap does not bound the real risk.
+# CLAUDE.md already applies this logic to equities ("SPY and QQQ count as one
+# position for correlation purposes"); options need the same treatment.
+MAX_AGGREGATE_SHORT_VOL_PCT   = 0.06   # of equity, summed defined max loss
+MAX_CONCURRENT_SHORT_VOL      = 3      # of the 5 total position slots
+
+SHORT_PREMIUM_STRATEGIES = (
+    "iron_condor", "bull_put_spread", "bear_call_spread", "short_strangle",
+)
+
+# Underlyings that are one volatility bet, not several. Broad US equity index
+# proxies share nearly all of their variance; selling premium on SPY and QQQ in
+# the same week is one trade sized twice.
+CORRELATED_UNDERLYING_GROUPS = (
+    {"SPY", "QQQ", "IWM", "DIA", "VOO", "IVV", "VTI"},
+)
+
+
+def underlying_group(symbol: str) -> str:
+    """Correlation group key for an underlying. Ungrouped names map to themselves."""
+    s = (symbol or "").upper()
+    for i, group in enumerate(CORRELATED_UNDERLYING_GROUPS):
+        if s in group:
+            return f"index_equity_{i}"
+    return s
+
+
+def is_short_premium(strat: dict) -> bool:
+    """True if the structure is net short volatility (collects premium)."""
+    return strat.get("strategy", "") in SHORT_PREMIUM_STRATEGIES
+
+
+def aggregate_short_vol_check(strat: dict, open_short_vol: list[dict],
+                              account_equity: float,
+                              leg_quotes: list[dict] = None) -> tuple[bool, str]:
+    """
+    Portfolio-level gate on short-volatility concentration.
+
+    Args:
+        strat: candidate strategy dict.
+        open_short_vol: already-open short-premium positions, each
+            {"symbol": str, "max_loss_per_contract": float, "qty": int}.
+            max_loss_per_contract is in dollars (per-share loss × 100).
+        account_equity: honest equity, from options_trade.get_equity().
+        leg_quotes: optional per-leg quotes, so the candidate's contribution is
+            costed the same way passes_risk_filters costs it.
+
+    Returns (ok, reason). Long-premium structures pass through untouched — they
+    are the other side of this risk, not more of it.
+    """
+    if not is_short_premium(strat):
+        return True, "Not a short-premium structure — concentration cap N/A"
+
+    if account_equity is None or account_equity <= 0:
+        return False, ("Account equity unknown — cannot size the aggregate "
+                       "short-vol cap")
+
+    open_short_vol = open_short_vol or []
+
+    if len(open_short_vol) >= MAX_CONCURRENT_SHORT_VOL:
+        return False, (f"{len(open_short_vol)} short-vol positions open ≥ "
+                       f"{MAX_CONCURRENT_SHORT_VOL} cap — a volatility spike "
+                       f"hits all of them at once")
+
+    # Correlation: one short-vol bet per underlying group.
+    candidate_group = underlying_group(strat.get("symbol", ""))
+    for pos in open_short_vol:
+        if underlying_group(pos.get("symbol", "")) == candidate_group:
+            return False, (f"Already short premium on {pos.get('symbol')} — same "
+                           f"correlation group as {strat.get('symbol')} "
+                           f"({candidate_group}); would double one bet")
+
+    # Aggregate defined risk, net of execution cost on the candidate.
+    costs = net_of_cost_metrics(strat, leg_quotes)
+    candidate_loss = costs["max_loss_after_costs"]
+    if candidate_loss is None:
+        return False, "Candidate has undefined max loss — cannot aggregate risk"
+    candidate_risk = candidate_loss * 100
+
+    existing_risk = 0.0
+    for pos in open_short_vol:
+        per_contract = pos.get("max_loss_per_contract")
+        if not isinstance(per_contract, (int, float)) or per_contract <= 0:
+            # An open short-vol position whose risk we cannot read is not
+            # assumed to be zero. Refuse rather than under-count the book.
+            return False, (f"Open short-vol position {pos.get('symbol','?')} has "
+                           f"unknown max loss — cannot verify the aggregate cap")
+        existing_risk += per_contract * max(1, int(pos.get("qty", 1) or 1))
+
+    total_risk = existing_risk + candidate_risk
+    cap = account_equity * MAX_AGGREGATE_SHORT_VOL_PCT
+
+    if total_risk > cap:
+        return False, (f"Aggregate short-vol risk ${total_risk:,.0f} "
+                       f"(${existing_risk:,.0f} open + ${candidate_risk:,.0f} new) "
+                       f"> {MAX_AGGREGATE_SHORT_VOL_PCT*100:.0f}% of equity "
+                       f"(${cap:,.0f})")
+
+    return True, (f"Aggregate short-vol risk ${total_risk:,.0f} of ${cap:,.0f} cap "
+                  f"({len(open_short_vol)+1}/{MAX_CONCURRENT_SHORT_VOL} slots)")
 
 
 if __name__ == "__main__":

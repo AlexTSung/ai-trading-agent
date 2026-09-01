@@ -17,6 +17,9 @@ import re
 from datetime import date, datetime, timedelta
 from statistics import mean
 
+from version import get_version
+from market_time import et_today, et_today_iso, et_now
+
 # ── Paths ─────────────────────────────────────────────────────────────────────
 ROOT         = os.path.dirname(os.path.abspath(__file__))
 JOURNAL_DIR  = os.path.join(ROOT, "logs", "paper")
@@ -246,7 +249,7 @@ def is_holiday_week() -> tuple:
     Return (True, holiday_name) if current trading week (Mon-Fri) contains a major US holiday.
     Skips speculative trades in holiday weeks due to low liquidity and erratic moves.
     """
-    today = date.today()
+    today = et_today()
     week_mon = today - timedelta(days=today.weekday())
     week_fri = week_mon + timedelta(days=4)
     y = today.year
@@ -292,7 +295,7 @@ def _clamp(scored: tuple, weight: float) -> tuple:
     return round(capped, 2), note
 
 def load_today_research():
-    today = date.today().isoformat()
+    today = et_today_iso()
     path  = os.path.join(JOURNAL_DIR, f"{today}.json")
     if not os.path.exists(path):
         # Try the root-level journal dir for backwards compat
@@ -303,7 +306,7 @@ def load_today_research():
         return json.load(f)
 
 def load_today_judge():
-    today = date.today().isoformat()
+    today = et_today_iso()
     path  = os.path.join(JOURNAL_DIR, f"{today}-judge.json")
     if not os.path.exists(path):
         return {}
@@ -375,6 +378,26 @@ def score_news(news_items: list, sym_data=None) -> tuple:
 
     return base_score, note
 
+def macro_regime(research: dict) -> str:
+    """
+    "RISK_ON" | "RISK_OFF" | "NEUTRAL" — the regime the executor sizes against.
+
+    Derived from the same branch score_macro uses, so the score, the rationale
+    string and the position size can never disagree. Keeping them as one source
+    is the point: the previous split let the report say "half sizing applies"
+    while the executor sized full.
+
+    Unavailable data returns NEUTRAL rather than RISK_ON — an unknown regime must
+    not silently unlock full size.
+    """
+    score, _ = score_macro(research)
+    if score >= 1.5:
+        return "RISK_ON"
+    if score <= 0.0:
+        return "RISK_OFF"
+    return "NEUTRAL"
+
+
 def score_macro(research: dict) -> tuple:
     """Score 0–1.5 based on SPY macro regime from research data."""
     spy_data = research.get("symbols", {}).get("SPY", {})
@@ -390,7 +413,21 @@ def score_macro(research: dict) -> tuple:
     if signal in ("STRONG_BUY", "WEAK_BUY") and ma20 > ma50:
         return 1.5, f"RISK-ON — SPY MA20 ${ma20:.2f} > MA50 ${ma50:.2f}"
     elif signal in ("STRONG_SELL", "WEAK_SELL") or ma20 < ma50:
-        return 0.0, f"RISK-OFF — SPY MA20 ${ma20:.2f} < MA50 ${ma50:.2f} (half sizing applies)"
+        # State the reason that actually fired. The message used to assert
+        # "MA20 < MA50" unconditionally, so on 2026-08-26 it reported
+        # "RISK-OFF — SPY MA20 $745.87 < MA50 $745.02" — MA20 was ABOVE MA50 and
+        # the real trigger was SPY's STRONG_SELL signal (price 738.06 below the
+        # MA50). Reading the journal you would conclude the MAs had crossed when
+        # they had not. Same class of defect as the doc/code drift already in
+        # Lessons Learned: a log line that contradicts its own inputs.
+        cross = f"MA20 ${ma20:.2f} {'<' if ma20 < ma50 else '>='} MA50 ${ma50:.2f}"
+        if ma20 < ma50 and signal in ("STRONG_SELL", "WEAK_SELL"):
+            why = f"SPY {signal} and {cross}"
+        elif ma20 < ma50:
+            why = f"SPY {cross}"
+        else:
+            why = f"SPY signal {signal} (price below MA50) despite {cross}"
+        return 0.0, f"RISK-OFF — {why}"
     else:
         return 0.75, "NEUTRAL macro regime"
 
@@ -999,7 +1036,7 @@ def score_symbol(symbol: str, research: dict) -> dict:
     # Social pump veto — load today's screener output and check pump_risk
     try:
         import json as _json
-        _today = __import__("datetime").date.today().isoformat()
+        _today = et_today_iso()
         _social_path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{_today}-social.json")
         if os.path.exists(_social_path):
             with open(_social_path) as _f:
@@ -1208,6 +1245,11 @@ def score_symbol(symbol: str, research: dict) -> dict:
         # Passed to the executor so the Citadel VIX sizing rule is actually
         # applied to share counts, not just mentioned in a rationale string.
         "size_multiplier": _intel.get("size_multiplier", 1.0),
+        # Same reason. score_macro printed "(half sizing applies)" while nothing
+        # read the regime, so the Dalio rule existed only in the rationale text.
+        # The executor now applies the 2.5% ceiling and the STRONG_BUY-only gate
+        # off this field.
+        "macro_regime": macro_regime(research),
         "learned_hints": _hints,
         "vix": _intel.get("vix"),
         "is_discovery": is_discovery,
@@ -1265,9 +1307,10 @@ def run_judge_session() -> dict:
         return {"error": "No research data found for today. Run research.py full first."}
 
     symbols_data = research.get("symbols", {})
-    today        = date.today().isoformat()
+    today        = et_today_iso()
     results      = {
-        "timestamp": datetime.now().isoformat(),
+        "agent_version": get_version(),
+        "timestamp": et_now().isoformat(),
         "date": today,
         "approved": [],
         "held": [],

@@ -37,6 +37,8 @@ from collections import defaultdict
 from datetime import date
 from statistics import mean
 
+from market_time import et_today_iso
+
 ROOT        = os.path.dirname(os.path.abspath(__file__))
 JOURNAL_DIR = os.path.join(ROOT, "logs", "paper")
 ROUND_TRIPS = os.path.join(JOURNAL_DIR, "round-trips.csv")
@@ -479,7 +481,7 @@ def build(round_trips=None) -> dict:
     vetoes = load_vetoes()
 
     return {
-        "generated": date.today().isoformat(),
+        "generated": et_today_iso(),
         "overall": summarize(trips),
         "by_source": analyse_source(trips),
         "tier_stops": analyse_tier_stops(trips),

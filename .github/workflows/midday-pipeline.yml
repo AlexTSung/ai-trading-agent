@@ -62,7 +62,7 @@ jobs:
           # Rebase before committing: the morning pipeline may have pushed since
           # this job checked out, and a stale base makes the push fail.
           git add logs/paper/
-          git diff --staged --quiet || git commit -m "chore: midday risk check $(date +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "chore: midday risk check $(TZ='America/New_York' date +%Y-%m-%d)"
           # Rebase AFTER committing — rebasing first fails with "cannot pull
           # with rebase: You have unstaged changes" on the freshly written logs.
           git pull --rebase origin ${{ github.ref_name }} || true

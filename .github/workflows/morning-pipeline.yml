@@ -68,7 +68,7 @@ jobs:
           git config user.name "Trading Agent"
           git config user.email "agent@youversion.com"
           git add logs/paper/
-          git diff --staged --quiet || git commit -m "chore: trading logs $(date +%Y-%m-%d) morning"
+          git diff --staged --quiet || git commit -m "chore: trading logs $(TZ='America/New_York' date +%Y-%m-%d) morning"
           # Rebase AFTER committing. Running it first always failed with
           # "cannot pull with rebase: You have unstaged changes" because the
           # pipeline has just written new log files.

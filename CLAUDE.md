@@ -1,6 +1,87 @@
 # Trading Agent — CLAUDE.md
+> **Version:** v1.1.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
+
+## Versioning — every strategy change gets a number
+
+This versions the **Alpaca equities + options agent** in this file.
+`EQUITIES_VERSION` is the single source of truth. `CLAUDE.md` (the line above)
+and `EQUITIES_CHANGELOG.md` must agree with it; `python3 version.py verify`
+asserts all three match and a guardrail test fails if they drift.
+
+**The OANDA forex agent has its own, separate `VERSION` / `CHANGELOG.md` and its
+own `v1.0.0` tag**, set up in the same repo by a parallel session. CLAUDE.md's
+"Two Agents, Two Judges" rule forbids the two agents from sharing scoring state,
+and a single version number for both would be exactly that — so the files here
+are deliberately named `EQUITIES_*` and every tag is prefixed `equities-v`,
+never a bare `vX.Y.Z`. `version.py rollback` checks the `equities-v` tag first
+and refuses to fall back to a bare tag silently, because a bare `v1.0.0` on this
+repo means the forex baseline, not this one.
+
+**Why this exists.** A strategy change makes the performance record before and
+after it incomparable. Phase 2 had to be voided for exactly that reason — the
+Judge's weights changed, every score shifted by up to 2.0 points, and the
+"avg Judge ≥ 7.0" criterion silently stopped meaning anything for seven weeks.
+Every pipeline output now carries `agent_version`, so results are attributable
+to the ruleset that produced them.
+
+| Level | When | Test to apply |
+|---|---|---|
+| **MAJOR** `X.0.0` | Record before/after is **not comparable**: baseline reset, phase voided, Judge scale or weights changed, graduation criteria changed, guardrail removed, **any Hard Rule loosened**, new book or broker, real money enabled | *Would I have to reset the baseline to measure this honestly?* |
+| **MINOR** `0.X.0` | New capability, safe with the existing record: new signal or factor, new watchlist symbols, a gate **tightened**, a documented-but-unimplemented rule now enforced, new tooling | *Does this add or tighten without invalidating past results?* |
+| **PATCH** `0.0.X` | Correctness fixes restoring intended behaviour: wrong log message, broken date window, doc corrected to match code, tests | *Was the intent always this, and the code simply wrong?* |
+
+**Loosening is always MAJOR; tightening is MINOR.** Lowering a documented floor
+changes what the agent will trade, so results collected under the stricter rule
+no longer apply. Same asymmetry as the learned-hint rails.
+
+**A MAJOR bump must state whether the baseline resets** — in the CHANGELOG entry
+and in the Experiment Timeline below. A MAJOR change without that note is how
+Phase 2 became unmeasurable.
+
+```
+python3 version.py show                            # current version
+python3 version.py verify                          # check for drift
+python3 version.py bump minor --reason "..."       # edits EQUITIES_VERSION, CLAUDE.md, EQUITIES_CHANGELOG stub
+git commit -am "..." && git tag -a equities-v1.1.0 -m "equities-v1.1.0"
+```
+
+`bump` deliberately does not commit or tag. A version bump is a claim about what
+changed and should be reviewed in a diff like any other change.
+
+### Reverting to a previous version
+
+```
+python3 version.py rollback 1.0.0            # DRY RUN — lists what would change
+python3 version.py rollback 1.0.0 --confirm  # apply
+```
+
+**`git checkout equities-v1.0.0` is the wrong command** (and a bare
+`git checkout v1.0.0` is worse — that tag belongs to the forex agent). 343
+files under `logs/` are tracked, so a plain checkout would roll the journals,
+verdicts and trade logs back too — destroying the performance record you
+rolled back in order to study.
+
+`version.py rollback` restores only the **version surface**: this agent's code,
+`CLAUDE.md`, `watchlist.json`, workflows, tests, and learned parameters under
+`logs/learnings/`. Learned weights are included on purpose — a v1.0.0 rollback
+that kept v1.4's learned parameters would not reproduce v1.0.0 behaviour.
+Everything else under `logs/` is left untouched.
+
+`forex_*.py`, `run_forex*`, `forex_config.json` and the forex workflow are
+excluded explicitly — the include globs (`*.py`, `*.sh`, workflow YAML) match
+by filename with no notion of which agent owns a file, and on first build
+silently caught all of them. That would have made an equities rollback also
+revert forex's code and its learned parameters, exactly the cross-agent bleed
+the ownership table above exists to prevent — just committed by the tooling
+instead of a person. If a new forex file pattern shows up that this list
+misses, add it to `version.EXCLUDED_GLOBS`, not to the equities include list.
+
+It refuses to run with a dirty working tree rather than overwriting uncommitted
+work, and dry-run is the default. After applying: review `git status`, run
+`python3 -m unittest discover -s tests`, and commit the revert as its own change
+with a PATCH or MAJOR bump depending on what it undoes.
 
 ## Identity & Mission
 You are a trading agent managing THREE books — paper equities, paper options, and one real-money account. Your job is to grow both portfolios through disciplined, research-driven decisions. You must NEVER confuse these accounts. Every order must be confirmed against the correct account before execution.
@@ -186,14 +267,54 @@ premium selling is working.
 | Structure | defined risk only | `passes_risk_filters` rejects undefined `max_loss`, so `short_strangle` is built but never traded |
 | Entry window | 21–60 DTE, target 45 | inside 21 days gamma accelerates; past 60 theta is too slow |
 | Direction | condor neutral, put spread bullish, call spread bearish | |
-| Max loss | ≤ 2% of **honest** equity | must use `options_trade.get_equity()`, which marks phantom positions to cost |
-| Reward/risk | ≥ 0.25 | at least $0.25 credit per $1 at risk |
+| No-arbitrage bounds | structure must satisfy its own static bounds | first gate; a credit ≥ the width securing it means a corrupt input, not a good fill |
+| Max loss | ≤ 2% of **honest** equity, **net of execution cost** | must use `options_trade.get_equity()`, which marks phantom positions to cost |
+| Reward/risk | ≥ 0.25 **net of execution cost** | at least $0.25 credit per $1 at risk, measured at prices we can transact at |
+| Leg liquidity | bid-ask ≤ 15% of mid, when quotes are real | a wide spread can exceed the entire edge |
 | Theta | must be positive on credit structures | time decay has to be working for us |
 | Profit target | close at 50% of max profit | |
 | Loss stop | 1× credit collected | never lose more than the premium taken in — **stricter than the 2× credit in published mechanics.** A tighter stop on an ~84%-win-rate strategy cuts positions that would have recovered; it also caps the tail. Revisit once the round-trip record can measure which costs more. |
 | Time stop | review at 21 DTE, force close at 7 | gamma risk is explosive near expiry |
 | Concurrency | max 5 open positions | |
+| Short-vol concurrency | max 3 open short-premium positions | they are one position in a volatility spike |
+| Short-vol aggregate risk | ≤ 6% of honest equity, summed | five 2% trades were never bounded to 6% |
+| Short-vol correlation | one short-premium position per underlying group | SPY/QQQ/IWM/DIA/VOO/IVV/VTI count as one |
 | Drawdown halt | stop new trades if monthly drawdown > 3.6% | |
+
+### Execution cost is not a rounding error
+
+Every price in `options_strategy.py` is a Black-Scholes theoretical value — a
+mid. We cannot transact at a mid: selling a spread means hitting the bid on the
+short legs and paying the ask on the long ones, and again in reverse when the
+position closes (which it does — at 21 DTE or +50%, not at expiry). A four-leg
+condor crosses **eight** spreads over a round trip.
+
+Measured on the current builders at 45 DTE, 16-delta shorts:
+
+| Underlying | IV | Credit | Est. cost | Cost as % of credit | Reward/risk gross → net |
+|---|---|---|---|---|---|
+| $150 | 25% | $1.75 | $0.28 | 16% | 0.28 → **0.22** |
+| $250 | 35% | $3.89 | $0.65 | 17% | 0.30 → **0.24** |
+| $60 | 30% | $0.92 | $0.15 | 16% | 0.30 → **0.24** |
+| $500 | 22% | $4.79 | $0.81 | 17% | 0.28 → **0.22** |
+
+**Every one of those clears the 0.25 bar on mids and fails it on transactable
+prices.** The gate was measuring a price that does not exist.
+
+The bar was **not** lowered to compensate. A structure whose edge does not
+survive its own execution cost had no edge, and the tighten-only rail forbids
+dropping a documented floor to book more trades. The fix is real quotes:
+`fetch_leg_quotes()` costs the trade against live bid/ask, and a liquid contract
+at a 2% spread costs ~$6/contract instead of the ~$28 fallback estimate — the
+same condor then passes. **Fetching quotes is what unlocks trades, not
+weakening the gate.**
+
+Contracts are now resolved *before* the risk gate rather than after, because a
+quote needs a contract symbol. When quotes are unreachable the fallback is
+deliberately pessimistic — a 10%-of-mid spread, the widest we would knowingly
+accept — so an unpriceable chain rejects a trade we might have taken rather than
+accepting one we would have refused. A cost that is half measured and half
+estimated is reported as `estimate`, never blended.
 
 **Improvements to consider, in order of expected value:**
 1. ~~Delta-based strike selection~~ — **done.** Short legs target ~16 delta and
@@ -218,15 +339,38 @@ premium selling is working.
    and would be rejected by the 0.25 filter, while the delta condor collects
    $0.60 at 0.251 and is tradeable.
 
-2. **Schedule it.** Equities and forex run in GitHub Actions; options runs only
-   from local `run_options*.sh`, so it only manages positions when a laptop is
-   on. Short options are the *least* safe thing to monitor intermittently.
+2. ~~Schedule it~~ — **done.** Equities and forex ran in GitHub Actions; options
+   ran only from local `run_options*.sh` with a hardcoded machine path, so it
+   only managed positions when a laptop happened to be on. Short options are
+   the *least* safe thing to monitor intermittently. `run_options_github.sh` +
+   `.github/workflows/options-pipeline.yml` schedule it the same way, with the
+   same 9:35–11:30 AM ET window and redundant-trigger pattern as the equities
+   morning pipeline (see Daily Schedule below).
 3. **Earnings blackout.** The equities Judge vetoes entries within 3 days of
    earnings. Selling premium into an earnings print is the same mistake with
    more leverage — and IV rank will look attractive precisely because the event
    is coming.
-4. **Liquidity floor.** Nothing checks open interest or bid/ask width. A wide
-   spread on an illiquid chain can exceed the entire edge.
+4. ~~Liquidity floor~~ — **done.** `options_screener.check_option_liquidity()`
+   already applied a 15%-of-mid ceiling but **was never called from any
+   pipeline**, so no option order had ever been liquidity-checked or costed
+   against a real quote. `fetch_leg_quotes()` now wires it into the gate. Open
+   interest is still unchecked — spread width is a proxy for it, not a
+   substitute.
+5. **Vol-regime gate on selling.** High IV rank is our entry signal, but it
+   reads the same after a spike has peaked (good) and while one is still
+   expanding (Volmageddon). The equities side already gates on real VIX
+   (`intelligence.py`, half size > 25, no new positions > 35); options ignores
+   it entirely. Reusing that plumbing is the next highest-value change.
+
+### Reference sources read for the options strategy
+
+Findings applied, with what each did and did not support:
+
+| Source | Applied | Not applicable |
+|---|---|---|
+| Wang, Pennock, Rothschild & Devanur, *Designing Expressive and Liquid Financial Options Markets* (ICAIF '24) | §4.3's measured spreads motivated execution-cost accounting; the §3 No Arbitrage Principle and Definition 1 dominance became `validate_no_arbitrage()` | The LP itself is a **market-maker** tool. It found 296 violations across 356 DJI markets at an average **$2.28** profit each — real, and worth nothing to a price taker paying retail commissions. We use the bounds to check our own arithmetic, not to hunt arbitrage. |
+| Aurum, *Arbitrage hedge fund primer* (Jan 2025) | Short-vol section's risk controls — strict position limits and diversification across assets, given that "increased correlations during market stress" collapse separate positions into one — became the aggregate short-vol cap and correlation grouping. Volmageddon (−90% in a day) is why the cap is on **aggregate** risk, not per trade. | Volatility arbitrage, dispersion, convertible and dividend arbitrage all require dynamic hedging, OTC access, or a replication book. Tail protection is a portfolio overlay whose cost only makes sense against a large long book. None are price-taker strategies. |
+| Bemporad, Bellucci & Gabbriellini, *Dynamic option hedging via stochastic MPC* (Quantitative Finance 2014) | §4.1.2's shortfall objectives (eqs 23–24) motivated `avg_shortfall_per_contract` — variance penalises a better-than-expected outcome as hard as a worse one, which is the wrong shape for a short-premium book | The SMPC method is **dealer-side replication**. Its own §5.1 result is that for plain vanilla options SMPC performs comparably to ordinary delta hedging (errors within ±€0.13 of each other), so the machinery buys nothing without exotics. Worth noting: even **weekly** rebalancing left ±€2.5 of hedging error on a €6.20 ATM call — ~40% of premium. An unhedged short position carries *more* residual risk than that, which is the quantitative case for the defined-risk-only rule we already have. |
 
 **Lessons carried over from equities** — every one of these was a real failure:
 - **Phantom equity poisons position sizing.** The 2% cap was computed off
@@ -242,7 +386,19 @@ premium selling is working.
 - **An inverted condition can disable a whole strategy silently.** The theta
   check rejected positive theta while its error message asked for positive
   theta, so no premium-selling position could ever open.
-- **Test the guardrails.** Options had zero test coverage until now.
+- **A written guardrail that nothing calls is not a guardrail.**
+  `check_option_liquidity()` had the right threshold and the right docstring and
+  zero call sites. Grep for the caller, not just the function.
+- **A per-trade cap does not bound a correlated book.** Five positions each
+  capped at 2% is 10% of equity behind one risk factor. The equities side had
+  had a correlation check since the beginning; options never got one.
+- **Fail loudly on a missing field, not plausibly.** `scenario_analysis`
+  defaulted a missing `underlying` to 0, putting every simulated price below
+  every breakeven, and reported nine consecutive max-loss scenarios with no
+  error. A wrong answer that looks like an answer is worse than a crash.
+- **Test the guardrails.** Options had zero test coverage until now; the suite
+  is at 122 tests, and each new gate was mutation-tested to confirm the test
+  fails when the gate is removed.
 
 ## Experiment Timeline
 | Phase | Dates | Status | Decision |
@@ -295,22 +451,40 @@ any local machine, and not from `routines.json`. The `.github/workflows/*.yml`
 files are authoritative. `routines.json` is reference material only: no script
 reads it, and its times are not what runs.
 
-**Three scheduled jobs, not eight.** Each pipeline runs its steps sequentially
+**Four scheduled jobs, not nine.** Each pipeline runs its steps sequentially
 inside a single job — the agents are not individually scheduled. Any per-agent
 clock time you may remember (8:30 AM intelligence, 10:00 AM judge, 4:15 PM
 reviewer) was aspirational and never existed in cron.
 
+**Multiple cron entries per job are redundant attempts, not extra runs.**
+GitHub Actions scheduled triggers are not guaranteed to fire on time —
+delays of 3.5–9 hours have actually happened on this repo, and a single
+morning trigger landing after the 11:30 AM ET cutoff meant the *entire
+trading day* got zero research and zero trades, not a late one. Every extra
+cron below sits inside the same legal window its job already enforces; the
+first one to land inside the window runs the pipeline, and every trigger
+after that is a free no-op — the morning/EOD/options jobs check an
+idempotency marker before doing any work, and the midday job's checks
+(`check-stops`, `check-phantom`) are read-check-act operations where running
+more often is strictly better, not just delay insurance.
+
 | ET | Workflow / runner | Cron (UTC) | Steps, in order |
 |---|---|---|---|
-| **9:45 AM** | `morning-pipeline.yml`<br>`run_github.sh` | `45 13 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
-| **12:00 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `0 16 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
-| **5:15 PM** | `eod-pipeline.yml`<br>`run_eod_github.sh` | `15 21 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
+| **9:45 AM** (+3 backups to 11:15) | `morning-pipeline.yml`<br>`run_github.sh` | `45 13`, `15 14`, `45 14`, `15 15 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
+| **9:40 AM** (+2 backups to 11:10) | `options-pipeline.yml`<br>`run_options_github.sh` | `40 13`, `10 14`, `10 15 * * 1-5` | `run_options.py` — manage existing positions, then screen the options watchlist for new defined-risk trades. Same 9:35–11:30 AM ET window as equities morning: IV rank and the chain are freshest right after open. Existed only as a local `run_options*.sh` tied to one machine before this. |
+| **10:30 AM, 12:00 PM, 2:00 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `30 14`, `0 16`, `0 18 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
+| **5:15 PM** (+1 backup at 6:00 PM) | `eod-pipeline.yml`<br>`run_eod_github.sh` | `15 21`, `0 22 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
 | **Sep 3, 5:30 PM** | `graduation-decision.yml` | `30 21 3 9 *` | `reviewer.py graduation` — Phase 2B verdict. Advisory only; manual approval still required. |
 
-Guardrails inside the runners: weekends skip; the morning job aborts after
-11:30 AM ET; the midday job runs only between 10:00 AM and 4:00 PM ET; the EOD
-job refuses to run before 4:00 PM ET. `workflow_dispatch` with `test_mode: true`
-bypasses the time windows on the morning and midday jobs.
+Guardrails inside the runners: weekends skip; the morning and options jobs
+abort after 11:30 AM ET; the midday job runs only between 10:00 AM and 4:00 PM
+ET; the EOD job refuses to run before 4:00 PM ET. Every one of these is
+computed from the **real US/Eastern wall-clock time** (`TZ="America/New_York"
+date`, or `market_time.py` in the Python layer) rather than the runner's UTC
+clock compared against a fixed offset — the earlier UTC-offset version broke
+the instant a delayed run crossed midnight UTC, and separately drifted an hour
+every time DST changed twice a year. `workflow_dispatch` with `test_mode: true`
+bypasses the time windows on the morning, midday and options jobs.
 
 Local equivalents for manual runs — these do **not** replace the schedule, they
 just let you inspect state:
@@ -423,6 +597,54 @@ Before any trading session, note the macro regime:
 - SPY MA20 vs MA50: above = risk-on, below = risk-off
 - In risk-off: reduce max long position size from 5% to 2.5%, require STRONG_BUY only
 - In risk-on: normal rules apply
+
+**Now enforced in code.** `judge.py macro_regime()` derives `RISK_ON` /
+`RISK_OFF` / `NEUTRAL` from the same branch `score_macro()` scores, so the
+score, the rationale string and the position size cannot disagree. It is passed
+to the executor, where `trade.regime_adjusted_position_pct()` applies the 2.5%
+ceiling and `buy_with_guardrails` blocks anything weaker than STRONG_BUY.
+
+Until 2026-08-26 **neither half existed.** `score_macro` returned 0.0 and
+printed `(half sizing applies)`, but nothing read the regime — `size_multiplier`
+came only from the VIX ladder — so the Judge announced a risk control that was
+never applied and the book ran full conviction size into a downtrend. A message
+claiming a limit it does not enforce is worse than no message: it reads as
+protection in the log while the exposure is unchanged.
+
+### How the risk reducers compose
+
+Order matters, and **every step may only lower the number**:
+
+| Step | Rule | Effect |
+|---|---|---|
+| 1 | Conviction (Hard Rule 6) | 8% / 5% / 3% by Judge score |
+| 2 | VIX ladder (Citadel) | × 0.5 above VIX 25, blocked above 35 |
+| 3 | Risk-off ceiling (Dalio) | `min(result, 2.5%)` |
+
+Step 3 is a **`min`, not an assignment**. If the VIX ladder has already cut a 3%
+position to 1.5%, entering risk-off must not raise it back to 2.5% — combining
+two risk reducers can never increase exposure.
+
+**The naive form is wrong and is guarded by a test.** Writing
+`size = capital × multiplier` capped at 2.5% conflates a *multiplier* (0.5–1.0)
+with a *fraction of capital*: it computes 50–100% of the book, so the 2.5% cap
+binds in every case and flattens the 8/5/3% tiers to one size for every
+trade — including in risk-on, where the Dalio ceiling should not apply at all.
+
+Measured on honest equity of $91,118.79:
+
+| Judge score | Conviction | Risk-on | Risk-off |
+|---|---|---|---|
+| ≥ 9.0 | 8% | $7,290 | **$2,278** |
+| 7.5–8.9 | 5% | $4,556 | **$2,278** |
+| 7.0–7.4 | 3% | $2,734 | **$2,278** |
+
+**Known limitation — the regime signal is noisy.** MA20 vs MA50 flips on any
+crossing however small. On 2026-08-26 SPY's MA20 was $745.87 against an MA50 of
+$745.02 — a **0.11%** gap deciding whether the entire book sizes at 8% or 2.5%.
+A 200-day SMA confirmation or a hysteresis band would make the regime stable;
+neither is implemented. VIX is also a *lagging* volatility measure — it spikes
+during and after a decline, not before — so both regime inputs are reactive.
 
 ## Bearish Market Playbook
 When the market is in a downtrend (SPY MA20 < MA50), don't sit in cash — deploy bearish instruments.
@@ -566,6 +788,8 @@ Sections: Portfolio Status → Market Research (per symbol) → Trades Executed 
 
 ## Lessons Learned
 *(Agent updates this section as patterns emerge from journal review)*
+- [2026-08-31] **discovery_channel_silently_dead**: `_extract_discovery_tickers(intel_path)` referenced `max_tickers` at `return tickers[:max_tickers]` without ever receiving it as a parameter — every call raised `NameError`, caught by a broad `except Exception`, and returned `[]`. Alpaca most-active, top gainers, and Reddit trending — the entire discovery channel fed by the morning intelligence scan — contributed exactly zero tickers to the Judge, every single day, with no error surfaced anywhere the journal or logs would show it. Found while widening the discovery funnel for more trade occurrences; the funnel had a hole in it, not just a narrow opening. Fixed: the parameter now exists, per-source slices widened to match what `get_market_discovery()` already fetches, and sources are interleaved round-robin rather than concatenated-then-truncated — the latter meant a full most-active batch alone could still crowd out every gainer and Reddit ticker once its slice was widened. **The general lesson, again**: a broad `except Exception: return []` at the boundary of a function is exactly where a real bug goes to hide — it looks like "gracefully handling missing data" in the code and reads as "no candidates today" in the log, and those are indistinguishable without instrumentation that says which one happened.
+- [2026-08-31] **naive_clock_mislabelled_as_ET**: journal.py/reviewer.py/research.py/judge.py/trade.py/learning_agent.py used `date.today()`/`datetime.now()` for filenames and printed the result labelled "ET" — but that reads the runner's clock, UTC on GitHub Actions. On 2026-08-28 a delayed EOD run (actual time 11:09 PM ET) filed itself as `2026-08-29.md` and printed "Generated: 2026-08-29 03:09:48 ET", a UTC timestamp one day off and falsely labelled. The bash guards were already fixed to compute in `America/New_York`; the Python layer underneath them was not, so the mismatch just moved down a layer. Fixed via a shared `market_time.py` (`et_today()`/`et_now()`, zoneinfo-based) used everywhere "today" determines a filename or cross-script lookup. Left untouched on purpose: self-consistent naive pairs (48h cooldown timestamps, min-hold entry dates, client-order-id uniqueness suffixes) where both the write and the read use the same naive clock — touching only one side there would raise `TypeError: can't subtract offset-naive and offset-aware datetimes`, a new crash for no benefit.
 - [2026-08-24] **high_score_poor_outcome** (seen 2x): Judge score ≥8.0 but outcome POOR_TRADE (2x: AAPL, AAPL). Judge may be overweighting news sentiment. Consider raising APPROVE threshold to 8.0.
 - [2026-08-24] **persistent_judge_overconfidence** (seen 5x): Judge consistently scores -4.8 pts above reviewer (5 trades). Judge is overconfident. Recommend reducing news component weight by 10%.
 - [Date initialized] Beta version launched. All lessons TBD.

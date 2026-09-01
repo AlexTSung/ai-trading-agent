@@ -14,6 +14,7 @@ import json
 import csv
 import requests
 from datetime import datetime, date, timedelta
+from market_time import et_today, et_today_iso, et_timestamp
 
 # ── Load .env ────────────────────────────────────────────────────────────────
 # setup.sh writes a .env file, but nothing used to read it, so filling in keys
@@ -24,6 +25,8 @@ try:
     load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
+
+from version import get_version
 
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
 ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
@@ -49,7 +52,7 @@ def get_positions():
     return r.json()
 
 def get_orders_today():
-    today = date.today().isoformat()
+    today = et_today_iso()
     r = requests.get(f"{BASE_URL}/v2/orders", headers=_headers(), params={"status": "all", "after": today, "limit": 100})
     r.raise_for_status()
     return r.json()
@@ -76,7 +79,7 @@ def load_md_if_exists(path):
     return ""
 
 def write_eod_journal():
-    today          = date.today().isoformat()
+    today          = et_today_iso()
     research_path  = os.path.join(JOURNAL_DIR, f"{today}.json")
     session_path   = os.path.join(JOURNAL_DIR, f"{today}-session.json")
     judge_path     = os.path.join(JOURNAL_DIR, f"{today}-judge.json")
@@ -217,7 +220,7 @@ def write_eod_journal():
 
     # ── Assemble Markdown ────────────────────────────────────────────────────
     md = f"""# Trade Journal — {today}
-*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S ET')}*
+*Generated: {et_timestamp()}*
 
 ---
 
@@ -317,7 +320,7 @@ def append_to_csv_log(orders, today):
 
 def weekly_review():
     """Generate a weekly performance summary from the last 5 journal files."""
-    today     = date.today()
+    today     = et_today()
     summaries = []
 
     for i in range(7):
@@ -347,7 +350,7 @@ if __name__ == "__main__":
         print(json.dumps(weekly_review(), indent=2))
     elif action == "csv-append":
         orders = get_orders_today()
-        append_to_csv_log(orders, date.today().isoformat())
+        append_to_csv_log(orders, et_today_iso())
         print(json.dumps({"appended": len(orders)}))
     elif action == "read" and len(sys.argv) > 2:
         path = os.path.join(JOURNAL_DIR, f"{sys.argv[2]}.md")

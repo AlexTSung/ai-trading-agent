@@ -47,7 +47,7 @@ jobs:
           git config user.name "Trading Agent"
           git config user.email "agent@youversion.com"
           git add logs/paper/ logs/learnings/ CLAUDE.md
-          git diff --staged --quiet || git commit -m "chore: trading logs $(date +%Y-%m-%d) EOD + learnings"
+          git diff --staged --quiet || git commit -m "chore: trading logs $(TZ='America/New_York' date +%Y-%m-%d) EOD + learnings"
           # Rebase AFTER committing — pipeline writes new files before this step runs.
           git pull --rebase origin ${{ github.ref_name }} || true
           git push

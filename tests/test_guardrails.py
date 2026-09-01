@@ -34,7 +34,12 @@ os.environ.setdefault("APCA_API_SECRET_KEY", "test")
 
 import judge          # noqa: E402
 import reviewer       # noqa: E402
+import research      # noqa: E402
+import version       # noqa: E402
 import trade          # noqa: E402
+import market_time    # noqa: E402
+import run_options    # noqa: E402
+import journal        # noqa: E402
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -697,8 +702,25 @@ import options_monitor as omon       # noqa: E402
 class TestOptionsRiskFilters(unittest.TestCase):
 
     # Credit structures carry POSITIVE theta in this codebase's convention.
+    # Legs are present because passes_risk_filters now validates the structure
+    # against its own no-arbitrage bounds before anything else, and a dict with
+    # no legs has no bounds to check. Credit ($1.20) sits below the strike width
+    # ($5.20), so the vertical is internally consistent.
     DEFINED = {"strategy": "bull_put_spread", "max_loss": 4.0,
-               "reward_risk": 0.30, "theta": 0.0135, "dte": 40}
+               "reward_risk": 0.30, "theta": 0.0135, "dte": 40,
+               "max_profit": 1.20, "net_credit": 1.20,
+               "legs": [{"type": "short_put", "strike": 95.0, "price": 2.00},
+                        {"type": "long_put",  "strike": 89.8, "price": 0.80}]}
+
+    # Tight quotes (2%-of-mid spreads, typical of a liquid 45-DTE contract on an
+    # index ETF or mega-cap). Supplied wherever a test targets a gate OTHER than
+    # execution cost, so the cost haircut does not silently become the thing
+    # under test.
+    @staticmethod
+    def _tight_quotes(strat, spread_frac=0.02):
+        return [{"bid": leg["price"] * (1 - spread_frac / 2),
+                 "ask": leg["price"] * (1 + spread_frac / 2)}
+                for leg in strat["legs"]]
 
     def test_unknown_equity_is_refused_not_guessed(self):
         """
@@ -722,9 +744,12 @@ class TestOptionsRiskFilters(unittest.TestCase):
 
     def test_two_percent_cap_scales_with_equity(self):
         """A $4.00-wide spread is $400 per contract: fine at $91K, not at $10K."""
-        ok_big, _ = ostrat.passes_risk_filters(self.DEFINED, account_equity=91000.0)
-        ok_small, why = ostrat.passes_risk_filters(self.DEFINED, account_equity=10000.0)
-        self.assertTrue(ok_big)
+        q = self._tight_quotes(self.DEFINED)
+        ok_big, why_big = ostrat.passes_risk_filters(
+            self.DEFINED, account_equity=91000.0, leg_quotes=q)
+        ok_small, why = ostrat.passes_risk_filters(
+            self.DEFINED, account_equity=10000.0, leg_quotes=q)
+        self.assertTrue(ok_big, why_big)
         self.assertFalse(ok_small)
         self.assertIn("2%", why)
 
@@ -747,14 +772,18 @@ class TestOptionsRiskFilters(unittest.TestCase):
                 strat = builder(S=100.0, T=40 / 365, sigma=0.30)
                 strat["strategy"] = name
                 self.assertGreater(strat["theta"], 0, "credit theta must be positive")
-                ok, why = ostrat.passes_risk_filters(strat, account_equity=91000.0)
+                ok, why = ostrat.passes_risk_filters(
+                    strat, account_equity=91000.0,
+                    leg_quotes=self._tight_quotes(strat))
                 self.assertTrue(ok, f"{name} rejected: {why}")
 
     def test_missing_dte_is_refused_not_crashed(self):
         """`None < 21` raises TypeError rather than failing the check."""
         no_dte = dict(self.DEFINED)
         no_dte.pop("dte")
-        ok, why = ostrat.passes_risk_filters(no_dte, account_equity=91000.0)
+        ok, why = ostrat.passes_risk_filters(
+            no_dte, account_equity=91000.0,
+            leg_quotes=self._tight_quotes(no_dte))
         self.assertFalse(ok)
         self.assertIn("DTE", why)
 
@@ -762,14 +791,1340 @@ class TestOptionsRiskFilters(unittest.TestCase):
         for dte, should_pass in ((15, False), (40, True), (75, False)):
             with self.subTest(dte=dte):
                 strat = dict(self.DEFINED, dte=dte)
-                ok, _ = ostrat.passes_risk_filters(strat, account_equity=91000.0)
-                self.assertEqual(ok, should_pass)
+                ok, why = ostrat.passes_risk_filters(
+                    strat, account_equity=91000.0,
+                    leg_quotes=self._tight_quotes(strat))
+                self.assertEqual(ok, should_pass, why)
 
     def test_weak_reward_risk_is_rejected(self):
-        weak = dict(self.DEFINED, reward_risk=0.10)
-        ok, why = ostrat.passes_risk_filters(weak, account_equity=91000.0)
+        weak = dict(self.DEFINED, reward_risk=0.10, max_profit=0.40,
+                    net_credit=0.40)
+        ok, why = ostrat.passes_risk_filters(
+            weak, account_equity=91000.0, leg_quotes=self._tight_quotes(weak))
         self.assertFalse(ok)
         self.assertIn("0.25", why)
+
+
+class TestVersioning(unittest.TestCase):
+    """
+    A strategy change makes the performance record before and after it
+    incomparable. Phase 2 was voided for exactly that reason: the Judge's
+    weights changed, every score shifted by up to 2.0 points, and the
+    "avg Judge >= 7.0" criterion silently stopped meaning anything for seven
+    weeks. A version number and a comparability note would have caught it.
+
+    These tests guard the versioning system itself, because the repo's most
+    frequent failure is documentation drifting from code.
+    """
+
+    def test_version_is_valid_semver(self):
+        self.assertRegex(version.get_version(), r"^\d+\.\d+\.\d+$")
+
+    def test_all_three_sources_agree(self):
+        """VERSION, CLAUDE.md and CHANGELOG.md must not drift apart."""
+        ok, msg = version.verify()
+        self.assertTrue(ok, msg)
+
+    def test_bump_arithmetic(self):
+        cases = [
+            ("1.0.0", "patch", "1.0.1"),
+            ("1.0.0", "minor", "1.1.0"),
+            ("1.0.0", "major", "2.0.0"),
+            ("1.4.7", "minor", "1.5.0"),   # minor resets patch
+            ("1.4.7", "major", "2.0.0"),   # major resets both
+        ]
+        for current, level, expected in cases:
+            with self.subTest(current=current, level=level):
+                self.assertEqual(version.next_version(current, level), expected)
+
+    def test_bump_rejects_an_unknown_level(self):
+        with self.assertRaises(ValueError):
+            version.next_version("1.0.0", "hotfix")
+
+    def test_bump_requires_a_reason(self):
+        """The reason is what makes the CHANGELOG worth reading."""
+        for bad in ("", "   ", None):
+            with self.subTest(reason=bad):
+                with self.assertRaises(ValueError):
+                    version.bump("patch", bad)
+
+    def test_malformed_version_file_does_not_crash_a_trading_run(self):
+        """
+        get_version() is called from every pipeline writer. An unstamped
+        journal is a smaller loss than a session that fails to execute.
+        """
+        with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+            f.write("not-a-version")
+            bad_path = f.name
+        try:
+            with mock.patch.object(version, "VERSION_FILE", bad_path):
+                self.assertEqual(version.get_version(), "0.0.0-unknown")
+            with mock.patch.object(version, "VERSION_FILE", "/nonexistent/VERSION"):
+                self.assertEqual(version.get_version(), "0.0.0-unknown")
+        finally:
+            os.unlink(bad_path)
+
+    def test_pipeline_outputs_are_version_stamped(self):
+        """
+        Results have to be attributable to the ruleset that produced them.
+        Every top-level pipeline output carries agent_version.
+        """
+        for mod in (research, judge, trade, reviewer):
+            with self.subTest(module=mod.__name__):
+                self.assertTrue(hasattr(mod, "get_version"),
+                                f"{mod.__name__} cannot stamp its output")
+                self.assertEqual(mod.get_version(), version.get_version())
+
+    # ── The version surface ──────────────────────────────────────────────────
+
+    def test_logs_are_not_in_the_version_surface(self):
+        """
+        THE rollback trap. 343 files under logs/ are tracked, so a plain
+        `git checkout v1.0.0` would roll the journals, verdicts and trade logs
+        back too — destroying the performance record you rolled back in order to
+        study. Only learned parameters are restored.
+        """
+        surface = version.version_surface()
+        log_paths = [p for p in surface if p.startswith("logs/")]
+        self.assertTrue(all(p.startswith("logs/learnings/") for p in log_paths),
+                        f"performance record would be reverted: {log_paths}")
+
+    def test_learned_parameters_are_in_the_surface(self):
+        """
+        A v1.0.0 rollback that kept v1.4's learned Judge weights would not
+        reproduce v1.0.0 behaviour. Learned weights are strategy.
+        """
+        surface = version.version_surface()
+        self.assertIn("logs/learnings/alpaca_judge_hints.json", surface)
+
+    def test_strategy_defining_files_are_in_the_surface(self):
+        surface = set(version.version_surface())
+        for path in ("CLAUDE.md", "watchlist.json", "trade.py", "judge.py",
+                     "research.py", "reviewer.py",
+                     "tests/test_guardrails.py"):
+            with self.subTest(path=path):
+                self.assertIn(path, surface)
+
+    def test_forex_owned_files_are_excluded_from_the_equities_surface(self):
+        """
+        THE bug the collision exposed. "*.py", "*.sh" and the workflow glob
+        match by filename anywhere in the repo, with no notion of which agent
+        owns the file — on first build this silently caught forex_judge.py,
+        forex_trade.py, forex_config.json, run_forex.py/.sh and the forex
+        workflow. An equities rollback would have reverted forex's code and its
+        learned parameters too: exactly the cross-agent bleed CLAUDE.md's "Two
+        Agents, Two Judges" rule exists to prevent, committed by the tooling
+        instead of a person.
+        """
+        surface = set(version.version_surface())
+        forex_owned = ("forex_judge.py", "forex_trade.py", "forex_optimizer.py",
+                       "forex_config.json", "run_forex.py", "run_forex.sh",
+                       "run_forex_manage.sh",
+                       ".github/workflows/forex-agent.yml")
+        for path in forex_owned:
+            with self.subTest(path=path):
+                self.assertNotIn(path, surface)
+
+    def test_excluded_globs_win_over_included_globs(self):
+        """
+        The exclusion check must run before, and override, the include check.
+        forex_judge.py is the case that matters: it also matches the broad
+        "*.py" include glob, so excluding it only works because
+        version_surface() checks EXCLUDED_GLOBS first and `continue`s.
+        forex_config.json needs no such defense — it was removed from the
+        include list outright and matches no include glob at all.
+        """
+        import fnmatch
+        self.assertTrue(
+            any(fnmatch.fnmatch("forex_judge.py", g) for g in version.EXCLUDED_GLOBS))
+        self.assertTrue(
+            any(fnmatch.fnmatch("forex_judge.py", g) for g in version.VERSIONED_GLOBS),
+            "forex_judge.py must still match an include glob for this test to "
+            "prove the exclusion — not just be absent from both lists")
+
+        self.assertTrue(
+            any(fnmatch.fnmatch("forex_config.json", g)
+                for g in version.EXCLUDED_GLOBS))
+        self.assertFalse(
+            any(fnmatch.fnmatch("forex_config.json", g)
+                for g in version.VERSIONED_GLOBS),
+            "forex_config.json should not need the exclusion at all — it was "
+            "removed from the include list rather than merely excluded")
+
+    def _clean_repo_git(self):
+        """A stubbed git where the tag exists and the tree is clean."""
+        def fake(*args, **kw):
+            if args[0] == "rev-parse":
+                return mock.Mock(returncode=0, stdout="abc123\n")
+            if args[0] == "status":
+                return mock.Mock(returncode=0, stdout="")
+            if args[0] in ("ls-files", "ls-tree"):
+                return mock.Mock(returncode=0,
+                                 stdout="trade.py\nCLAUDE.md\n"
+                                        "logs/paper/2026-08-25.md\n"
+                                        "logs/learnings/alpaca_judge_hints.json\n")
+            if args[0] == "diff":
+                return mock.Mock(returncode=0, stdout="trade.py\n")
+            return mock.Mock(returncode=0, stdout="")
+        return fake
+
+    def test_rollback_is_dry_run_by_default(self):
+        """Reverting files is destructive; it must be opt-in."""
+        with mock.patch.object(version, "_git", side_effect=self._clean_repo_git()):
+            out = version.rollback("1.0.0")
+        self.assertTrue(out.get("dry_run"), out)
+        self.assertNotIn("restored", out)
+        self.assertIn("to_apply", out)
+
+    def test_rollback_does_not_checkout_on_a_dry_run(self):
+        calls = []
+
+        def recording(*args, **kw):
+            calls.append(args[0])
+            return self._clean_repo_git()(*args, **kw)
+
+        with mock.patch.object(version, "_git", side_effect=recording):
+            version.rollback("1.0.0")
+        self.assertNotIn("checkout", calls, "dry run must not modify the tree")
+
+    def test_rollback_reports_logs_are_preserved(self):
+        with mock.patch.object(version, "_git", side_effect=self._clean_repo_git()):
+            out = version.rollback("1.0.0")
+        self.assertTrue(out.get("logs_preserved"))
+
+    def test_rollback_excludes_the_journal_from_what_it_restores(self):
+        """
+        End to end on the surface computation: a tracked journal file must not
+        appear among the paths handed to git checkout.
+        """
+        captured = {}
+
+        def recording(*args, **kw):
+            if args[0] == "checkout":
+                captured["paths"] = list(args[3:])
+            return self._clean_repo_git()(*args, **kw)
+
+        with mock.patch.object(version, "_git", side_effect=recording):
+            version.rollback("1.0.0", confirm=True)
+
+        self.assertIn("paths", captured, "confirm should have run a checkout")
+        self.assertNotIn("logs/paper/2026-08-25.md", captured["paths"])
+        self.assertIn("logs/learnings/alpaca_judge_hints.json", captured["paths"])
+        self.assertIn("trade.py", captured["paths"])
+
+    def test_baseline_tag_exists(self):
+        """
+        equities-v1.0.0 is the declared MVP baseline, so the tag has to be
+        there for a rollback to have anything to return to. Skipped where tags
+        are unavailable (a shallow or tagless clone).
+
+        Must be the equities-prefixed tag, not a bare v1.0.0: this repo also
+        hosts the OANDA forex agent, which tagged its own baseline as a bare
+        v1.0.0 first. Asserting the bare tag here would pass by coincidence
+        against the wrong agent's release.
+        """
+        try:
+            tags = version._git("tag", "-l").stdout.split()
+        except Exception as e:                     # pragma: no cover
+            self.skipTest(f"git tags unavailable: {e}")
+        if not tags:
+            self.skipTest("no tags in this clone")
+        self.assertIn("equities-v1.0.0", tags)
+
+    def test_rollback_never_resolves_the_bare_forex_tag_silently(self):
+        """
+        THE collision this repo actually hit. A bare `v1.0.0` exists and
+        belongs to the forex agent. rollback("1.0.0") must resolve to
+        `equities-v1.0.0` when it exists, and must refuse — not silently
+        succeed against the wrong commit — if only the bare tag is found.
+        """
+        def only_bare_tag_exists(*args, **kw):
+            if args[0] == "rev-parse":
+                ref = args[3]
+                if ref.startswith("v1.0.0"):
+                    return mock.Mock(returncode=0, stdout="deadbeef\n")
+                return mock.Mock(returncode=1, stdout="")
+            if args[0] == "tag":
+                return mock.Mock(returncode=0, stdout="v1.0.0\n")
+            return mock.Mock(returncode=0, stdout="")
+
+        with mock.patch.object(version, "_git", side_effect=only_bare_tag_exists):
+            out = version.rollback("1.0.0")
+        self.assertFalse(out.get("ok"), out)
+        self.assertIn("not an equities tag", out.get("error", ""))
+
+    def test_rollback_prefers_the_equities_tag_when_both_exist(self):
+        seen_refs = []
+
+        def both_tags_exist(*args, **kw):
+            if args[0] == "rev-parse":
+                seen_refs.append(args[3])
+                return mock.Mock(returncode=0, stdout="deadbeef\n")
+            if args[0] == "status":
+                return mock.Mock(returncode=0, stdout="")
+            if args[0] in ("ls-files", "ls-tree"):
+                return mock.Mock(returncode=0, stdout="trade.py\n")
+            if args[0] == "diff":
+                return mock.Mock(returncode=0, stdout="")
+            return mock.Mock(returncode=0, stdout="")
+
+        with mock.patch.object(version, "_git", side_effect=both_tags_exist):
+            out = version.rollback("1.0.0")
+        self.assertEqual(out.get("target"), "equities-v1.0.0")
+        self.assertEqual(seen_refs[0], "equities-v1.0.0^{commit}",
+                         "must probe the equities tag before any other form")
+
+    def test_rollback_rejects_an_unknown_target(self):
+        out = version.rollback("99.99.99")
+        self.assertFalse(out.get("ok"))
+        self.assertIn("No such tag or commit", out.get("error", ""))
+
+    def test_rollback_refuses_to_overwrite_uncommitted_work(self):
+        dirty = ["M  trade.py", "?? scratch.py"]
+        with mock.patch.object(version, "_git") as g:
+            def fake(*args, **kw):
+                if args[0] == "rev-parse":
+                    return mock.Mock(returncode=0, stdout="abc123\n")
+                if args[0] == "status":
+                    return mock.Mock(returncode=0, stdout="\n".join(dirty))
+                return mock.Mock(returncode=0, stdout="")
+            g.side_effect = fake
+            out = version.rollback("1.0.0", confirm=True)
+        self.assertFalse(out.get("ok"))
+        self.assertIn("not clean", out.get("error", ""))
+
+
+class TestMacroRegimeSizing(unittest.TestCase):
+    """
+    CLAUDE.md's Dalio rule — "In risk-off: reduce max long position size from 5%
+    to 2.5%, require STRONG_BUY only" — was documented and announced but never
+    implemented. score_macro returned 0.0 and printed "(half sizing applies)"
+    while `size_multiplier` came only from the VIX ladder, so the Judge was
+    reporting a risk control that did not exist and the book ran full size into a
+    downtrend. That is the phantom-risk failure mode, and it is the same class of
+    defect as check_option_liquidity having zero call sites.
+    """
+
+    def test_risk_on_preserves_conviction_tiers(self):
+        """Hard Rule 6's 8/5/3% must survive — the ceiling is risk-off only."""
+        for conviction in (0.08, 0.05, 0.03):
+            for regime in ("RISK_ON", "NEUTRAL"):
+                with self.subTest(conviction=conviction, regime=regime):
+                    pct, _ = trade.regime_adjusted_position_pct(conviction, regime, 1.0)
+                    self.assertAlmostEqual(pct, conviction)
+
+    def test_risk_off_caps_at_two_and_a_half_percent(self):
+        for conviction in (0.08, 0.05, 0.03):
+            with self.subTest(conviction=conviction):
+                pct, notes = trade.regime_adjusted_position_pct(
+                    conviction, "RISK_OFF", 1.0)
+                self.assertAlmostEqual(pct, trade.RISK_OFF_MAX_POSITION_PCT)
+                self.assertTrue(any("RISK-OFF" in n for n in notes))
+
+    def test_ceiling_is_a_min_not_an_assignment(self):
+        """
+        THE subtle bug to avoid. If the VIX ladder already cut a 3% position to
+        1.5%, entering risk-off must not raise it back to the 2.5% ceiling.
+        Combining two risk reducers can never increase exposure.
+        """
+        pct, _ = trade.regime_adjusted_position_pct(0.03, "RISK_OFF", 0.5)
+        self.assertAlmostEqual(pct, 0.015)
+        self.assertLess(pct, trade.RISK_OFF_MAX_POSITION_PCT)
+
+    def test_risk_reducers_compose_monotonically(self):
+        """No combination of regime and VIX may exceed the plain conviction size."""
+        for conviction in (0.08, 0.05, 0.03):
+            base, _ = trade.regime_adjusted_position_pct(conviction, "RISK_ON", 1.0)
+            for regime in ("RISK_ON", "NEUTRAL", "RISK_OFF"):
+                for vixm in (1.0, 0.5, 0.25):
+                    with self.subTest(conviction=conviction, regime=regime, vix=vixm):
+                        pct, _ = trade.regime_adjusted_position_pct(
+                            conviction, regime, vixm)
+                        self.assertLessEqual(pct, base + 1e-12)
+
+    def test_the_naive_formula_would_have_flattened_conviction(self):
+        """
+        Guards against the proposed fix, not just the original bug. Treating a
+        multiplier as a fraction of capital and applying the 2.5% cap outside the
+        risk-off branch collapses every tier to 2.5% in EVERY regime.
+        """
+        def naive(base_capital, vix_multiplier, judge_signal):
+            final = vix_multiplier
+            if judge_signal == "RISK_OFF":
+                final = vix_multiplier * 0.5
+            return min(base_capital * final, base_capital * 0.025)
+
+        cap = 91118.79
+        sizes = {naive(cap, v, r)
+                 for v in (1.0, 0.5) for r in ("RISK_ON", "RISK_OFF")}
+        self.assertEqual(len(sizes), 1, "naive form gives one size for everything")
+        self.assertAlmostEqual(sizes.pop(), cap * 0.025, places=2)
+
+        ours = {round(trade.regime_adjusted_position_pct(c, r, v)[0], 6)
+                for c in (0.08, 0.05, 0.03)
+                for r in ("RISK_ON", "RISK_OFF") for v in (1.0, 0.5)}
+        self.assertGreater(len(ours), 1, "ours must still discriminate conviction")
+
+    def test_unknown_regime_does_not_unlock_full_size_silently(self):
+        """An absent regime is NEUTRAL, and NEUTRAL never exceeds conviction."""
+        pct, _ = trade.regime_adjusted_position_pct(0.08, "NEUTRAL", 1.0)
+        self.assertAlmostEqual(pct, 0.08)
+        self.assertEqual(judge.macro_regime({}), "NEUTRAL",
+                         "missing SPY data must not read as RISK_ON")
+
+    def test_regime_is_derived_from_the_same_branch_as_the_score(self):
+        """
+        One source of truth. The report saying "half sizing applies" while the
+        executor sized full is exactly what splitting them caused.
+        """
+        cases = [
+            ({"signal": "WEAK_BUY",    "ma20": 750.0, "ma50": 740.0}, "RISK_ON"),
+            ({"signal": "STRONG_SELL", "ma20": 745.87, "ma50": 745.02}, "RISK_OFF"),
+            ({"signal": "HOLD",        "ma20": 740.0, "ma50": 750.0}, "RISK_OFF"),
+            ({"signal": "HOLD",        "ma20": 750.0, "ma50": 740.0}, "NEUTRAL"),
+        ]
+        for tech, expected in cases:
+            research_blob = {"symbols": {"SPY": {"technicals": tech}}}
+            with self.subTest(tech=tech):
+                score, _ = judge.score_macro(research_blob)
+                regime = judge.macro_regime(research_blob)
+                self.assertEqual(regime, expected)
+                if regime == "RISK_OFF":
+                    self.assertEqual(score, 0.0)
+                elif regime == "RISK_ON":
+                    self.assertEqual(score, 1.5)
+
+    def test_risk_off_requires_strong_buy(self):
+        self.assertEqual(trade.RISK_OFF_REQUIRED_SIGNAL, "STRONG_BUY")
+
+    def test_weaker_signals_are_blocked_before_sizing_in_risk_off(self):
+        """
+        A trade that must not happen should not be sized. The gate runs before
+        calculate_max_shares, so no order is generated at all.
+        """
+        with mock.patch.object(trade, "get_market_status", return_value={"is_open": True}), \
+             mock.patch.object(trade, "is_buyable", return_value=(True, "ok")), \
+             mock.patch.object(trade, "get_latest_ask", return_value=100.0), \
+             mock.patch.object(trade, "calculate_max_shares") as sizer, \
+             mock.patch.object(trade, "place_limit_order") as placer:
+            for signal in ("WEAK_BUY", "HOLD", "BUY"):
+                with self.subTest(signal=signal):
+                    out = trade.buy_with_guardrails(
+                        "CEG", signal, {"cash": "70000", "buying_power": "70000"},
+                        research_limit_price=99.0, judge_score=8.0,
+                        macro_regime="RISK_OFF", positions=[])
+                    self.assertEqual(out.get("action"), "SKIPPED")
+                    self.assertIn("REGIME BLOCK", out.get("error", ""))
+            sizer.assert_not_called()
+            placer.assert_not_called()
+
+    def test_strong_buy_still_passes_the_regime_gate_in_risk_off(self):
+        with mock.patch.object(trade, "get_market_status", return_value={"is_open": True}), \
+             mock.patch.object(trade, "is_buyable", return_value=(True, "ok")), \
+             mock.patch.object(trade, "get_latest_ask", return_value=100.0), \
+             mock.patch.object(trade, "calculate_max_shares",
+                               return_value=(10, "sized")), \
+             mock.patch.object(trade, "place_limit_order",
+                               return_value={"_ok": True, "id": "o1"}):
+            out = trade.buy_with_guardrails(
+                "CEG", "STRONG_BUY", {"cash": "70000", "buying_power": "70000"},
+                research_limit_price=99.0, judge_score=8.0,
+                macro_regime="RISK_OFF", positions=[])
+        self.assertEqual(out.get("action"), "BUY")
+
+    def test_risk_on_does_not_gate_on_signal_strength(self):
+        """The STRONG_BUY-only requirement is a risk-off rule, not a global one."""
+        with mock.patch.object(trade, "get_market_status", return_value={"is_open": True}), \
+             mock.patch.object(trade, "is_buyable", return_value=(True, "ok")), \
+             mock.patch.object(trade, "get_latest_ask", return_value=100.0), \
+             mock.patch.object(trade, "calculate_max_shares",
+                               return_value=(10, "sized")), \
+             mock.patch.object(trade, "place_limit_order",
+                               return_value={"_ok": True, "id": "o1"}):
+            out = trade.buy_with_guardrails(
+                "CEG", "WEAK_BUY", {"cash": "70000", "buying_power": "70000"},
+                research_limit_price=99.0, judge_score=8.0,
+                macro_regime="RISK_ON", positions=[])
+        self.assertEqual(out.get("action"), "BUY")
+
+    def test_vix_block_still_takes_precedence(self):
+        """Regression: the regime gate must not have displaced the VIX 35 block."""
+        with mock.patch.object(trade, "get_market_status", return_value={"is_open": True}), \
+             mock.patch.object(trade, "is_buyable", return_value=(True, "ok")), \
+             mock.patch.object(trade, "get_latest_ask", return_value=100.0):
+            out = trade.buy_with_guardrails(
+                "CEG", "STRONG_BUY", {"cash": "70000", "buying_power": "70000"},
+                research_limit_price=99.0, judge_score=8.0,
+                size_multiplier=0.0, macro_regime="RISK_ON", positions=[])
+        self.assertEqual(out.get("action"), "SKIPPED")
+        self.assertIn("VOLATILITY BLOCK", out.get("error", ""))
+
+
+class TestDiscoveryTickerExtraction(unittest.TestCase):
+    """
+    _extract_discovery_tickers(intel_path) was called with no max_tickers
+    argument, while the function referenced that name unconditionally at
+    `return tickers[:max_tickers]`. Every call raised NameError, caught by a
+    broad `except Exception`, always returning []. Alpaca most-active, top
+    gainers and Reddit trending — the entire discovery channel fed by the
+    morning intelligence scan — silently contributed zero tickers, every day,
+    with no error surfaced anywhere.
+    """
+
+    def _fake_intel(self, n_active=3, n_gainers=3, n_reddit=3):
+        import tempfile, json
+        data = {
+            "market_discovery": {"discovery": {
+                "most_active": [{"symbol": f"SYM{i}", "volume": 1000 + i}
+                                for i in range(n_active)],
+                "top_gainers": [{"symbol": f"GAIN{i}", "change_pct": 3.0, "price": 10.0}
+                               for i in range(n_gainers)],
+            }},
+            "reddit": {"tickers": [{"symbol": f"RDT{i}", "reddit_mentions": 10}
+                                   for i in range(n_reddit)]},
+        }
+        f = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+        json.dump(data, f)
+        f.close()
+        self.addCleanup(os.unlink, f.name)
+        return f.name
+
+    def test_the_bug_no_longer_returns_empty(self):
+        path = self._fake_intel()
+        result = research._extract_discovery_tickers(path)
+        self.assertGreater(len(result), 0,
+                           "discovery tickers must not silently be empty")
+
+    def test_max_tickers_is_actually_a_parameter(self):
+        """Calling with no second argument must not raise NameError internally."""
+        path = self._fake_intel(n_active=20, n_gainers=10, n_reddit=5)
+        try:
+            result = research._extract_discovery_tickers(path)
+        except NameError:
+            self.fail("max_tickers must be a real parameter, not a free variable")
+        self.assertLessEqual(len(result), 15, "default cap should still apply")
+
+    def test_caller_threads_max_tickers_through(self):
+        """_load_intelligence_tickers must pass its own max_tickers onward."""
+        with mock.patch.object(research, "_extract_discovery_tickers") as ex:
+            ex.return_value = []
+            with mock.patch("os.path.exists", return_value=True):
+                research._load_intelligence_tickers(max_tickers=7)
+        ex.assert_called_once()
+        self.assertEqual(ex.call_args.kwargs.get("max_tickers"), 7)
+
+    def test_sources_are_interleaved_not_concatenated(self):
+        """
+        A full most-active batch (up to 20) must not crowd out every gainer
+        and Reddit ticker before either gets a look. Concatenate-then-truncate
+        did exactly that once most_active's slice was widened to 20.
+        """
+        path = self._fake_intel(n_active=20, n_gainers=10, n_reddit=5)
+        result = research._extract_discovery_tickers(path, max_tickers=15)
+        sources = {t["source"] for t in result}
+        self.assertEqual(sources, {"alpaca_most_active", "alpaca_gainers", "reddit"},
+                         f"expected all three sources represented, got {sources}")
+
+    def test_duplicate_symbols_across_sources_are_deduped(self):
+        import tempfile, json
+        data = {
+            "market_discovery": {"discovery": {
+                "most_active": [{"symbol": "DUP", "volume": 999}],
+                "top_gainers": [{"symbol": "DUP", "change_pct": 2.0, "price": 20.0}],
+            }},
+            "reddit": {"tickers": []},
+        }
+        f = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+        json.dump(data, f); f.close()
+        self.addCleanup(os.unlink, f.name)
+        result = research._extract_discovery_tickers(f.name)
+        self.assertEqual(sum(1 for t in result if t["symbol"] == "DUP"), 1)
+
+    def test_missing_file_returns_empty_not_an_exception(self):
+        self.assertEqual(research._extract_discovery_tickers("/no/such/path.json"), [])
+
+
+class TestOptionsFunnelWidening(unittest.TestCase):
+    """
+    MAX_SCANNED=15 against an 18-symbol WATCHLIST silently dropped the last
+    three symbols (JPM, BAC, GS) every run — they were never screened, not
+    filtered by any gate. TOP_N_CANDIDATES=5 fed exactly MAX_POSITIONS
+    candidates into strategy selection, so one bad quote could end a run
+    with nothing tried even when better candidates existed further down the
+    ranked list.
+    """
+
+    def test_max_scanned_covers_the_full_watchlist(self):
+        self.assertGreaterEqual(run_options.MAX_SCANNED, len(run_options.WATCHLIST),
+                                "no watchlist symbol should go unscreened")
+
+    def test_top_n_candidates_exceeds_the_position_cap(self):
+        """More candidates than open slots gives the risk gates room to reject
+        some and still find a tradeable one."""
+        self.assertGreater(run_options.TOP_N_CANDIDATES, run_options.MAX_POSITIONS)
+
+
+class TestMarketTime(unittest.TestCase):
+    """
+    The bash guards (run_eod_github.sh etc.) were fixed to compute the trading
+    day in US/Eastern. The Python layer underneath them still used naive
+    date.today()/datetime.now(), which reads the RUNNER's clock — UTC on GitHub
+    Actions. That agreed with ET on every ordinary run, and broke exactly the
+    way the bash bug did: on 2026-08-28 the EOD job actually ran at 11:09 PM ET,
+    but journal.py printed "Generated: 2026-08-29 03:09:48 ET" — a UTC
+    timestamp mislabelled as ET, filed under the wrong calendar day — and wrote
+    it to logs/paper/2026-08-29.md while run_eod_github.sh's own (correctly ET-
+    based) $DATE was 2026-08-28. The bash G1 idempotency check greps for
+    "$DATE.md" and would never find a file the Python layer named a day later.
+    """
+
+    def _fake_et_now(self):
+        """The exact failing moment: 03:09:48 UTC on 2026-08-29 == 23:09:48 ET
+        on 2026-08-28."""
+        from zoneinfo import ZoneInfo
+        return datetime(2026, 8, 29, 3, 9, 48, tzinfo=ZoneInfo("UTC")).astimezone(
+            market_time.EASTERN)
+
+    def test_the_live_incident_resolves_to_the_correct_trading_day(self):
+        with mock.patch.object(market_time, "et_now", side_effect=self._fake_et_now):
+            self.assertEqual(market_time.et_today_iso(), "2026-08-28",
+                             "03:09 UTC on the 29th is 11:09 PM ET on the 28th")
+
+    def test_the_live_incident_no_longer_mislabels_the_timestamp(self):
+        with mock.patch.object(market_time, "et_now", side_effect=self._fake_et_now):
+            label = market_time.et_timestamp()
+        self.assertIn("2026-08-28", label)
+        self.assertNotIn("2026-08-29", label)
+        self.assertTrue(label.endswith("ET"))
+
+    def test_et_today_matches_et_today_iso(self):
+        self.assertEqual(market_time.et_today().isoformat(), market_time.et_today_iso())
+
+    def test_et_now_is_timezone_aware(self):
+        self.assertIsNotNone(market_time.et_now().tzinfo,
+                             "a naive datetime is exactly the bug being fixed")
+
+    def test_journal_and_reviewer_share_the_same_today_source(self):
+        """
+        journal.py and reviewer.py must agree with each other and with the bash
+        wrapper's $DATE — that agreement is the whole point. If they drift, the
+        G1 idempotency check silently stops working again.
+        """
+        with mock.patch.object(market_time, "et_now", side_effect=self._fake_et_now):
+            self.assertEqual(journal.et_today_iso(), "2026-08-28")
+            self.assertEqual(reviewer.et_today_iso(), "2026-08-28")
+
+    def test_pipeline_modules_import_the_shared_helper_not_bare_datetime(self):
+        """
+        Guards against a future edit quietly reintroducing date.today() in one
+        module while the others move on. All must resolve through market_time.
+        """
+        for mod in (journal, reviewer, research, judge, trade):
+            with self.subTest(module=mod.__name__):
+                self.assertTrue(hasattr(mod, "et_today_iso"),
+                                f"{mod.__name__} lost its market_time import")
+
+
+class TestRestingEntryOrders(unittest.TestCase):
+    """
+    Entry limits were time-in-force "day", so a patient bid at MA20 x 0.995
+    expired at the close every session it was not touched. On a name trading 5%
+    above its MA20 that is every session — cancel_orphan_exits existed
+    specifically to clean up the abandoned OCO legs of "day-limit buys that
+    expired unfilled". Five sessions to 2026-08-26 produced zero fills.
+
+    GTC lets the bid rest. The limit price is unchanged, so this is strictly more
+    patience, not a worse entry. The new risk is a stale bid filling after the
+    thesis broke, which is what revalidate_resting_entries guards.
+    """
+
+    def _order(self, sym="CEG", days_old=0, cid=None):
+        ts = (datetime.now() - timedelta(days=days_old)).isoformat()
+        return {"id": f"ord-{sym}", "symbol": sym, "side": "buy",
+                "client_order_id": cid if cid is not None else f"agent-buy-{sym}-x",
+                "submitted_at": ts}
+
+    def _research(self, sym="CEG", ma20=100.0, ma50=90.0, earnings=()):
+        return {"symbols": {sym: {"technicals": {"ma20": ma20, "ma50": ma50}}},
+                "intelligence": {"earnings_watch_symbols": list(earnings)}}
+
+    def test_entries_rest_rather_than_expiring_nightly(self):
+        self.assertEqual(trade.ENTRY_ORDER_TIF, "gtc",
+                         "a day order cannot catch a pullback that arrives tomorrow")
+
+    def test_a_valid_bid_is_kept(self):
+        keep, why = trade.resting_entry_verdict(self._order(), self._research())
+        self.assertTrue(keep, why)
+
+    def test_stale_bid_is_cancelled(self):
+        keep, why = trade.resting_entry_verdict(
+            self._order(days_old=trade.ENTRY_ORDER_MAX_AGE_DAYS + 1), self._research())
+        self.assertFalse(keep)
+        self.assertIn("max age", why)
+
+    def test_bid_is_cancelled_when_earnings_approach(self):
+        """A resting bid would fill straight into the print (Hard Rule 9)."""
+        keep, why = trade.resting_entry_verdict(
+            self._order(), self._research(earnings=("CEG",)))
+        self.assertFalse(keep)
+        self.assertIn("earnings", why.lower())
+
+    def test_bid_is_cancelled_on_thesis_break(self):
+        """MA20 below MA50 is no longer a pullback in an uptrend."""
+        keep, why = trade.resting_entry_verdict(
+            self._order(), self._research(ma20=90.0, ma50=100.0))
+        self.assertFalse(keep)
+        self.assertIn("thesis break", why.lower())
+
+    def test_chase_veto_does_not_cancel_a_resting_bid(self):
+        """
+        A chase veto means price rose AWAY from our bid. A resting bid below the
+        market is exactly the order we want then — cancelling on it would mean
+        only ever bidding for stocks that are already falling.
+        """
+        r = self._research(ma20=100.0, ma50=90.0)
+        r["symbols"]["CEG"]["technicals"].update({"rsi": 78, "last_close": 130.0})
+        keep, why = trade.resting_entry_verdict(self._order(), r)
+        self.assertTrue(keep, f"should still rest: {why}")
+
+    def test_unreadable_timestamp_cancels_rather_than_assuming_fresh(self):
+        bad = self._order()
+        bad["submitted_at"] = "not-a-date"
+        keep, why = trade.resting_entry_verdict(bad, self._research())
+        self.assertFalse(keep)
+        self.assertIn("age", why.lower())
+
+    def test_only_agent_placed_buys_are_touched(self):
+        """A manual or third-party order is not ours to cancel."""
+        with mock.patch.object(trade.requests, "delete") as d:
+            actions = trade.revalidate_resting_entries(
+                [self._order(days_old=99, cid="manual-order-1"),
+                 dict(self._order(), side="sell")],
+                self._research())
+        self.assertEqual(actions, [])
+        d.assert_not_called()
+
+    def test_cancelled_orders_are_reported_with_a_reason(self):
+        with mock.patch.object(trade.requests, "delete") as d:
+            d.return_value = mock.Mock(status_code=204)
+            actions = trade.revalidate_resting_entries(
+                [self._order(days_old=99)], self._research())
+        self.assertEqual(len(actions), 1)
+        self.assertEqual(actions[0]["action"], "CANCELLED")
+        self.assertIn("reason", actions[0])
+
+
+class TestEntryLimitReachability(unittest.TestCase):
+    """
+    The limit price is Hard Rule 2's formula (MA20 x 0.995) and is unchanged.
+    What was missing is any measure of whether that price is likely to trade. A
+    percentage gap is not comparable across a 1%-ATR utility and a 4%-ATR growth
+    name; ATR is the average daily range, so the gap measured in ATRs answers
+    "how many normal days of movement away is this".
+    """
+
+    def test_gap_is_measured_in_atr_not_just_percent(self):
+        """
+        The same 5% gap is five normal days for a 1%-ATR utility and just over
+        one day for a 4%-ATR growth name. Percent alone cannot tell them apart.
+        """
+        _, quiet_dist, quiet_label = research.entry_limit_reachability(100.0, 95.0, 1.0)
+        _, wild_dist,  wild_label  = research.entry_limit_reachability(100.0, 95.0, 4.0)
+        self.assertEqual(quiet_dist, 5.0)
+        self.assertEqual(wild_dist, 1.25)
+        self.assertEqual(quiet_label, "UNLIKELY")
+        self.assertEqual(wild_label, "PLAUSIBLE")
+
+    def test_labels_against_the_live_2026_08_26_values(self):
+        cases = [
+            # (last, ma20, atr, expected label)
+            (321.57, 311.35, 7.4043, "PLAUSIBLE"),   # AAPL, 3.7% gap = 1.59 ATR
+            (244.43, 255.92, 9.00,   "AT_OR_BELOW"), # DDOG, already below MA20
+            (208.76, 202.73, 7.2814, "LIKELY"),      # NVDA, 3.0% above MA20
+            (100.00, 90.00,  1.00,   "UNLIKELY"),    # 10% away, quiet name
+        ]
+        for last, ma20, atr, expected in cases:
+            limit = round(ma20 * 0.995, 2)
+            with self.subTest(last=last, ma20=ma20, atr=atr):
+                _, _, label = research.entry_limit_reachability(last, limit, atr)
+                self.assertEqual(label, expected)
+
+    def test_at_or_below_takes_precedence_over_atr(self):
+        """Price already under the target is a value entry, not a wait."""
+        gap, _, label = research.entry_limit_reachability(95.0, 99.50, 2.0)
+        self.assertLessEqual(gap, 0)
+        self.assertEqual(label, "AT_OR_BELOW")
+
+    def test_missing_atr_is_unknown_not_a_guess(self):
+        """A zero or absent ATR must not silently become LIKELY."""
+        for atr in (0, None, "n/a"):
+            with self.subTest(atr=atr):
+                _, dist, label = research.entry_limit_reachability(100.0, 95.0, atr)
+                self.assertIsNone(dist)
+                self.assertEqual(label, "UNKNOWN")
+
+    def test_degenerate_price_is_refused(self):
+        for last, limit in ((0, 95.0), (-1, 95.0), (100.0, 0), (100.0, None)):
+            with self.subTest(last=last, limit=limit):
+                self.assertEqual(
+                    research.entry_limit_reachability(last, limit, 2.0)[2], "UNKNOWN")
+
+    def test_limit_formula_is_unchanged(self):
+        """
+        Hard Rule 2's entry price is MA20 x 0.995. Reachability reporting must
+        not have moved the price itself — that would be chasing by another name.
+        """
+        self.assertAlmostEqual(round(311.35 * 0.995, 2), 309.79, places=2)
+
+
+class TestMacroRegimeMessage(unittest.TestCase):
+    """
+    On 2026-08-26 the Judge reported "RISK-OFF — SPY MA20 $745.87 < MA50
+    $745.02". MA20 was ABOVE MA50; the real trigger was SPY's STRONG_SELL signal
+    (price 738.06, below the MA50). The verdict was defensible, the stated reason
+    was false, and a reader of the journal would conclude the MAs had crossed.
+    """
+
+    def _r(self, signal, ma20, ma50):
+        return {"symbols": {"SPY": {"technicals": {
+            "signal": signal, "ma20": ma20, "ma50": ma50}}}}
+
+    def test_the_live_case_no_longer_claims_a_cross_that_did_not_happen(self):
+        score, note = judge.score_macro(self._r("STRONG_SELL", 745.87, 745.02))
+        self.assertEqual(score, 0.0, "STRONG_SELL is still risk-off")
+        self.assertNotIn("$745.87 < MA50", note)
+        self.assertIn("STRONG_SELL", note)
+
+    def test_a_genuine_cross_is_still_described_as_a_cross(self):
+        _, note = judge.score_macro(self._r("HOLD", 740.0, 750.0))
+        self.assertIn("<", note)
+        self.assertIn("RISK-OFF", note)
+
+    def test_risk_on_is_unchanged(self):
+        score, note = judge.score_macro(self._r("WEAK_BUY", 750.0, 740.0))
+        self.assertEqual(score, 1.5)
+        self.assertIn("RISK-ON", note)
+
+
+class TestWatchlistExpansion(unittest.TestCase):
+    """
+    The watchlist was ~100% mega-cap tech plus inverse ETFs. On 2026-08-26 every
+    tech name showed MA20 < MA50 while energy (+22% YTD), consumer defensives
+    (+13.3%), industrials and utilities led. Five sessions produced zero buys
+    because the universe had no pullback setups — not because the gates misfired.
+    """
+
+    NEW = ("CEG", "VST", "GEV", "LLY", "MRK", "ARGX", "COP", "DTM", "DT", "TGT")
+
+    def setUp(self):
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                            "watchlist.json")
+        with open(path) as f:
+            self.cfg = json.load(f)
+        self.by_sym = {e["symbol"]: e for e in self.cfg["watchlist"]}
+
+    def test_all_ten_candidates_are_present(self):
+        for sym in self.NEW:
+            with self.subTest(symbol=sym):
+                self.assertIn(sym, self.by_sym)
+
+    def test_each_new_name_is_tradeable_and_capped(self):
+        for sym in self.NEW:
+            e = self.by_sym[sym]
+            with self.subTest(symbol=sym):
+                self.assertGreater(e["max_allocation_pct"], 0,
+                                   "a 0% cap would silently make it unbuyable")
+                self.assertLessEqual(e["max_allocation_pct"], 8,
+                                     "Hard Rule 6 caps a single position at 8%")
+
+    def test_high_beta_names_are_not_left_on_the_speculative_stop(self):
+        """
+        Tier 3's 10% stop is defined for "speculative, market cap < $10B". A
+        $60B+ utility or a $700B pharma defaulting into it was a
+        misclassification — and a 10% stop on a high-ATR name like GEV is taken
+        out by ordinary noise.
+        """
+        for sym in ("CEG", "VST", "GEV", "LLY", "MRK", "ARGX", "DT"):
+            with self.subTest(symbol=sym):
+                self.assertEqual(trade.tier_for(sym), "TIER2")
+                self.assertEqual(trade.stop_pct_for(sym), trade.STOP_PCT_TIER2)
+
+    def test_correlated_pairs_are_flagged_in_config(self):
+        """CEG and VST are one bet; DT is the same industry as the open DDOG."""
+        self.assertEqual(self.by_sym["CEG"].get("correlation_group"),
+                         self.by_sym["VST"].get("correlation_group"))
+        self.assertIsNotNone(self.by_sym["CEG"].get("correlation_group"))
+        self.assertIn("DDOG", self.by_sym["DT"]["notes"],
+                      "the DDOG overlap has to be visible where sizing happens")
+
+    def test_the_universe_is_no_longer_only_tech(self):
+        self.assertGreaterEqual(len(self.cfg["watchlist"]), 24)
+
+    def test_inverse_etfs_keep_their_tight_stop(self):
+        """Regression: the tier edit must not have disturbed the 5% inverse stop."""
+        for sym in ("SQQQ", "SPXS", "SOXS"):
+            with self.subTest(symbol=sym):
+                self.assertEqual(trade.tier_for(sym), "INVERSE")
+
+    def test_tier1_compounders_are_unchanged(self):
+        for sym in ("AAPL", "MSFT", "GOOGL", "AMZN", "NVDA"):
+            with self.subTest(symbol=sym):
+                self.assertEqual(trade.tier_for(sym), "TIER1")
+
+
+class TestRoundTripWindow(unittest.TestCase):
+    """
+    The graduation round-trip count could never rise above zero.
+
+    fetch_filled_orders(since) filters on Alpaca's `after`, which matches
+    submitted_at, not fill time. Passing the Phase 2B baseline straight through
+    returned only orders SUBMITTED after 2026-08-20 — but every position open at
+    the baseline was bought in June or July, so build_round_trips() saw sells
+    with no open lot and dropped them all into `unmatched`.
+
+    Live consequence: NVDA closed 2026-08-26 at +9.06%, the first realized Phase
+    2B trade and a winner, and counted zero. Occurrences would have read 0 on the
+    2026-09-03 decision date regardless of how the agent traded.
+    """
+
+    BUY_JUN = {"symbol": "NVDA", "side": "buy", "filled_qty": "25",
+               "filled_avg_price": "192.81", "filled_at": "2026-06-29T13:31:00Z",
+               "status": "filled", "id": "buy-jun"}
+    SELL_AUG = {"symbol": "NVDA", "side": "sell", "filled_qty": "25",
+                "filled_avg_price": "210.28", "filled_at": "2026-08-26T14:26:43Z",
+                "status": "filled", "id": "sell-aug"}
+
+    def test_the_bug_a_short_window_loses_the_entry_leg(self):
+        """Baseline behaviour: fetching only post-baseline orders finds no trip."""
+        trips, unmatched = reviewer.build_round_trips([self.SELL_AUG])
+        self.assertEqual(trips, [], "no buy leg in window, so no round trip")
+        self.assertEqual(len(unmatched), 1, "the winner lands in unmatched")
+
+    def test_full_history_matches_the_trip(self):
+        trips, unmatched = reviewer.build_round_trips([self.BUY_JUN, self.SELL_AUG])
+        self.assertEqual(len(trips), 1)
+        self.assertEqual(unmatched, [])
+        t = trips[0]
+        self.assertEqual(t["entry_date"], "2026-06-29")
+        self.assertEqual(t["exit_date"], "2026-08-26")
+        self.assertAlmostEqual(t["pnl_pct"], 9.06, places=1)
+        self.assertAlmostEqual(t["pnl_dollar"], 436.75, places=2)
+
+    def test_window_filters_on_exit_date_not_entry_date(self):
+        """
+        A position bought in July and sold in Phase 2B is a Phase 2B result —
+        the exit is the decision being scored. Filtering on entry would discard
+        it; filtering on exit keeps it.
+        """
+        with mock.patch.object(reviewer, "fetch_filled_orders",
+                               return_value=[self.BUY_JUN, self.SELL_AUG]):
+            in_window, all_trips, unmatched = reviewer.round_trips_closed_since(
+                "2026-08-20")
+        self.assertEqual(len(all_trips), 1)
+        self.assertEqual(len(in_window), 1,
+                         "exit on 2026-08-26 is inside a window opening 08-20")
+        self.assertEqual(unmatched, [])
+
+    def test_fetch_is_called_with_the_lookback_not_the_window(self):
+        """
+        THE bug, asserted directly. Mocking only the return value is not enough:
+        a mock that ignores its argument passes whether the code fetches from the
+        lookback or from `since`, so it cannot detect a regression to the short
+        window. Assert the argument.
+        """
+        seen = {}
+
+        def fake(since):
+            seen["since"] = since
+            # Mimic Alpaca: `after` filters on submitted_at, so a narrow window
+            # returns only the sell and the entry leg is invisible.
+            return [o for o in (self.BUY_JUN, self.SELL_AUG)
+                    if o["filled_at"][:10] >= since]
+
+        with mock.patch.object(reviewer, "fetch_filled_orders", side_effect=fake):
+            in_window, all_trips, unmatched = reviewer.round_trips_closed_since(
+                "2026-08-20")
+
+        self.assertEqual(seen["since"], reviewer.ROUND_TRIP_LOOKBACK_START,
+                         "must fetch the full history, not the reporting window")
+        self.assertEqual(len(in_window), 1, "the NVDA winner must be counted")
+        self.assertEqual(unmatched, [], "no orphaned sell once the buy is in scope")
+
+    def test_trips_closed_before_the_window_are_excluded(self):
+        """The window still has to mean something — old exits must not count."""
+        early_sell = dict(self.SELL_AUG, filled_at="2026-07-15T14:00:00Z",
+                          id="sell-jul")
+        with mock.patch.object(reviewer, "fetch_filled_orders",
+                               return_value=[self.BUY_JUN, early_sell]):
+            in_window, all_trips, _ = reviewer.round_trips_closed_since(
+                "2026-08-20")
+        self.assertEqual(len(all_trips), 1)
+        self.assertEqual(in_window, [], "exit predates the window")
+
+    def test_lookback_reaches_back_far_enough_for_open_positions(self):
+        """
+        Every position open at the baseline was bought in June. A lookback that
+        started at the baseline would reintroduce the original bug.
+        """
+        self.assertLess(reviewer.ROUND_TRIP_LOOKBACK_START,
+                        reviewer.PHASE2B_BASELINE_DATE)
+        self.assertLessEqual(reviewer.ROUND_TRIP_LOOKBACK_START, "2026-06-16",
+                            "must predate the first paper fill (2026-06-16)")
+
+    def test_lookback_never_shortens_the_requested_window(self):
+        """A caller asking for an older window must not get a newer fetch."""
+        captured = {}
+
+        def fake(since):
+            captured["since"] = since
+            return []
+
+        with mock.patch.object(reviewer, "fetch_filled_orders", side_effect=fake):
+            reviewer.round_trips_closed_since("2026-01-01")
+        self.assertEqual(captured["since"], "2026-01-01")
+
+    def test_metrics_see_the_recovered_trip(self):
+        trips, _ = reviewer.build_round_trips([self.BUY_JUN, self.SELL_AUG])
+        m = reviewer.round_trip_metrics(trips)
+        self.assertEqual(m["count"], 1)
+        self.assertEqual(m["win_rate"], 100.0)
+        self.assertAlmostEqual(m["net_dollar"], 436.75, places=2)
+        self.assertEqual(m["avg_hold_days"], 58)
+
+
+class TestOptionsExecutionCost(unittest.TestCase):
+    """
+    Every price in options_strategy is a Black-Scholes mid. Until now the risk
+    gates measured reward/risk against those mids, so they gated on a price the
+    account could never transact at.
+
+    Wang, Pennock, Rothschild & Devanur (ICAIF '24) §4.3 measured a mean 78-cent
+    bid-ask spread across the option series of the 30 DJI constituents. A
+    four-leg structure crosses eight spreads over a round trip, and options
+    positions here are closed at 21 DTE or +50%, not held to expiry.
+    """
+
+    def _condor(self, S=150.0, sigma=0.25):
+        strat = ostrat.build_iron_condor(S=S, T=45 / 365, sigma=sigma)
+        strat["symbol"] = "TEST"
+        strat["underlying"] = S
+        return strat
+
+    def test_cost_is_charged_on_both_the_open_and_the_close(self):
+        """A position that is closed pays the spread twice, not once."""
+        strat = self._condor()
+        cost = ostrat.execution_cost(strat)
+        one_way = sum(leg["half_spread"] for leg in cost["per_leg"])
+        self.assertAlmostEqual(cost["cost_per_share"], one_way * 2, places=4)
+        self.assertEqual(ostrat.ROUND_TRIP_CROSSINGS, 2)
+
+    def test_ratio_legs_are_charged_per_contract(self):
+        """
+        A butterfly's middle leg is two short contracts. Counting it once
+        understated the cost of the single widest leg in the structure.
+        """
+        fly = ostrat.build_butterfly_spread(S=150.0, T=45 / 365, sigma=0.25)
+        self.assertEqual(ostrat._leg_count(fly), 4, "1 + 2 + 1 contracts")
+        mid_leg = next(l for l in ostrat.execution_cost(fly)["per_leg"]
+                       if l["type"] == "short_call2")
+        self.assertEqual(mid_leg["contracts"], 2)
+
+    def test_measured_source_requires_a_quote_for_every_leg(self):
+        """
+        A cost that is half measured and half estimated is neither. Reporting it
+        as measured would let the liquidity floor run against a fallback
+        constant instead of a real spread.
+        """
+        strat = self._condor()
+        full = [{"bid": l["price"] * 0.99, "ask": l["price"] * 1.01}
+                for l in strat["legs"]]
+        self.assertEqual(ostrat.execution_cost(strat, full)["source"], "measured")
+
+        for broken in (full[:2],                                  # too few
+                       full[:3] + [{"bid": 0, "ask": 0}],         # one unusable
+                       full[:3] + [{"bid": 5.0, "ask": 5.0}]):    # zero width
+            with self.subTest(case=len(broken)):
+                self.assertEqual(
+                    ostrat.execution_cost(strat, broken)["source"], "estimate")
+
+    def test_cost_falls_on_both_sides_of_reward_risk(self):
+        """
+        We receive less than the theoretical credit and pay more than the
+        theoretical loss. Haircutting only the credit understates the damage.
+        """
+        strat = self._condor()
+        m = ostrat.net_of_cost_metrics(strat)
+        c = m["exec_cost_per_share"]
+        self.assertAlmostEqual(m["max_profit_after_costs"], strat["max_profit"] - c, places=3)
+        self.assertAlmostEqual(m["max_loss_after_costs"],   strat["max_loss"] + c, places=3)
+        self.assertLess(m["reward_risk_net"], strat["reward_risk"])
+
+    def test_marginal_structures_fail_once_costs_are_counted(self):
+        """
+        The finding that motivated this: a 45-DTE 16-delta iron condor clears
+        the 0.25 reward/risk bar on mid prices by a hair (0.28) and fails it
+        once the round-trip spread is charged. The bar is NOT lowered to
+        compensate — CLAUDE.md's tighten-only rail forbids dropping a
+        documented floor to book more trades.
+        """
+        strat = self._condor()
+        self.assertGreaterEqual(strat["reward_risk"], 0.25, "passes on mids")
+        ok, why = ostrat.passes_risk_filters(strat, account_equity=91000.0)
+        self.assertFalse(ok, "must fail once execution cost is charged")
+        self.assertIn("net of costs", why)
+
+    def test_tight_real_quotes_are_what_unlock_the_trade(self):
+        """
+        The fallback is deliberately pessimistic (a 10%-of-mid spread, the
+        widest we would knowingly accept). Real quotes on a liquid contract are
+        far tighter, and the same structure passes — so the incentive is to
+        fetch quotes, not to weaken the gate.
+        """
+        strat = self._condor()
+        tight = [{"bid": l["price"] * 0.99, "ask": l["price"] * 1.01}
+                 for l in strat["legs"]]
+        ok, why = ostrat.passes_risk_filters(strat, account_equity=91000.0,
+                                            leg_quotes=tight)
+        self.assertTrue(ok, why)
+        self.assertIn("measured", why)
+
+    def test_illiquid_legs_are_rejected_when_quotes_are_real(self):
+        """
+        options_screener.check_option_liquidity applied a 15%-of-mid spread
+        ceiling but was never called from any pipeline, so no option order was
+        ever liquidity-checked.
+        """
+        strat = self._condor()
+        wide = [{"bid": l["price"] * 0.70, "ask": l["price"] * 1.30}
+                for l in strat["legs"]]
+        ok, why = ostrat.passes_risk_filters(strat, account_equity=91000.0,
+                                            leg_quotes=wide)
+        self.assertFalse(ok)
+        self.assertIn("spread", why.lower())
+
+
+class TestOptionsNoArbitrageValidation(unittest.TestCase):
+    """
+    Wang et al. §4.3 found no-arbitrage violations in 296 of 356 consolidated
+    DJI option markets built from real closing quotes — violations are the norm.
+    We are a price taker and cannot harvest them, but the same bounds are a free
+    correctness check on our own arithmetic: a credit larger than the width
+    securing it is not a great fill, it is a corrupt input.
+    """
+
+    def test_valid_structures_pass(self):
+        for builder in (ostrat.build_iron_condor, ostrat.build_bull_put_spread,
+                        ostrat.build_bear_call_spread, ostrat.build_butterfly_spread,
+                        ostrat.build_long_straddle):
+            strat = builder(S=150.0, T=45 / 365, sigma=0.25)
+            with self.subTest(strategy=strat["strategy"]):
+                ok, why = ostrat.validate_no_arbitrage(strat)
+                self.assertTrue(ok, f"{strat['strategy']}: {why}")
+
+    def test_credit_may_not_reach_the_width_that_secures_it(self):
+        """A vertical whose credit equals its width is riskless profit."""
+        strat = ostrat.build_bull_put_spread(S=150.0, T=45 / 365, sigma=0.25)
+        width = abs(strat["legs"][0]["strike"] - strat["legs"][1]["strike"])
+        strat["net_credit"] = width
+        ok, why = ostrat.validate_no_arbitrage(strat)
+        self.assertFalse(ok)
+        self.assertIn("width", why)
+
+    def test_condor_credit_is_bound_by_the_narrower_wing(self):
+        """Only one side can finish in the money, so the narrow wing binds."""
+        strat = ostrat.build_iron_condor(S=150.0, T=45 / 365, sigma=0.25)
+        by_type = {l["type"]: l["strike"] for l in strat["legs"]}
+        narrow = min(by_type["short_put"] - by_type["long_put"],
+                     by_type["long_call"] - by_type["short_call"])
+        strat["net_credit"] = narrow + 0.01
+        ok, why = ostrat.validate_no_arbitrage(strat)
+        self.assertFalse(ok)
+        self.assertIn("wing width", why)
+
+    def test_out_of_order_strikes_are_rejected(self):
+        strat = ostrat.build_iron_condor(S=150.0, T=45 / 365, sigma=0.25)
+        for leg in strat["legs"]:
+            if leg["type"] == "long_put":
+                leg["strike"] = 999.0          # wing inside the short strikes
+        ok, why = ostrat.validate_no_arbitrage(strat)
+        self.assertFalse(ok)
+        self.assertIn("order", why.lower())
+
+    def test_dominated_leg_priced_above_dominant_leg_is_rejected(self):
+        """
+        Portfolio dominance (Wang et al. Definition 1): the short leg of a put
+        credit spread dominates the further-OTM long leg, so it cannot be the
+        cheaper of the two.
+        """
+        strat = ostrat.build_bull_put_spread(S=150.0, T=45 / 365, sigma=0.25)
+        by_type = {l["type"]: l for l in strat["legs"]}
+        by_type["short_put"]["price"], by_type["long_put"]["price"] = (
+            by_type["long_put"]["price"], by_type["short_put"]["price"])
+        ok, why = ostrat.validate_no_arbitrage(strat)
+        self.assertFalse(ok)
+        self.assertIn("dominance", why.lower())
+
+    def test_negative_prices_and_strikes_are_rejected(self):
+        for field, value in (("strike", -10.0), ("strike", 0.0), ("price", -1.0)):
+            strat = ostrat.build_iron_condor(S=150.0, T=45 / 365, sigma=0.25)
+            strat["legs"][0][field] = value
+            with self.subTest(field=field, value=value):
+                self.assertFalse(ostrat.validate_no_arbitrage(strat)[0])
+
+    def test_validation_runs_before_every_other_gate(self):
+        """
+        A structurally corrupt strategy must be rejected as corrupt, not pass
+        into max-loss and reward/risk arithmetic derived from the bad input.
+        """
+        strat = ostrat.build_bull_put_spread(S=150.0, T=45 / 365, sigma=0.25)
+        strat["net_credit"] = 0.0            # impossible for a credit spread
+        ok, why = ostrat.passes_risk_filters(strat, account_equity=91000.0)
+        self.assertFalse(ok)
+        self.assertIn("no-arbitrage", why.lower())
+
+
+class TestOptionsShortVolConcentration(unittest.TestCase):
+    """
+    Aurum, "Arbitrage hedge fund primer" (Jan 2025): short volatility delivers
+    "small, consistent gains interrupted by occasional large losses", and
+    "increased correlations during market stress" mean separately-sized short-vol
+    positions become one position in a spike. February 2018 'Volmageddon' took
+    short-vol ETPs down up to 90% in a single day.
+
+    run_options.MAX_POSITIONS was 5 and each trade could risk 2% of equity, so
+    the book could hold 10% of equity in max loss, all of it short premium, with
+    no portfolio-level check at all.
+    """
+
+    def _condor(self, symbol="AAPL"):
+        strat = ostrat.build_iron_condor(S=150.0, T=45 / 365, sigma=0.25)
+        strat["symbol"] = symbol
+        strat["underlying"] = 150.0
+        return strat
+
+    def test_long_premium_is_not_capped(self):
+        """Buying premium is the other side of this risk, not more of it."""
+        straddle = ostrat.build_long_straddle(S=150.0, T=45 / 365, sigma=0.15)
+        straddle["symbol"] = "AAPL"
+        self.assertFalse(ostrat.is_short_premium(straddle))
+        ok, _ = ostrat.aggregate_short_vol_check(straddle, [], 91000.0)
+        self.assertTrue(ok)
+
+    def test_concurrent_short_vol_slots_are_capped(self):
+        book = [{"symbol": s, "max_loss_per_contract": 300.0, "qty": 1}
+                for s in ("MSFT", "GOOGL", "AMZN")]
+        ok, why = ostrat.aggregate_short_vol_check(
+            self._condor(), book, 1_000_000.0)
+        self.assertFalse(ok, "3 open short-vol positions is the cap")
+        self.assertIn("spike", why.lower())
+
+    def test_aggregate_risk_cap_binds_before_the_slot_cap(self):
+        """
+        Two positions is under the slot cap, but at 6% of equity the dollar
+        risk is what stops the third — which is the point: five 2% trades were
+        never bounded to 6%.
+        """
+        equity = 91000.0
+        cap = equity * ostrat.MAX_AGGREGATE_SHORT_VOL_PCT
+        book = [{"symbol": "MSFT", "max_loss_per_contract": cap * 0.6, "qty": 1},
+                {"symbol": "GOOGL", "max_loss_per_contract": cap * 0.5, "qty": 1}]
+        ok, why = ostrat.aggregate_short_vol_check(self._condor(), book, equity)
+        self.assertFalse(ok)
+        self.assertIn("aggregate", why.lower())
+
+    def test_quantity_is_counted_not_just_position_count(self):
+        """Ten contracts of one spread is ten times the risk of one."""
+        equity = 91000.0
+        cap = equity * ostrat.MAX_AGGREGATE_SHORT_VOL_PCT
+        one = [{"symbol": "MSFT", "max_loss_per_contract": cap / 10, "qty": 1}]
+        many = [{"symbol": "MSFT", "max_loss_per_contract": cap / 10, "qty": 10}]
+        self.assertTrue(ostrat.aggregate_short_vol_check(
+            self._condor(), one, equity)[0])
+        self.assertFalse(ostrat.aggregate_short_vol_check(
+            self._condor(), many, equity)[0])
+
+    def test_correlated_underlyings_count_as_one_bet(self):
+        """
+        CLAUDE.md already treats SPY and QQQ as one position for equities.
+        Selling premium on both in the same week is one trade sized twice.
+        """
+        self.assertEqual(ostrat.underlying_group("SPY"),
+                         ostrat.underlying_group("QQQ"))
+        self.assertNotEqual(ostrat.underlying_group("AAPL"),
+                            ostrat.underlying_group("SPY"))
+        book = [{"symbol": "SPY", "max_loss_per_contract": 100.0, "qty": 1}]
+        ok, why = ostrat.aggregate_short_vol_check(
+            self._condor("QQQ"), book, 1_000_000.0)
+        self.assertFalse(ok)
+        self.assertIn("correlation group", why.lower())
+
+    def test_unreadable_open_risk_refuses_rather_than_counting_zero(self):
+        """
+        An open short-vol position whose max loss we cannot read is not assumed
+        to be riskless. That assumption is how the aggregate cap would be
+        silently under-counted.
+        """
+        book = [{"symbol": "MSFT", "max_loss_per_contract": None, "qty": 1}]
+        ok, why = ostrat.aggregate_short_vol_check(self._condor(), book, 91000.0)
+        self.assertFalse(ok)
+        self.assertIn("unknown max loss", why.lower())
+
+    def test_unknown_equity_is_refused_not_guessed(self):
+        for bad in (None, 0, -1):
+            with self.subTest(equity=bad):
+                ok, why = ostrat.aggregate_short_vol_check(self._condor(), [], bad)
+                self.assertFalse(ok)
+                self.assertIn("equity unknown", why.lower())
+
+
+class TestOptionsScenarioShortfall(unittest.TestCase):
+    """
+    Bemporad, Bellucci & Gabbriellini (Quantitative Finance 2014) §4.1.2 offers
+    shortfall objectives (eqs 23-24) against the symmetric minimum-variance one:
+    variance penalises a better-than-expected outcome as hard as a worse one.
+    For a short-premium book the shape of the loss tail is the whole risk.
+    """
+
+    def _condor(self):
+        strat = ostrat.build_iron_condor(S=150.0, T=45 / 365, sigma=0.25)
+        strat["symbol"] = "TEST"
+        strat["underlying"] = 150.0
+        return strat
+
+    def test_missing_underlying_raises_instead_of_reporting_total_loss(self):
+        """
+        `underlying` is stamped by select_strategy, not the builders. It
+        defaulted to 0, so every simulated price was 0 — below every breakeven —
+        and a strategy dict that skipped the selector silently reported nine
+        consecutive max-loss scenarios and a 100% losing fraction.
+        """
+        raw = ostrat.build_iron_condor(S=150.0, T=45 / 365, sigma=0.25)
+        self.assertNotIn("underlying", raw)
+        with self.assertRaises(ValueError):
+            ostrat.scenario_analysis(raw)
+
+    def test_shortfall_averages_only_the_losing_scenarios(self):
+        sa = ostrat.scenario_analysis(self._condor())
+        losing = [s["pl"] for s in sa["scenarios"] if s["pl"] < 0]
+        self.assertEqual(sa["losing_scenario_count"], len(losing))
+        self.assertAlmostEqual(sa["avg_shortfall_per_contract"],
+                               sum(losing) / len(losing), places=2)
+        self.assertAlmostEqual(sa["max_shortfall_per_contract"], min(losing), places=2)
+
+    def test_shortfall_exposes_the_short_vol_payoff_asymmetry(self):
+        """
+        The 'pennies in front of a steamroller' shape: a premium seller's
+        average loss dwarfs its best case. worst_case alone is one point on the
+        curve and flat_case is the scenario a seller most wants to look at.
+        """
+        sa = ostrat.scenario_analysis(self._condor())
+        self.assertLess(abs(sa["best_case"]["pl"]),
+                        abs(sa["avg_shortfall_per_contract"]))
+
+    def test_no_losing_scenario_reports_zero_not_a_crash(self):
+        sa = ostrat.scenario_analysis(self._condor(), stock_moves=[0.0])
+        self.assertEqual(sa["losing_scenario_count"], 0)
+        self.assertEqual(sa["avg_shortfall_per_contract"], 0.0)
 
 
 class TestOptionsStrategySelection(unittest.TestCase):

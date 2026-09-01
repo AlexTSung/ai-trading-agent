@@ -16,6 +16,7 @@ import sys
 import json
 import requests
 from datetime import datetime, timedelta
+from itertools import zip_longest
 from statistics import mean
 
 # ── Load .env ────────────────────────────────────────────────────────────────
@@ -27,6 +28,9 @@ try:
     load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
+
+from version import get_version
+from market_time import et_today_iso, et_now
 
 # ── Auth ────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
@@ -103,6 +107,55 @@ def get_market_status():
     return r.json()
 
 # ── Technical Analysis ───────────────────────────────────────────────────────
+# ── Entry limit reachability ──────────────────────────────────────────────────
+# Thresholds in ATR units. ATR is the average daily range, so a gap measured in
+# ATRs is roughly "how many normal days of movement away is this price".
+LIMIT_LIKELY_ATR    = 1.0    # inside one normal day's range
+LIMIT_PLAUSIBLE_ATR = 2.5    # a few days of drift would reach it
+
+
+def entry_limit_reachability(last: float, limit_price: float, atr: float):
+    """
+    How likely a resting entry limit is to actually trade.
+
+    Returns (gap_pct, atr_distance, label).
+
+    The limit price itself is CLAUDE.md Hard Rule 2's formula and is not changed
+    here. What this adds is a measure of whether that price is reachable: a
+    stock 6% above its MA20 needs a 6.5% pullback to fill, and a bid at that
+    level may simply never be touched.
+
+    A percentage gap is not comparable across underlyings — 5% is five normal
+    days for a 1%-ATR utility and just over one day for a 4%-ATR growth name.
+    ATR normalises that.
+
+    A missing or zero ATR yields "UNKNOWN" rather than an optimistic guess.
+    Fail-closed on missing data is the rule a $0.03 stock broke once already.
+    """
+    if not isinstance(last, (int, float)) or last <= 0:
+        return None, None, "UNKNOWN"
+    if not isinstance(limit_price, (int, float)) or limit_price <= 0:
+        return None, None, "UNKNOWN"
+
+    gap_pct = round((last - limit_price) / last * 100, 2)
+
+    if isinstance(atr, (int, float)) and atr > 0:
+        atr_distance = round((last - limit_price) / atr, 2)
+    else:
+        atr_distance = None
+
+    if gap_pct <= 0:
+        # Already at or below the target — this is a value entry, not a wait.
+        return gap_pct, atr_distance, "AT_OR_BELOW"
+    if atr_distance is None:
+        return gap_pct, atr_distance, "UNKNOWN"
+    if atr_distance <= LIMIT_LIKELY_ATR:
+        return gap_pct, atr_distance, "LIKELY"
+    if atr_distance <= LIMIT_PLAUSIBLE_ATR:
+        return gap_pct, atr_distance, "PLAUSIBLE"
+    return gap_pct, atr_distance, "UNLIKELY"
+
+
 def compute_technicals(bars_data):
     """
     Full technical analysis suite:
@@ -219,6 +272,24 @@ def compute_technicals(bars_data):
     if macd_bullish:   entry_score += 25   # momentum confirming
     if vol_spike:      entry_score += 20   # institutional volume
 
+    # ── Entry limit and how reachable it is ───────────────────────────────────
+    # The limit itself is CLAUDE.md Hard Rule 2's formula, unchanged: MA20 x
+    # 0.995, i.e. 0.5% below MA20 support. What was missing is any measure of
+    # whether that price is actually likely to trade. A stock 6% above its MA20
+    # needs a 6.5% pullback to fill, and a day-limit order at that level simply
+    # expires unfilled every session — which is what cancel_orphan_exits exists
+    # to clean up after.
+    #
+    # ATR is the natural yardstick: it is the average daily range, so the gap to
+    # the limit measured in ATRs is roughly "how many normal days of movement
+    # away is this". A gap inside 1 ATR is ordinary noise and fills often; past
+    # ~2.5 ATR it needs a genuine trend change, not a wiggle. Expressing the gap
+    # in percent alone is not comparable across a 1%-ATR utility and a 4%-ATR
+    # growth name.
+    limit_price = round(ma20 * 0.995, 2)
+    limit_gap_pct, limit_atr_distance, reachability = entry_limit_reachability(
+        last, limit_price, atr)
+
     return {
         "ma20":             round(ma20, 4),
         "ma50":             round(ma50, 4),
@@ -239,7 +310,10 @@ def compute_technicals(bars_data):
         "atr_pct":          atr_pct,
         "entry_score":          entry_score,
         "entry_quality":        "EXCELLENT" if entry_score >= 70 else "GOOD" if entry_score >= 45 else "FAIR" if entry_score >= 25 else "POOR",
-        "limit_price":          round(ma20 * 0.995, 2),
+        "limit_price":          limit_price,
+        "limit_gap_pct":        limit_gap_pct,
+        "limit_atr_distance":   limit_atr_distance,
+        "limit_reachability":   reachability,
         "prev_close":           round(prev_close, 4),
         "was_above_ma50_yest":  was_above_ma50_yest,
         "was_above_ma20_yest":  was_above_ma20_yest,
@@ -271,8 +345,7 @@ def _load_social_tickers(max_tickers=10):
     safe_to_judge=True and not already on the watchlist.
     This is the missing link — social tickers must flow into Researcher.
     """
-    from datetime import date as _date
-    today = _date.today().isoformat()
+    today = et_today_iso()
     social_path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-social.json")
     if not os.path.exists(social_path):
         return []
@@ -309,18 +382,16 @@ def _load_intelligence_tickers(max_tickers=15):
     - Top gainers under 8% move (momentum without pump risk)
     - Reddit trending (when available)
     """
-    from datetime import date as _date
-    today = _date.today().isoformat()
+    today = et_today_iso()
     intel_path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-intelligence.json")
     if not os.path.exists(intel_path):
         return []
-    return _extract_discovery_tickers(intel_path)
+    return _extract_discovery_tickers(intel_path, max_tickers=max_tickers)
 
 
 def _intel_path_today():
-    from datetime import date as _date
     return os.path.join(os.path.dirname(__file__), "logs", "paper",
-                        f"{_date.today().isoformat()}-intelligence.json")
+                        f"{et_today_iso()}-intelligence.json")
 
 
 def load_intelligence_context() -> dict:
@@ -410,24 +481,42 @@ def load_intelligence_context() -> dict:
     return ctx
 
 
-def _extract_discovery_tickers(intel_path):
-    """Harvest discovery tickers from the intelligence file."""
+def _extract_discovery_tickers(intel_path, max_tickers=15):
+    """
+    Harvest discovery tickers from the intelligence file.
+
+    Was called as _extract_discovery_tickers(intel_path) with no max_tickers
+    argument, while this function referenced the name unconditionally at
+    `return tickers[:max_tickers]`. Every call raised NameError, and the
+    broad `except Exception` below swallowed it and returned []. Alpaca
+    most-active, top gainers, and Reddit trending — an entire discovery
+    channel from the morning intelligence scan — silently reached the Judge
+    as zero tickers, every single day. Reproduced directly: calling this
+    with a minimal fake intelligence.json logs "2 discovery tickers: [...]"
+    immediately followed by "name 'max_tickers' is not defined" and returns
+    [] regardless of what was found.
+
+    Also widens the per-source slices to match what intelligence.py's
+    get_market_discovery() already fetches (top=20 most-active, top=10
+    movers) — the old [:10]/[:5] discarded roughly half of data already
+    paid for with an API call, for no reason tied to any risk control.
+    """
     if not os.path.exists(intel_path):
         return []
     try:
         with open(intel_path) as f:
             intel = json.load(f)
-        tickers = []
         seen = set()
 
         # Alpaca most-active — most reliable daily discovery source
         discovery = intel.get("market_discovery", {}).get("discovery", {})
-        for s in discovery.get("most_active", [])[:10]:
+        most_active = []
+        for s in discovery.get("most_active", [])[:20]:
             sym = s.get("symbol", "")
             if not sym or len(sym) > 5 or sym in seen:
                 continue
             seen.add(sym)
-            tickers.append({
+            most_active.append({
                 "symbol": sym,
                 "description": f"Alpaca most-active — {s.get('volume', 0):,} shares traded",
                 "max_allocation_pct": 3,
@@ -435,13 +524,14 @@ def _extract_discovery_tickers(intel_path):
             })
 
         # Top gainers filtered to < 8% (not a pump)
-        for s in discovery.get("top_gainers", [])[:5]:
+        gainers = []
+        for s in discovery.get("top_gainers", [])[:10]:
             sym = s.get("symbol", "")
             price = s.get("price", 0)
             if not sym or len(sym) > 5 or sym in seen or (price and price < 5):
                 continue
             seen.add(sym)
-            tickers.append({
+            gainers.append({
                 "symbol": sym,
                 "description": f"Top gainer +{s.get('change_pct', 0)}% today",
                 "max_allocation_pct": 3,
@@ -449,17 +539,32 @@ def _extract_discovery_tickers(intel_path):
             })
 
         # Reddit trending tickers (bonus when available)
+        reddit = []
         for t in intel.get("reddit", {}).get("tickers", [])[:5]:
             sym = t.get("symbol", "")
             if not sym or len(sym) > 5 or sym in seen:
                 continue
             seen.add(sym)
-            tickers.append({
+            reddit.append({
                 "symbol": sym,
                 "description": f"Reddit trending — {t.get('reddit_mentions', 0)} mentions",
                 "max_allocation_pct": 3,
                 "source": "reddit",
             })
+
+        # Interleaved round-robin, not concatenate-then-truncate. Most-active
+        # alone can return up to 20 candidates; appending it first and slicing
+        # to max_tickers meant a full most-active batch silently crowded out
+        # every gainer and Reddit ticker before either ever got a look. A
+        # single wide source is not the same as diverse discovery, and the
+        # trades that most need this channel — surprising movers, not the
+        # mega-caps that dominate most-active every day — are exactly the ones
+        # a naive concatenation starves.
+        tickers = []
+        for group in zip_longest(most_active, gainers, reddit):
+            for t in group:
+                if t is not None:
+                    tickers.append(t)
 
         print(f"  [intel loader] {len(tickers)} discovery tickers: {[t['symbol'] for t in tickers]}", file=sys.stderr)
         return tickers[:max_tickers]
@@ -473,8 +578,7 @@ def _load_dip_tickers():
     Load 25%+ single-day drop candidates from today's screener output.
     These bypass normal signal filtering in the Judge — dip scoring path used instead.
     """
-    from datetime import date as _date
-    today = _date.today().isoformat()
+    today = et_today_iso()
     path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-screener.json")
     if not os.path.exists(path):
         return []
@@ -507,8 +611,7 @@ def _load_dip_tickers():
 
 def _load_screener_tickers(max_tickers=15):
     """Load top candidates from today's full market screener output."""
-    from datetime import date as _date
-    today = _date.today().isoformat()
+    today = et_today_iso()
     path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-screener.json")
     if not os.path.exists(path):
         return []
@@ -606,7 +709,8 @@ def full_research():
         print(f"  [research] Discovered: {[t['symbol'] for t in extra_items]}", file=sys.stderr)
 
     results = {
-        "timestamp": datetime.now().isoformat(),
+        "agent_version": get_version(),
+        "timestamp": et_now().isoformat(),
         "market_open": clock.get("is_open", False),
         "next_open": clock.get("next_open", ""),
         "account": {
@@ -710,7 +814,8 @@ def midday_check():
     clock     = get_market_status()
 
     results = {
-        "timestamp": datetime.now().isoformat(),
+        "agent_version": get_version(),
+        "timestamp": et_now().isoformat(),
         "market_open": clock.get("is_open", False),
         "account": {
             "cash": account.get("cash"),
@@ -751,7 +856,7 @@ if __name__ == "__main__":
         from datetime import date
         _log_dir = os.path.join(os.path.dirname(__file__), "logs", "paper")
         os.makedirs(_log_dir, exist_ok=True)
-        _out_path = os.path.join(_log_dir, f"{date.today().isoformat()}.json")
+        _out_path = os.path.join(_log_dir, f"{et_today_iso()}.json")
         with open(_out_path, "w") as _f:
             json.dump(data, _f, indent=2)
         print(json.dumps(data, indent=2))

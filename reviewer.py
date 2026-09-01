@@ -18,6 +18,7 @@ import json
 import csv
 import requests
 from datetime import date, datetime, timedelta
+from market_time import et_today, et_today_iso, et_now
 from statistics import mean
 
 # ── Load .env ────────────────────────────────────────────────────────────────
@@ -29,6 +30,8 @@ try:
     load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
+
+from version import get_version
 
 # A single-trade P&L beyond this magnitude (in percent) is treated as a data
 # fault rather than a result. Real equity trades do not move 1000% intraday;
@@ -44,6 +47,12 @@ TOTAL_LOSS_PNL_PCT  = -99.9
 # points. Those scores are not comparable to post-fix ones, so the graduation
 # decision counts only trades from the baseline forward.
 PHASE2B_BASELINE_DATE = "2026-08-20"
+
+# FIFO matching needs the buy leg, and every position open at the Phase 2B
+# baseline was bought well before it. This is the start of the paper account's
+# order history, not a performance window — round trips are filtered to the
+# reporting period by EXIT date after matching. See round_trips_closed_since().
+ROUND_TRIP_LOOKBACK_START = "2026-06-01"
 PHASE2B_DECISION_DATE = "2026-09-03"
 
 GRADUATION_MIN_OCCURRENCES   = 15
@@ -99,7 +108,7 @@ def _check_auth():
 # ── Data Fetchers ─────────────────────────────────────────────────────────────
 
 def get_orders_today():
-    today = date.today().isoformat()
+    today = et_today_iso()
     r = requests.get(f"{BASE_URL}/v2/orders",
                      headers=_headers(),
                      params={"status": "all", "after": today, "limit": 100})
@@ -317,6 +326,11 @@ def fetch_filled_orders(since: str) -> list:
     """
     Every filled order since `since`, oldest first, following pagination.
 
+    NOTE ON `since`: Alpaca's `after` parameter filters on **submitted_at**, not
+    on fill time. A GTC exit submitted months ago and filled yesterday is
+    therefore NOT returned by a short window. Callers that FIFO-match need the
+    full history — see ROUND_TRIP_LOOKBACK_START and round_trips_closed_since().
+
     Alpaca caps a page at 500, so a long window needs several requests. Uses the
     broker as the source of truth rather than trade-log.csv, which is known to be
     incomplete: it duplicates the 2026-06-16 fills three times each and is
@@ -409,6 +423,44 @@ def build_round_trips(orders: list) -> tuple:
                               "exit_date": when, "exit": round(price, 4)})
 
     return trips, unmatched
+
+
+def round_trips_closed_since(since: str,
+                             lookback_start: str = None) -> tuple:
+    """
+    Round trips whose EXIT lands on or after `since`, FIFO-matched against the
+    full position history.
+
+    Why this exists. `fetch_filled_orders(since)` filters on Alpaca's `after`
+    parameter, which matches **submitted_at**. Passing the Phase 2B baseline
+    straight through meant the fetch returned only orders *submitted* after
+    2026-08-20 — but every position open at the baseline was bought in June or
+    July. Their buy legs fell outside the window, so build_round_trips() saw
+    sells with no open lot to consume and dropped every one of them into
+    `unmatched`.
+
+    The effect was that closing a position could not increase the round-trip
+    count. On 2026-08-26 NVDA closed at +9.06%, the first realized Phase 2B
+    trade and a winner, and it would have counted zero. Occurrences would read
+    0 on the 2026-09-03 decision date no matter how the agent actually traded,
+    forcing an "extend" verdict that measured nothing.
+
+    Matching needs the whole history; the *reporting window* is what should be
+    filtered, and it must be filtered on the exit date, because that is when a
+    decision completes. A trade bought in July and sold in Phase 2B is a Phase
+    2B result — the exit is the decision being scored.
+
+    Returns (trips_in_window, all_trips, unmatched).
+    """
+    lookback_start = lookback_start or ROUND_TRIP_LOOKBACK_START
+    # Never fetch a shorter history than the window itself asks for.
+    if lookback_start > since:
+        lookback_start = since
+
+    orders = fetch_filled_orders(lookback_start)
+    all_trips, unmatched = build_round_trips(orders)
+    in_window = [t for t in all_trips if (t.get("exit_date") or "") >= since]
+    return in_window, all_trips, unmatched
 
 
 def _days_between(a: str, b: str) -> int:
@@ -544,11 +596,17 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
     # Profit factor, expectancy and realized win rate now come from FIFO-matched
     # entry->exit pairs. If the broker is unreachable the metrics stay empty and
     # the criteria fail rather than passing on a proxy.
+    #
+    # Round trips are FIFO-matched over the FULL order history and then filtered
+    # to this window by EXIT date. Matching against `since` alone silently
+    # dropped every trade whose entry predated the baseline — which was all of
+    # them — so closing a position could never raise the count. See
+    # round_trips_closed_since().
     try:
-        trips, unmatched = build_round_trips(fetch_filled_orders(since))
-        write_round_trip_log(trips)
+        trips, all_trips, unmatched = round_trips_closed_since(since)
+        write_round_trip_log(all_trips)
     except Exception as e:
-        trips, unmatched = [], []
+        trips, all_trips, unmatched = [], [], []
         rt_error = str(e)
     else:
         rt_error = None
@@ -603,7 +661,7 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
     passed = all(ok for *_, ok in checks)
 
     lines = [
-        f"# Graduation Decision — {date.today().isoformat()}",
+        f"# Graduation Decision — {et_today_iso()}",
         "",
         f"**Baseline**: {since} (Phase 2B)",
         f"**Trades counted**: {n}"
@@ -726,7 +784,7 @@ def run_calibration_report(days: int = 30) -> str:
         rows   = list(reader)
 
     # Filter to last N days
-    cutoff = (date.today() - timedelta(days=days)).isoformat()
+    cutoff = (et_today() - timedelta(days=days)).isoformat()
     rows   = [r for r in rows if r["date"] >= cutoff and r["delta"] != ""]
 
     if not rows:
@@ -791,7 +849,7 @@ def run_calibration_report(days: int = 30) -> str:
 # ── EOD Session ───────────────────────────────────────────────────────────────
 
 def run_eod_review() -> dict:
-    today     = date.today().isoformat()
+    today     = et_today_iso()
     orders    = get_orders_today()
 
     # Load judge scores for today
@@ -803,7 +861,10 @@ def run_eod_review() -> dict:
             for sym, scored in raw.get("scores", {}).items():
                 judge_data[sym] = scored.get("score")
 
-    results  = {"date": today, "timestamp": datetime.now().isoformat(), "trades": []}
+    results  = {"date": today,
+                "agent_version": get_version(),
+                "timestamp": et_now().isoformat(),
+                "trades": []}
     filled   = [o for o in orders if o.get("status") in ("filled", "partially_filled") and o.get("side") == "buy"]
 
     for order in filled:
@@ -852,16 +913,20 @@ if __name__ == "__main__":
     elif action == "roundtrips":
         _since = arg2 or PHASE2B_BASELINE_DATE
         try:
-            _trips, _unm = build_round_trips(fetch_filled_orders(_since))
+            _trips, _all, _unm = round_trips_closed_since(_since)
         except Exception as _e:
             print(json.dumps({"error": f"Could not reach the broker: {_e}",
                               "since": _since}, indent=2))
             sys.exit(1)
-        _p = write_round_trip_log(_trips)
+        _p = write_round_trip_log(_all)
         _m = round_trip_metrics(_trips)
-        print(json.dumps({"since": _since, "metrics": {
-            k: (None if v is None else v) for k, v in _m.items()
-            if k not in ("best", "worst")},
+        print(json.dumps({
+            "since": _since,
+            "lookback_start": ROUND_TRIP_LOOKBACK_START,
+            "closed_in_window": len(_trips),
+            "closed_all_time": len(_all),
+            "metrics": {k: (None if v is None else v) for k, v in _m.items()
+                        if k not in ("best", "worst")},
             "unmatched_sells": _unm, "log": _p}, indent=2, default=str))
 
     elif action == "graduation":
