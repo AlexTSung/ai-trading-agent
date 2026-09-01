@@ -4,7 +4,17 @@ on:
   schedule:
     # 16:00 UTC = 12:00 PM ET (EDT, UTC-4) — the midday stop-loss check that
     # CLAUDE.md and routines.json have always described but nothing ran.
-    - cron: '0 16 * * 1-5'
+    #
+    # Two more triggers inside the same 10 AM-4 PM ET market-hours window this
+    # workflow's own guardrail already enforces. Unlike the morning pipeline,
+    # this is not purely a delay workaround: check-stops and check-phantom are
+    # read-check-act operations, so checking more often is strictly better —
+    # it catches a stop-loss breach sooner, not just hedges against GitHub's
+    # scheduler running hours late (observed: 3.5-9h delays this repo has
+    # actually hit). No idempotency guard is needed or wanted here.
+    - cron: '0 16 * * 1-5'    # 12:00 PM ET
+    - cron: '30 14 * * 1-5'   # 10:30 AM ET
+    - cron: '0 18 * * 1-5'    # 2:00 PM ET
   workflow_dispatch:
     inputs:
       test_mode:

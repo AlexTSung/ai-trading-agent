@@ -2,8 +2,27 @@ name: Morning Trading Pipeline
 
 on:
   schedule:
-    # 13:45 UTC = 9:45 AM ET (EDT, UTC-4) - after market open, before 10:30 AM cutoff
-    - cron: '45 13 * * 1-5'
+    # Primary target: 13:45 UTC = 9:45 AM ET (EDT) - after market open.
+    #
+    # GitHub Actions scheduled triggers are not guaranteed to run on time —
+    # delays of several hours are a documented, observed behavior on this repo
+    # (3.5h on 2026-08-27, 8-9h on 2026-08-27/28, and a full missed day on
+    # 2026-08-31/09-01 with only the single cron below). run_github.sh's
+    # GUARDRAIL G2 refuses to run past 11:30 AM ET (correctly — running
+    # research against a stale morning trigger hours later is worse than not
+    # running), so a large enough delay meant the ENTIRE trading day got zero
+    # research and zero trades, not a late one.
+    #
+    # These three extra triggers are redundant attempts inside the same legal
+    # window (before 11:30 AM ET / 15:30 UTC), not a wider window and not a
+    # loosened guard. GUARDRAIL G1 (idempotency: skip if today's research
+    # already ran) makes every trigger after the first a free no-op the
+    # moment one succeeds, so this only ever adds chances to land inside the
+    # window — it cannot cause a duplicate run.
+    - cron: '45 13 * * 1-5'   # 9:45 AM ET target
+    - cron: '15 14 * * 1-5'   # 10:15 AM ET backup
+    - cron: '45 14 * * 1-5'   # 10:45 AM ET backup
+    - cron: '15 15 * * 1-5'   # 11:15 AM ET backup — last chance before the 11:30 cutoff
   workflow_dispatch:
     inputs:
       test_mode:
