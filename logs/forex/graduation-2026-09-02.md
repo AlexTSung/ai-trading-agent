@@ -5,30 +5,30 @@
 ## Graduation Criteria
 | Criterion | Required | Current | Status |
 |-----------|----------|---------|--------|
-| 📊 Closed trades | 15 | 6 | ❌ |
-| 🎯 Win rate | 55% | 50% | ❌ |
-| 💰 Profit factor | 1.50 | 1.10 | ❌ |
-| 📈 Expectancy/trade | >$0 | $38.00 | ✅ |
-| 🏦 Net return | 3.0% | 0.23% | ❌ |
+| 📊 Closed trades | 15 | 5 | ❌ |
+| 🎯 Win rate | 55% | 60% | ✅ |
+| 💰 Profit factor | 1.50 | 4.38 | ✅ |
+| 📈 Expectancy/trade | >$0 | $371.81 | ✅ |
+| 🏦 Net return | 3.0% | 1.86% | ❌ |
 
 ## Performance Detail
 | | |
 |---|---|
-| Total closed trades | 6 |
-| Wins / Losses | 3W / 3L |
-| Win rate | 50% |
+| Total closed trades | 5 |
+| Wins / Losses | 3W / 2L |
+| Win rate | 60% |
 | Gross wins | $2,409.37 |
-| Gross losses | $2,181.39 |
-| Profit factor | 1.10 |
+| Gross losses | $550.34 |
+| Profit factor | 4.38 |
 | Avg win | $803.12 |
-| Avg loss | $727.13 |
-| Expectancy/trade | $38.00 |
-| Total realized P&L | $+227.97 |
-| Net return | 0.23% |
+| Avg loss | $275.17 |
+| Expectancy/trade | $371.81 |
+| Total realized P&L | $+1,859.03 |
+| Net return | 1.86% |
 
 ## Blockers to Graduation
-- Need **9 more closed trades** (have 6, need 15)
-- Need **+2.77% more return** (have 0.23%, need 3.0%)
+- Need **10 more closed trades** (have 5, need 15)
+- Need **+1.14% more return** (have 1.86%, need 3.0%)
 
 ## Per-Pair Stats
 | Pair | Wins | Losses | Total P&L | Total Pips | Status |
@@ -36,34 +36,32 @@
 | USD_JPY | 2 | 0 | $+2398.50 | +113.2 | ✅ Active |
 | EUR_JPY | 1 | 0 | $+10.87 | +75.8 | ✅ Active |
 | USD_CHF | 0 | 2 | $-550.34 | -15.3 | ⛔ Deprioritized |
-| CAD_JPY | 0 | 1 | $-1631.06 | -51.6 | ✅ Active |
 
-## What the Agent Learned (6 adjustments)
-- ⬇️ **carry** weight: 1.122 → 1.01 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
-- ⬇️ **momentum** weight: 1.672 → 1.505 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
-- ⬇️ **technical** weight: 5.238 → 5.038 — avg score 0.17 in wins vs 0.39 in losses — not predictive (delta=-0.22)
-- ⬇️ **session** weight: 0.563 → 0.507 — avg score 0.33 in wins vs 0.75 in losses — not predictive (delta=-0.42)
-- ⬇️ **volatility** weight: 0.842 → 0.758 — avg score 0.23 in wins vs 0.57 in losses — not predictive (delta=-0.33)
-- ⬇️ **risk_reward** weight: 0.563 → 0.507 — avg score 0.33 in wins vs 0.85 in losses — not predictive (delta=-0.52)
+## What the Agent Learned (5 adjustments)
+- ⬇️ **carry** weight: 1.083 → 0.975 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
+- ⬇️ **momentum** weight: 1.614 → 1.453 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
+- ⬇️ **session** weight: 0.544 → 0.5 — avg score 0.33 in wins vs 0.75 in losses — not predictive (delta=-0.42)
+- ⬇️ **volatility** weight: 0.813 → 0.732 — avg score 0.23 in wins vs 0.70 in losses — not predictive (delta=-0.47)
+- ⬇️ **risk_reward** weight: 0.544 → 0.5 — avg score 0.33 in wins vs 0.85 in losses — not predictive (delta=-0.52)
 
 ## Direction Bias
-- Long win rate:  0.5
+- Long win rate:  0.6
 - Short win rate: None
-- Sample: 6 trades
+- Sample: 5 trades
 
 ## Updated Judge Weights
 ```json
 {
-  "carry": 1.083,
-  "momentum": 1.614,
-  "technical": 5.403,
-  "session": 0.544,
-  "volatility": 0.813,
-  "risk_reward": 0.544
+  "carry": 1.02,
+  "momentum": 1.519,
+  "technical": 5.65,
+  "session": 0.523,
+  "volatility": 0.765,
+  "risk_reward": 0.523
 }
 ```
 
 ## Estimated Path to Graduation
-- Trades needed: **9** more  (~6 weeks at 1-2/week)
-- Return needed: **+2.77%** more  (~$2,772 more profit needed)
+- Trades needed: **10** more  (~7 weeks at 1-2/week)
+- Return needed: **+1.14%** more  (~$1,141 more profit needed)
 - Manual approval required before any real money is deployed.
