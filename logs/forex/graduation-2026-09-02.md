@@ -39,12 +39,12 @@
 | CAD_JPY | 0 | 1 | $-1631.06 | -51.6 | ✅ Active |
 
 ## What the Agent Learned (6 adjustments)
-- ⬇️ **carry** weight: 1.16 → 1.044 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
-- ⬇️ **momentum** weight: 1.729 → 1.556 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
-- ⬇️ **technical** weight: 5.075 → 4.875 — avg score 0.17 in wins vs 0.39 in losses — not predictive (delta=-0.22)
-- ⬇️ **session** weight: 0.582 → 0.524 — avg score 0.33 in wins vs 0.75 in losses — not predictive (delta=-0.42)
-- ⬇️ **volatility** weight: 0.871 → 0.784 — avg score 0.23 in wins vs 0.57 in losses — not predictive (delta=-0.33)
-- ⬇️ **risk_reward** weight: 0.582 → 0.524 — avg score 0.33 in wins vs 0.85 in losses — not predictive (delta=-0.52)
+- ⬇️ **carry** weight: 1.122 → 1.01 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
+- ⬇️ **momentum** weight: 1.672 → 1.505 — avg score 0.33 in wins vs 1.00 in losses — not predictive (delta=-0.67)
+- ⬇️ **technical** weight: 5.238 → 5.038 — avg score 0.17 in wins vs 0.39 in losses — not predictive (delta=-0.22)
+- ⬇️ **session** weight: 0.563 → 0.507 — avg score 0.33 in wins vs 0.75 in losses — not predictive (delta=-0.42)
+- ⬇️ **volatility** weight: 0.842 → 0.758 — avg score 0.23 in wins vs 0.57 in losses — not predictive (delta=-0.33)
+- ⬇️ **risk_reward** weight: 0.563 → 0.507 — avg score 0.33 in wins vs 0.85 in losses — not predictive (delta=-0.52)
 
 ## Direction Bias
 - Long win rate:  0.5
@@ -54,12 +54,12 @@
 ## Updated Judge Weights
 ```json
 {
-  "carry": 1.122,
-  "momentum": 1.672,
-  "technical": 5.238,
-  "session": 0.563,
-  "volatility": 0.842,
-  "risk_reward": 0.563
+  "carry": 1.083,
+  "momentum": 1.614,
+  "technical": 5.403,
+  "session": 0.544,
+  "volatility": 0.813,
+  "risk_reward": 0.544
 }
 ```
 
