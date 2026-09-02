@@ -61,11 +61,34 @@ jobs:
           git config user.name "Trading Agent"
           git config user.email "agent@youversion.com"
           git add logs/options/
-          git diff --staged --quiet || git commit -m "chore: options run $(TZ='America/New_York' date +%Y-%m-%d)"
-          # Rebase AFTER committing — the pipeline writes new files before this
-          # step runs, so rebasing first fails on unstaged changes.
-          git pull --rebase origin ${{ github.ref_name }} || true
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: options run $(TZ='America/New_York' date +%Y-%m-%d)"
+          # This workflow and morning-pipeline.yml both run in the 9:35-11:30 AM
+          # ET window and commit to the same branch — a single unretried push can
+          # lose a run's output to the other one winning the race (observed
+          # 2026-09-02). Retry with fetch+rebase on rejection instead of one
+          # `git pull --rebase || true` followed by an unconditional push.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "Pushed on attempt $attempt"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) - fetching and rebasing onto latest ${{ github.ref_name }}"
+            git fetch origin ${{ github.ref_name }}
+            git stash --include-untracked --quiet || true
+            if ! git rebase "origin/${{ github.ref_name }}"; then
+              echo "::error::Rebase conflict against origin/${{ github.ref_name }} - manual intervention needed"
+              git rebase --abort
+              git stash pop --quiet || true
+              exit 1
+            fi
+            git stash pop --quiet || true
+          done
+          echo "::error::Failed to push logs after 5 attempts"
+          exit 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

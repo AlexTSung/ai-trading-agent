@@ -68,12 +68,38 @@ jobs:
           git config user.name "Trading Agent"
           git config user.email "agent@youversion.com"
           git add logs/paper/
-          git diff --staged --quiet || git commit -m "chore: trading logs $(TZ='America/New_York' date +%Y-%m-%d) morning"
-          # Rebase AFTER committing. Running it first always failed with
-          # "cannot pull with rebase: You have unstaged changes" because the
-          # pipeline has just written new log files.
-          git pull --rebase origin ${{ github.ref_name }} || true
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: trading logs $(TZ='America/New_York' date +%Y-%m-%d) morning"
+          # options-pipeline.yml now runs in this same 9:35-11:30 AM ET window and
+          # commits to the same branch. On 2026-09-02 both jobs committed within
+          # 40s of each other; options pushed first, and morning's single
+          # unretried push was rejected as non-fast-forward, failing the whole job
+          # and losing that day's research/judge/trade output (never reached
+          # origin — only existed on the runner that got torn down). A single
+          # `git pull --rebase || true` followed by one unconditional `git push`
+          # cannot recover from that: it swallows the rebase failure and then
+          # fails hard on the push with no second attempt.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "Pushed on attempt $attempt"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt) - fetching and rebasing onto latest ${{ github.ref_name }}"
+            git fetch origin ${{ github.ref_name }}
+            git stash --include-untracked --quiet || true
+            if ! git rebase "origin/${{ github.ref_name }}"; then
+              echo "::error::Rebase conflict against origin/${{ github.ref_name }} - manual intervention needed"
+              git rebase --abort
+              git stash pop --quiet || true
+              exit 1
+            fi
+            git stash pop --quiet || true
+          done
+          echo "::error::Failed to push logs after 5 attempts"
+          exit 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
