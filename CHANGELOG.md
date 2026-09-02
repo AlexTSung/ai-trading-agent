@@ -13,6 +13,25 @@ git checkout master          # return to latest
 
 ---
 
+## v1.2.0 — 2026-09-02 (Risk Controls: Correlation Cap + Cooldown + Earlier Breakeven)
+
+**Post-mortem response to Sep 2 drawdown: −$6,553 across 4 correlated stop-outs.**
+
+### Root Cause Analysis
+- **JPY correlation**: USD/JPY ×2, AUD/JPY, CAD/JPY all held simultaneously = one massive BOJ/USD risk factor. When USD/JPY sold off ~80 pips, all four hit stops simultaneously.
+- **No early protection**: Breakeven trigger was at 1:1 R:R (77+ pips profit required on USD/JPY). Positions peaked at +10–16 pips and reversed — SL sat at original level with zero protection.
+- **Duplicate USD/JPY**: 939K combined units before G2b guard was live, doubling the loss on that pair.
+
+### Fixed
+- **G13: JPY correlation cap** — max 2 JPY pair positions open at once (`MAX_JPY_POSITIONS = 2`). USD/JPY, AUD/JPY, CAD/JPY, EUR/JPY, GBP/JPY all count against the same bucket. Would have capped Sep 2 exposure to 2 positions instead of 4.
+- **G14: Stop-loss cooldown** — 24h re-entry block after any stop-loss; auto-escalates to 48h if 2+ JPY pairs stopped the same day (macro regime shift signal). USD/JPY is blocked today after this morning's double stop-out.
+- **Earlier breakeven trigger** — `TRAILING_TRIGGER_RR` lowered from 1.0 → 0.5 (half the stop distance, not equal). On a 77-pip USD/JPY stop: breakeven now triggers at +38 pips instead of +77. The Sep 2 positions peaked at +16 pips — still wouldn't have saved them, but any future position reaching half its stop distance locks in with no-loss floor.
+
+### No baseline reset
+All changes are new guardrails (tightening). Past results stand.
+
+---
+
 ## v1.1.0 — 2026-08-31 (Accelerated Learning)
 
 **Goal: faster trade accumulation toward the 30-trade graduation target.**

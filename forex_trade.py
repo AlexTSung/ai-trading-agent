@@ -33,6 +33,8 @@ from forex_screener import (
 
 # ── Safety constants (always enforced) ────────────────────────────────────────
 MAX_OPEN_PAIRS      = 5       # G2
+MAX_JPY_POSITIONS   = 2       # G13: max correlated JPY pairs open at once (USD/JPY, AUD/JPY, CAD/JPY etc all share BOJ risk)
+COOLDOWN_HOURS      = 24      # G14: min hours before re-entering a pair after stop-loss; 48h if 2+ JPY stopped same day
 MAX_RISK_PCT        = 0.02    # G3: 2% equity per trade
 MAX_DAILY_LOSS_PCT  = 0.03    # G4: pause if daily loss > 3%
 STOP_ATR_MULT       = 2.0     # G5: stop = 2.0 × ATR(14) — give trades room to breathe (proven principle)
@@ -120,6 +122,64 @@ def get_open_pairs() -> set:
         return set()
     trade_list = trades if isinstance(trades, list) else trades.get("trades", [])
     return {t.get("instrument") for t in trade_list if t.get("instrument")}
+
+
+def count_open_jpy_positions() -> int:
+    """Count open positions on JPY pairs (USD/JPY, AUD/JPY, CAD/JPY, etc.) — they share BOJ risk."""
+    return sum(1 for p in get_open_pairs() if "JPY" in p)
+
+
+def get_cooldown_blocked_pairs() -> dict:
+    """
+    G14: Return pairs blocked by stop-loss cooldown.
+    Reads recent closed trades from OANDA — if a pair closed at its SL within
+    COOLDOWN_HOURS (24h), or within 48h if 2+ JPY pairs stopped the same day, block it.
+    Returns {pair: unblock_time_utc_str}.
+    """
+    from datetime import datetime, timezone, timedelta
+    now = datetime.now(timezone.utc)
+    blocked = {}
+    try:
+        result = _request("GET", f"/v3/accounts/{OANDA_ACCOUNT_ID}/trades?state=CLOSED&count=30")
+        trades = result if isinstance(result, list) else result.get("trades", [])
+
+        # Detect how many JPY pairs stopped out today (any in last 48h)
+        jpy_stops_today = 0
+        for t in trades:
+            close_time_str = t.get("closeTime", "")
+            if not close_time_str:
+                continue
+            close_time = datetime.fromisoformat(close_time_str.replace("Z", "+00:00"))
+            hours_ago = (now - close_time).total_seconds() / 3600
+            if hours_ago > 48:
+                continue
+            # Detect stop-loss close: price == SL price
+            close_price = float(t.get("averageClosePrice") or 0)
+            sl_price = float((t.get("stopLossOrder") or {}).get("price") or 0)
+            was_stopped = sl_price > 0 and abs(close_price - sl_price) < 0.001
+            if was_stopped and "JPY" in t.get("instrument", ""):
+                jpy_stops_today += 1
+
+        cooldown_h = 48 if jpy_stops_today >= 2 else COOLDOWN_HOURS
+
+        for t in trades:
+            close_time_str = t.get("closeTime", "")
+            if not close_time_str:
+                continue
+            close_time = datetime.fromisoformat(close_time_str.replace("Z", "+00:00"))
+            hours_ago = (now - close_time).total_seconds() / 3600
+            if hours_ago > cooldown_h:
+                continue
+            close_price = float(t.get("averageClosePrice") or 0)
+            sl_price = float((t.get("stopLossOrder") or {}).get("price") or 0)
+            was_stopped = sl_price > 0 and abs(close_price - sl_price) < 0.001
+            if was_stopped:
+                pair = t.get("instrument", "")
+                unblock = close_time + timedelta(hours=cooldown_h)
+                blocked[pair] = unblock.strftime("%Y-%m-%d %H:%M UTC")
+    except Exception as e:
+        print(f"  [G14] Cooldown check error: {e}")
+    return blocked
 
 
 def check_daily_outcome_limit() -> dict:
@@ -335,7 +395,7 @@ def close_all_positions(reason: str = "manual") -> list:
 
 
 # ── Trailing stop management ───────────────────────────────────────────────────
-TRAILING_TRIGGER_RR   = 1.0   # Stage 1: partial close + move SL to breakeven at 1:1
+TRAILING_TRIGGER_RR   = 0.5   # Stage 1: partial close + move SL to breakeven at 0.5:1 (half the stop distance)
 BREAKEVEN_BUFFER_PIPS = 5     # Breakeven SL = entry + 5 pips buffer (cover spread + small win)
 STAGE2_TRIGGER_RR     = 2.0   # Stage 2: when remaining half reaches 2:1, trail SL to lock in 1:1 gain
 STAGE2_TRAIL_RR       = 0.75  # Stage 2: trail SL at 0.75× risk_dist behind current price
@@ -620,7 +680,9 @@ def execute_verdicts(target_pair: str = None) -> list:
 
     results = []
     slots_available = MAX_OPEN_PAIRS - open_count
-    open_pairs = get_open_pairs()  # G2b: same-pair duplicate guard
+    open_pairs = get_open_pairs()          # G2b: same-pair duplicate guard
+    cooldown_blocked = get_cooldown_blocked_pairs()  # G14: stop-loss cooldown
+    jpy_open = count_open_jpy_positions()  # G13: JPY correlation cap
 
     for verdict in tradeable[:slots_available]:
         pair = verdict.get("pair")
@@ -628,6 +690,16 @@ def execute_verdicts(target_pair: str = None) -> list:
         # G2b: Skip if we already hold this pair — prevents double-entry on back-to-back runs
         if pair in open_pairs:
             print(f"  G2b: {pair} already open — skipping duplicate entry")
+            continue
+
+        # G14: Stop-loss cooldown — skip re-entry within 24h (48h if 2+ JPY stopped same day)
+        if pair in cooldown_blocked:
+            print(f"  G14: {pair} in cooldown after stop-loss — unblocks {cooldown_blocked[pair]}")
+            continue
+
+        # G13: JPY correlation cap — max 2 JPY positions at once
+        if "JPY" in pair and jpy_open >= MAX_JPY_POSITIONS:
+            print(f"  G13: JPY correlation cap reached ({jpy_open}/{MAX_JPY_POSITIONS}) — skipping {pair}")
             continue
 
         print(f"  Placing {verdict['direction']} on {pair} | score={verdict['score']} | env={OANDA_ENV}")
@@ -639,7 +711,9 @@ def execute_verdicts(target_pair: str = None) -> list:
 
         if result.get("status") == "filled":
             print(f"  ✓ Filled: {pair} @ {result.get('entry_price')} | units={result.get('units')} | stop={result.get('stop_price')}")
-            open_pairs.add(pair)  # block same pair in later iterations this run
+            open_pairs.add(pair)  # G2b: block same pair in later iterations this run
+            if "JPY" in pair:
+                jpy_open += 1     # G13: track JPY count within this run
         else:
             print(f"  ✗ Failed: {pair} — {result.get('error')}")
 
