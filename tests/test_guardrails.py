@@ -254,6 +254,29 @@ class TestOrderPlumbing(unittest.TestCase):
     def test_urgent_exits_use_a_wider_limit(self):
         self.assertGreater(trade.URGENT_EXIT_SLIPPAGE, trade.LIMIT_SLIPPAGE)
 
+    def test_options_positions_are_never_given_stock_oco_exits(self):
+        """
+        2026-09-02: /v2/positions returns both books on the shared Alpaca
+        account. Every session, ensure_exits_for_positions() walked the
+        options contracts too and tried to attach a stock-style OCO bracket,
+        which the broker rejects with "complex orders not supported for
+        options trading" (HTTP 422) -- harmless (options are already exited by
+        options_monitor.py) but it has no business touching that book at all.
+        """
+        positions = [
+            {"symbol": "MSFT261016P00450000", "asset_class": "us_option",
+             "qty": "1", "avg_entry_price": "3.25"},
+            {"symbol": "AAPL", "asset_class": "us_equity",
+             "qty": "17", "avg_entry_price": "283.70"},
+        ]
+        with mock.patch.object(trade, "place_oco_exits",
+                               return_value={"_ok": True}) as mocked:
+            attached = trade.ensure_exits_for_positions(positions, [], state={})
+        touched = {a["symbol"] for a in attached}
+        self.assertNotIn("MSFT261016P00450000", touched)
+        self.assertIn("AAPL", touched)
+        mocked.assert_called_once_with("AAPL", 17, 283.70)
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Entry-quality vetoes

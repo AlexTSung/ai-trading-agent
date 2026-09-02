@@ -561,6 +561,14 @@ def ensure_exits_for_positions(positions, open_orders, state=None):
     attached    = []
 
     for pos in positions:
+        # /v2/positions returns both books on a shared Alpaca account. OCO
+        # take-profit/stop-loss brackets are a stock order type; the broker
+        # rejects them for options ("complex orders not supported for options
+        # trading"), and those contracts are already exited by
+        # options_monitor.py's own profit-target/loss-stop logic — this
+        # executor has no business attaching stock-style exits to them.
+        if pos.get("asset_class") == "us_option":
+            continue
         sym = pos["symbol"]
         if sym in covered or sym in suspect:
             continue
