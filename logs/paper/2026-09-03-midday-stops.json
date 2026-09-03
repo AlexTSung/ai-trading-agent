@@ -1,0 +1,95 @@
+{
+  "checked": 5,
+  "triggers": [
+    {
+      "symbol": "MSFT261016P00450000",
+      "qty": "1",
+      "avg_entry": "3.25",
+      "current_price": "1.93",
+      "unrealized_plpc": -0.40615,
+      "tier": "TIER3",
+      "stop_pct": -0.1,
+      "reason": "STOP-LOSS TIER3 (-10%): down -40.6%"
+    }
+  ],
+  "inverse_max_hold": [],
+  "phantom_equity": [
+    {
+      "symbol": "LBGJ",
+      "qty": 154903.0,
+      "avg_entry_price": 0.0288,
+      "current_price": 2.35,
+      "price_ratio": 81.6,
+      "unrealized_plpc": 80.59722,
+      "reported_market_value": 364022.05,
+      "cost_basis": 4461.21,
+      "phantom_amount": 359560.84,
+      "reasons": [
+        "price $2.3500 is 82x its cost basis $0.0288",
+        "unrealized P&L 8,060% exceeds the 1,000% plausibility ceiling",
+        "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
+      ],
+      "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
+    }
+  ],
+  "closed": [
+    {
+      "symbol": "MSFT261016P00450000",
+      "result": {
+        "id": "92195212-3941-4545-a40a-39108f965e04",
+        "client_order_id": "agent-sell-MSFT261016P00450000-20260903175624",
+        "created_at": "2026-09-03T17:56:25.070162959Z",
+        "updated_at": "2026-09-03T17:56:25.070194877Z",
+        "submitted_at": "2026-09-03T17:56:25.047423315Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "69b717c3-4550-41fe-9dd4-3c69b89fc410",
+        "symbol": "MSFT261016P00450000",
+        "asset_class": "us_option",
+        "notional": null,
+        "qty": "1",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "simple",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "gtc",
+        "limit_price": "1.91",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-12-02T21:00:00Z",
+        "_ok": true,
+        "_agent_reason": "STOP-LOSS TIER3 (-10%): down -40.6%",
+        "_limit_price_used": 1.91,
+        "_urgent_exit": true,
+        "_released_orders": []
+      },
+      "trigger": {
+        "symbol": "MSFT261016P00450000",
+        "qty": "1",
+        "avg_entry": "3.25",
+        "current_price": "1.93",
+        "unrealized_plpc": -0.40615,
+        "tier": "TIER3",
+        "stop_pct": -0.1,
+        "reason": "STOP-LOSS TIER3 (-10%): down -40.6%"
+      }
+    }
+  ],
+  "failed": [],
+  "skipped_suspect": []
+}
