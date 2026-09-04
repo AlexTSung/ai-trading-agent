@@ -1,43 +1,337 @@
 {
-  "generated": "2026-09-03",
+  "generated": "2026-09-04",
   "overall": {
-    "n": 0,
-    "win_rate": null,
-    "expectancy": null,
-    "profit_factor": null,
-    "net_dollar": 0.0,
-    "confidence": "anecdote"
+    "n": 30,
+    "win_rate": 13.3,
+    "expectancy": -7.53,
+    "profit_factor": 0.11,
+    "net_dollar": -9770.07,
+    "avg_hold_days": 17.0,
+    "confidence": "actionable"
   },
-  "by_source": {},
-  "tier_stops": {},
+  "by_source": {
+    "discovery": {
+      "n": 8,
+      "win_rate": 0.0,
+      "expectancy": -14.66,
+      "profit_factor": 0.0,
+      "net_dollar": -5148.71,
+      "avg_hold_days": 10,
+      "confidence": "suggestive"
+    },
+    "watchlist": {
+      "n": 22,
+      "win_rate": 18.2,
+      "expectancy": -4.94,
+      "profit_factor": 0.21,
+      "net_dollar": -4621.36,
+      "avg_hold_days": 19.5,
+      "confidence": "actionable"
+    }
+  },
+  "tier_stops": {
+    "TIER1": {
+      "all": {
+        "n": 9,
+        "win_rate": 22.2,
+        "expectancy": -2.88,
+        "profit_factor": 0.31,
+        "net_dollar": -1067.79,
+        "avg_hold_days": 12.7,
+        "confidence": "suggestive"
+      },
+      "stopped_out": {
+        "n": 0,
+        "win_rate": null,
+        "expectancy": null,
+        "profit_factor": null,
+        "net_dollar": 0.0,
+        "confidence": "anecdote"
+      },
+      "not_stopped": {
+        "n": 9,
+        "win_rate": 22.2,
+        "expectancy": -2.88,
+        "profit_factor": 0.31,
+        "net_dollar": -1067.79,
+        "avg_hold_days": 12.7,
+        "confidence": "suggestive"
+      },
+      "stopped_share": 0.0
+    },
+    "TIER2": {
+      "all": {
+        "n": 5,
+        "win_rate": 0.0,
+        "expectancy": -6.92,
+        "profit_factor": 0.0,
+        "net_dollar": -1241.28,
+        "avg_hold_days": 25,
+        "confidence": "suggestive"
+      },
+      "stopped_out": {
+        "n": 0,
+        "win_rate": null,
+        "expectancy": null,
+        "profit_factor": null,
+        "net_dollar": 0.0,
+        "confidence": "anecdote"
+      },
+      "not_stopped": {
+        "n": 5,
+        "win_rate": 0.0,
+        "expectancy": -6.92,
+        "profit_factor": 0.0,
+        "net_dollar": -1241.28,
+        "avg_hold_days": 25,
+        "confidence": "suggestive"
+      },
+      "stopped_share": 0.0
+    },
+    "TIER3": {
+      "all": {
+        "n": 16,
+        "win_rate": 12.5,
+        "expectancy": -10.34,
+        "profit_factor": 0.09,
+        "net_dollar": -7461.0,
+        "avg_hold_days": 16.9,
+        "confidence": "actionable"
+      },
+      "stopped_out": {
+        "n": 9,
+        "win_rate": 0.0,
+        "expectancy": -16.62,
+        "profit_factor": 0.0,
+        "net_dollar": -7069.77,
+        "avg_hold_days": 9.6,
+        "confidence": "suggestive"
+      },
+      "not_stopped": {
+        "n": 7,
+        "win_rate": 28.6,
+        "expectancy": -2.26,
+        "profit_factor": 0.52,
+        "net_dollar": -391.23,
+        "avg_hold_days": 26.3,
+        "confidence": "suggestive"
+      },
+      "stopped_share": 0.56
+    }
+  },
   "hold_time": {
-    "by_bucket": {},
-    "avg_hold_winners": null,
-    "avg_hold_losers": null,
+    "by_bucket": {
+      "0-1d": {
+        "n": 1,
+        "win_rate": 0.0,
+        "expectancy": -15.98,
+        "profit_factor": 0.0,
+        "net_dollar": -763.13,
+        "avg_hold_days": 1,
+        "confidence": "anecdote"
+      },
+      "16-30d": {
+        "n": 8,
+        "win_rate": 12.5,
+        "expectancy": -8.98,
+        "profit_factor": 0.03,
+        "net_dollar": -3012.58,
+        "avg_hold_days": 18.9,
+        "confidence": "suggestive"
+      },
+      "2-5d": {
+        "n": 8,
+        "win_rate": 12.5,
+        "expectancy": -5.21,
+        "profit_factor": 0.05,
+        "net_dollar": -1823.64,
+        "avg_hold_days": 3,
+        "confidence": "suggestive"
+      },
+      "30d+": {
+        "n": 5,
+        "win_rate": 40.0,
+        "expectancy": 0.9,
+        "profit_factor": 1.23,
+        "net_dollar": 624.55,
+        "avg_hold_days": 49.6,
+        "confidence": "suggestive"
+      },
+      "6-15d": {
+        "n": 8,
+        "win_rate": 0.0,
+        "expectancy": -12.61,
+        "profit_factor": 0.0,
+        "net_dollar": -4795.27,
+        "avg_hold_days": 10.6,
+        "confidence": "suggestive"
+      }
+    },
+    "avg_hold_winners": 28.5,
+    "avg_hold_losers": 15.2,
     "note": "Winners held markedly shorter than losers is the classic cut-flowers-water-weeds pattern \u2014 take profit later, cut losers sooner."
   },
   "judge_calibration": {
-    "correlation": null,
-    "n": 0,
-    "by_score_band": {},
+    "correlation": -0.512,
+    "n": 21,
+    "by_score_band": {
+      "7.0-7.9": {
+        "n": 2,
+        "win_rate": 0.0,
+        "expectancy": -7.95,
+        "profit_factor": 0.0,
+        "net_dollar": -349.43,
+        "avg_hold_days": 41,
+        "confidence": "anecdote"
+      },
+      "8.0-8.9": {
+        "n": 10,
+        "win_rate": 10.0,
+        "expectancy": -8.72,
+        "profit_factor": 0.03,
+        "net_dollar": -3742.42,
+        "avg_hold_days": 16.5,
+        "confidence": "actionable"
+      },
+      "9.0+": {
+        "n": 5,
+        "win_rate": 0.0,
+        "expectancy": -13.04,
+        "profit_factor": 0.0,
+        "net_dollar": -3109.27,
+        "avg_hold_days": 9.6,
+        "confidence": "suggestive"
+      },
+      "<7.0": {
+        "n": 4,
+        "win_rate": 25.0,
+        "expectancy": -0.75,
+        "profit_factor": 0.75,
+        "net_dollar": 53.22,
+        "avg_hold_days": 16.8,
+        "confidence": "anecdote"
+      }
+    },
     "note": "A correlation near zero means the Judge score carries no predictive power over outcomes and the weights are decorative."
   },
-  "criteria_power": {},
+  "criteria_power": {
+    "news": {
+      "correlation": -0.181,
+      "n": 21,
+      "confidence": "actionable"
+    },
+    "portfolio": {
+      "correlation": -0.441,
+      "n": 21,
+      "confidence": "actionable"
+    },
+    "technical": {
+      "correlation": -0.259,
+      "n": 21,
+      "confidence": "actionable"
+    }
+  },
   "entry_conditions": {
-    "by_rsi": {},
-    "by_atr": {},
-    "by_entry_quality": {},
-    "by_signal": {},
+    "by_rsi": {
+      "45-60": {
+        "n": 1,
+        "win_rate": 100.0,
+        "expectancy": 2.34,
+        "profit_factor": null,
+        "net_dollar": 106.68,
+        "avg_hold_days": 4,
+        "confidence": "anecdote"
+      },
+      "overbought 60+": {
+        "n": 1,
+        "win_rate": 0.0,
+        "expectancy": -8.95,
+        "profit_factor": 0.0,
+        "net_dollar": -428.47,
+        "avg_hold_days": 4,
+        "confidence": "anecdote"
+      }
+    },
+    "by_atr": {
+      "high 4%+": {
+        "n": 1,
+        "win_rate": 0.0,
+        "expectancy": -8.95,
+        "profit_factor": 0.0,
+        "net_dollar": -428.47,
+        "avg_hold_days": 4,
+        "confidence": "anecdote"
+      },
+      "mid 2-4%": {
+        "n": 1,
+        "win_rate": 100.0,
+        "expectancy": 2.34,
+        "profit_factor": null,
+        "net_dollar": 106.68,
+        "avg_hold_days": 4,
+        "confidence": "anecdote"
+      }
+    },
+    "by_entry_quality": {
+      "FAIR": {
+        "n": 2,
+        "win_rate": 50.0,
+        "expectancy": -3.3,
+        "profit_factor": 0.26,
+        "net_dollar": -321.79,
+        "avg_hold_days": 4,
+        "confidence": "anecdote"
+      }
+    },
+    "by_signal": {
+      "STRONG_BUY": {
+        "n": 20,
+        "win_rate": 10.0,
+        "expectancy": -8.37,
+        "profit_factor": 0.06,
+        "net_dollar": -6960.45,
+        "avg_hold_days": 17.9,
+        "confidence": "actionable"
+      },
+      "WEAK_BUY": {
+        "n": 1,
+        "win_rate": 0.0,
+        "expectancy": -4.02,
+        "profit_factor": 0.0,
+        "net_dollar": -187.45,
+        "avg_hold_days": 5,
+        "confidence": "anecdote"
+      }
+    },
     "rsi_correlation": {
       "r": null,
-      "n": 0
+      "n": 2
     },
     "entry_score_correlation": {
       "r": null,
-      "n": 0
+      "n": 2
     }
   },
-  "by_regime": {},
+  "by_regime": {
+    "RISK_ON": {
+      "n": 22,
+      "win_rate": 9.1,
+      "expectancy": -8.19,
+      "profit_factor": 0.06,
+      "net_dollar": -7579.24,
+      "avg_hold_days": 17.5,
+      "confidence": "actionable"
+    },
+    "UNKNOWN": {
+      "n": 8,
+      "win_rate": 25.0,
+      "expectancy": -5.73,
+      "profit_factor": 0.27,
+      "net_dollar": -2190.83,
+      "avg_hold_days": 15.4,
+      "confidence": "suggestive"
+    }
+  },
   "veto_cost": {
     "other": {
       "5d": {
@@ -133,7 +427,7 @@
     }
   },
   "counts": {
-    "round_trips": 0,
+    "round_trips": 30,
     "vetoes": 57,
     "judge_days": 17,
     "priced_symbols": 130
