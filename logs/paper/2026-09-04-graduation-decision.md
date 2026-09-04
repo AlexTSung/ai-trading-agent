@@ -1,14 +1,14 @@
 # Graduation Decision — 2026-09-04
 
 **Baseline**: 2026-08-20 (Phase 2B)
-**Trades counted**: 4
+**Trades counted**: 0
 **Honest equity**: unavailable  (baseline $91,455.93)
 
 ## Criteria
 
 | Criterion | Required | Actual | |
 |---|---|---|---|
-| Occurrences (scored buys) | ≥15 | 4 | ❌ |
+| Occurrences (scored buys) | ≥15 | 0 | ❌ |
 | Closed round trips | ≥10 | 2 | ❌ |
 | Net return | ≥+3.0% | unavailable | ❌ |
 | Profit factor (realized) | ≥1.5 | 2.56 | ✅ |
@@ -16,16 +16,16 @@
 | Realized win rate | ≥55.0% | 50.0% | ❌ |
 | Reviewer win rate | ≥55.0% | 0.0% | ❌ |
 | Avg Judge score | ≥7.0 | 0.00 | ❌ |
-| Avg Reviewer score | ≥6.0 | 6.00 | ✅ |
+| Avg Reviewer score | ≥6.0 | 0.00 | ❌ |
 | Beat SPY | agent > SPY | unavailable | ❌ |
 
 ## Verdict
 
 **DO NOT GRADUATE.** Phase 3 stays locked.
 
-Failing: Occurrences (scored buys), Closed round trips, Net return, Realized win rate, Reviewer win rate, Avg Judge score, Beat SPY.
+Failing: Occurrences (scored buys), Closed round trips, Net return, Realized win rate, Reviewer win rate, Avg Judge score, Avg Reviewer score, Beat SPY.
 
-Only 4 qualifying trade(s) since the baseline. Note that reviewer.py scores buys only, so a period of net selling produces no calibration rows at all.
+Only 0 qualifying trade(s) since the baseline. Note that reviewer.py scores buys only, so a period of net selling produces no calibration rows at all.
 
 ## Closed round trips
 
