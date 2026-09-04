@@ -38,11 +38,11 @@
 | USD_CHF | 0 | 2 | $-550.34 | -15.3 | ⛔ Deprioritized |
 
 ## What the Agent Learned (5 adjustments)
-- ⬇️ **carry** weight: 0.505 → 0.5 — avg score 0.45 in wins vs 1.00 in losses — not predictive (delta=-0.55)
-- ⬇️ **momentum** weight: 0.621 → 0.559 — avg score 0.45 in wins vs 1.00 in losses — not predictive (delta=-0.55)
-- ⬇️ **session** weight: 0.505 → 0.5 — avg score 0.44 in wins vs 0.75 in losses — not predictive (delta=-0.31)
-- ⬇️ **volatility** weight: 0.505 → 0.5 — avg score 0.42 in wins vs 0.70 in losses — not predictive (delta=-0.27)
-- ⬇️ **risk_reward** weight: 0.505 → 0.5 — avg score 0.46 in wins vs 0.85 in losses — not predictive (delta=-0.39)
+- ⬇️ **carry** weight: 0.504 → 0.5 — avg score 0.45 in wins vs 1.00 in losses — not predictive (delta=-0.55)
+- ⬇️ **momentum** weight: 0.564 → 0.508 — avg score 0.45 in wins vs 1.00 in losses — not predictive (delta=-0.55)
+- ⬇️ **session** weight: 0.504 → 0.5 — avg score 0.44 in wins vs 0.75 in losses — not predictive (delta=-0.31)
+- ⬇️ **volatility** weight: 0.504 → 0.5 — avg score 0.42 in wins vs 0.70 in losses — not predictive (delta=-0.27)
+- ⬇️ **risk_reward** weight: 0.504 → 0.5 — avg score 0.46 in wins vs 0.85 in losses — not predictive (delta=-0.39)
 
 ## Direction Bias
 - Long win rate:  0.6
@@ -53,8 +53,8 @@
 ```json
 {
   "carry": 0.504,
-  "momentum": 0.564,
-  "technical": 7.42,
+  "momentum": 0.512,
+  "technical": 7.474,
   "session": 0.504,
   "volatility": 0.504,
   "risk_reward": 0.504
