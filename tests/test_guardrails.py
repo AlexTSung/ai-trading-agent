@@ -617,6 +617,36 @@ class TestGraduationGate(unittest.TestCase):
         self.assertGreater(reviewer.IMPLAUSIBLE_PNL_PCT, 0)
         self.assertLess(reviewer.TOTAL_LOSS_PNL_PCT, 0)
 
+    def test_is_options_symbol_detects_occ_format(self):
+        self.assertTrue(reviewer.is_options_symbol("NVDA261016P00200000"))
+        self.assertTrue(reviewer.is_options_symbol("MSFT261016P00450000"))
+        self.assertFalse(reviewer.is_options_symbol("AAPL"))
+        self.assertFalse(reviewer.is_options_symbol("NVDA"))
+        self.assertFalse(reviewer.is_options_symbol(""))
+        self.assertFalse(reviewer.is_options_symbol(None))
+
+    def test_graduation_excludes_historical_options_rows_from_calibration_log(self):
+        """
+        The 2026-09-03 calibration log had rows written before the
+        get_orders_today() fix, with no book field to retro-filter on. The
+        OCC symbol format is what run_graduation_decision() uses to exclude
+        those rows without rewriting the log itself.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, "calibration-log.csv"),
+                      "w", newline="") as f:
+                w = csv.writer(f)
+                w.writerow(["date", "symbol", "side", "judge_score",
+                            "reviewer_score", "pnl_pct", "verdict", "delta"])
+                w.writerow(["2026-09-01", "NVDA261016P00200000", "buy", "",
+                            "5.0", "-11.83", "POOR_TRADE", ""])
+                w.writerow(["2026-08-21", "AAPL", "buy", "7.5", "8.0",
+                            "2.0", "GOOD_TRADE", "0.5"])
+            with mock.patch.object(reviewer, "JOURNAL_DIR", tmp):
+                report = reviewer.run_graduation_decision(since="2026-08-20")
+        self.assertNotIn("NVDA261016P00200000", report)
+        self.assertIn("**Trades counted**: 1", report)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
