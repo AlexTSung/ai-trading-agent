@@ -512,7 +512,7 @@
     },
     "environment": "practice",
     "opened_at": "2026-09-03T08:45:43.954168+00:00",
-    "unrealized_pl": -623.8254,
+    "unrealized_pl": -762.7683,
     "current_price": 0.58643
   },
   {
@@ -595,11 +595,11 @@
     },
     "environment": "practice",
     "opened_at": "2026-09-04T08:41:04.033746+00:00",
-    "unrealized_pl": -79.9676,
+    "unrealized_pl": 31.3874,
     "current_price": 181.695
   },
   {
-    "status": "open",
+    "status": "closed",
     "event": "open",
     "pair": "GBP_JPY",
     "direction": "SHORT",
@@ -679,6 +679,94 @@
     "environment": "practice",
     "opened_at": "2026-09-04T08:41:04.476064+00:00",
     "unrealized_pl": -61.9312,
-    "current_price": 211.553
+    "current_price": 211.553,
+    "realized_pl": 831.42,
+    "pip_pl": 0.8,
+    "close_price": 210.365,
+    "close_reason": "stop_loss",
+    "closed_at": "2026-09-04T13:30:04.855044215Z"
+  },
+  {
+    "status": "open",
+    "event": "open",
+    "pair": "USD_CAD",
+    "direction": "SHORT",
+    "trade_id": "283",
+    "units": -453961,
+    "entry_price": 1.3833,
+    "stop_price": 1.38943,
+    "tp1_price": 1.37118,
+    "score": 7.99,
+    "confluence": null,
+    "size_multiplier": 1.0,
+    "factors": {
+      "carry": {
+        "score": 0.4,
+        "weight": 0.51,
+        "detail": {
+          "carry_pct": 0.25,
+          "carry_signal": "NEUTRAL",
+          "raw_score": 0.4
+        }
+      },
+      "momentum": {
+        "score": 0.6,
+        "weight": 0.62,
+        "detail": {
+          "daily_momentum": "bearish",
+          "ma_cross": "bearish",
+          "below_ma20": true,
+          "signals": 3,
+          "raw_score": 0.6
+        }
+      },
+      "technical": {
+        "score": 0.833,
+        "weight": 7.36,
+        "detail": {
+          "rsi14": "ok_at_40.3",
+          "rsi2": "overbought_100",
+          "macd": "bearish",
+          "ibs": "overbought_0.927",
+          "pivot": "below_pivot",
+          "points": 5,
+          "raw_score": 0.833
+        }
+      },
+      "session": {
+        "score": 1.0,
+        "weight": 0.51,
+        "detail": {
+          "session_quality": "london_ny_overlap",
+          "utc_hour": 15,
+          "raw_score": 1.0
+        }
+      },
+      "volatility": {
+        "score": 0.7,
+        "weight": 0.51,
+        "detail": {
+          "spread_pips": 1.7,
+          "spread_ok": true,
+          "atr_pips": 30.4,
+          "atr_regime": "borderline",
+          "raw_score": 0.7
+        }
+      },
+      "risk_reward": {
+        "score": 0.85,
+        "weight": 0.51,
+        "detail": {
+          "rr_ratio": 2.0,
+          "stop_pips": 61,
+          "tp1_pips": 122,
+          "raw_score": 0.85
+        }
+      }
+    },
+    "environment": "practice",
+    "opened_at": "2026-09-04T15:47:48.327751+00:00",
+    "unrealized_pl": -55.7893,
+    "current_price": 1.3833
   }
 ]
