@@ -113,7 +113,12 @@ def get_orders_today():
                      headers=_headers(),
                      params={"status": "all", "after": today, "limit": 100})
     r.raise_for_status()
-    return r.json()
+    # /v2/orders returns both books on the shared Alpaca account. reviewer.py
+    # is the EQUITIES reviewer feeding the real-money graduation decision;
+    # "Options do not share the equities graduation gate" means an options
+    # fill scored here and written into calibration-log.csv would corrupt
+    # that decision with a book it was never meant to measure.
+    return [o for o in r.json() if o.get("asset_class") != "us_option"]
 
 def get_bars_today(symbol):
     """Get today's intraday bars for post-trade movement scoring."""
@@ -346,7 +351,11 @@ def fetch_filled_orders(since: str) -> list:
         fresh = [o for o in page
                  if o.get("id") not in seen
                  and o.get("status") in ("filled", "partially_filled")
-                 and float(o.get("filled_qty") or 0) > 0]
+                 and float(o.get("filled_qty") or 0) > 0
+                 # Same shared-account leak as get_orders_today(): options
+                 # fills must not enter the equities round-trip ledger that
+                 # feeds the graduation decision.
+                 and o.get("asset_class") != "us_option"]
         if not page:
             break
         for o in fresh:
@@ -372,7 +381,12 @@ def build_round_trips(orders: list) -> tuple:
     whether the exit was any good and judges a 30-day hold on its first
     afternoon.
 
-    Quarantined symbols are skipped entirely.
+    Quarantined symbols are skipped entirely, and so is anything with
+    asset_class "us_option" -- see the 2026-09-03 graduation decision, whose
+    round-trip ledger included two options contracts (NVDA261016P00200000,
+    MSFT261016P00450000) alongside the real equity exits because neither this
+    function nor fetch_filled_orders()/get_orders_today() filtered the shared
+    account's order list by book before this fix.
     """
     from collections import defaultdict, deque
 
@@ -382,6 +396,11 @@ def build_round_trips(orders: list) -> tuple:
     for o in orders:
         sym = o.get("symbol")
         if not sym or sym in QUARANTINED_SYMBOLS:
+            continue
+        # Options do not share the equities graduation gate (CLAUDE.md) --
+        # belt-and-suspenders in case a caller passes an unfiltered order
+        # list straight from the shared Alpaca account.
+        if o.get("asset_class") == "us_option":
             continue
         try:
             qty   = float(o["filled_qty"])

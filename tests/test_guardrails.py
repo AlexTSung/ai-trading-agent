@@ -506,10 +506,11 @@ class TestAgentIsolation(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 # Round-trip P&L
 # ══════════════════════════════════════════════════════════════════════════════
-def _order(sym, side, qty, price, day):
+def _order(sym, side, qty, price, day, asset_class="us_equity"):
     return {"id": f"{sym}-{side}-{day}-{price}", "symbol": sym, "side": side,
             "filled_qty": str(qty), "filled_avg_price": str(price),
-            "filled_at": f"{day}T15:00:00Z", "status": "filled"}
+            "filled_at": f"{day}T15:00:00Z", "status": "filled",
+            "asset_class": asset_class}
 
 
 class TestRoundTrips(unittest.TestCase):
@@ -553,6 +554,43 @@ class TestRoundTrips(unittest.TestCase):
         self.assertEqual(m["count"], 2)
         self.assertAlmostEqual(m["win_rate"], 50.0)
         self.assertAlmostEqual(m["profit_factor"], 2.0)
+
+    def test_options_fills_never_enter_the_equities_ledger(self):
+        """
+        2026-09-03: the graduation decision's round-trip table included
+        NVDA261016P00200000 and MSFT261016P00450000 -- options contracts --
+        alongside real equity exits, because nothing filtered the shared
+        Alpaca account's order list by book. "Options do not share the
+        equities graduation gate" (CLAUDE.md) means this must be zero.
+        """
+        orders = [
+            _order("AAPL", "buy", 10, 200.0, "2026-08-21"),
+            _order("AAPL", "sell", 10, 220.0, "2026-08-25"),
+            _order("NVDA261016P00200000", "buy", 1, 2.79, "2026-09-01",
+                   asset_class="us_option"),
+            _order("NVDA261016P00200000", "sell", 1, 2.46, "2026-09-02",
+                   asset_class="us_option"),
+        ]
+        trips, _ = reviewer.build_round_trips(orders)
+        self.assertEqual([t["symbol"] for t in trips], ["AAPL"])
+
+    def test_get_orders_today_excludes_options_fills(self):
+        """
+        run_eod_review() scores every buy get_orders_today() returns and
+        writes the result into calibration-log.csv -- the same file
+        run_graduation_decision() reads. An options buy fill scored with the
+        equities Judge's lookup (which never has that symbol) writes an empty
+        judge_score row that still counts toward "Occurrences (scored buys)".
+        """
+        with mock.patch.object(reviewer, "requests") as rq:
+            rq.get.return_value.raise_for_status = lambda: None
+            rq.get.return_value.json.return_value = [
+                _order("AAPL", "buy", 10, 200.0, "2026-09-03"),
+                _order("MSFT261016P00450000", "buy", 1, 3.25, "2026-09-03",
+                       asset_class="us_option"),
+            ]
+            orders = reviewer.get_orders_today()
+        self.assertEqual([o["symbol"] for o in orders], ["AAPL"])
 
 
 # ══════════════════════════════════════════════════════════════════════════════
