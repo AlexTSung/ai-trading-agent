@@ -84,6 +84,23 @@ PHASE2B_BASELINE_EQUITY = 91455.93
 # Its P&L is still recorded in the journals for the audit trail.
 QUARANTINED_SYMBOLS = {"LBGJ"}
 
+# calibration-log.csv rows written before the get_orders_today()/
+# fetch_filled_orders() asset_class fix (2026-09-04) have no book field to
+# retro-filter on, and options fills from that period are already baked in
+# (see the 2026-09-03 graduation decision). The OCC contract symbol format
+# itself is unambiguous -- root ticker + YYMMDD + C/P + 8-digit strike, e.g.
+# "NVDA261016P00200000" -- and no equity ticker collides with it, so
+# run_graduation_decision() uses this to exclude those historical rows
+# without rewriting the calibration log itself (same "exclude from
+# measurement, don't erase the record" principle as QUARANTINED_SYMBOLS).
+import re
+OPTIONS_SYMBOL_RE = re.compile(r"^[A-Z]{1,6}\d{6}[CP]\d{8}$")
+
+
+def is_options_symbol(symbol: str) -> bool:
+    return bool(OPTIONS_SYMBOL_RE.match(symbol or ""))
+
+
 # ── Auth ─────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
 ALPACA_SECRET = os.getenv("APCA_API_SECRET_KEY")
@@ -596,6 +613,7 @@ def run_graduation_decision(since: str = PHASE2B_BASELINE_DATE) -> str:
         all_rows = list(csv.DictReader(f))
 
     rows       = [r for r in all_rows if r.get("date", "") >= since]
+    rows       = [r for r in rows if not is_options_symbol(r.get("symbol"))]
     quarantine = [r for r in rows if r.get("symbol") in QUARANTINED_SYMBOLS]
     rows       = [r for r in rows if r.get("symbol") not in QUARANTINED_SYMBOLS]
     suspect    = [r for r in rows if r.get("verdict") == "DATA_SUSPECT"]
