@@ -54,7 +54,7 @@
 {
   "carry": 0.5,
   "momentum": 0.5,
-  "technical": 7.499,
+  "technical": 7.5,
   "session": 0.5,
   "volatility": 0.5,
   "risk_reward": 0.5
