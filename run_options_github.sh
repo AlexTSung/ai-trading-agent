@@ -50,17 +50,27 @@ if [ -f "$DONE_MARKER" ]; then
   exit 0
 fi
 
-# ── GUARDRAIL G2: Time window — 9:35 AM to 11:30 AM ET ────────────────────
-# Same window as the equities morning pipeline. IV rank and the option chain
-# are freshest right after open; running this against a stale mid-afternoon
-# snapshot is worse than not running, so it does not run all day like the
-# equities midday check does.
+# ── GUARDRAIL G2: Time window — 9:35 AM to 4:00 PM ET ─────────────────────
+# Widened from 9:35-11:30 AM on 2026-09-08, same reason and same day as the
+# equities morning pipeline (see run_github.sh): a 105-minute window with
+# redundant cron attempts inside it assumed scheduler delays were occasional
+# and roughly random. Instead GitHub delayed the whole block of triggers by a
+# similar multi-hour offset on 2026-09-03, 09-04 and 09-07, so every attempt
+# missed the old cutoff together and this pipeline produced zero real runs
+# those days.
+#
+# IV rank and the option chain are genuinely freshest right after open, and
+# that tradeoff is real -- widening this window does trade freshness for
+# reliability, unlike the equities side where daily-bar signals barely
+# degrade intraday. But a stale-but-real afternoon snapshot that can still
+# manage existing positions and screen for new ones beats a guaranteed-empty
+# day, which is what the narrow window was actually producing.
 HOUR_ET=$(TZ="America/New_York" date +%-H)
 MIN_ET=$(TZ="America/New_York" date +%-M)
 MINS_ET=$((HOUR_ET * 60 + MIN_ET))
 if [ "${TEST_MODE}" != "1" ]; then
-  if [ "$MINS_ET" -lt $((9 * 60 + 35)) ] || [ "$MINS_ET" -gt $((11 * 60 + 30)) ]; then
-    printf "GUARDRAIL G2: outside the 9:35-11:30 AM ET window (%02d:%02d ET) — skipping (not a failure).\n" \
+  if [ "$MINS_ET" -lt $((9 * 60 + 35)) ] || [ "$MINS_ET" -gt $((16 * 60)) ]; then
+    printf "GUARDRAIL G2: outside the 9:35 AM-4:00 PM ET window (%02d:%02d ET) — skipping (not a failure).\n" \
       "$HOUR_ET" "$MIN_ET"
     exit 0
   fi

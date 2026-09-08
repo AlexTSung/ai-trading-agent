@@ -41,6 +41,25 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.1.1] — 2026-09-08
+
+**PATCH** — Widen morning/options execution window from 11:30 AM to 4:00 PM ET: three straight trading days (Sept 3, 4, 7) had zero real research despite green workflow runs because GitHub Actions delayed the entire block of a day's redundant cron triggers together, past the old 105-minute window. Matches midday's proven 6-hour window. No scoring/gate/strategy change -- restores the intended behavior of actually running most days, which the narrow window was defeating.
+
+### Strategy / CLAUDE.md changes
+- Daily Schedule table: morning and options windows now run 9:45 AM-2:30 PM / 9:40 AM-2:35 PM ET (was 9:45/9:40-11:15/11:10 AM), with two more backup cron attempts each spread across the wider window, mirroring midday's pattern
+- Options-improvements item 2 ("Schedule it") updated to note the widened window
+- "Guardrails inside the runners" line: morning/options abort time moved from 11:30 AM to 4:00 PM ET
+
+### Code changes
+- `run_github.sh` GUARDRAIL G2: cutoff `11 * 60 + 30` → `16 * 60`
+- `run_options_github.sh` GUARDRAIL G2: cutoff `11 * 60 + 30` → `16 * 60`
+- `.github/workflows/morning-pipeline.yml`: added `0 17` (1:00 PM ET) and `30 18` (2:30 PM ET) backup crons
+- `.github/workflows/options-pipeline.yml`: added `5 17` (1:05 PM ET) and `35 18` (2:35 PM ET) backup crons, offset 5 min from morning's to reduce (not eliminate — the push-retry fix already handles a collision) simultaneous-push races
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** No Judge criterion, gate, sizing rule, or scoring weight changed. Research run later in the same trading day scores identically to research run earlier — MA20/RSI signals are computed from daily bars, not intraday ticks. The options side does trade some intraday freshness (IV rank, chain snapshot) for reliability; that tradeoff is documented in run_options_github.sh's GUARDRAIL G2 comment but does not change any risk gate or the options graduation baseline.
+
+
 ## [v1.1.0] — unreleased
 
 **MINOR** — Widen the trade funnel without loosening any risk gate: fix a silently-dead discovery channel (NameError swallowed by a broad except, zero tickers reaching the Judge from Alpaca most-active/gainers/Reddit every day), widen options MAX_SCANNED to cover the full watchlist and TOP_N_CANDIDATES above the position cap, and schedule the options pipeline in GitHub Actions for the first time. Also adds redundant same-window cron triggers to morning/midday/EOD so a GitHub Actions scheduler delay (observed 3.5-9h) can no longer zero out a whole trading day.
