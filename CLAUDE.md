@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v1.1.0
+> **Version:** v1.1.1
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -344,8 +344,9 @@ estimated is reported as `estimate`, never blended.
    only managed positions when a laptop happened to be on. Short options are
    the *least* safe thing to monitor intermittently. `run_options_github.sh` +
    `.github/workflows/options-pipeline.yml` schedule it the same way, with the
-   same 9:35–11:30 AM ET window and redundant-trigger pattern as the equities
-   morning pipeline (see Daily Schedule below).
+   same 9:35 AM–4:00 PM ET window and redundant-trigger pattern as the equities
+   morning pipeline (see Daily Schedule below). The window was widened from
+   11:30 AM on 2026-09-08 — see the Daily Schedule section for why.
 3. **Earnings blackout.** The equities Judge vetoes entries within 3 days of
    earnings. Selling premium into an earnings print is the same mistake with
    more leverage — and IV rank will look attractive precisely because the event
@@ -458,26 +459,34 @@ reviewer) was aspirational and never existed in cron.
 
 **Multiple cron entries per job are redundant attempts, not extra runs.**
 GitHub Actions scheduled triggers are not guaranteed to fire on time —
-delays of 3.5–9 hours have actually happened on this repo, and a single
-morning trigger landing after the 11:30 AM ET cutoff meant the *entire
-trading day* got zero research and zero trades, not a late one. Every extra
-cron below sits inside the same legal window its job already enforces; the
-first one to land inside the window runs the pipeline, and every trigger
-after that is a free no-op — the morning/EOD/options jobs check an
-idempotency marker before doing any work, and the midday job's checks
-(`check-stops`, `check-phantom`) are read-check-act operations where running
-more often is strictly better, not just delay insurance.
+delays of 3.5–9 hours have actually happened on this repo. The morning and
+options windows originally cut off at 11:30 AM ET, on the assumption that
+delays were occasional and roughly random, so spreading a few attempts across
+105 minutes would likely land one inside it. On 2026-09-03, 09-04 and 09-07
+GitHub instead delayed the *entire block* of a day's triggers by a similar
+multi-hour offset together — every attempt on all three days landed between
+1 PM and 3 PM ET, after the cutoff, producing zero real research on three
+straight trading days despite every scheduled run showing green. Widened to
+4:00 PM ET on 2026-09-08, matching the midday window, which had gotten real
+checks in on nearly all of those same delayed days because 6 hours is wide
+enough to catch a multi-hour delay landing anywhere inside it. Every extra
+cron below sits inside the legal window its job enforces; the first one to
+land inside the window runs the pipeline, and every trigger after that is a
+free no-op — the morning/EOD/options jobs check an idempotency marker before
+doing any work, and the midday job's checks (`check-stops`, `check-phantom`)
+are read-check-act operations where running more often is strictly better,
+not just delay insurance.
 
 | ET | Workflow / runner | Cron (UTC) | Steps, in order |
 |---|---|---|---|
-| **9:45 AM** (+3 backups to 11:15) | `morning-pipeline.yml`<br>`run_github.sh` | `45 13`, `15 14`, `45 14`, `15 15 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
-| **9:40 AM** (+2 backups to 11:10) | `options-pipeline.yml`<br>`run_options_github.sh` | `40 13`, `10 14`, `10 15 * * 1-5` | `run_options.py` — manage existing positions, then screen the options watchlist for new defined-risk trades. Same 9:35–11:30 AM ET window as equities morning: IV rank and the chain are freshest right after open. Existed only as a local `run_options*.sh` tied to one machine before this. |
+| **9:45 AM** (+5 backups to 2:30 PM) | `morning-pipeline.yml`<br>`run_github.sh` | `45 13`, `15 14`, `45 14`, `15 15`, `0 17`, `30 18 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
+| **9:40 AM** (+4 backups to 2:35 PM) | `options-pipeline.yml`<br>`run_options_github.sh` | `40 13`, `10 14`, `10 15`, `5 17`, `35 18 * * 1-5` | `run_options.py` — manage existing positions, then screen the options watchlist for new defined-risk trades. Same 9:35 AM–4:00 PM ET window as equities morning. IV rank and the chain are freshest right after open, and widening this window trades some of that freshness for reliability — see run_options_github.sh's GUARDRAIL G2 comment. Existed only as a local `run_options*.sh` tied to one machine before this. |
 | **10:30 AM, 12:00 PM, 2:00 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `30 14`, `0 16`, `0 18 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
 | **5:15 PM** (+1 backup at 6:00 PM) | `eod-pipeline.yml`<br>`run_eod_github.sh` | `15 21`, `0 22 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
 | **Sep 3, 5:30 PM** | `graduation-decision.yml` | `30 21 3 9 *` | `reviewer.py graduation` — Phase 2B verdict. Advisory only; manual approval still required. |
 
 Guardrails inside the runners: weekends skip; the morning and options jobs
-abort after 11:30 AM ET; the midday job runs only between 10:00 AM and 4:00 PM
+abort after 4:00 PM ET; the midday job runs only between 10:00 AM and 4:00 PM
 ET; the EOD job refuses to run before 4:00 PM ET. Every one of these is
 computed from the **real US/Eastern wall-clock time** (`TZ="America/New_York"
 date`, or `market_time.py` in the Python layer) rather than the runner's UTC

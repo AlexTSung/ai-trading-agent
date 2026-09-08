@@ -3,19 +3,27 @@ name: Options Trading Pipeline
 on:
   schedule:
     # Same window and redundant-trigger pattern as morning-pipeline.yml: a
-    # primary target inside 9:35-11:30 AM ET, plus backups so a GitHub
-    # Actions scheduler delay (observed on this repo: 3.5-9h) can't zero out
-    # an entire day. run_options_github.sh's GUARDRAIL G1 makes every trigger
-    # after the first a free no-op once one succeeds.
+    # primary target inside 9:35 AM-4:00 PM ET, plus backups so a GitHub
+    # Actions scheduler delay (observed on this repo: 3.5-9h, and on
+    # 2026-09-03/04/07 an entire block of same-day triggers delayed by a
+    # similar multi-hour offset together) can't zero out an entire day.
+    # run_options_github.sh's GUARDRAIL G1 makes every trigger after the
+    # first a free no-op once one succeeds. Window widened from 11:30 AM to
+    # 4:00 PM on 2026-09-08 for the same reason and on the same day as
+    # morning-pipeline.yml — see run_options_github.sh's GUARDRAIL G2 comment
+    # for the freshness-vs-reliability tradeoff that widening this window
+    # specifically (unlike the equities side) does trade away.
     #
-    # This workflow did not exist before. CLAUDE.md's options-improvements
-    # list has said "Schedule it" since the strategy was first written down —
-    # equities and forex ran in GitHub Actions, options only ever ran from a
-    # local run_options.sh tied to one machine being on. Short options are the
-    # LEAST safe thing to monitor intermittently.
+    # This workflow did not exist before 2026-09-02. CLAUDE.md's
+    # options-improvements list has said "Schedule it" since the strategy was
+    # first written down — equities and forex ran in GitHub Actions, options
+    # only ever ran from a local run_options.sh tied to one machine being on.
+    # Short options are the LEAST safe thing to monitor intermittently.
     - cron: '40 13 * * 1-5'   # 9:40 AM ET target
     - cron: '10 14 * * 1-5'   # 10:10 AM ET backup
-    - cron: '10 15 * * 1-5'   # 11:10 AM ET backup — last chance before the 11:30 cutoff
+    - cron: '10 15 * * 1-5'   # 11:10 AM ET backup
+    - cron: '5 17 * * 1-5'    # 1:05 PM ET backup
+    - cron: '35 18 * * 1-5'   # 2:35 PM ET backup — last chance before the 4:00 PM cutoff
   workflow_dispatch:
     inputs:
       test_mode:

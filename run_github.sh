@@ -40,8 +40,25 @@ if [ -f "$LOG_DIR/$DATE.json" ]; then
   exit 0
 fi
 
-# ── GUARDRAIL G2: Time window — must be at or before 11:30 AM ET ─────────
+# ── GUARDRAIL G2: Time window — must be at or before 4:00 PM ET ──────────
 # Skip time check when TEST_MODE=1 (for manual workflow_dispatch runs only)
+#
+# Widened from 11:30 AM on 2026-09-08. The 105-minute window (9:45-11:30 AM
+# ET, with 4 redundant cron attempts inside it) assumed scheduler delays were
+# occasional and roughly random, so multiple attempts spread across the
+# window would likely land one inside it. On 2026-09-03, 09-04 and 09-07,
+# GitHub instead delayed the ENTIRE block of triggers by a similar multi-hour
+# offset each day — all 4 attempts landed between 1 PM and 3 PM ET, after
+# every one of them had already missed the 11:30 cutoff. Three straight
+# trading days produced zero real research despite every scheduled run
+# showing green, discovered only by noticing logs/paper/ had no
+# judge.md/session.json for those dates.
+#
+# midday-pipeline.yml's 10 AM-4 PM ET window got real checks in on nearly all
+# of the same days a multi-hour-delayed trigger still landed inside 6 hours.
+# MA20/RSI signals are computed from daily bars, not intraday ticks, so a
+# same-day run in the early afternoon is not meaningfully staler for equities
+# than one at 10 AM — a late real run beats a guaranteed-skipped day.
 #
 # Derived directly from the America/New_York zone, not a fixed UTC offset.
 # The old "15:30 UTC" threshold assumed EDT (UTC-4); during EST it is off by
@@ -56,8 +73,8 @@ if [ "${TEST_MODE}" != "1" ]; then
   HOUR_ET=$(TZ="America/New_York" date +%-H)
   MIN_ET=$(TZ="America/New_York" date +%-M)
   MINS_ET=$((HOUR_ET * 60 + MIN_ET))
-  if [ "$MINS_ET" -gt $((11 * 60 + 30)) ]; then
-    echo "GUARDRAIL G2: Past 11:30 AM ET — skipping pipeline (not a failure)."
+  if [ "$MINS_ET" -gt $((16 * 60)) ]; then
+    echo "GUARDRAIL G2: Past 4:00 PM ET — skipping pipeline (not a failure)."
     exit 0
   fi
 fi
