@@ -1393,7 +1393,7 @@ class TestDiscoveryTickerExtraction(unittest.TestCase):
             result = research._extract_discovery_tickers(path)
         except NameError:
             self.fail("max_tickers must be a real parameter, not a free variable")
-        self.assertLessEqual(len(result), 15, "default cap should still apply")
+        self.assertLessEqual(len(result), 30, "default cap should still apply")
 
     def test_caller_threads_max_tickers_through(self):
         """_load_intelligence_tickers must pass its own max_tickers onward."""

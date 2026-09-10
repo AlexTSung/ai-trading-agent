@@ -515,8 +515,11 @@ def get_market_discovery():
         results["most_active_error"] = str(e)
 
     try:
-        # Top gainers and losers
-        url = f"{DATA_URL}/v1beta1/screener/stocks/movers?top=10"
+        # Top gainers and losers — matches most-actives' top=20 above; this
+        # pool feeds _extract_discovery_tickers in research.py, which was
+        # discarding half of a 10-gainer fetch to begin with, before the cap
+        # widening below.
+        url = f"{DATA_URL}/v1beta1/screener/stocks/movers?top=20"
         r = requests.get(url, headers=_alpaca_headers(), timeout=10)
         if r.status_code == 200:
             data = r.json()

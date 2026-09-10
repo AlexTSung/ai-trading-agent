@@ -339,7 +339,7 @@ def summarize_news(news_data):
     return headlines
 
 # ── Full Research Pass ───────────────────────────────────────────────────────
-def _load_social_tickers(max_tickers=10):
+def _load_social_tickers(max_tickers=20):
     """
     Read today's social screener output and return tickers that are
     safe_to_judge=True and not already on the watchlist.
@@ -375,7 +375,7 @@ def _load_social_tickers(max_tickers=10):
         return []
 
 
-def _load_intelligence_tickers(max_tickers=15):
+def _load_intelligence_tickers(max_tickers=30):
     """
     Read today's intelligence scan and return discovery tickers from 3 sources:
     - Alpaca most-active stocks (always reliable — fresh every day)
@@ -481,7 +481,7 @@ def load_intelligence_context() -> dict:
     return ctx
 
 
-def _extract_discovery_tickers(intel_path, max_tickers=15):
+def _extract_discovery_tickers(intel_path, max_tickers=30):
     """
     Harvest discovery tickers from the intelligence file.
 
@@ -525,7 +525,7 @@ def _extract_discovery_tickers(intel_path, max_tickers=15):
 
         # Top gainers filtered to < 8% (not a pump)
         gainers = []
-        for s in discovery.get("top_gainers", [])[:10]:
+        for s in discovery.get("top_gainers", [])[:20]:
             sym = s.get("symbol", "")
             price = s.get("price", 0)
             if not sym or len(sym) > 5 or sym in seen or (price and price < 5):
@@ -538,9 +538,11 @@ def _extract_discovery_tickers(intel_path, max_tickers=15):
                 "source": "alpaca_gainers",
             })
 
-        # Reddit trending tickers (bonus when available)
+        # Reddit trending tickers (bonus when available). scan_reddit()
+        # already returns up to 20 ranked tickers; this used to keep only 5
+        # of them for no reason tied to a risk control.
         reddit = []
-        for t in intel.get("reddit", {}).get("tickers", [])[:5]:
+        for t in intel.get("reddit", {}).get("tickers", [])[:15]:
             sym = t.get("symbol", "")
             if not sym or len(sym) > 5 or sym in seen:
                 continue
@@ -609,7 +611,7 @@ def _load_dip_tickers():
         return []
 
 
-def _load_screener_tickers(max_tickers=15):
+def _load_screener_tickers(max_tickers=25):
     """Load top candidates from today's full market screener output."""
     today = et_today_iso()
     path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-screener.json")
@@ -635,7 +637,7 @@ def _load_screener_tickers(max_tickers=15):
             })
 
         # Tickers hot in news firehose
-        for t in data.get("news_firehose", {}).get("hot_tickers", [])[:5]:
+        for t in data.get("news_firehose", {}).get("hot_tickers", [])[:10]:
             sym = t.get("symbol", "")
             if not sym or sym in seen or len(sym) > 5:
                 continue
@@ -648,7 +650,7 @@ def _load_screener_tickers(max_tickers=15):
             })
 
         # Congressional buys
-        for t in data.get("congressional", {}).get("congressional_buys", [])[:3]:
+        for t in data.get("congressional", {}).get("congressional_buys", [])[:5]:
             sym = t.get("symbol", "")
             if not sym or sym in seen or len(sym) > 5:
                 continue
@@ -682,9 +684,9 @@ def full_research():
     account = get_account()
 
     # ── Expand symbol list from all discovery sources ────────────────────────
-    social_tickers   = _load_social_tickers(max_tickers=10)
-    intel_tickers    = _load_intelligence_tickers(max_tickers=15)
-    screener_tickers = _load_screener_tickers(max_tickers=15)
+    social_tickers   = _load_social_tickers(max_tickers=20)
+    intel_tickers    = _load_intelligence_tickers(max_tickers=30)
+    screener_tickers = _load_screener_tickers(max_tickers=25)
     dip_tickers      = _load_dip_tickers()
 
     watchlist_syms = {item["symbol"] for item in watchlist_items}
@@ -723,7 +725,9 @@ def full_research():
         "intelligence": load_intelligence_context(),
         "discovery_sources": {
             "social_tickers": [t["symbol"] for t in social_tickers],
-            "reddit_tickers": [t["symbol"] for t in intel_tickers],
+            "intelligence_tickers": [t["symbol"] for t in intel_tickers],
+            "screener_tickers": [t["symbol"] for t in screener_tickers],
+            "dip_tickers": [t["symbol"] for t in dip_tickers],
         }
     }
 

@@ -41,6 +41,54 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.2.0] — 2026-09-10
+
+**MINOR** — Widen the research discovery funnel: raise per-source ticker caps
+across every discovery channel and unlock data that was already being fetched
+but discarded, plus fetch a modestly bigger pool at the API layer. No Judge
+criterion, gate, or sizing rule changed — more candidates reach `research.py`;
+the Judge's existing STRONG_BUY/WEAK_BUY eligibility filter still decides what
+gets scored, and every Hard Rule and risk gate is untouched.
+
+### Strategy / CLAUDE.md changes
+- None. This only changes how many candidates the Researcher looks at before
+  the existing Judge filter runs — no rule in CLAUDE.md changed.
+
+### Code changes
+- `intelligence.py get_market_discovery()`: Alpaca movers fetch `top=10` →
+  `top=20`, matching most-actives' already-20. The pool this feeds
+  (`top_gainers`) was being fetched at half the size research.py could use.
+- `research.py _load_social_tickers()`: default `max_tickers` 10 → 20
+  (StockTwits screener output already carries up to 50 tickers per day; this
+  was discarding 80% of it before today).
+- `research.py _extract_discovery_tickers()` / `_load_intelligence_tickers()`:
+  default `max_tickers` 15 → 30; per-source slices widened to match what's
+  already fetched — `top_gainers[:10]` → `[:20]`, `reddit tickers[:5]` →
+  `[:15]` (scan_reddit() already ranks and returns up to 20). Round-robin
+  interleaving (added in v1.1.0) is unchanged, so a full most-active batch
+  still can't crowd out gainers/Reddit picks.
+- `research.py _load_screener_tickers()`: default `max_tickers` 15 → 25;
+  `news_firehose hot_tickers[:5]` → `[:10]`, `congressional_buys[:3]` → `[:5]`.
+- `screener.py full_scan()`: default `top_n` 30 → 50 — more of the
+  already-pre-filtered S&P 500 + Nasdaq 100 universe survives into
+  `top_candidates`, with no additional API calls.
+- `research.py full_research()`: call sites updated to the new defaults; the
+  `discovery_sources` field in the research output now reports all four
+  discovery channels (`social_tickers`, `intelligence_tickers`,
+  `screener_tickers`, `dip_tickers`) instead of silently omitting screener and
+  dip tickers from the summary while still feeding them into research.
+- `tests/test_guardrails.py`: updated the one test that encoded the old
+  default cap (15) as an assertion; all 207 tests pass.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Every risk gate,
+  Judge scoring criterion, position-sizing rule, and Hard Rule is unchanged.
+  This widens the pool of symbols that reach `research.py` and, by extension,
+  the Judge's existing eligibility filter — it does not change what the Judge
+  approves, how much gets sized, or any stop/hold/cooldown rule. Same
+  precedent as v1.1.0's funnel widening, which was also MINOR.
+
+
 ## [v1.1.1] — 2026-09-08
 
 **PATCH** — Widen morning/options execution window from 11:30 AM to 4:00 PM ET: three straight trading days (Sept 3, 4, 7) had zero real research despite green workflow runs because GitHub Actions delayed the entire block of a day's redundant cron triggers together, past the old 105-minute window. Matches midday's proven 6-hour window. No scoring/gate/strategy change -- restores the intended behavior of actually running most days, which the narrow window was defeating.

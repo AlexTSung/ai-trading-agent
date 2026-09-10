@@ -343,7 +343,7 @@ def detect_dip_opportunities(snapshots, min_drop_pct=15.0, min_price=5.0, min_vo
 
 
 # ── Full morning scan ─────────────────────────────────────────────────────────
-def full_scan(top_n=30):
+def full_scan(top_n=50):
     """
     Complete market scan:
     1. Load S&P 500 + Nasdaq 100 universe
