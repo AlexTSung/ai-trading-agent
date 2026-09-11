@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-11T14:47:42.504208",
+  "timestamp": "2026-09-11T14:53:39.091195",
   "run_type": "morning_intelligence",
   "fear_greed": {
     "source": "fred_vix_proxy",
@@ -8,16 +8,91 @@
     "score": 65,
     "rating": "Greed",
     "signal": "GREED \u2014 risk-on, watch exits",
-    "timestamp": "2026-09-11T14:47:42.853478"
+    "timestamp": "2026-09-11T14:53:39.156242"
   },
   "vix": {
-    "error": "VIX data unavailable"
+    "symbol": "VIXY",
+    "price": 17.48,
+    "note": "VIXY proxy for VIX"
   },
   "global_markets": {
-    "error": "Expecting value: line 1 column 1 (char 0)"
+    "timestamp": "2026-09-11T14:53:39.262610",
+    "source": "global_etfs",
+    "markets": {
+      "EWJ": {
+        "description": "Japan (Nikkei proxy)",
+        "prev_close": 96.44,
+        "today": 98.55,
+        "change_pct": 2.19,
+        "signal": "UP"
+      },
+      "EWG": {
+        "description": "Germany (DAX proxy)",
+        "prev_close": 42.62,
+        "today": 42.92,
+        "change_pct": 0.72,
+        "signal": "UP"
+      },
+      "FXI": {
+        "description": "China (HSI/CSI proxy)",
+        "prev_close": 34.36,
+        "today": 34.59,
+        "change_pct": 0.68,
+        "signal": "UP"
+      },
+      "EWU": {
+        "description": "UK (FTSE proxy)",
+        "prev_close": 47.52,
+        "today": 47.83,
+        "change_pct": 0.64,
+        "signal": "UP"
+      },
+      "EWZ": {
+        "description": "Brazil (Ibovespa proxy)",
+        "prev_close": 38.57,
+        "today": 38.34,
+        "change_pct": -0.6,
+        "signal": "DOWN"
+      },
+      "EEM": {
+        "description": "Emerging markets",
+        "prev_close": 67.01,
+        "today": 67.86,
+        "change_pct": 1.28,
+        "signal": "UP"
+      },
+      "GLD": {
+        "description": "Gold",
+        "prev_close": 396.38,
+        "today": 401.61,
+        "change_pct": 1.32,
+        "signal": "UP"
+      },
+      "USO": {
+        "description": "Oil",
+        "prev_close": 158.34,
+        "today": 153.27,
+        "change_pct": -3.2,
+        "signal": "DOWN"
+      },
+      "TLT": {
+        "description": "US 20yr Treasuries (rates proxy)",
+        "prev_close": 80.8,
+        "today": 81.3,
+        "change_pct": 0.62,
+        "signal": "UP"
+      },
+      "UUP": {
+        "description": "US Dollar index",
+        "prev_close": 28.04,
+        "today": 28.03,
+        "change_pct": -0.04,
+        "signal": "FLAT"
+      }
+    }
   },
   "macro": {
-    "timestamp": "2026-09-11T14:47:44.244486",
+    "timestamp": "2026-09-11T14:53:39.619930",
     "source": "fred_csv",
     "macro": {
       "FEDFUNDS": {
@@ -59,24 +134,246 @@
     }
   },
   "market_discovery": {
-    "timestamp": "2026-09-11T14:47:44.612804",
+    "timestamp": "2026-09-11T14:53:39.708419",
     "source": "alpaca_discovery",
     "discovery": {
-      "most_active": [],
+      "most_active": [
+        {
+          "symbol": "TRUG",
+          "volume": 194109604,
+          "trade_count": 343044
+        },
+        {
+          "symbol": "SURG",
+          "volume": 153981312,
+          "trade_count": 151017
+        },
+        {
+          "symbol": "ACVA",
+          "volume": 66622955,
+          "trade_count": 44197
+        },
+        {
+          "symbol": "TNON",
+          "volume": 56432615,
+          "trade_count": 570878
+        },
+        {
+          "symbol": "ETHA",
+          "volume": 50814996,
+          "trade_count": 56120
+        },
+        {
+          "symbol": "BDRX",
+          "volume": 48860509,
+          "trade_count": 192830
+        },
+        {
+          "symbol": "ORCL",
+          "volume": 40222401,
+          "trade_count": 476228
+        },
+        {
+          "symbol": "OPTT",
+          "volume": 39913091,
+          "trade_count": 45682
+        },
+        {
+          "symbol": "SNXX",
+          "volume": 37431381,
+          "trade_count": 130781
+        },
+        {
+          "symbol": "FTFT",
+          "volume": 37144505,
+          "trade_count": 193894
+        },
+        {
+          "symbol": "SOXS",
+          "volume": 34892956,
+          "trade_count": 261071
+        },
+        {
+          "symbol": "NVDA",
+          "volume": 33209069,
+          "trade_count": 764109
+        },
+        {
+          "symbol": "INTC",
+          "volume": 32997208,
+          "trade_count": 286433
+        },
+        {
+          "symbol": "BMNR",
+          "volume": 28778332,
+          "trade_count": 173507
+        },
+        {
+          "symbol": "TQQQ",
+          "volume": 28171907,
+          "trade_count": 153454
+        },
+        {
+          "symbol": "SOXL",
+          "volume": 28094594,
+          "trade_count": 391678
+        },
+        {
+          "symbol": "BITO",
+          "volume": 27261979,
+          "trade_count": 13354
+        },
+        {
+          "symbol": "SPCX",
+          "volume": 26552100,
+          "trade_count": 349395
+        },
+        {
+          "symbol": "NVD",
+          "volume": 26219860,
+          "trade_count": 7692
+        },
+        {
+          "symbol": "SMR",
+          "volume": 25786429,
+          "trade_count": 109459
+        }
+      ],
       "top_gainers": [],
-      "top_losers": []
+      "top_losers": [
+        {
+          "symbol": "BIAFW",
+          "change_pct": -60.91,
+          "price": 0.215
+        },
+        {
+          "symbol": "RIV.RT",
+          "change_pct": -55.33,
+          "price": 0.0067
+        },
+        {
+          "symbol": "ASTLW",
+          "change_pct": -52.48,
+          "price": 0.0048
+        },
+        {
+          "symbol": "RDACR",
+          "change_pct": -47.86,
+          "price": 0.061
+        },
+        {
+          "symbol": "SCLXW",
+          "change_pct": -44.85,
+          "price": 0.06
+        },
+        {
+          "symbol": "OPTT",
+          "change_pct": -38.81,
+          "price": 0.0979
+        },
+        {
+          "symbol": "NMCO.RT",
+          "change_pct": -29.84,
+          "price": 0.0221
+        },
+        {
+          "symbol": "PBMWW",
+          "change_pct": -28.62,
+          "price": 0.0202
+        },
+        {
+          "symbol": "CDT",
+          "change_pct": -26.04,
+          "price": 0.255
+        },
+        {
+          "symbol": "CVV",
+          "change_pct": -25.65,
+          "price": 4.662
+        },
+        {
+          "symbol": "GCTK",
+          "change_pct": -24.15,
+          "price": 2.45
+        },
+        {
+          "symbol": "ADBT",
+          "change_pct": -22.33,
+          "price": 0.24
+        },
+        {
+          "symbol": "KLXER",
+          "change_pct": -21.8,
+          "price": 0.104
+        },
+        {
+          "symbol": "IPDN",
+          "change_pct": -21.58,
+          "price": 0.1101
+        },
+        {
+          "symbol": "SMU",
+          "change_pct": -21.22,
+          "price": 5.68
+        },
+        {
+          "symbol": "SMUP",
+          "change_pct": -20.94,
+          "price": 4.53
+        },
+        {
+          "symbol": "COLAR",
+          "change_pct": -20.82,
+          "price": 0.4
+        },
+        {
+          "symbol": "KPTI",
+          "change_pct": -20.68,
+          "price": 1.285
+        },
+        {
+          "symbol": "BEAGR",
+          "change_pct": -20.32,
+          "price": 0.1992
+        },
+        {
+          "symbol": "NCPLW",
+          "change_pct": -19.39,
+          "price": 0.0266
+        }
+      ]
     }
   },
   "reddit": {
-    "timestamp": "2026-09-11T14:47:46.191276",
+    "timestamp": "2026-09-11T14:53:40.601851",
     "source": "reddit",
     "tickers": []
   },
   "earnings_watch": {
-    "error": "Expecting value: line 1 column 1 (char 0)"
+    "timestamp": "2026-09-11T14:53:42.186146",
+    "earnings_watch": [
+      {
+        "symbol": "AMZN",
+        "headline": "Chewy Posts In-Line Q2 Earnings: Pet Parents Cut Treats, Not Necessities",
+        "date": "2026-09-10T17:47:32Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "DDOG",
+        "headline": "Consumer Tech (Aug 3-7): SpaceX Released Strong First Earnings, Meta Sued For Harming Children's Mental Health & More",
+        "date": "2026-08-09T14:40:24Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "QCOM",
+        "headline": "iPhone 18 Pro Debuts C2 Modem As Apple Keeps Weaning Off Qualcomm \u2014 Pro Max Isn't Ready to Let Go",
+        "date": "2026-09-10T07:29:24Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      }
+    ]
   },
   "insider_activity": {
-    "timestamp": "2026-09-11T14:47:46.963630",
+    "timestamp": "2026-09-11T14:53:42.558849",
     "source": "sec_edgar",
     "insider_filings": [
       {
@@ -195,7 +492,7 @@
       },
       {
         "company": "",
-        "filed": "2026-09-04",
+        "filed": "2026-09-10",
         "form": "4",
         "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
       }
