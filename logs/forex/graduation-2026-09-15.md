@@ -42,10 +42,10 @@
 | NZD_USD | 1 | 1 | $-1429.09 | -27.9 | ✅ Active |
 
 ## What the Agent Learned (4 adjustments)
-- ⬇️ **carry** weight: 0.5 → 0.5 — avg score 0.60 in wins vs 0.80 in losses — not predictive (delta=-0.20)
-- ⬇️ **momentum** weight: 0.5 → 0.5 — avg score 0.49 in wins vs 0.80 in losses — not predictive (delta=-0.31)
-- ⬆️ **technical** weight: 7.892 → 8.192 — avg score 0.56 in wins vs 0.39 in losses (+0.17 predictive edge)
-- ⬇️ **risk_reward** weight: 0.5 → 0.5 — avg score 0.68 in wins vs 0.85 in losses — not predictive (delta=-0.17)
+- ⬇️ **carry** weight: 0.485 → 0.5 — avg score 0.60 in wins vs 0.80 in losses — not predictive (delta=-0.20)
+- ⬇️ **momentum** weight: 0.485 → 0.5 — avg score 0.49 in wins vs 0.80 in losses — not predictive (delta=-0.31)
+- ⬆️ **technical** weight: 7.953 → 8.253 — avg score 0.56 in wins vs 0.39 in losses (+0.17 predictive edge)
+- ⬇️ **risk_reward** weight: 0.485 → 0.5 — avg score 0.68 in wins vs 0.85 in losses — not predictive (delta=-0.17)
 
 ## Direction Bias
 - Long win rate:  0.62
@@ -55,12 +55,12 @@
 ## Updated Judge Weights
 ```json
 {
-  "carry": 0.485,
-  "momentum": 0.485,
-  "technical": 7.953,
-  "session": 0.295,
-  "volatility": 0.295,
-  "risk_reward": 0.485
+  "carry": 0.483,
+  "momentum": 0.483,
+  "technical": 7.979,
+  "session": 0.285,
+  "volatility": 0.285,
+  "risk_reward": 0.483
 }
 ```
 
