@@ -1,9 +1,9 @@
 # Daily Trading Reflection — 2026-09-15
 
 ## P&L
-- Realized today: $+0.00
-- Trades closed: 0
-- Wins: 0  Losses: 0
+- Realized today: $+130.46
+- Trades closed: 1
+- Wins: 1  Losses: 0
 
 ## Did I follow the strategy exactly?
 - [ ] Only took trades with judge score ≥ 7.0
@@ -16,17 +16,19 @@
 ## What happened vs. what I expected?
 _(Review each trade: was the outcome different from what you anticipated? Why?)_
 
+- **AUD_JPY** LONG → manual → $+130.46
+  - Expected: ___  Actual: ___  Lesson: ___
+
 ## Lessons logged today
-- [growth] Milestone: 20 closed trades completed. Experience accumulates — each trade builds pattern recognition.
 
 ## One improvement for tomorrow
 _(Even a tiny improvement compounds over time — what ONE thing will you do better?)_
 
 > ___
 
-## Overall performance — 20 trades lifetime
-- Win rate: 55.0%  (target ≥55%)
-- Profit factor: 0.39  (target ≥1.3)
+## Overall performance — 21 trades lifetime
+- Win rate: 57.1%  (target ≥55%)
+- Profit factor: 0.40  (target ≥1.3)
 - Max drawdown: 971.5%  (max 8%)
 
 ---
