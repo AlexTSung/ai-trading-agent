@@ -41,9 +41,9 @@
 | NZD_USD | 1 | 1 | $-1429.09 | -27.9 | ✅ Active |
 
 ## What the Agent Learned (3 adjustments)
-- ⬇️ **carry** weight: 0.498 → 0.5 — avg score 0.55 in wins vs 0.80 in losses — not predictive (delta=-0.25)
-- ⬇️ **momentum** weight: 0.498 → 0.5 — avg score 0.53 in wins vs 0.80 in losses — not predictive (delta=-0.27)
-- ⬇️ **risk_reward** weight: 0.498 → 0.5 — avg score 0.66 in wins vs 0.85 in losses — not predictive (delta=-0.19)
+- ⬇️ **carry** weight: 0.5 → 0.5 — avg score 0.55 in wins vs 0.80 in losses — not predictive (delta=-0.25)
+- ⬇️ **momentum** weight: 0.5 → 0.5 — avg score 0.53 in wins vs 0.80 in losses — not predictive (delta=-0.27)
+- ⬇️ **risk_reward** weight: 0.5 → 0.5 — avg score 0.66 in wins vs 0.85 in losses — not predictive (delta=-0.19)
 
 ## Direction Bias
 - Long win rate:  0.57
@@ -55,7 +55,7 @@
 {
   "carry": 0.5,
   "momentum": 0.5,
-  "technical": 7.893,
+  "technical": 7.892,
   "session": 0.304,
   "volatility": 0.304,
   "risk_reward": 0.5
