@@ -1,9 +1,9 @@
 # Daily Trading Reflection — 2026-09-16
 
 ## P&L
-- Realized today: $+979.20
-- Trades closed: 2
-- Wins: 2  Losses: 0
+- Realized today: $+1894.20
+- Trades closed: 3
+- Wins: 3  Losses: 0
 
 ## Did I follow the strategy exactly?
 - [ ] Only took trades with judge score ≥ 7.0
@@ -22,17 +22,20 @@ _(Review each trade: was the outcome different from what you anticipated? Why?)_
 - **GBP_USD** SHORT → stop_loss → $+633.78
   - Expected: ___  Actual: ___  Lesson: ___
 
+- **NZD_USD** SHORT → stop_loss → $+915.00
+  - Expected: ___  Actual: ___  Lesson: ___
+
 ## Lessons logged today
-- [psychology] Daily win limit reached (2W today) — stopped trading to protect profits.
+- [psychology] Daily win limit reached (3W today) — stopped trading to protect profits.
 
 ## One improvement for tomorrow
 _(Even a tiny improvement compounds over time — what ONE thing will you do better?)_
 
 > ___
 
-## Overall performance — 23 trades lifetime
-- Win rate: 60.9%  (target ≥55%)
-- Profit factor: 0.50  (target ≥1.3)
+## Overall performance — 24 trades lifetime
+- Win rate: 62.5%  (target ≥55%)
+- Profit factor: 0.58  (target ≥1.3)
 - Max drawdown: 971.5%  (max 8%)
 
 ---
