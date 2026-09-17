@@ -1,0 +1,72 @@
+# Trade Learnings — 2026-09-17
+
+Round trips: 30  ·  vetoes analysed: 225  ·  judge days: 25
+
+## Overall
+  all closed trades          n=30   win  13.3%  exp  -7.53%  pf  0.11  $    -9,770  [actionable]
+
+## Discovery vs watchlist
+  discovery                  n=8    win   0.0%  exp -14.66%  pf  0.00  $    -5,149  [suggestive]
+  watchlist                  n=22   win  18.2%  exp  -4.94%  pf  0.21  $    -4,621  [actionable]
+
+## Stop effectiveness by tier
+  TIER1  stopped-out share: 0%
+    ├─ stopped out           —
+    └─ ran to a real exit    n=9    win  22.2%  exp  -2.88%  pf  0.31  $    -1,068  [suggestive]
+  TIER2  stopped-out share: 0%
+    ├─ stopped out           —
+    └─ ran to a real exit    n=5    win   0.0%  exp  -6.92%  pf  0.00  $    -1,241  [suggestive]
+  TIER3  stopped-out share: 56%
+    ├─ stopped out           n=9    win   0.0%  exp -16.62%  pf  0.00  $    -7,070  [suggestive]
+    └─ ran to a real exit    n=7    win  28.6%  exp  -2.26%  pf  0.52  $      -391  [suggestive]
+
+## Hold time vs outcome
+  0-1d                       n=1    win   0.0%  exp -15.98%  pf  0.00  $      -763  [anecdote]
+  16-30d                     n=8    win  12.5%  exp  -8.98%  pf  0.03  $    -3,013  [suggestive]
+  2-5d                       n=8    win  12.5%  exp  -5.21%  pf  0.05  $    -1,824  [suggestive]
+  30d+                       n=5    win  40.0%  exp  +0.90%  pf  1.23  $      +625  [suggestive]
+  6-15d                      n=8    win   0.0%  exp -12.61%  pf  0.00  $    -4,795  [suggestive]
+  avg hold — winners: 28.5d   losers: 15.2d
+
+## Does the Judge score predict the outcome?
+  correlation -0.512 on n=21
+  7.0-7.9                    n=2    win   0.0%  exp  -7.95%  pf  0.00  $      -349  [anecdote]
+  8.0-8.9                    n=10   win  10.0%  exp  -8.72%  pf  0.03  $    -3,742  [actionable]
+  9.0+                       n=5    win   0.0%  exp -13.04%  pf  0.00  $    -3,109  [suggestive]
+  <7.0                       n=4    win  25.0%  exp  -0.75%  pf  0.75  $       +53  [anecdote]
+
+## Predictive power per criterion
+  portfolio                  r=-0.441  n=21   [actionable]
+  technical                  r=-0.259  n=21   [actionable]
+  news                       r=-0.181  n=21   [actionable]
+
+## Entry conditions
+  by RSI band:
+    45-60                    n=1    win 100.0%  exp  +2.34%  pf     ∞  $      +107  [anecdote]
+    overbought 60+           n=1    win   0.0%  exp  -8.95%  pf  0.00  $      -428  [anecdote]
+  by ATR band:
+    high 4%+                 n=1    win   0.0%  exp  -8.95%  pf  0.00  $      -428  [anecdote]
+    mid 2-4%                 n=1    win 100.0%  exp  +2.34%  pf     ∞  $      +107  [anecdote]
+  by entry quality:
+    FAIR                     n=2    win  50.0%  exp  -3.30%  pf  0.26  $      -322  [anecdote]
+  by signal:
+    STRONG_BUY               n=20   win  10.0%  exp  -8.37%  pf  0.06  $    -6,960  [actionable]
+    WEAK_BUY                 n=1    win   0.0%  exp  -4.02%  pf  0.00  $      -187  [anecdote]
+
+## By macro regime
+  RISK_ON                    n=22   win   9.1%  exp  -8.19%  pf  0.06  $    -7,579  [actionable]
+  UNKNOWN                    n=8    win  25.0%  exp  -5.73%  pf  0.27  $    -2,191  [suggestive]
+
+## What the vetoed trades did next
+  (positive forward return = the veto cost money; negative = it earned its keep)
+  chase                5d +0.6% (51% up, n=69)   10d -0.9% (57% up, n=49)   20d -8.3% (39% up, n=31)
+  discovery_quality    5d -7.7% (0% up, n=2)   10d -10.3% (0% up, n=3)   20d -10.0% (0% up, n=4)
+  earnings             5d -0.1% (60% up, n=10)   10d -0.5% (71% up, n=7)   20d +2.4% (80% up, n=5)
+  holiday              5d -2.4% (0% up, n=2)   10d -2.7% (0% up, n=2)
+  other                5d +0.3% (57% up, n=30)   10d +0.3% (52% up, n=27)   20d +1.0% (62% up, n=16)
+  tier1_protection     5d +0.5% (67% up, n=3)   10d -0.7% (0% up, n=1)
+
+---
+Confidence: anecdote <5, suggestive <10, actionable 10+. Nothing here changes a parameter; judge.py's LEARNING_TIERS decides how much may affect scoring.
+
+[analytics] machine-readable copy: /home/runner/work/ai-trading-agent/ai-trading-agent/logs/learnings/analytics.json
