@@ -738,7 +738,7 @@ def full_research():
             news_raw    = get_news(sym)
             tech_data   = compute_technicals(bars_raw)
             news_sum    = summarize_news(news_raw)
-            fundamentals = get_yahoo_fundamentals(sym)
+            fundamentals = get_yahoo_fundamentals(sym, current_price=tech_data.get("last_close"))
 
             sym_result = {
                 "description":      item.get("description", ""),
@@ -760,16 +760,59 @@ def full_research():
     return results
 
 
-def get_yahoo_fundamentals(symbol):
-    """
-    Pull key fundamentals from Yahoo Finance — free, no API key.
-    Returns P/E, EPS, revenue growth, analyst target, short float.
-    """
+# ── Yahoo session/crumb handshake ────────────────────────────────────────────
+# Yahoo's quoteSummary endpoint stopped answering plain unauthenticated GETs —
+# it now 401s every request without a session cookie plus a matching "crumb"
+# token, the same anti-scraping change that broke this class of free scraper
+# industry-wide. Confirmed on 2026-09-18: 63 of 68 symbols researched that day
+# got {"error": "Yahoo Finance 401"}, not just a handful of obscure ones — this
+# was silently zeroing out the Judge's quality score (W_QUALITY, 2.5 of 10
+# points) for virtually every candidate, and unconditionally vetoing every
+# discovery-sourced one (judge.score_quality gives watchlist stocks "benefit of
+# the doubt" on missing market cap, but discovery stocks get 0, then another
+# -0.25 for the analyst-count check that also always reads 0).
+#
+# The handshake: GET a Yahoo page to receive session cookies, then GET
+# /v1/test/getcrumb with those same cookies to receive a crumb string that
+# must be appended to the real query. Cached at module level so research.py's
+# once-per-run loop over 60+ symbols does the handshake once, not per symbol.
+_yahoo_session = None
+_yahoo_crumb = None
+_yahoo_handshake_failed = False
+
+
+def _yahoo_handshake():
+    """Perform the cookie+crumb handshake once per process; cache the result."""
+    global _yahoo_session, _yahoo_crumb, _yahoo_handshake_failed
+    if _yahoo_crumb or _yahoo_handshake_failed:
+        return _yahoo_session, _yahoo_crumb
+    try:
+        s = requests.Session()
+        s.headers.update({"User-Agent": "Mozilla/5.0"})
+        s.get("https://fc.yahoo.com", timeout=8)  # sets the cookies the crumb endpoint needs
+        r = s.get("https://query2.finance.yahoo.com/v1/test/getcrumb", timeout=8)
+        crumb = r.text.strip()
+        if r.status_code == 200 and crumb and "<html" not in crumb.lower():
+            _yahoo_session, _yahoo_crumb = s, crumb
+        else:
+            _yahoo_handshake_failed = True
+    except Exception:
+        _yahoo_handshake_failed = True
+    return _yahoo_session, _yahoo_crumb
+
+
+def _fetch_yahoo_fundamentals_raw(symbol):
+    """The actual Yahoo quoteSummary call, authenticated with the session+crumb."""
+    session, crumb = _yahoo_handshake()
+    if not session:
+        return {"error": "Yahoo handshake failed"}
     try:
         url = f"https://query1.finance.yahoo.com/v10/finance/quoteSummary/{symbol}"
-        params = {"modules": "summaryDetail,defaultKeyStatistics,financialData,recommendationTrend"}
-        headers = {"User-Agent": "Mozilla/5.0"}
-        r = requests.get(url, params=params, headers=headers, timeout=8)
+        params = {
+            "modules": "summaryDetail,defaultKeyStatistics,financialData,recommendationTrend",
+            "crumb": crumb,
+        }
+        r = session.get(url, params=params, timeout=8)
         if r.status_code != 200:
             return {"error": f"Yahoo Finance {r.status_code}"}
         data = r.json().get("quoteSummary", {}).get("result", [{}])[0]
@@ -790,6 +833,7 @@ def get_yahoo_fundamentals(symbol):
         profit_margin_raw = findata.get("profitMargins", {}).get("raw")
 
         return {
+            "source":             "yahoo",
             "pe_ratio":           _val(summary, "trailingPE"),
             "forward_pe":         _val(summary, "forwardPE"),
             "eps_ttm":            _val(keystats, "trailingEps"),
@@ -810,6 +854,144 @@ def get_yahoo_fundamentals(symbol):
         }
     except Exception as e:
         return {"error": str(e)}
+
+
+# ── SEC EDGAR market-cap fallback ────────────────────────────────────────────
+# Yahoo is the only source that carries analyst ratings and profit margins for
+# free — those stay unavailable if Yahoo is down. Market cap is the one field
+# that drives the largest share of the quality score (1.5 of 2.5 points), and
+# it can be reconstructed from data SEC EDGAR already gives away: the latest
+# filed shares-outstanding figure, times a live price we already have from
+# Alpaca. No API key, same EDGAR host this repo already uses for Form 4 scans.
+_cik_map_cache = None
+
+
+def _load_cik_map():
+    """
+    Ticker -> CIK, from SEC's own static mapping file. Cached to disk for a
+    week, same pattern as screener.get_cached_universe() — this file is
+    several MB and only changes when companies list/delist.
+    """
+    global _cik_map_cache
+    if _cik_map_cache is not None:
+        return _cik_map_cache
+    cache_path = os.path.join(os.path.dirname(__file__), "logs", "paper", "cik-cache.json")
+    try:
+        if os.path.exists(cache_path):
+            with open(cache_path) as f:
+                cache = json.load(f)
+            from datetime import date as _date
+            age_days = (_date.today() - _date.fromisoformat(cache.get("date", "2000-01-01"))).days
+            if age_days < 7:
+                _cik_map_cache = cache["map"]
+                return _cik_map_cache
+    except Exception:
+        pass
+    try:
+        r = requests.get("https://www.sec.gov/files/company_tickers.json",
+                         headers={"User-Agent": "TradingAgent research@trading.com"},
+                         timeout=15)
+        r.raise_for_status()
+        raw = r.json()
+        cik_map = {v["ticker"].upper(): v["cik_str"] for v in raw.values()}
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+        from datetime import date as _date
+        with open(cache_path, "w") as f:
+            json.dump({"date": _date.today().isoformat(), "map": cik_map}, f)
+        _cik_map_cache = cik_map
+    except Exception:
+        _cik_map_cache = {}
+    return _cik_map_cache
+
+
+def get_secedgar_market_cap(symbol, current_price=None):
+    """
+    Estimate market cap from SEC EDGAR's latest filed shares-outstanding
+    figure times a live price. Returns {"market_cap_b": float} or {"error": ...}.
+    Only market cap — EDGAR's XBRL facts don't carry analyst ratings, so this
+    cannot restore the rest of the quality score, only its largest component.
+    """
+    if not current_price:
+        return {"error": "no current price to multiply against"}
+    cik_map = _load_cik_map()
+    cik = cik_map.get(symbol.upper())
+    if not cik:
+        return {"error": "no CIK for symbol"}
+    try:
+        url = f"https://data.sec.gov/api/xbrl/companyconcept/CIK{int(cik):010d}/dei/EntityCommonStockSharesOutstanding.json"
+        r = requests.get(url, headers={"User-Agent": "TradingAgent research@trading.com"}, timeout=10)
+        if r.status_code != 200:
+            return {"error": f"SEC EDGAR {r.status_code}"}
+        units = r.json().get("units", {}).get("shares", [])
+        if not units:
+            return {"error": "no shares-outstanding facts filed"}
+        shares = sorted(units, key=lambda u: u.get("end", ""))[-1]["val"]
+        market_cap = shares * float(current_price)
+        return {"market_cap_b": round(market_cap / 1e9, 2), "shares_outstanding": shares,
+                "source": "sec_edgar"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ── Stooq price fallback ─────────────────────────────────────────────────────
+def get_stooq_price(symbol):
+    """
+    Last-resort current-price lookup from Stooq's free CSV quote endpoint, no
+    API key. Stooq carries prices and historical bars only — no market cap,
+    no analyst data — so this fills `current_price` (and the upside_pct calc
+    that depends on it) when neither Yahoo nor the caller's own Alpaca price
+    is available. Not a fundamentals source in its own right.
+    """
+    try:
+        r = requests.get(f"https://stooq.com/q/l/?s={symbol.lower()}.us&f=sd2t2ohlcv&h&e=csv",
+                         headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
+        if r.status_code != 200:
+            return {"error": f"Stooq {r.status_code}"}
+        lines = r.text.strip().splitlines()
+        if len(lines) < 2:
+            return {"error": "no Stooq data"}
+        row = lines[1].split(",")
+        close = row[6] if len(row) > 6 else "N/D"
+        if close in ("N/D", ""):
+            return {"error": "Stooq has no quote for this symbol"}
+        return {"current_price": float(close), "source": "stooq"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def get_yahoo_fundamentals(symbol, current_price=None):
+    """
+    Fundamentals with a fallback chain: Yahoo (richest — P/E, EPS, revenue
+    growth, analyst target/coverage, profit margin, market cap) first, then
+    SEC EDGAR for market cap alone, then Stooq for current price alone, if
+    Yahoo's session/crumb handshake or the query itself fails. Callers should
+    pass `current_price` (e.g. research.py's own compute_technicals last_close)
+    so the SEC fallback has something to multiply shares outstanding against —
+    without it, a Yahoo outage degrades straight to "unavailable" same as before.
+    """
+    primary = _fetch_yahoo_fundamentals_raw(symbol)
+    if "error" not in primary:
+        return primary
+
+    _log_note = primary.get("error", "unknown")
+    fallback = {"error": _log_note, "source": "fallback", "yahoo_error": _log_note}
+
+    cap = get_secedgar_market_cap(symbol, current_price)
+    if "error" not in cap:
+        fallback["market_cap_b"] = cap["market_cap_b"]
+        fallback["market_cap"] = cap["market_cap_b"] * 1e9
+        fallback.pop("error", None)
+
+    price_source_price = current_price
+    if not price_source_price:
+        stooq = get_stooq_price(symbol)
+        if "error" not in stooq:
+            price_source_price = stooq["current_price"]
+    if price_source_price:
+        fallback["current_price"] = price_source_price
+        fallback.pop("error", None)
+
+    return fallback
 
 def midday_check():
     """Lighter check: only open positions + market status."""

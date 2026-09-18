@@ -40,6 +40,8 @@ import trade          # noqa: E402
 import market_time    # noqa: E402
 import run_options    # noqa: E402
 import journal        # noqa: E402
+import screener       # noqa: E402
+import intelligence   # noqa: E402
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -788,6 +790,7 @@ class TestVetoOpportunityCost(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 import options_strategy as ostrat    # noqa: E402
 import options_monitor as omon       # noqa: E402
+import options_screener as oscreen   # noqa: E402
 
 
 class TestOptionsRiskFilters(unittest.TestCase):
@@ -2335,3 +2338,412 @@ class TestDeltaStrikeSelection(unittest.TestCase):
         d = ostrat.build_iron_condor(100.0, self.T, 0.15)
         f = ostrat.build_iron_condor(100.0, self.T, 0.15, use_delta=False)
         self.assertGreater(d["reward_risk"], f["reward_risk"])
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# News-firehose ticker extraction — headline acronyms are not tickers
+# ══════════════════════════════════════════════════════════════════════════════
+class TestNewsFirehoseTickerValidation(unittest.TestCase):
+    """
+    fetch_news_firehose() matched any 2-5 letter all-caps word in a headline
+    against a 35-entry hardcoded ignore-list. Real financial headlines are full
+    of all-caps acronyms that list can never fully cover (IRA, UAE, BRICS, ARR,
+    CNBC, ...), so these were reaching the Judge as "hot tickers" and dying
+    downstream with `object of type 'NoneType' has no len()` once research.py
+    tried to fetch bars for a symbol that doesn't exist. Validating candidates
+    against a live Alpaca snapshot closes this without an ever-growing blocklist.
+    """
+
+    def _feed_response(self, headline):
+        xml = f"<rss><channel><title>Feed</title><item><title>{headline}</title></item></channel></rss>"
+        resp = mock.Mock(status_code=200, text=xml)
+        return resp
+
+    def test_non_ticker_acronym_is_rejected_when_snapshot_has_no_data(self):
+        headline = "UAE and IRA reforms lift ARR at CNBC-covered firms"
+        with mock.patch.object(screener, "NEWS_RSS_FEEDS", {"Test Feed": "http://x"}), \
+             mock.patch.object(screener, "requests") as mock_requests, \
+             mock.patch.object(screener, "batch_snapshots", return_value={}):
+            mock_requests.get.return_value = self._feed_response(headline)
+            out = screener.fetch_news_firehose()
+        self.assertEqual(out["hot_tickers"], [],
+                         "acronyms with no real snapshot data must not become hot tickers")
+
+    def test_real_ticker_with_valid_snapshot_survives(self):
+        headline = "AAPL rallies on strong iPhone demand ahead of earnings"
+        fake_snap = {"AAPL": {"dailyBar": {"c": 230.5}}}
+        with mock.patch.object(screener, "NEWS_RSS_FEEDS", {"Test Feed": "http://x"}), \
+             mock.patch.object(screener, "requests") as mock_requests, \
+             mock.patch.object(screener, "batch_snapshots", return_value=fake_snap):
+            mock_requests.get.return_value = self._feed_response(headline)
+            out = screener.fetch_news_firehose()
+        symbols = [t["symbol"] for t in out["hot_tickers"]]
+        self.assertIn("AAPL", symbols)
+
+    def test_snapshot_with_no_daily_bar_is_rejected(self):
+        """A symbol Alpaca knows nothing about (empty snapshot) must not pass."""
+        headline = "ZZZZ files for a surprise listing this week"
+        with mock.patch.object(screener, "NEWS_RSS_FEEDS", {"Test Feed": "http://x"}), \
+             mock.patch.object(screener, "requests") as mock_requests, \
+             mock.patch.object(screener, "batch_snapshots", return_value={"ZZZZ": {}}):
+            mock_requests.get.return_value = self._feed_response(headline)
+            out = screener.fetch_news_firehose()
+        self.assertEqual(out["hot_tickers"], [])
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Fundamentals fallback chain — Yahoo 401'd on 63/68 symbols on 2026-09-18
+# ══════════════════════════════════════════════════════════════════════════════
+class TestFundamentalsFallbackChain(unittest.TestCase):
+    """
+    query1.finance.yahoo.com/v10/finance/quoteSummary stopped answering plain
+    unauthenticated GETs — every real ticker researched on 2026-09-18 (63 of
+    68) got {"error": "Yahoo Finance 401"}. That silently zeroed the Judge's
+    quality score for virtually every candidate and made every discovery-
+    sourced candidate structurally unable to clear the 0.5 quality floor
+    (judge.score_quality: watchlist stocks get +0.5 "benefit of the doubt" on
+    missing market cap, discovery stocks get +0.0 and then another -0.25 for
+    the always-zero analyst count). Fixed with a session+crumb handshake for
+    Yahoo, and a SEC-EDGAR/Stooq fallback chain for when Yahoo itself is down.
+    """
+
+    def setUp(self):
+        # Module-level caches must not leak between tests.
+        research._yahoo_session = None
+        research._yahoo_crumb = None
+        research._yahoo_handshake_failed = False
+        research._cik_map_cache = None
+
+    def tearDown(self):
+        research._yahoo_session = None
+        research._yahoo_crumb = None
+        research._yahoo_handshake_failed = False
+        research._cik_map_cache = None
+
+    def _fake_session(self, crumb_text="abc123", crumb_status=200, query_json=None,
+                      query_status=200):
+        session = mock.Mock()
+        cookie_resp = mock.Mock(status_code=200)
+        crumb_resp = mock.Mock(status_code=crumb_status, text=crumb_text)
+        query_resp = mock.Mock(status_code=query_status)
+        query_resp.json.return_value = query_json or {"quoteSummary": {"result": [{}]}}
+        session.get.side_effect = [cookie_resp, crumb_resp, query_resp]
+        return session
+
+    def test_handshake_success_then_query_succeeds_returns_yahoo_source(self):
+        yahoo_payload = {"quoteSummary": {"result": [{
+            "summaryDetail": {"marketCap": {"raw": 250_000_000_000}},
+            "defaultKeyStatistics": {},
+            "financialData": {"profitMargins": {"raw": 0.15}},
+            "recommendationTrend": {"trend": [{"buy": 22, "sell": 1}]},
+        }]}}
+        session = self._fake_session(query_json=yahoo_payload)
+        with mock.patch.object(research, "requests") as mock_requests:
+            mock_requests.Session.return_value = session
+            result = research.get_yahoo_fundamentals("AAPL", current_price=230.0)
+        self.assertNotIn("error", result)
+        self.assertEqual(result["source"], "yahoo")
+        self.assertEqual(result["market_cap_b"], 250.0)
+        self.assertEqual(result["analyst_buy_count"], 22)
+
+    def test_handshake_caches_across_calls(self):
+        """research.py loops over 60+ symbols per run — the handshake must happen once."""
+        session = self._fake_session()
+        # Only 3 responses queued (cookie, crumb, one query) — a second symbol's
+        # query reuses the same session.get call list position 4 onward.
+        session.get.side_effect = list(session.get.side_effect) + [
+            mock.Mock(status_code=200, json=lambda: {"quoteSummary": {"result": [{}]}})
+        ]
+        with mock.patch.object(research, "requests") as mock_requests:
+            mock_requests.Session.return_value = session
+            research.get_yahoo_fundamentals("AAPL", current_price=100.0)
+            research.get_yahoo_fundamentals("MSFT", current_price=100.0)
+        # Session() constructed exactly once despite two fundamentals calls.
+        mock_requests.Session.assert_called_once()
+
+    def test_yahoo_401_falls_back_to_secedgar_market_cap(self):
+        session = mock.Mock()
+        session.get.side_effect = [
+            mock.Mock(status_code=200),                       # cookie
+            mock.Mock(status_code=200, text="crumb"),          # crumb
+            mock.Mock(status_code=401),                        # quoteSummary 401
+        ]
+        edgar_resp = mock.Mock(status_code=200)
+        edgar_resp.json.return_value = {"units": {"shares": [
+            {"end": "2026-06-30", "val": 1_400_000_000},
+        ]}}
+        # _load_cik_map() has its own disk cache under logs/paper/ — mocked
+        # directly here so this test can never touch (or be poisoned by) a
+        # real cache file, and doesn't need to also fake the CIK-lookup
+        # network call just to reach the part being tested.
+        with mock.patch.object(research, "requests") as mock_requests, \
+             mock.patch.object(research, "_load_cik_map", return_value={"GM": 1467858}):
+            mock_requests.Session.return_value = session
+            mock_requests.get.return_value = edgar_resp
+            result = research.get_yahoo_fundamentals("GM", current_price=50.0)
+        self.assertNotIn("error", result)
+        self.assertEqual(result["market_cap_b"], round(1_400_000_000 * 50.0 / 1e9, 2))
+
+    def test_total_failure_still_returns_error_key(self):
+        """When Yahoo, SEC EDGAR, and Stooq all fail, the old failure contract holds."""
+        session = mock.Mock()
+        session.get.side_effect = [
+            mock.Mock(status_code=200),
+            mock.Mock(status_code=200, text="crumb"),
+            mock.Mock(status_code=401),
+        ]
+        with mock.patch.object(research, "requests") as mock_requests:
+            mock_requests.Session.return_value = session
+            mock_requests.get.side_effect = Exception("network down")
+            result = research.get_yahoo_fundamentals("ZZZZ", current_price=None)
+        self.assertIn("error", result)
+
+    def test_secedgar_market_cap_requires_a_price(self):
+        self.assertIn("error", research.get_secedgar_market_cap("AAPL", current_price=None))
+
+    def test_secedgar_market_cap_unknown_ticker(self):
+        with mock.patch.object(research, "_load_cik_map", return_value={}):
+            out = research.get_secedgar_market_cap("NOTATICKER", current_price=10.0)
+        self.assertIn("error", out)
+
+    def test_stooq_price_parses_valid_csv(self):
+        csv_text = "Symbol,Date,Time,Open,High,Low,Close,Volume\nAAPL.US,2026-09-18,20:00:00,229,231,228,230.5,1000\n"
+        with mock.patch.object(research, "requests") as mock_requests:
+            mock_requests.get.return_value = mock.Mock(status_code=200, text=csv_text)
+            out = research.get_stooq_price("AAPL")
+        self.assertEqual(out["current_price"], 230.5)
+
+    def test_stooq_price_no_data_marker(self):
+        csv_text = "Symbol,Date,Time,Open,High,Low,Close,Volume\nZZZZ.US,N/D,N/D,N/D,N/D,N/D,N/D,N/D\n"
+        with mock.patch.object(research, "requests") as mock_requests:
+            mock_requests.get.return_value = mock.Mock(status_code=200, text=csv_text)
+            out = research.get_stooq_price("ZZZZ")
+        self.assertIn("error", out)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Reddit trending tickers — surfaced as a standalone daily report
+# ══════════════════════════════════════════════════════════════════════════════
+class TestRedditReport(unittest.TestCase):
+    """
+    scan_reddit() already ran daily inside morning_intelligence() and fed the
+    discovery channel, but its output only ever reached logs/paper/*-intelligence.json
+    — there was no standalone report the way StockTwits gets one. write_reddit_report
+    gives it the same visibility.
+    """
+
+    def test_writes_report_with_tickers(self):
+        reddit_data = {"tickers": [
+            {"symbol": "GME", "reddit_mentions": 12, "subreddit": "wallstreetbets",
+             "top_post": "GME to the moon", "url": "https://reddit.com/x", "post_score": 500},
+        ]}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = intelligence.write_reddit_report(reddit_data, out_dir=tmp)
+            with open(path) as f:
+                content = f.read()
+        self.assertIn("GME", content)
+        self.assertIn("12 mention", content)
+
+    def test_writes_placeholder_when_scrape_failed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = intelligence.write_reddit_report({"tickers": []}, out_dir=tmp)
+            with open(path) as f:
+                content = f.read()
+        self.assertIn("No tickers surfaced", content)
+
+    def test_morning_intelligence_calls_report_writer(self):
+        reddit_result = {"tickers": []}
+        with mock.patch.object(intelligence, "get_fear_greed", return_value={}), \
+             mock.patch.object(intelligence, "get_vix", return_value={}), \
+             mock.patch.object(intelligence, "get_global_signals", return_value={}), \
+             mock.patch.object(intelligence, "get_macro_data", return_value={}), \
+             mock.patch.object(intelligence, "get_market_discovery", return_value={}), \
+             mock.patch.object(intelligence, "scan_reddit", return_value=reddit_result), \
+             mock.patch.object(intelligence, "get_earnings_calendar", return_value={}), \
+             mock.patch.object(intelligence, "get_insider_buys", return_value={}), \
+             mock.patch.object(intelligence, "write_reddit_report") as mock_write, \
+             mock.patch("builtins.open", mock.mock_open()), \
+             mock.patch.object(intelligence.os, "makedirs"):
+            intelligence.morning_intelligence()
+        mock_write.assert_called_once_with(reddit_result)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Options earnings blackout — the gap confirmed by grep: zero references to
+# "earnings" anywhere in options_strategy.py, options_screener.py, run_options.py
+# ══════════════════════════════════════════════════════════════════════════════
+class TestOptionsEarningsBlackout(unittest.TestCase):
+
+    def test_vetoes_on_own_news_upcoming_earnings_language(self):
+        news_items = [{"headline": "AAPL to report earnings next week", "summary": ""}]
+        with mock.patch("research.get_news", return_value={"news": []}), \
+             mock.patch("research.summarize_news", return_value=news_items), \
+             mock.patch("os.path.exists", return_value=False):
+            vetoed, reason = oscreen.check_earnings_blackout("AAPL")
+        self.assertTrue(vetoed)
+        self.assertIn("EARNINGS VETO", reason)
+
+    def test_no_veto_when_no_earnings_language(self):
+        news_items = [{"headline": "AAPL launches new product line", "summary": ""}]
+        with mock.patch("research.get_news", return_value={"news": []}), \
+             mock.patch("research.summarize_news", return_value=news_items), \
+             mock.patch("os.path.exists", return_value=False):
+            vetoed, reason = oscreen.check_earnings_blackout("AAPL")
+        self.assertFalse(vetoed)
+
+    def test_backward_looking_recap_alone_does_not_veto(self):
+        """Same false-positive guard as equities: a recap of a past report is not a blackout trigger."""
+        news_items = [{"headline": "AAPL reported strong earnings last quarter", "summary": ""}]
+        with mock.patch("research.get_news", return_value={"news": []}), \
+             mock.patch("research.summarize_news", return_value=news_items), \
+             mock.patch("os.path.exists", return_value=False):
+            vetoed, reason = oscreen.check_earnings_blackout("AAPL")
+        self.assertFalse(vetoed)
+
+    def test_reads_equities_intelligence_file_when_present(self):
+        intel = {"earnings_watch": [], "earnings_watch_symbols": ["AAPL"]}
+        # check_earnings_veto reads earnings_watch_detail for the triggering headline
+        intel_wrapped = {"earnings_watch_symbols": ["AAPL"],
+                         "earnings_watch_detail": {"AAPL": "AAPL is scheduled to report earnings"}}
+        with mock.patch("research.get_news", return_value={"news": []}), \
+             mock.patch("research.summarize_news", return_value=[]), \
+             mock.patch("os.path.exists", return_value=True), \
+             mock.patch("builtins.open", mock.mock_open(read_data=json.dumps(intel_wrapped))):
+            vetoed, reason = oscreen.check_earnings_blackout("AAPL")
+        self.assertTrue(vetoed)
+
+    def test_missing_intelligence_file_degrades_to_direct_news_check_only(self):
+        """Options can run before the morning equities pipeline writes today's file."""
+        with mock.patch("research.get_news", return_value={"news": []}), \
+             mock.patch("research.summarize_news", return_value=[]), \
+             mock.patch("os.path.exists", return_value=False):
+            vetoed, reason = oscreen.check_earnings_blackout("AAPL")
+        self.assertFalse(vetoed)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Options VIX vol-regime gate — equities has had this since 2026-08-26, options
+# never did
+# ══════════════════════════════════════════════════════════════════════════════
+class TestOptionsVixRegime(unittest.TestCase):
+
+    def test_normal_vix_full_size_no_block(self):
+        with mock.patch("intelligence.get_fear_greed", return_value={"vix": 15.0}):
+            regime = oscreen.get_vix_regime()
+        self.assertEqual(regime["size_mult"], 1.0)
+        self.assertFalse(regime["block_new_short_vol"])
+
+    def test_elevated_vix_halves_size(self):
+        with mock.patch("intelligence.get_fear_greed", return_value={"vix": 28.0}):
+            regime = oscreen.get_vix_regime()
+        self.assertEqual(regime["size_mult"], 0.5)
+        self.assertFalse(regime["block_new_short_vol"])
+
+    def test_extreme_vix_blocks_new_short_vol(self):
+        with mock.patch("intelligence.get_fear_greed", return_value={"vix": 40.0}):
+            regime = oscreen.get_vix_regime()
+        self.assertEqual(regime["size_mult"], 0.0)
+        self.assertTrue(regime["block_new_short_vol"])
+
+    def test_missing_vix_defaults_to_full_size_no_block(self):
+        """Unavailable data must not silently unlock a stricter regime either way."""
+        with mock.patch("intelligence.get_fear_greed", return_value={"error": "FRED down"}):
+            regime = oscreen.get_vix_regime()
+        self.assertEqual(regime["size_mult"], 1.0)
+        self.assertFalse(regime["block_new_short_vol"])
+
+    def test_thresholds_match_equities_citadel_ladder(self):
+        """Same 25/35 thresholds as judge.score_volatility's VIX_HALF_SIZE/VIX_NO_NEW_POSITIONS."""
+        self.assertEqual(oscreen.VIX_HALF_SIZE_OPTIONS, judge.VIX_HALF_SIZE)
+        self.assertEqual(oscreen.VIX_NO_NEW_SHORT_VOL, judge.VIX_NO_NEW_POSITIONS)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# run_scan() wiring — both gates must actually be consulted, not just exist
+# ══════════════════════════════════════════════════════════════════════════════
+class TestRunScanConsultsNewGates(unittest.TestCase):
+    """
+    A written guardrail nothing calls is not a guardrail — the same lesson
+    CLAUDE.md already records for check_option_liquidity(). These assert the
+    call sites, not just the functions in isolation.
+    """
+
+    def _base_mocks(self):
+        candidate = {"symbol": "COIN", "iv_rank": 75.0, "iv_pct": 80.0,
+                     "hv30": 40.0, "signal": "NEUTRAL", "trend": "UP"}
+        strat = {"symbol": "COIN", "strategy": "bull_put_spread", "iv_rank": 75.0,
+                 "dte": 30, "max_loss": 500, "net_credit": 4.45, "legs": [],
+                 "reward_risk": 0.8}
+        patches = {
+            "scan_universe": mock.patch.object(run_options, "scan_universe", return_value=[candidate]),
+            "open_short_vol_positions": mock.patch.object(run_options, "open_short_vol_positions", return_value=[]),
+            "get_equity": mock.patch.object(run_options, "get_equity", return_value=100_000.0),
+            "get_option_positions": mock.patch.object(run_options, "get_option_positions", return_value=[]),
+            "check_monthly_drawdown": mock.patch.object(
+                run_options, "check_monthly_drawdown",
+                return_value={"detail": "ok", "halt": False, "drawdown_pct": 0.0}),
+            "select_strategy": mock.patch.object(run_options, "select_strategy", return_value=strat),
+            "is_short_premium": mock.patch.object(run_options, "is_short_premium", return_value=True),
+        }
+        return patches, candidate, strat
+
+    def test_earnings_veto_prevents_strategy_selection(self):
+        patches, _, _ = self._base_mocks()
+        with mock.patch.object(run_options, "check_earnings_blackout",
+                               return_value=(True, "EARNINGS VETO: test")) as mock_earn, \
+             mock.patch.object(run_options, "get_vix_regime",
+                               return_value={"vix": 15.0, "size_mult": 1.0,
+                                            "block_new_short_vol": False, "note": "normal"}), \
+             patches["scan_universe"], patches["open_short_vol_positions"], \
+             patches["get_equity"], patches["get_option_positions"], \
+             patches["check_monthly_drawdown"], \
+             mock.patch.object(run_options, "select_strategy") as mock_select:
+            run_options.run_scan(dry_run=True)
+        mock_earn.assert_called_once_with("COIN")
+        mock_select.assert_not_called()
+
+    def test_vix_block_prevents_execution_of_short_premium(self):
+        patches, _, _ = self._base_mocks()
+        with mock.patch.object(run_options, "check_earnings_blackout", return_value=(False, "")), \
+             mock.patch.object(run_options, "get_vix_regime",
+                               return_value={"vix": 40.0, "size_mult": 0.0,
+                                            "block_new_short_vol": True, "note": "VOLATILITY VETO"}), \
+             patches["scan_universe"], patches["open_short_vol_positions"], \
+             patches["get_equity"], patches["get_option_positions"], \
+             patches["check_monthly_drawdown"], patches["select_strategy"], \
+             patches["is_short_premium"], \
+             mock.patch.object(run_options, "find_strategy_contracts") as mock_contracts:
+            run_options.run_scan(dry_run=True)
+        mock_contracts.assert_not_called()
+
+    def test_elevated_vix_caps_short_premium_qty_at_one_contract(self):
+        patches, _, strat = self._base_mocks()
+        with mock.patch.object(run_options, "check_earnings_blackout", return_value=(False, "")), \
+             mock.patch.object(run_options, "get_vix_regime",
+                               return_value={"vix": 28.0, "size_mult": 0.5,
+                                            "block_new_short_vol": False, "note": "half size"}), \
+             patches["scan_universe"], patches["open_short_vol_positions"], \
+             patches["get_equity"], patches["get_option_positions"], \
+             patches["check_monthly_drawdown"], patches["select_strategy"], \
+             patches["is_short_premium"], \
+             mock.patch.object(run_options, "find_strategy_contracts",
+                               return_value=[{"side": "sell", "leg_type": "put",
+                                              "strike": 180, "symbol": "COIN260101P00180000"}]), \
+             mock.patch.object(run_options, "fetch_leg_quotes", return_value=None), \
+             mock.patch.object(run_options, "net_of_cost_metrics",
+                               return_value={"exec_cost_per_contract": 5, "exec_cost_source": "estimate",
+                                            "reward_risk_net": 0.7, "cost_pct_of_credit": 10,
+                                            "max_loss_after_costs": 5.0}), \
+             mock.patch.object(run_options, "passes_risk_filters", return_value=(True, "ok")), \
+             mock.patch.object(run_options, "aggregate_short_vol_check", return_value=(True, "ok")), \
+             mock.patch.object(run_options, "scenario_analysis",
+                               return_value={"worst_case": {"move": "-10%", "pl": -100},
+                                            "max_defined_loss_per_contract": 500,
+                                            "losing_scenario_count": 1, "scenario_count": 5,
+                                            "avg_shortfall_per_contract": -50,
+                                            "best_case": {"pl": 100}}), \
+             mock.patch.object(run_options, "execute_strategy", return_value=[]) as mock_exec, \
+             mock.patch.object(run_options, "log_options_trade"):
+            run_options.run_scan(dry_run=True)
+        self.assertEqual(mock_exec.call_args.kwargs.get("qty"), 1,
+                         "elevated VIX must cap short-premium sizing at 1 contract")

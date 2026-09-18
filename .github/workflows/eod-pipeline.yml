@@ -2,13 +2,18 @@ name: EOD Trading Pipeline
 
 on:
   schedule:
-    # 21:15 UTC = 5:15 PM ET (EDT, UTC-4) - after market close + 1hr buffer.
+    # 21:22 UTC = 5:22 PM ET (EDT, UTC-4) - after market close + 1hr buffer.
     # One backup trigger, same pattern as morning/midday: GUARDRAIL G1
     # (idempotency — skip if today's EOD already ran) makes it a free no-op
     # once the primary succeeds, so this only adds a second chance if the
     # first is delayed or the runner never starts.
-    - cron: '15 21 * * 1-5'   # 5:15 PM ET target
-    - cron: '0 22 * * 1-5'    # 6:00 PM ET backup
+    #
+    # Minutes moved off :15/:00 on 2026-09-18, same fix as the other three
+    # equities workflows — the backup sat exactly on the hour, GitHub's own
+    # documented worst-congestion minute. See morning-pipeline.yml's schedule
+    # comment for the measurement behind this.
+    - cron: '22 21 * * 1-5'   # 5:22 PM ET target
+    - cron: '7 22 * * 1-5'    # 6:07 PM ET backup
   workflow_dispatch:
 
 jobs:

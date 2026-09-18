@@ -41,6 +41,104 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.3.0] — 2026-09-18
+
+**MINOR** — Four independent fixes from the same review pass: restore the
+Yahoo fundamentals source and give it real fallbacks, close the two
+documented-but-unbuilt options gaps (earnings blackout, VIX vol-regime gate),
+validate news-firehose ticker extraction against live data, and retime every
+equities cron off GitHub's documented high-load minutes. No Judge criterion,
+graduation gate, or sizing rule changed; two previously-undocumented risk
+gaps on the options book are now closed, which is exactly the "tighten only"
+direction the versioning table treats as MINOR.
+
+### Strategy / CLAUDE.md changes
+- Options-improvements list items 3 and 5 marked done (earnings blackout,
+  VIX vol-regime gate) with the actual thresholds and call sites.
+- Daily Schedule table and its explanatory paragraph updated with the new
+  cron minutes and the GitHub high-load-minute finding.
+
+### Code changes
+- `research.py get_yahoo_fundamentals()`: root cause of the 2026-09-18
+  finding — Yahoo's quoteSummary endpoint now 401s every unauthenticated GET
+  (confirmed on 63 of 68 symbols researched that day). Added a session
+  cookie + crumb handshake (`_yahoo_handshake()`, cached per process so a
+  60+-symbol research run does it once, not per symbol). Judge's quality
+  score was silently near-zero for virtually every candidate as a result,
+  and every discovery-sourced candidate was structurally unable to clear the
+  0.5 quality floor (`judge.score_quality` gives watchlist stocks "benefit of
+  the doubt" on missing market cap; discovery stocks get 0, then another
+  -0.25 for the always-zero analyst count).
+- `research.py get_secedgar_market_cap()` (new): market-cap fallback from
+  SEC EDGAR's filed shares-outstanding × a live price, for when Yahoo itself
+  is down. Ticker→CIK map cached to disk weekly, same pattern as
+  `screener.get_cached_universe()`. Restores only market cap (1.5 of 2.5
+  quality points) — EDGAR's XBRL facts don't carry analyst ratings or
+  profitability, so those stay unavailable on a real Yahoo outage.
+- `research.py get_stooq_price()` (new): last-resort current-price fallback,
+  free CSV quote, no key. Price only, not a fundamentals source in its own
+  right — used only to fill `current_price` (and the `upside_pct` calc that
+  depends on it) when neither Yahoo nor the caller's own price is available.
+- `research.py full_research()`: passes `compute_technicals()`'s `last_close`
+  into the fundamentals call so the SEC EDGAR fallback has a price to
+  multiply against.
+- `intelligence.py write_reddit_report()` (new): `scan_reddit()` already ran
+  daily inside `morning_intelligence()` and fed the discovery channel, but
+  only ever reached `logs/paper/*-intelligence.json` — no standalone report
+  the way StockTwits gets one. Now writes `logs/paper/YYYY-MM-DD-reddit.md`.
+- `options_screener.py check_earnings_blackout()` (new): options equivalent
+  of Hard Rule 9 / `judge.check_earnings_veto` — reuses judge.py's keyword
+  classifier (same false-positive guards) and gates new entries in both
+  directions (buying or selling), since a long straddle into a known
+  catalyst carries its own IV-crush risk. Reads today's equities-side
+  intelligence.json when present, plus a direct per-symbol news check always
+  — options can run before the morning equities pipeline writes that file.
+- `options_screener.py get_vix_regime()` (new): options equivalent of the
+  equities Citadel VIX ladder. Calls `intelligence.get_fear_greed()` directly
+  (a free FRED lookup) rather than reading equities' file, for the same
+  independent-schedule reason. VIX > 25 caps new short-premium at 1 contract
+  (contracts are discrete — no fractional half-size exists to fall back to);
+  VIX > 35 blocks new short-premium entirely. Only gates short-premium
+  structures, using the same `is_short_premium()` distinction the aggregate
+  concentration cap already draws. Thresholds match `judge.VIX_HALF_SIZE` /
+  `judge.VIX_NO_NEW_POSITIONS` exactly.
+- `run_options.py run_scan()`: wired both gates in — earnings check before
+  strategy selection (cheapest gate first), VIX regime check before contract
+  resolution/execution for short-premium candidates only.
+- `screener.py fetch_news_firehose()`: candidate tickers extracted from
+  headline text are now validated against a live Alpaca snapshot
+  (`batch_snapshots()`, one batched call) before being reported as
+  "hot tickers." The old approach matched any 2-5 letter all-caps word
+  against a 35-entry hardcoded ignore-list, which real estate acronyms
+  (UAE, IRA, ARR, BRICS, CNBC, ...) sail through easily — these were
+  reaching research.py and failing downstream with
+  `object of type 'NoneType' has no len()`.
+- `.github/workflows/morning-pipeline.yml`, `midday-pipeline.yml`,
+  `eod-pipeline.yml`: every cron moved off `:00/:15/:30/:45`. Measured fire
+  times for Sept 14-18 showed real research landing 4-5 hours late *every
+  day*, never once on the nominal target. GitHub's own scheduled-workflow
+  docs: the schedule event "can be delayed during periods of high load," and
+  "high load times include the start of every hour" — every cron in these
+  three files was sitting exactly on that grid. `options-pipeline.yml` was
+  already off-grid by accident and left unchanged. `forex-agent.yml` has the
+  same issue (every cron on `:00`) but is outside this file's ownership —
+  flagged, not changed.
+- `tests/test_guardrails.py`: 27 new tests across all four fixes (fundamentals
+  fallback chain, Reddit report, options earnings/VIX gates including
+  `run_scan()` wiring, news-ticker validation); 234 tests total, all pass.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** No Judge
+  scoring criterion, graduation threshold, or position-sizing rule changed.
+  The Yahoo/fallback/Reddit/ticker-validation fixes restore data that was
+  silently missing — they don't change how any restored data is scored. The
+  options earnings and VIX gates are new risk controls that can only prevent
+  a trade that would otherwise have been taken, never approve one that
+  wouldn't have passed before — same tighten-only direction as every other
+  MINOR entry in this file. The cron retiming changes when a pipeline runs,
+  not what it decides.
+
+
 ## [v1.2.0] — 2026-09-10
 
 **MINOR** — Widen the research discovery funnel: raise per-source ticker caps

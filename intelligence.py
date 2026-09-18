@@ -137,6 +137,39 @@ def scan_reddit():
     return {"timestamp": datetime.now().isoformat(), "source": "reddit", "tickers": results}
 
 
+def write_reddit_report(reddit_data, out_dir=None):
+    """
+    Reddit trending tickers were computed every morning and buried inside
+    intelligence.json's "reddit" key — visible to the pipeline, invisible to
+    anyone reading the day's logs. Writes a standalone report, the same
+    parity reddit_screener.py's StockTwits scan already gets with its own
+    daily -social.md file, so "what did Reddit surface today" has a direct
+    answer instead of requiring a jq query into the intelligence blob.
+    """
+    out_dir = out_dir or os.path.join(os.path.dirname(__file__), "logs", "paper")
+    os.makedirs(out_dir, exist_ok=True)
+    tickers = reddit_data.get("tickers", []) if reddit_data else []
+
+    lines = [f"# Reddit Trending Tickers — {date.today().isoformat()}", ""]
+    if not tickers:
+        lines.append("No tickers surfaced today (scrape failed or nothing trending).")
+    else:
+        for i, t in enumerate(tickers, 1):
+            lines.append(
+                f"{i:>2}. **{t['symbol']}** — {t['reddit_mentions']} mention(s), "
+                f"r/{t.get('subreddit', '?')}"
+            )
+            if t.get("top_post"):
+                lines.append(f"    \"{t['top_post']}\" ({t.get('url', '')})")
+    report = "\n".join(lines) + "\n"
+
+    out_path = os.path.join(out_dir, f"{date.today().isoformat()}-reddit.md")
+    with open(out_path, "w") as f:
+        f.write(report)
+    print(f"  [reddit report] Saved to {out_path}", file=sys.stderr)
+    return out_path
+
+
 # ── 2. Twitter / X key influencer scan (web search fallback) ─────────────
 INFLUENCERS = [
     "ElonMusk",
@@ -573,6 +606,7 @@ def morning_intelligence():
 
     print("  [6/8] Reddit trending tickers...", file=sys.stderr)
     output["reddit"] = scan_reddit()
+    write_reddit_report(output["reddit"])
 
     print("  [7/8] Earnings calendar...", file=sys.stderr)
     output["earnings_watch"] = get_earnings_calendar()

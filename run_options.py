@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 assert os.getenv("ALPACA_PAPER_TRADE", "true").lower() == "true", \
     "FATAL: ALPACA_PAPER_TRADE must be 'true'"
 
-from options_screener    import scan_universe
+from options_screener    import scan_universe, check_earnings_blackout, get_vix_regime
 from robinhood_screener  import (
     build_screen_from_robinhood_quote, scan_universe_robinhood,
     build_iron_condor_strikes, build_butterfly_strikes, format_screen_result,
@@ -175,6 +175,15 @@ def run_scan(dry_run: bool = False, scan_only: bool = False):
             _log(f"  {p['symbol']:6s} {p['strategy']:18s} "
                  f"max_loss={'$%.0f' % ml if ml else 'UNKNOWN'}/contract")
 
+    # ── Citadel VIX ladder, options side ──────────────────────────────────────
+    # Equities has gated new positions on the real VIX since 2026-08-26; options
+    # never did. IV rank reads the same after a spike has peaked as while one
+    # is still expanding, and that's exactly the difference a real VIX level
+    # tells apart. Fetched once per run — this only affects new short-premium
+    # entries below, not existing-position management.
+    vix_regime = get_vix_regime()
+    _log(f"\nVIX regime: {vix_regime['note']}")
+
     # 2. Select strategy + risk filter
     trades_placed = 0
     for candidate in candidates:
@@ -183,6 +192,15 @@ def run_scan(dry_run: bool = False, scan_only: bool = False):
 
         symbol = candidate["symbol"]
         _log(f"\nEvaluating {symbol}...")
+
+        # ── Earnings blackout (CLAUDE.md Hard Rule 9, options gap) ─────────────
+        # Cheapest gate first — skip before spending a strategy build + contract
+        # resolution + live quote fetch on a symbol that's about to be vetoed
+        # anyway.
+        earnings_veto, earnings_reason = check_earnings_blackout(symbol)
+        if earnings_veto:
+            _log(f"  SKIP — {earnings_reason}")
+            continue
 
         # Build strategy
         strat = select_strategy(candidate)
@@ -194,6 +212,21 @@ def run_scan(dry_run: bool = False, scan_only: bool = False):
              f"IVR={strat['iv_rank']:.0f} | DTE={strat['dte']} | "
              f"max_loss=${strat.get('max_loss', '?')} | "
              f"net_credit=${strat.get('net_credit', 'N/A')}")
+
+        # VIX regime only constrains new short-premium (selling) structures —
+        # buying a straddle when vol is already elevated isn't the risk this
+        # protects against.
+        candidate_qty = trade_qty
+        if is_short_premium(strat):
+            if vix_regime["block_new_short_vol"]:
+                _log(f"  SKIP — VOLATILITY VETO: {vix_regime['note']}")
+                continue
+            if vix_regime["size_mult"] < 1.0:
+                # Contracts are discrete (1-2), so "half size" caps at the
+                # minimum contract size rather than a literal 0.5x — there is
+                # no fractional contract to fall back to.
+                candidate_qty = 1
+                _log(f"  Sizing capped at 1 contract — {vix_regime['note']}")
 
         # 3. Resolve to actual Alpaca contracts BEFORE the risk gate.
         # The gate now costs the trade against real bid/ask, and a quote needs
@@ -253,12 +286,12 @@ def run_scan(dry_run: bool = False, scan_only: bool = False):
              f"avg ${scenarios['avg_shortfall_per_contract']:+.0f}/contract "
              f"vs best ${scenarios['best_case']['pl']:+.0f}")
 
-        # 5. Execute (use performance-adjusted qty)
-        orders = execute_strategy(strat, contracts, qty=trade_qty, dry_run=dry_run)
+        # 5. Execute (use performance-adjusted + VIX-adjusted qty)
+        orders = execute_strategy(strat, contracts, qty=candidate_qty, dry_run=dry_run)
 
         # 6. Journal
         log_options_trade(strat, orders, JOURNAL, costs=costs,
-                          scenarios=scenarios, qty=trade_qty)
+                          scenarios=scenarios, qty=candidate_qty)
 
         # Count the new position against the concentration cap immediately, so
         # a single run cannot open three correlated short-vol trades before the
@@ -272,7 +305,7 @@ def run_scan(dry_run: bool = False, scan_only: bool = False):
                     round(costs["max_loss_after_costs"] * 100, 2)
                     if costs.get("max_loss_after_costs") is not None else None
                 ),
-                "qty": trade_qty,
+                "qty": candidate_qty,
             })
 
         if not dry_run:

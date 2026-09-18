@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v1.2.0
+> **Version:** v1.3.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -347,21 +347,30 @@ estimated is reported as `estimate`, never blended.
    same 9:35 AM–4:00 PM ET window and redundant-trigger pattern as the equities
    morning pipeline (see Daily Schedule below). The window was widened from
    11:30 AM on 2026-09-08 — see the Daily Schedule section for why.
-3. **Earnings blackout.** The equities Judge vetoes entries within 3 days of
-   earnings. Selling premium into an earnings print is the same mistake with
-   more leverage — and IV rank will look attractive precisely because the event
-   is coming.
+3. ~~Earnings blackout~~ — **done.** `options_screener.check_earnings_blackout()`
+   reuses judge.py's keyword classifier (same false-positive guards — 13F
+   "Q2 Portfolio" recaps, backward-looking language) and gates every new
+   position, buying or selling — a long straddle into a known catalyst carries
+   its own IV-crush risk once the report clears, so this isn't scoped to
+   sellers only. Reads today's equities-side intelligence.json when it
+   exists, plus a direct per-symbol news check always, since options can run
+   before the morning equities pipeline has written that file.
 4. ~~Liquidity floor~~ — **done.** `options_screener.check_option_liquidity()`
    already applied a 15%-of-mid ceiling but **was never called from any
    pipeline**, so no option order had ever been liquidity-checked or costed
    against a real quote. `fetch_leg_quotes()` now wires it into the gate. Open
    interest is still unchecked — spread width is a proxy for it, not a
    substitute.
-5. **Vol-regime gate on selling.** High IV rank is our entry signal, but it
-   reads the same after a spike has peaked (good) and while one is still
-   expanding (Volmageddon). The equities side already gates on real VIX
-   (`intelligence.py`, half size > 25, no new positions > 35); options ignores
-   it entirely. Reusing that plumbing is the next highest-value change.
+5. ~~Vol-regime gate on selling~~ — **done.** `options_screener.get_vix_regime()`
+   calls `intelligence.get_fear_greed()` directly (a free FRED VIXCLS lookup,
+   not a read of equities' file — options can run before that file exists
+   today) and gates only short-premium structures, same distinction
+   `is_short_premium()` already draws for the aggregate concentration cap:
+   VIX > 25 caps new short-premium at 1 contract regardless of what Ed
+   Seykota performance-sizing would otherwise pick (contracts are discrete,
+   so there's no fractional half-size to fall back to), VIX > 35 blocks new
+   short-premium entirely. Same 25/35 thresholds as the equities Citadel
+   ladder (`judge.VIX_HALF_SIZE`, `judge.VIX_NO_NEW_POSITIONS`).
 
 ### Reference sources read for the options strategy
 
@@ -477,12 +486,36 @@ doing any work, and the midday job's checks (`check-stops`, `check-phantom`)
 are read-check-act operations where running more often is strictly better,
 not just delay insurance.
 
+**A second, more specific cause found 2026-09-18: this repo's own crons were
+sitting on the most congested minutes on GitHub's infrastructure.** Pulling
+the actual fire times for Sept 14–18 showed the real research run landing
+4–5 hours after its nominal target *every single day* — not the occasional
+delay the widened window was built around, but a near-daily one, with real
+research never once landing on the 9:45/10:15/10:45/11:15 AM slots. GitHub's
+own scheduled-workflow docs say the schedule event "can be delayed during
+periods of high load," and that "high load times include the start of every
+hour" — recommending an off-grid minute specifically to avoid it. Every cron
+in morning-pipeline.yml, midday-pipeline.yml and eod-pipeline.yml was sitting
+exactly on :00/:15/:30/:45 — the same round minutes most other repos'
+schedules also default to, i.e. the most congested moments on GitHub's whole
+triggering infrastructure. options-pipeline.yml's crons already happened to
+avoid that grid (an accident of the "offset 5 minutes from morning" choice),
+and options got noticeably fewer complete misses than morning over the same
+week — circumstantial, but consistent with the mechanism. All equities crons
+were moved off the grid on 2026-09-18 (`:52/:22/:52/:22/:07/:37` for morning,
+similar for midday/EOD). This does not guarantee the platform-wide delay
+never recurs — it reduces exposure to one *documented* cause of it, it is not
+a fix for GitHub Actions scheduling being best-effort in general. The forex
+agent's own workflow (`forex-agent.yml`, outside this file's ownership) has
+every cron on `:00`, the single worst-documented minute — flagged for that
+session, not changed here.
+
 | ET | Workflow / runner | Cron (UTC) | Steps, in order |
 |---|---|---|---|
-| **9:45 AM** (+5 backups to 2:30 PM) | `morning-pipeline.yml`<br>`run_github.sh` | `45 13`, `15 14`, `45 14`, `15 15`, `0 17`, `30 18 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
-| **9:40 AM** (+4 backups to 2:35 PM) | `options-pipeline.yml`<br>`run_options_github.sh` | `40 13`, `10 14`, `10 15`, `5 17`, `35 18 * * 1-5` | `run_options.py` — manage existing positions, then screen the options watchlist for new defined-risk trades. Same 9:35 AM–4:00 PM ET window as equities morning. IV rank and the chain are freshest right after open, and widening this window trades some of that freshness for reliability — see run_options_github.sh's GUARDRAIL G2 comment. Existed only as a local `run_options*.sh` tied to one machine before this. |
-| **10:30 AM, 12:00 PM, 2:00 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `30 14`, `0 16`, `0 18 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
-| **5:15 PM** (+1 backup at 6:00 PM) | `eod-pipeline.yml`<br>`run_eod_github.sh` | `15 21`, `0 22 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
+| **9:52 AM** (+5 backups to 2:37 PM) | `morning-pipeline.yml`<br>`run_github.sh` | `52 13`, `22 14`, `52 14`, `22 15`, `7 17`, `37 18 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
+| **9:40 AM** (+4 backups to 2:35 PM) | `options-pipeline.yml`<br>`run_options_github.sh` | `40 13`, `10 14`, `10 15`, `5 17`, `35 18 * * 1-5` | `run_options.py` — manage existing positions, then screen the options watchlist for new defined-risk trades. Same 9:35 AM–4:00 PM ET window as equities morning. IV rank and the chain are freshest right after open, and widening this window trades some of that freshness for reliability — see run_options_github.sh's GUARDRAIL G2 comment. Existed only as a local `run_options*.sh` tied to one machine before this. Already off the :00/:15/:30/:45 grid, so left unchanged in the 2026-09-18 retiming. |
+| **10:37 AM, 12:07 PM, 2:07 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `37 14`, `7 16`, `7 18 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
+| **5:22 PM** (+1 backup at 6:07 PM) | `eod-pipeline.yml`<br>`run_eod_github.sh` | `22 21`, `7 22 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
 | **Sep 3, 5:30 PM** | `graduation-decision.yml` | `30 21 3 9 *` | `reviewer.py graduation` — Phase 2B verdict. Advisory only; manual approval still required. |
 
 Guardrails inside the runners: weekends skip; the morning and options jobs

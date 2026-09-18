@@ -2,7 +2,7 @@ name: Midday Risk Check
 
 on:
   schedule:
-    # 16:00 UTC = 12:00 PM ET (EDT, UTC-4) — the midday stop-loss check that
+    # 16:07 UTC = 12:07 PM ET (EDT, UTC-4) — the midday stop-loss check that
     # CLAUDE.md and routines.json have always described but nothing ran.
     #
     # Two more triggers inside the same 10 AM-4 PM ET market-hours window this
@@ -11,10 +11,16 @@ on:
     # read-check-act operations, so checking more often is strictly better —
     # it catches a stop-loss breach sooner, not just hedges against GitHub's
     # scheduler running hours late (observed: 3.5-9h delays this repo has
-    # actually hit). No idempotency guard is needed or wanted here.
-    - cron: '0 16 * * 1-5'    # 12:00 PM ET
-    - cron: '30 14 * * 1-5'   # 10:30 AM ET
-    - cron: '0 18 * * 1-5'    # 2:00 PM ET
+    # actually hit).
+    #
+    # Minutes moved off :00/:30 on 2026-09-18 — two of these three sat exactly
+    # on the hour, the single most congested minute per GitHub's own scheduled-
+    # workflow docs ("high load times include the start of every hour").
+    # See morning-pipeline.yml's schedule comment for the full measurement
+    # that motivated this across all of this agent's workflows.
+    - cron: '7 16 * * 1-5'    # 12:07 PM ET
+    - cron: '37 14 * * 1-5'   # 10:37 AM ET
+    - cron: '7 18 * * 1-5'    # 2:07 PM ET
   workflow_dispatch:
     inputs:
       test_mode:

@@ -255,8 +255,28 @@ def fetch_news_firehose(max_per_feed=10):
         except Exception:
             continue
 
-    # Top mentioned tickers across all feeds
-    hot_tickers = sorted(ticker_mentions.items(), key=lambda x: x[1], reverse=True)[:20]
+    # Candidates by mention count, before validation. A bare regex over
+    # headline text matches any 2-5 letter all-caps word — country/org
+    # acronyms (UAE, BRICS, IRA, ARR), network names (CNBC), etc. all pass
+    # just as easily as a real ticker, and a hardcoded ignore-list can never
+    # keep up with financial-headline English. Validating against a live
+    # Alpaca snapshot (one batched call, reusing batch_snapshots) confirms
+    # each candidate is an actual tradable symbol with real market data
+    # instead of growing the ignore-list forever.
+    ranked = sorted(ticker_mentions.items(), key=lambda x: x[1], reverse=True)
+    candidate_syms = [t for t, _ in ranked[:40]]
+    valid_syms = set()
+    if candidate_syms:
+        snaps = batch_snapshots(candidate_syms)
+        for sym, snap in snaps.items():
+            if (snap or {}).get("dailyBar", {}).get("c"):
+                valid_syms.add(sym)
+
+    hot_tickers = [(t, c) for t, c in ranked if t in valid_syms][:20]
+    rejected = [t for t, _ in ranked[:40] if t not in valid_syms]
+    if rejected:
+        print(f"  [screener] News firehose rejected {len(rejected)} non-tickers: "
+              f"{rejected[:10]}", file=sys.stderr)
 
     return {
         "timestamp":    datetime.now().isoformat(),

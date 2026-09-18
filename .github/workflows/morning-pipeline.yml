@@ -2,7 +2,7 @@ name: Morning Trading Pipeline
 
 on:
   schedule:
-    # Primary target: 13:45 UTC = 9:45 AM ET (EDT) - after market open.
+    # Primary target: 13:52 UTC = 9:52 AM ET (EDT) - after market open.
     #
     # GitHub Actions scheduled triggers are not guaranteed to run on time —
     # delays of several hours are a documented, observed behavior on this repo
@@ -25,12 +25,25 @@ on:
     # every trigger after the first a free no-op the moment one succeeds, so
     # this only ever adds chances to land inside the window — it cannot cause
     # a duplicate run.
-    - cron: '45 13 * * 1-5'   # 9:45 AM ET target
-    - cron: '15 14 * * 1-5'   # 10:15 AM ET backup
-    - cron: '45 14 * * 1-5'   # 10:45 AM ET backup
-    - cron: '15 15 * * 1-5'   # 11:15 AM ET backup
-    - cron: '0 17 * * 1-5'    # 1:00 PM ET backup
-    - cron: '30 18 * * 1-5'   # 2:30 PM ET backup — last chance before the 4:00 PM cutoff
+    #
+    # Minutes moved off :00/:15/:30/:45 on 2026-09-18. Pulling the actual fire
+    # times for the week of Sept 14-18 showed the real research run landing
+    # 4-5 hours after every nominal target, every single day — not the
+    # "occasional multi-hour delay" the wider window was built around, but a
+    # near-daily one. GitHub's own scheduled-workflow docs say why: the
+    # schedule event "can be delayed during periods of high load," and "high
+    # load times include the start of every hour" — recommending a different
+    # minute specifically to avoid it. Every cron below had been sitting on
+    # the exact 15-minute grid (:00/:15/:30/:45) most other repos' schedules
+    # also default to, i.e. the most congested minutes on GitHub's triggering
+    # infrastructure. Moved to :52/:22/:52/:22/:07/:37 — off that grid, and
+    # the 1 PM slot specifically off :00, the single worst-documented minute.
+    - cron: '52 13 * * 1-5'   # 9:52 AM ET target
+    - cron: '22 14 * * 1-5'   # 10:22 AM ET backup
+    - cron: '52 14 * * 1-5'   # 10:52 AM ET backup
+    - cron: '22 15 * * 1-5'   # 11:22 AM ET backup
+    - cron: '7 17 * * 1-5'    # 1:07 PM ET backup
+    - cron: '37 18 * * 1-5'   # 2:37 PM ET backup — last chance before the 4:00 PM cutoff
   workflow_dispatch:
     inputs:
       test_mode:

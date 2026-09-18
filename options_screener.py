@@ -41,6 +41,89 @@ def _headers():
     }
 
 
+# ── Earnings blackout (CLAUDE.md Hard Rule 9, options gap) ───────────────────
+# The equities Judge has vetoed entries within 3 trading days of earnings
+# since the ruleset was first written down. Options never got the same check —
+# confirmed by grep, zero references to "earnings" anywhere in this file,
+# options_strategy.py, or run_options.py. Selling premium into an earnings
+# print is the same mistake with more leverage (CLAUDE.md's own options
+# improvements list flagged this as the next highest-value gap), and buying
+# volatility into a known catalyst carries its own IV-crush risk the moment
+# the report clears — so this blocks new entries in both directions, matching
+# the equities side's blanket rule rather than only gating premium sellers.
+def check_earnings_blackout(symbol: str) -> tuple:
+    """
+    Returns (vetoed: bool, reason: str). Reuses judge.py's keyword classifier
+    (same false-positive guards as equities: rejects 13F "Q2 Portfolio"
+    stories and backward-looking recaps unless forward-looking language is
+    also present) so the two agents' earnings logic can't quietly drift apart.
+
+    Consults two sources, same as the equities check:
+      1. Today's equities-side intelligence.json earnings watch, if that file
+         exists. Options runs independently of the morning equities pipeline
+         (different schedule, can fire first), so this degrades gracefully to
+         source 2 alone when the file isn't there yet — it is never required.
+      2. This symbol's own recent news, fetched directly here.
+    """
+    import judge
+    import research as _research
+    from market_time import et_today_iso
+
+    intel_path = os.path.join(os.path.dirname(__file__), "logs", "paper",
+                              f"{et_today_iso()}-intelligence.json")
+    research_ctx = None
+    if os.path.exists(intel_path):
+        try:
+            with open(intel_path) as f:
+                research_ctx = {"intelligence": json.load(f)}
+        except Exception:
+            research_ctx = None
+
+    try:
+        news_items = _research.summarize_news(_research.get_news(symbol, limit=10))
+    except Exception:
+        news_items = []
+
+    return judge.check_earnings_veto(news_items, symbol, research=research_ctx)
+
+
+# ── VIX vol-regime gate on premium selling ───────────────────────────────────
+# High IV rank is the entry signal for selling premium, but it reads the same
+# after a spike has peaked (good — vol about to mean-revert) and while one is
+# still expanding (Volmageddon, -90% in a day per CLAUDE.md's Aurum reference —
+# bad). The equities side already gates on the real VIX (judge.score_volatility,
+# intelligence.get_fear_greed): half size above 25, no new positions above 35.
+# Options ignored it entirely until now. Only short-premium structures are
+# gated — buying a straddle when vol is already elevated isn't the risk this
+# protects against, and is_short_premium() already exists for the aggregate
+# concentration cap, so this reuses the same distinction.
+VIX_HALF_SIZE_OPTIONS  = 25.0
+VIX_NO_NEW_SHORT_VOL   = 35.0
+
+
+def get_vix_regime() -> dict:
+    """
+    Returns {"vix", "size_mult", "block_new_short_vol", "note"}. Calls
+    intelligence.get_fear_greed() directly (a single free FRED VIXCLS lookup)
+    rather than reading equities' intelligence.json, since options can run
+    before the morning equities pipeline has written it today.
+    """
+    import intelligence
+    fg = intelligence.get_fear_greed()
+    vix = fg.get("vix")
+    if not isinstance(vix, (int, float)):
+        return {"vix": None, "size_mult": 1.0, "block_new_short_vol": False,
+                "note": "VIX unavailable — full sizing, no regime block"}
+    if vix > VIX_NO_NEW_SHORT_VOL:
+        return {"vix": vix, "size_mult": 0.0, "block_new_short_vol": True,
+                "note": f"VIX {vix:.1f} > {VIX_NO_NEW_SHORT_VOL:.0f} — no new short-premium positions"}
+    if vix > VIX_HALF_SIZE_OPTIONS:
+        return {"vix": vix, "size_mult": 0.5, "block_new_short_vol": False,
+                "note": f"VIX {vix:.1f} > {VIX_HALF_SIZE_OPTIONS:.0f} — reduce size on new short-premium"}
+    return {"vix": vix, "size_mult": 1.0, "block_new_short_vol": False,
+            "note": f"VIX {vix:.1f} — normal regime"}
+
+
 # ── Market data helpers ───────────────────────────────────────────────────────
 
 def get_stock_price(symbol: str) -> Optional[float]:
