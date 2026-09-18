@@ -1,27 +1,95 @@
 {
-  "checked": 4,
-  "triggers": [],
+  "checked": 7,
+  "triggers": [
+    {
+      "symbol": "COIN261030P00172500",
+      "qty": "1",
+      "avg_entry": "8.8",
+      "current_price": "7.4",
+      "unrealized_plpc": -0.15909,
+      "tier": "TIER3",
+      "stop_pct": -0.1,
+      "reason": "STOP-LOSS TIER3 (-10%): down -15.9%"
+    }
+  ],
   "inverse_max_hold": [],
   "phantom_equity": [
     {
       "symbol": "LBGJ",
       "qty": 154903.0,
       "avg_entry_price": 0.0288,
-      "current_price": 1.95,
-      "price_ratio": 67.71,
-      "unrealized_plpc": 66.70833,
-      "reported_market_value": 302060.85,
+      "current_price": 1.94,
+      "price_ratio": 67.36,
+      "unrealized_plpc": 66.36111,
+      "reported_market_value": 300511.82,
       "cost_basis": 4461.21,
-      "phantom_amount": 297599.64,
+      "phantom_amount": 296050.61,
       "reasons": [
-        "price $1.9500 is 68x its cost basis $0.0288",
-        "unrealized P&L 6,671% exceeds the 1,000% plausibility ceiling",
+        "price $1.9400 is 67x its cost basis $0.0288",
+        "unrealized P&L 6,636% exceeds the 1,000% plausibility ceiling",
         "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
       ],
       "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
     }
   ],
-  "closed": [],
+  "closed": [
+    {
+      "symbol": "COIN261030P00172500",
+      "result": {
+        "id": "1196882d-2c89-4529-8847-53d510d26d14",
+        "client_order_id": "agent-sell-COIN261030P00172500-20260918174513",
+        "created_at": "2026-09-18T17:45:14.105966328Z",
+        "updated_at": "2026-09-18T17:45:14.1060276Z",
+        "submitted_at": "2026-09-18T17:45:14.093929756Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "cac846c9-31db-4daf-83e9-f4c2a2a98db9",
+        "symbol": "COIN261030P00172500",
+        "asset_class": "us_option",
+        "notional": null,
+        "qty": "1",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "simple",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "gtc",
+        "limit_price": "7.33",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-12-17T21:00:00Z",
+        "_ok": true,
+        "_agent_reason": "STOP-LOSS TIER3 (-10%): down -15.9%",
+        "_limit_price_used": 7.33,
+        "_urgent_exit": true,
+        "_released_orders": []
+      },
+      "trigger": {
+        "symbol": "COIN261030P00172500",
+        "qty": "1",
+        "avg_entry": "8.8",
+        "current_price": "7.4",
+        "unrealized_plpc": -0.15909,
+        "tier": "TIER3",
+        "stop_pct": -0.1,
+        "reason": "STOP-LOSS TIER3 (-10%): down -15.9%"
+      }
+    }
+  ],
   "failed": [],
   "skipped_suspect": []
 }
