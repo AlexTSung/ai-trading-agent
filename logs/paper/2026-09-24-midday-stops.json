@@ -1,27 +1,95 @@
 {
   "checked": 8,
-  "triggers": [],
+  "triggers": [
+    {
+      "symbol": "NFLX261030C00072000",
+      "qty": "1",
+      "avg_entry": "4.05",
+      "current_price": "3.2",
+      "unrealized_plpc": -0.20988,
+      "tier": "TIER3",
+      "stop_pct": -0.1,
+      "reason": "STOP-LOSS TIER3 (-10%): down -21.0%"
+    }
+  ],
   "inverse_max_hold": [],
   "phantom_equity": [
     {
       "symbol": "LBGJ",
       "qty": 154903.0,
       "avg_entry_price": 0.0288,
-      "current_price": 2.15,
-      "price_ratio": 74.65,
-      "unrealized_plpc": 73.65278,
-      "reported_market_value": 333041.45,
+      "current_price": 2.0501,
+      "price_ratio": 71.18,
+      "unrealized_plpc": 70.18403,
+      "reported_market_value": 317566.64,
       "cost_basis": 4461.21,
-      "phantom_amount": 328580.24,
+      "phantom_amount": 313105.43,
       "reasons": [
-        "price $2.1500 is 75x its cost basis $0.0288",
-        "unrealized P&L 7,365% exceeds the 1,000% plausibility ceiling",
+        "price $2.0501 is 71x its cost basis $0.0288",
+        "unrealized P&L 7,018% exceeds the 1,000% plausibility ceiling",
         "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
       ],
       "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
     }
   ],
-  "closed": [],
+  "closed": [
+    {
+      "symbol": "NFLX261030C00072000",
+      "result": {
+        "id": "eddd9806-f157-4f42-b31b-f6ce9ab5bdeb",
+        "client_order_id": "agent-sell-NFLX261030C00072000-20260924195644",
+        "created_at": "2026-09-24T19:56:44.13899973Z",
+        "updated_at": "2026-09-24T19:56:44.139050396Z",
+        "submitted_at": "2026-09-24T19:56:44.127203138Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "17cbe51b-455b-4d13-8f75-fcf2a68987af",
+        "symbol": "NFLX261030C00072000",
+        "asset_class": "us_option",
+        "notional": null,
+        "qty": "1",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "simple",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "gtc",
+        "limit_price": "3.17",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-12-23T21:00:00Z",
+        "_ok": true,
+        "_agent_reason": "STOP-LOSS TIER3 (-10%): down -21.0%",
+        "_limit_price_used": 3.17,
+        "_urgent_exit": true,
+        "_released_orders": []
+      },
+      "trigger": {
+        "symbol": "NFLX261030C00072000",
+        "qty": "1",
+        "avg_entry": "4.05",
+        "current_price": "3.2",
+        "unrealized_plpc": -0.20988,
+        "tier": "TIER3",
+        "stop_pct": -0.1,
+        "reason": "STOP-LOSS TIER3 (-10%): down -21.0%"
+      }
+    }
+  ],
   "failed": [],
   "skipped_suspect": []
 }
