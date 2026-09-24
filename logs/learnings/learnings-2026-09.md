@@ -1,4 +1,4 @@
-# Learning Agent Report — 2026-09-23
+# Learning Agent Report — 2026-09-24
 
 ## Performance Summary
 | Metric | Value |
@@ -15,8 +15,8 @@
 Judge score ≥8.0 but outcome POOR_TRADE (2x: AAPL, AAPL). Judge may be overweighting news sentiment. Consider raising APPROVE threshold to 8.0.
 **Recommended action**: `raise_approve_threshold`
 
-### 2. persistent_judge_overconfidence (seen 5x)
-Judge consistently scores -4.8 pts above reviewer (5 trades). Judge is overconfident. Recommend reducing news component weight by 10%.
+### 2. persistent_judge_overconfidence (seen 7x)
+Judge consistently scores -4.6 pts above reviewer (7 trades). Judge is overconfident. Recommend reducing news component weight by 10%.
 **Recommended action**: `reduce_news_weight`
 
 ### 3. win_rate_summary (seen 30x)
@@ -28,7 +28,7 @@ Overall win rate: 27% (8W / 5L / 17N of 30 trades). Below 55% graduation thresho
 {
   "approve_threshold": 8.0,
   "news_weight_adj": 0.6,
-  "last_updated": "2026-09-23",
+  "last_updated": "2026-09-24",
   "total_trades": 30,
   "scope": "alpaca_equities",
   "round_trips": 30,
