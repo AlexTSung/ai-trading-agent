@@ -1,0 +1,495 @@
+{
+  "timestamp": "2026-10-02T18:44:39.863720",
+  "run_type": "morning_intelligence",
+  "fear_greed": {
+    "source": "fred_vix_proxy",
+    "vix": 16.39,
+    "vix_date": "2026-10-01",
+    "score": 65,
+    "rating": "Greed",
+    "signal": "GREED \u2014 risk-on, watch exits",
+    "timestamp": "2026-10-02T18:44:39.951876"
+  },
+  "vix": {
+    "symbol": "VIXY",
+    "price": 16.78,
+    "note": "VIXY proxy for VIX"
+  },
+  "global_markets": {
+    "timestamp": "2026-10-02T18:44:40.040223",
+    "source": "global_etfs",
+    "markets": {
+      "EWJ": {
+        "description": "Japan (Nikkei proxy)",
+        "prev_close": 97.36,
+        "today": 98.71,
+        "change_pct": 1.39,
+        "signal": "UP"
+      },
+      "EWG": {
+        "description": "Germany (DAX proxy)",
+        "prev_close": 40.84,
+        "today": 41.24,
+        "change_pct": 0.98,
+        "signal": "UP"
+      },
+      "FXI": {
+        "description": "China (HSI/CSI proxy)",
+        "prev_close": 33.92,
+        "today": 33.2,
+        "change_pct": -2.14,
+        "signal": "DOWN"
+      },
+      "EWU": {
+        "description": "UK (FTSE proxy)",
+        "prev_close": 45.89,
+        "today": 46.09,
+        "change_pct": 0.42,
+        "signal": "FLAT"
+      },
+      "EWZ": {
+        "description": "Brazil (Ibovespa proxy)",
+        "prev_close": 37.13,
+        "today": 37.82,
+        "change_pct": 1.84,
+        "signal": "UP"
+      },
+      "EEM": {
+        "description": "Emerging markets",
+        "prev_close": 66.8,
+        "today": 67.45,
+        "change_pct": 0.97,
+        "signal": "UP"
+      },
+      "GLD": {
+        "description": "Gold",
+        "prev_close": 382.78,
+        "today": 379.71,
+        "change_pct": -0.8,
+        "signal": "DOWN"
+      },
+      "USO": {
+        "description": "Oil",
+        "prev_close": 150.05,
+        "today": 146.69,
+        "change_pct": -2.24,
+        "signal": "DOWN"
+      },
+      "TLT": {
+        "description": "US 20yr Treasuries (rates proxy)",
+        "prev_close": 77.72,
+        "today": 77.45,
+        "change_pct": -0.35,
+        "signal": "FLAT"
+      },
+      "UUP": {
+        "description": "US Dollar index",
+        "prev_close": 28.96,
+        "today": 28.93,
+        "change_pct": -0.14,
+        "signal": "FLAT"
+      }
+    }
+  },
+  "macro": {
+    "timestamp": "2026-10-02T18:44:40.374405",
+    "source": "fred_csv",
+    "macro": {
+      "FEDFUNDS": {
+        "label": "Fed Funds Rate",
+        "value": "3.75",
+        "date": "2026-09-01",
+        "note": ""
+      },
+      "CPIAUCSL": {
+        "label": "CPI (inflation)",
+        "value": "334.131",
+        "date": "2026-08-01",
+        "note": "CPI index level 334.131 \u2014 watch YoY % change"
+      },
+      "UNRATE": {
+        "label": "Unemployment Rate",
+        "value": "4.2",
+        "date": "2026-09-01",
+        "note": ""
+      },
+      "T10Y2Y": {
+        "label": "Yield Curve (10yr-2yr spread)",
+        "value": "0.46",
+        "date": "2026-10-01",
+        "note": "Flat curve \u2014 caution"
+      },
+      "DGS10": {
+        "label": "10-Year Treasury Yield",
+        "value": "5.29",
+        "date": "2026-09-30",
+        "note": ""
+      },
+      "VIXCLS": {
+        "label": "VIX Closing Price",
+        "value": "16.39",
+        "date": "2026-10-01",
+        "note": "LOW VOL \u2014 risk-on, full sizing allowed"
+      }
+    }
+  },
+  "market_discovery": {
+    "timestamp": "2026-10-02T18:44:40.492395",
+    "source": "alpaca_discovery",
+    "discovery": {
+      "most_active": [
+        {
+          "symbol": "NIVF",
+          "volume": 288292321,
+          "trade_count": 274748
+        },
+        {
+          "symbol": "FNGR",
+          "volume": 226303017,
+          "trade_count": 177846
+        },
+        {
+          "symbol": "AMOD",
+          "volume": 179149353,
+          "trade_count": 989263
+        },
+        {
+          "symbol": "SCNX",
+          "volume": 157708160,
+          "trade_count": 127607
+        },
+        {
+          "symbol": "FLUX",
+          "volume": 142018269,
+          "trade_count": 197763
+        },
+        {
+          "symbol": "SDEV",
+          "volume": 120713930,
+          "trade_count": 895366
+        },
+        {
+          "symbol": "QTEX",
+          "volume": 116593131,
+          "trade_count": 262090
+        },
+        {
+          "symbol": "NKE",
+          "volume": 111422027,
+          "trade_count": 590723
+        },
+        {
+          "symbol": "NVDA",
+          "volume": 102268271,
+          "trade_count": 2388604
+        },
+        {
+          "symbol": "SPCX",
+          "volume": 95166632,
+          "trade_count": 1042112
+        },
+        {
+          "symbol": "SOXS",
+          "volume": 91765335,
+          "trade_count": 435528
+        },
+        {
+          "symbol": "SCKT",
+          "volume": 87217055,
+          "trade_count": 162807
+        },
+        {
+          "symbol": "BITO",
+          "volume": 76560934,
+          "trade_count": 35374
+        },
+        {
+          "symbol": "NVD",
+          "volume": 74745984,
+          "trade_count": 21905
+        },
+        {
+          "symbol": "TSLL",
+          "volume": 72550869,
+          "trade_count": 110053
+        },
+        {
+          "symbol": "AIXI",
+          "volume": 71647230,
+          "trade_count": 445756
+        },
+        {
+          "symbol": "INTC",
+          "volume": 69675142,
+          "trade_count": 637447
+        },
+        {
+          "symbol": "HYG",
+          "volume": 68603436,
+          "trade_count": 57624
+        },
+        {
+          "symbol": "TSLG",
+          "volume": 64661914,
+          "trade_count": 21266
+        },
+        {
+          "symbol": "AAL",
+          "volume": 57375632,
+          "trade_count": 102579
+        }
+      ],
+      "top_gainers": [],
+      "top_losers": [
+        {
+          "symbol": "ASTLW",
+          "change_pct": -80.81,
+          "price": 0.0019
+        },
+        {
+          "symbol": "SBFMW",
+          "change_pct": -52.1,
+          "price": 0.0251
+        },
+        {
+          "symbol": "ASGI.RT",
+          "change_pct": -49.32,
+          "price": 0.0075
+        },
+        {
+          "symbol": "DRCT",
+          "change_pct": -47.02,
+          "price": 0.8
+        },
+        {
+          "symbol": "SMX",
+          "change_pct": -37.01,
+          "price": 3.88
+        },
+        {
+          "symbol": "FLDDW",
+          "change_pct": -32.89,
+          "price": 0.0802
+        },
+        {
+          "symbol": "GRMLW",
+          "change_pct": -32.27,
+          "price": 0.5215
+        },
+        {
+          "symbol": "NEXRW",
+          "change_pct": -31.08,
+          "price": 0.0102
+        },
+        {
+          "symbol": "BBAI.WS",
+          "change_pct": -29.88,
+          "price": 0.0575
+        },
+        {
+          "symbol": "FHTX",
+          "change_pct": -29.62,
+          "price": 2.055
+        },
+        {
+          "symbol": "UWMC.RTWI",
+          "change_pct": -29.56,
+          "price": 0.0317
+        },
+        {
+          "symbol": "HUBCW",
+          "change_pct": -29.47,
+          "price": 0.0067
+        },
+        {
+          "symbol": "PNAQ.RT",
+          "change_pct": -29.17,
+          "price": 0.17
+        },
+        {
+          "symbol": "RDACU",
+          "change_pct": -28.64,
+          "price": 7.1
+        },
+        {
+          "symbol": "SDHIR",
+          "change_pct": -28.64,
+          "price": 0.0999
+        },
+        {
+          "symbol": "AMPGZ",
+          "change_pct": -28.05,
+          "price": 0.1008
+        },
+        {
+          "symbol": "RZAI",
+          "change_pct": -27.21,
+          "price": 19.15
+        },
+        {
+          "symbol": "NXL",
+          "change_pct": -26.08,
+          "price": 5.5807
+        },
+        {
+          "symbol": "GRRRW",
+          "change_pct": -25.91,
+          "price": 0.0912
+        },
+        {
+          "symbol": "ASPCR",
+          "change_pct": -25.64,
+          "price": 0.0751
+        }
+      ]
+    }
+  },
+  "reddit": {
+    "timestamp": "2026-10-02T18:44:41.423604",
+    "source": "reddit",
+    "tickers": []
+  },
+  "earnings_watch": {
+    "timestamp": "2026-10-02T18:44:41.831192",
+    "earnings_watch": [
+      {
+        "symbol": "AAPL",
+        "headline": "Market Reaction To Micron Earnings And Broadcom Deal Signals A Shift In AI Trade",
+        "date": "2026-10-01T19:04:58Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "TSLA",
+        "headline": "Tesla Reports Q3 Total Production 464,391 Units Vs Visible Alpha Est. 486,761 Units; Deliveries 486,532 Units, Visible Alpha Est. 456,896 Units; Model 3/Y Production 457,387 Units, Deliveries 478,237 Units; Other Models Production 7,004 Units, Deliveries 8,295 Units; Q3 Deployed 13.7 GWh Of Energy Storage Products",
+        "date": "2026-10-02T13:04:19Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      }
+    ]
+  },
+  "insider_activity": {
+    "timestamp": "2026-10-02T18:44:42.503079",
+    "source": "sec_edgar",
+    "insider_filings": [
+      {
+        "company": "",
+        "filed": "2026-09-28",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-30",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-28",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-29",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-30",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-28",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-29",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-29",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-29",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-10-01",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      },
+      {
+        "company": "",
+        "filed": "2026-09-25",
+        "form": "4",
+        "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
+      }
+    ]
+  }
+}
