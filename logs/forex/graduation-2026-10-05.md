@@ -5,26 +5,26 @@
 ## Graduation Criteria
 | Criterion | Required | Current | Status |
 |-----------|----------|---------|--------|
-| 📊 Closed trades | 15 | 20 | ✅ |
-| 🎯 Win rate | 55% | 80% | ✅ |
-| 💰 Profit factor | 1.50 | 5.25 | ✅ |
-| 📈 Expectancy/trade | >$0 | $617.55 | ✅ |
-| 🏦 Net return | 3.0% | 12.35% | ✅ |
+| 📊 Closed trades | 15 | 22 | ✅ |
+| 🎯 Win rate | 55% | 77% | ✅ |
+| 💰 Profit factor | 1.50 | 3.78 | ✅ |
+| 📈 Expectancy/trade | >$0 | $534.31 | ✅ |
+| 🏦 Net return | 3.0% | 11.75% | ✅ |
 
 ## Performance Detail
 | | |
 |---|---|
-| Total closed trades | 20 |
-| Wins / Losses | 16W / 4L |
-| Win rate | 80% |
-| Gross wins | $15,258.34 |
-| Gross losses | $2,907.24 |
-| Profit factor | 5.25 |
-| Avg win | $953.65 |
-| Avg loss | $726.81 |
-| Expectancy/trade | $617.55 |
-| Total realized P&L | $+12,351.10 |
-| Net return | 12.35% |
+| Total closed trades | 22 |
+| Wins / Losses | 17W / 5L |
+| Win rate | 77% |
+| Gross wins | $15,988.01 |
+| Gross losses | $4,233.10 |
+| Profit factor | 3.78 |
+| Avg win | $940.47 |
+| Avg loss | $846.62 |
+| Expectancy/trade | $534.31 |
+| Total realized P&L | $+11,754.91 |
+| Net return | 11.75% |
 
 ## Blockers to Graduation
 - All criteria met ✅ — awaiting manual approval from Alex
@@ -34,36 +34,35 @@
 |------|------|--------|-----------|------------|--------|
 | USD_JPY | 2 | 0 | $+2398.50 | +113.2 | ✅ Active |
 | EUR_JPY | 4 | 0 | $+2237.94 | +219.4 | ✅ Active |
+| NZD_JPY | 2 | 0 | $+1700.27 | +89.5 | ✅ Active |
 | EUR_GBP | 1 | 0 | $+1458.35 | +22.2 | ✅ Active |
-| GBP_JPY | 1 | 1 | $+1423.69 | +100.3 | ✅ Active |
 | GBP_USD | 1 | 0 | $+1147.12 | +49.1 | ✅ Active |
-| NZD_JPY | 1 | 0 | $+970.60 | +52.0 | ✅ Active |
 | USD_CAD | 1 | 0 | $+952.38 | +29.2 | ✅ Active |
 | EUR_USD | 1 | 0 | $+930.56 | +26.8 | ✅ Active |
 | CAD_JPY | 1 | 0 | $+650.91 | +46.3 | ✅ Active |
 | NZD_USD | 2 | 1 | $+600.91 | +12.7 | ✅ Active |
 | AUD_JPY | 1 | 0 | $+130.46 | +7.0 | ✅ Active |
+| GBP_JPY | 1 | 2 | $+97.83 | +49.3 | ✅ Active |
 | USD_CHF | 0 | 2 | $-550.34 | -15.3 | ⛔ Deprioritized |
 
-## What the Agent Learned (3 adjustments)
-- ⬇️ **carry** weight: 0.484 → 0.5 — avg score 0.57 in wins vs 0.85 in losses — not predictive (delta=-0.28)
-- ⬇️ **momentum** weight: 0.484 → 0.5 — avg score 0.58 in wins vs 0.80 in losses — not predictive (delta=-0.22)
-- ⬆️ **technical** weight: 8.624 → 8.924 — avg score 0.67 in wins vs 0.46 in losses (+0.21 predictive edge)
+## What the Agent Learned (2 adjustments)
+- ⬇️ **carry** weight: 0.484 → 0.5 — avg score 0.58 in wins vs 0.84 in losses — not predictive (delta=-0.26)
+- ⬇️ **momentum** weight: 0.484 → 0.5 — avg score 0.59 in wins vs 0.80 in losses — not predictive (delta=-0.21)
 
 ## Direction Bias
 - Long win rate:  0.67
-- Short win rate: 1.0
-- Sample: 20 trades
+- Short win rate: 0.9
+- Sample: 22 trades
 
 ## Updated Judge Weights
 ```json
 {
-  "carry": 0.484,
-  "momentum": 0.484,
-  "technical": 8.637,
+  "carry": 0.498,
+  "momentum": 0.498,
+  "technical": 8.609,
   "session": 0.126,
   "volatility": 0.018,
-  "risk_reward": 0.251
+  "risk_reward": 0.25
 }
 ```
 
