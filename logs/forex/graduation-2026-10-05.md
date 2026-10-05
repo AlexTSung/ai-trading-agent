@@ -46,8 +46,8 @@
 | USD_CHF | 0 | 2 | $-550.34 | -15.3 | ⛔ Deprioritized |
 
 ## What the Agent Learned (2 adjustments)
-- ⬇️ **carry** weight: 0.484 → 0.5 — avg score 0.58 in wins vs 0.84 in losses — not predictive (delta=-0.26)
-- ⬇️ **momentum** weight: 0.484 → 0.5 — avg score 0.59 in wins vs 0.80 in losses — not predictive (delta=-0.21)
+- ⬇️ **carry** weight: 0.498 → 0.5 — avg score 0.58 in wins vs 0.84 in losses — not predictive (delta=-0.26)
+- ⬇️ **momentum** weight: 0.498 → 0.5 — avg score 0.59 in wins vs 0.80 in losses — not predictive (delta=-0.21)
 
 ## Direction Bias
 - Long win rate:  0.67
@@ -57,9 +57,9 @@
 ## Updated Judge Weights
 ```json
 {
-  "carry": 0.498,
-  "momentum": 0.498,
-  "technical": 8.609,
+  "carry": 0.5,
+  "momentum": 0.5,
+  "technical": 8.606,
   "session": 0.126,
   "volatility": 0.018,
   "risk_reward": 0.25
