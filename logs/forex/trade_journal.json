@@ -1939,5 +1939,86 @@
     "close_price": 88.459,
     "close_reason": "stop_loss",
     "closed_at": "2026-10-05T11:17:47.182897791Z"
+  },
+  {
+    "status": "open",
+    "event": "open",
+    "pair": "NZD_JPY",
+    "direction": "LONG",
+    "trade_id": "888",
+    "units": 400141,
+    "entry_price": 88.498,
+    "stop_price": 87.76079,
+    "tp1_price": 89.90793,
+    "score": 8.09,
+    "confluence": null,
+    "size_multiplier": 1.5,
+    "factors": {
+      "carry": {
+        "score": 1.0,
+        "weight": 0.5,
+        "detail": {
+          "carry_pct": 5.4,
+          "carry_signal": "LONG",
+          "raw_score": 1.0
+        }
+      },
+      "momentum": {
+        "score": 0.2,
+        "weight": 0.5,
+        "detail": {
+          "hp_signal": "LONG",
+          "signals": 1,
+          "raw_score": 0.2
+        }
+      },
+      "technical": {
+        "score": 0.833,
+        "weight": 8.61,
+        "detail": {
+          "rsi14": "ok_at_52.9",
+          "rsi2": "oversold_12.1",
+          "macd": "bullish",
+          "ibs": "oversold_0.251",
+          "pivot": "above_pivot",
+          "points": 5,
+          "raw_score": 0.833
+        }
+      },
+      "session": {
+        "score": 0.75,
+        "weight": 0.13,
+        "detail": {
+          "session_quality": "new_york",
+          "utc_hour": 18,
+          "raw_score": 0.75
+        }
+      },
+      "volatility": {
+        "score": 0.55,
+        "weight": 0.02,
+        "detail": {
+          "spread_pips": 3.5,
+          "spread_ok": true,
+          "atr_pips": 23.9,
+          "atr_regime": "quiet_ok",
+          "raw_score": 0.55
+        }
+      },
+      "risk_reward": {
+        "score": 0.85,
+        "weight": 0.25,
+        "detail": {
+          "rr_ratio": 2.0,
+          "stop_pips": 72,
+          "tp1_pips": 144,
+          "raw_score": 0.85
+        }
+      }
+    },
+    "environment": "practice",
+    "opened_at": "2026-10-07T18:28:03.933743+00:00",
+    "unrealized_pl": -81.0694,
+    "current_price": 88.498
   }
 ]
