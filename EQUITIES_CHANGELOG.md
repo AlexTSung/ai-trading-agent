@@ -41,6 +41,39 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.3.1] — 2026-10-12
+
+**PATCH** — Document the external-trigger fix for GitHub Actions schedule-event
+delays: `schedule:` triggers hit a hard ceiling on 2026-10-05 (entire day's
+cron block delayed past market close again, despite the Sept 18 retiming
+fix). `workflow_dispatch` isn't subject to the same documented high-load
+delay, so an external cron service now calls it directly at the same
+documented times; in-repo `schedule:` crons stay as a free fallback. No code
+change — all four workflows already accepted `workflow_dispatch`. Restores
+the intended "fires consistently" behavior; doesn't touch any Judge/strategy
+logic.
+
+### Strategy / CLAUDE.md changes
+- Daily Schedule section: new "External trigger" subsection explains why
+  `schedule:`-only triggering hit a hard ceiling (2026-10-05 measurement)
+  and why `workflow_dispatch` from an external cron service isn't subject
+  to the same documented delay mechanism.
+- "Where automation actually runs" line updated to name the external cron
+  service as the primary trigger, `schedule:` as fallback.
+
+### Code changes
+- None. Every workflow already accepts `workflow_dispatch` — this is a
+  trigger-source change (who calls the existing entry point), not a new
+  capability in the YAML or Python layer. No new secrets, no new workflow
+  inputs, no change to G1/G2 guardrail logic, which already made repeated
+  `workflow_dispatch` calls safe no-ops before this change.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** This changes
+  how reliably a pipeline *fires*, not what it decides once it runs. No
+  Judge criterion, gate, or sizing rule changed.
+
+
 ## [v1.3.0] — 2026-09-18
 
 **MINOR** — Four independent fixes from the same review pass: restore the

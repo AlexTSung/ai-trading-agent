@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v1.3.0
+> **Version:** v1.3.1
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -461,6 +461,11 @@ any local machine, and not from `routines.json`. The `.github/workflows/*.yml`
 files are authoritative. `routines.json` is reference material only: no script
 reads it, and its times are not what runs.
 
+**Primary trigger as of 2026-10-12: an external cron service, not GitHub's
+`schedule:` event.** See "External trigger" below — `schedule:` stays wired
+on every workflow as a free fallback layer, but it is no longer what's
+relied on to fire on time.
+
 **Four scheduled jobs, not nine.** Each pipeline runs its steps sequentially
 inside a single job — the agents are not individually scheduled. Any per-agent
 clock time you may remember (8:30 AM intelligence, 10:00 AM judge, 4:15 PM
@@ -509,6 +514,58 @@ a fix for GitHub Actions scheduling being best-effort in general. The forex
 agent's own workflow (`forex-agent.yml`, outside this file's ownership) has
 every cron on `:00`, the single worst-documented minute — flagged for that
 session, not changed here.
+
+**The retiming fix hit its ceiling on 2026-10-05.** Every cron across all
+four equities workflows — including options, already off the congested
+grid — landed between 5:14 PM and 10:14 PM ET that day, after market close.
+GitHub delayed the *entire block* again, exactly the Sept 3/4/7 failure mode,
+proving a within-`schedule:` fix can reduce exposure but can't eliminate it:
+`schedule:` is documented as best-effort, full stop, and no cron placement
+survives a platform-wide delay that pushes the whole day's block past the
+legal window.
+
+### External trigger — the actual fix (2026-10-12)
+
+The only way to stop depending on GitHub's `schedule:` event is to not use
+it as the primary trigger. `workflow_dispatch` is a *different* event type —
+it is not subject to the "high load" delay `schedule:` carries by its own
+documentation, because nothing is polling a cron table on GitHub's side
+waiting for a time match; the run is created the instant the API call
+lands. Every pipeline here already accepts `workflow_dispatch` (it's how
+this file's author manually re-triggered a missed day throughout
+Sept–Oct 2026), so the fix is moving who calls it: an external cron service
+(outside GitHub entirely) now calls
+
+```
+POST /repos/AlexTSung/ai-trading-agent/actions/workflows/{workflow}.yml/dispatches
+Authorization: Bearer <fine-grained PAT, Actions: Read and write, this repo only>
+Body: {"ref": "master"}
+```
+
+at the same wall-clock times this file has always documented, for all four
+`{workflow}` values. The in-repo `schedule:` crons are left in place on
+every workflow as a zero-cost fallback layer — if the external service ever
+has its own outage, GitHub's own (less reliable, but free and already
+written) scheduler still gets a chance. `GUARDRAIL G1` (idempotency) and
+`G2` (time window) already make every one of these calls — scheduled or
+external, first or thirtieth — a safe no-op once the day's real work is
+done, so the external pinger needed zero new code to be safe to add.
+
+**Why not ping every few minutes instead of at fixed times.** `schedule:`'s
+documented delay is specific to that event type; `workflow_dispatch` calls
+made directly against the API haven't shown it anywhere in this repo's
+history (manual dispatches this session landed within seconds almost every
+time, one outlier queued ~5 minutes). A dense ping schedule would mostly
+burn GitHub Actions minutes — billed per job regardless of how fast G1 skips
+it — against this is a **private** repo's metered quota, for a problem the
+fixed-time calls don't actually have. A handful of calls per workflow per day,
+at the same times `schedule:` already uses, is the proportionate fix.
+
+**Setup is intentionally not something this session could do alone.** It
+needs a GitHub fine-grained personal access token — an account-level
+credential only the repo owner can mint — stored as a secret on whichever
+external cron service is chosen. Neither the token's creation nor its
+storage on a third party happens inside this repo or this session.
 
 | ET | Workflow / runner | Cron (UTC) | Steps, in order |
 |---|---|---|---|
