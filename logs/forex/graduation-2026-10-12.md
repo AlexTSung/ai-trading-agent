@@ -1,73 +1,68 @@
 # Forex Graduation Report — 2026-10-12
 
-## Verdict: ✅ READY FOR REAL MONEY — pending Alex approval
+## Verdict: ❌ NOT YET READY
 
 ## Graduation Criteria
 | Criterion | Required | Current | Status |
 |-----------|----------|---------|--------|
-| 📊 Closed trades | 15 | 23 | ✅ |
-| 🎯 Win rate | 55% | 78% | ✅ |
-| 💰 Profit factor | 1.50 | 3.98 | ✅ |
-| 📈 Expectancy/trade | >$0 | $548.02 | ✅ |
-| 🏦 Net return | 3.0% | 12.60% | ✅ |
+| 📊 Closed trades | 15 | 6 | ❌ |
+| 🎯 Win rate | 55% | 67% | ✅ |
+| 💰 Profit factor | 1.50 | 7.14 | ✅ |
+| 📈 Expectancy/trade | >$0 | $563.13 | ✅ |
+| 🏦 Net return | 3.0% | 3.38% | ✅ |
 
 ## Performance Detail
 | | |
 |---|---|
-| Total closed trades | 23 |
-| Wins / Losses | 18W / 5L |
-| Win rate | 78% |
-| Gross wins | $16,837.64 |
-| Gross losses | $4,233.10 |
-| Profit factor | 3.98 |
-| Avg win | $935.42 |
-| Avg loss | $846.62 |
-| Expectancy/trade | $548.02 |
-| Total realized P&L | $+12,604.53 |
-| Net return | 12.60% |
+| Total closed trades | 6 |
+| Wins / Losses | 4W / 2L |
+| Win rate | 67% |
+| Gross wins | $3,929.12 |
+| Gross losses | $550.34 |
+| Profit factor | 7.14 |
+| Avg win | $982.28 |
+| Avg loss | $275.17 |
+| Expectancy/trade | $563.13 |
+| Total realized P&L | $+3,378.78 |
+| Net return | 3.38% |
 
 ## Blockers to Graduation
-- All criteria met ✅ — awaiting manual approval from Alex
+- Need **9 more closed trades** (have 6, need 15)
 
 ## Per-Pair Stats
 | Pair | Wins | Losses | Total P&L | Total Pips | Status |
 |------|------|--------|-----------|------------|--------|
-| NZD_JPY | 3 | 0 | $+2549.90 | +123.4 | ✅ Active |
 | USD_JPY | 2 | 0 | $+2398.50 | +113.2 | ✅ Active |
-| EUR_JPY | 4 | 0 | $+2237.94 | +219.4 | ✅ Active |
-| EUR_GBP | 1 | 0 | $+1458.35 | +22.2 | ✅ Active |
-| GBP_USD | 1 | 0 | $+1147.12 | +49.1 | ✅ Active |
-| USD_CAD | 1 | 0 | $+952.38 | +29.2 | ✅ Active |
-| EUR_USD | 1 | 0 | $+930.56 | +26.8 | ✅ Active |
-| CAD_JPY | 1 | 0 | $+650.91 | +46.3 | ✅ Active |
-| NZD_USD | 2 | 1 | $+600.91 | +12.7 | ✅ Active |
-| AUD_JPY | 1 | 0 | $+130.46 | +7.0 | ✅ Active |
-| GBP_JPY | 1 | 2 | $+97.83 | +49.3 | ✅ Active |
+| AUD_USD | 1 | 0 | $+1519.75 | +42.4 | ✅ Active |
+| EUR_JPY | 1 | 0 | $+10.87 | +75.8 | ✅ Active |
 | USD_CHF | 0 | 2 | $-550.34 | -15.3 | ⛔ Deprioritized |
 
-## What the Agent Learned (3 adjustments)
-- ⬇️ **carry** weight: 0.484 → 0.5 — avg score 0.61 in wins vs 0.84 in losses — not predictive (delta=-0.23)
-- ⬇️ **momentum** weight: 0.484 → 0.5 — avg score 0.57 in wins vs 0.80 in losses — not predictive (delta=-0.23)
-- ⬆️ **technical** weight: 8.687 → 8.987 — avg score 0.69 in wins vs 0.53 in losses (+0.15 predictive edge)
+## What the Agent Learned (6 adjustments)
+- ⬇️ **carry** weight: 2.5 → 2.3 — avg score 0.30 in wins vs 1.00 in losses — not predictive (delta=-0.70)
+- ⬇️ **momentum** weight: 2.0 → 1.8 — avg score 0.40 in wins vs 1.00 in losses — not predictive (delta=-0.60)
+- ⬆️ **technical** weight: 1.5 → 1.65 — avg score 0.33 in wins vs 0.17 in losses (+0.17 predictive edge)
+- ⬇️ **session** weight: 1.0 → 0.9 — avg score 0.44 in wins vs 0.75 in losses — not predictive (delta=-0.31)
+- ⬇️ **volatility** weight: 1.5 → 1.35 — avg score 0.31 in wins vs 0.70 in losses — not predictive (delta=-0.39)
+- ⬇️ **risk_reward** weight: 1.5 → 1.35 — avg score 0.46 in wins vs 0.85 in losses — not predictive (delta=-0.39)
 
 ## Direction Bias
-- Long win rate:  0.69
-- Short win rate: 0.9
-- Sample: 23 trades
+- Long win rate:  0.6
+- Short win rate: 1.0
+- Sample: 6 trades
 
 ## Updated Judge Weights
 ```json
 {
-  "carry": 0.484,
-  "momentum": 0.484,
-  "technical": 8.698,
-  "session": 0.106,
-  "volatility": 0.015,
-  "risk_reward": 0.213
+  "carry": 2.46,
+  "momentum": 1.925,
+  "technical": 1.765,
+  "session": 0.963,
+  "volatility": 1.444,
+  "risk_reward": 1.444
 }
 ```
 
 ## Estimated Path to Graduation
-- Trades needed: **0** more  (done ✅)
+- Trades needed: **9** more  (~6 weeks at 1-2/week)
 - Return needed: **+0.00%** more  (done ✅)
 - Manual approval required before any real money is deployed.

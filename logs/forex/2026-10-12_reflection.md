@@ -1,9 +1,9 @@
 # Daily Trading Reflection — 2026-10-12
 
 ## P&L
-- Realized today: $+0.00
-- Trades closed: 0
-- Wins: 0  Losses: 0
+- Realized today: $-1330.04
+- Trades closed: 1
+- Wins: 0  Losses: 1
 
 ## Did I follow the strategy exactly?
 - [ ] Only took trades with judge score ≥ 7.0
@@ -16,16 +16,20 @@
 ## What happened vs. what I expected?
 _(Review each trade: was the outcome different from what you anticipated? Why?)_
 
+- **USD_CAD** LONG → stop_loss → $-1330.04
+  - Expected: ___  Actual: ___  Lesson: ___
+
 ## Lessons logged today
+- [risk] Stop-loss respected on USD_CAD — loss of $-1330.04 accepted. Strategy followed.
 
 ## One improvement for tomorrow
 _(Even a tiny improvement compounds over time — what ONE thing will you do better?)_
 
 > ___
 
-## Overall performance — 33 trades lifetime
-- Win rate: 66.7%  (target ≥55%)
-- Profit factor: 0.78  (target ≥1.3)
+## Overall performance — 34 trades lifetime
+- Win rate: 64.7%  (target ≥55%)
+- Profit factor: 0.70  (target ≥1.3)
 - Max drawdown: 971.5%  (max 8%)
 
 ---
