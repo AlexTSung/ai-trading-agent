@@ -1,0 +1,83 @@
+[
+  {
+    "status": "open",
+    "event": "open",
+    "pair": "AUD_USD",
+    "direction": "SHORT",
+    "trade_id": "762",
+    "units": -358432,
+    "entry_price": 0.71281,
+    "stop_price": 0.71854,
+    "tp1_price": 0.70154,
+    "score": 7.0,
+    "confluence": null,
+    "size_multiplier": 1.0,
+    "factors": {
+      "carry": {
+        "score": 0.2,
+        "weight": 1.08,
+        "detail": {
+          "carry_pct": -0.9,
+          "carry_signal": "SHORT",
+          "raw_score": 0.2
+        }
+      },
+      "momentum": {
+        "score": 0.6,
+        "weight": 1.61,
+        "detail": {
+          "h4_momentum": "bearish",
+          "ma_cross": "bearish",
+          "below_ma20": true,
+          "signals": 3,
+          "raw_score": 0.6
+        }
+      },
+      "technical": {
+        "score": 0.833,
+        "weight": 5.4,
+        "detail": {
+          "rsi14": "ok_at_39.6",
+          "rsi2": "overbought_100",
+          "macd": "bearish",
+          "ibs": "overbought_0.813",
+          "pivot": "below_pivot",
+          "points": 5,
+          "raw_score": 0.833
+        }
+      },
+      "session": {
+        "score": 0.75,
+        "weight": 0.54,
+        "detail": {
+          "session_quality": "new_york",
+          "utc_hour": 17,
+          "raw_score": 0.75
+        }
+      },
+      "volatility": {
+        "score": 0.55,
+        "weight": 0.81,
+        "detail": {
+          "spread_pips": 1.5,
+          "spread_ok": true,
+          "atr_pips": 18.9,
+          "atr_regime": "quiet_ok",
+          "raw_score": 0.55
+        }
+      },
+      "risk_reward": {
+        "score": 0.85,
+        "weight": 0.54,
+        "detail": {
+          "rr_ratio": 2.0,
+          "stop_pips": 57,
+          "tp1_pips": 114,
+          "raw_score": 0.85
+        }
+      }
+    },
+    "environment": "practice",
+    "opened_at": "2026-09-15T17:58:28.436309+00:00"
+  }
+]

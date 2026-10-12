@@ -13,6 +13,30 @@ git checkout master          # return to latest
 
 ---
 
+## v1.3.0 — 2026-10-12 (Exit Mechanics Overhaul — 10× Improvement Plan)
+
+**Post-mortem on 33-trade sample: 22 stop-loss closes produced −$5,137 total; 10 manual closes produced +$2,393. Trades were winning, then being swept by tight trailing stops.**
+
+### Root Cause Analysis
+- **Profit factor 0.74 despite 67% win rate** — exits, not entries, are the problem
+- **13 of 22 stop-loss closes were wins** — trailing stop swept profitable positions on normal retracements
+- **Only 1 TP1 hit in 33 trades** — 2:1 R:R target was too far; market reversed before reaching it
+- **JPY losses 3–4× larger than wins** — position sizing at 2% on JPY pairs creates outsized pip exposure (~$94/pip on USD/JPY at $95K NAV)
+- **Learned weights overfit on 6 trades** — technical weight inflated to 5.4 from sample too small to be meaningful; best pairs (NZD/JPY, EUR/JPY) are carry+momentum driven
+
+### Fixed
+- **TP1: 2.0R → 1.5R** — 40% partial close triggers sooner; captures profit before retracement at 2:1 never arrives
+- **Stage 2 trail: 0.75R → 1.5R** behind price — was sweeping positions on normal H4 wicks; now gives 1.5× stop distance of room before the trail fires
+- **Stage 2 trigger: 2.0R → 1.5R** — starts trailing at TP1 (consistent with new TP1 level)
+- **Time stop: 5 days → 3 days** at 0.5R threshold — stagnant trades (momentum dead) freed at 72h not 120h
+- **JPY size cap: 2% → 1.5%** equity (`MAX_JPY_RISK_PCT = 0.015`) — higher pip value per unit on JPY pairs demands smaller percentage to prevent catastrophic pip exposure
+- **Judge weights reset and rebalanced**: carry 2.0→2.5, momentum 2.5→2.0, technical 2.0→1.5, risk_reward 1.0→1.5. Overfit learned weights (technical 5.4 from 6 trades) cleared; base weights now reflect observed pair performance over 33 trades.
+
+### No baseline reset
+All changes are exit-mechanic tightening and weight rebalancing. Signal criteria unchanged. Past results stand.
+
+---
+
 ## v1.2.0 — 2026-09-02 (Risk Controls: Correlation Cap + Cooldown + Earlier Breakeven)
 
 **Post-mortem response to Sep 2 drawdown: −$6,553 across 4 correlated stop-outs.**

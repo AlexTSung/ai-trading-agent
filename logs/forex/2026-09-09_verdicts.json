@@ -1,12 +1,17 @@
 {
   "session_date": "2026-09-09",
+<<<<<<< HEAD
   "judged_at": "2026-09-09T19:09:06.685893+00:00",
+=======
+  "judged_at": "2026-09-09T17:42:56.029622+00:00",
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
   "environment": "practice",
   "total_reviewed": 12,
   "tradeable": 0,
   "gate": 7.0,
   "verdicts": [
     {
+<<<<<<< HEAD
       "pair": "GBP_USD",
       "direction": "LONG",
       "score": 5.46,
@@ -19,13 +24,117 @@
       "stop_price": 1.34821,
       "tp1_price": 1.36668,
       "tp2_price": 1.379,
+=======
+      "pair": "USD_CHF",
+      "direction": "SHORT",
+      "score": 6.75,
+      "verdict": "DISQUALIFIED",
+      "reason": "DEPRIORITIZED_USD_CHF_needs_7.5_got_6.75",
+      "size_multiplier": 0.0,
+      "environment": "practice",
+      "judged_at": "2026-09-09T17:42:56.027956+00:00",
+      "entry_price": 0.80954,
+      "stop_price": 0.81514,
+      "tp1_price": 0.79836,
+      "tp2_price": 0.78717,
+      "stop_pips": 56,
+      "tp1_pips": 112,
+      "atr14_pips": 18.6,
+      "factors": {
+        "carry": {
+          "score": 0.8,
+          "weight": 1.08,
+          "detail": {
+            "carry_pct": 3.5,
+            "carry_signal": "LONG",
+            "raw_score": 0.8
+          }
+        },
+        "momentum": {
+          "score": 0.6,
+          "weight": 1.61,
+          "detail": {
+            "daily_momentum": "bearish",
+            "ma_cross": "bearish",
+            "below_ma20": true,
+            "signals": 3,
+            "raw_score": 0.6
+          }
+        },
+        "technical": {
+          "score": 0.667,
+          "weight": 5.4,
+          "detail": {
+            "rsi14": "ok_at_52.2",
+            "macd": "bearish",
+            "ibs": "overbought_0.753",
+            "pivot": "below_pivot",
+            "points": 4,
+            "raw_score": 0.667
+          }
+        },
+        "session": {
+          "score": 0.75,
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+            "raw_score": 0.75
+          }
+        },
+        "volatility": {
+          "score": 0.55,
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 1.5,
+            "spread_ok": true,
+            "atr_pips": 18.6,
+            "atr_regime": "quiet_ok",
+            "raw_score": 0.55
+          }
+        },
+        "risk_reward": {
+          "score": 0.85,
+          "weight": 0.54,
+          "detail": {
+            "rr_ratio": 2.0,
+            "stop_pips": 56,
+            "tp1_pips": 112,
+            "raw_score": 0.85
+          }
+        }
+      },
+      "learned_weights_active": true,
+      "direction_penalty": 0.0,
+      "disqualifiers": [
+        "DEPRIORITIZED_USD_CHF_needs_7.5_got_6.75"
+      ]
+    },
+    {
+      "pair": "GBP_USD",
+      "direction": "LONG",
+      "score": 5.96,
+      "verdict": "SKIP",
+      "reason": "score_5.96_below_gate_7.0",
+      "size_multiplier": 0.0,
+      "environment": "practice",
+      "judged_at": "2026-09-09T17:42:56.027610+00:00",
+      "entry_price": 1.35596,
+      "stop_price": 1.3498,
+      "tp1_price": 1.36827,
+      "tp2_price": 1.38059,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "stop_pips": 62,
       "tp1_pips": 124,
       "atr14_pips": 20.5,
       "factors": {
         "carry": {
           "score": 0.3,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.08,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "carry_pct": -0.25,
             "carry_signal": "NEUTRAL",
@@ -34,7 +143,11 @@
         },
         "momentum": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.61,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "h4_momentum": "bullish",
             "daily_momentum": "bullish",
@@ -47,7 +160,11 @@
         },
         "technical": {
           "score": 0.5,
+<<<<<<< HEAD
           "weight": 7.59,
+=======
+          "weight": 5.4,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rsi14": "ok_at_57.1",
             "macd": "bullish",
@@ -58,18 +175,31 @@
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 0.55,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "spread_pips": 1.6,
+=======
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 1.8,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "spread_ok": true,
             "atr_pips": 20.5,
             "atr_regime": "quiet_ok",
@@ -78,7 +208,11 @@
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.54,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 62,
@@ -94,6 +228,7 @@
     {
       "pair": "EUR_USD",
       "direction": "LONG",
+<<<<<<< HEAD
       "score": 5.31,
       "verdict": "SKIP",
       "reason": "score_5.31_below_gate_7.0",
@@ -104,13 +239,29 @@
       "stop_price": 1.15827,
       "tp1_price": 1.17166,
       "tp2_price": 1.18059,
+=======
+      "score": 5.63,
+      "verdict": "SKIP",
+      "reason": "score_5.63_below_gate_7.0",
+      "size_multiplier": 0.0,
+      "environment": "practice",
+      "judged_at": "2026-09-09T17:42:56.027012+00:00",
+      "entry_price": 1.1639,
+      "stop_price": 1.15944,
+      "tp1_price": 1.17283,
+      "tp2_price": 1.18175,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "stop_pips": 45,
       "tp1_pips": 90,
       "atr14_pips": 14.9,
       "factors": {
         "carry": {
           "score": 0.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.08,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "carry_pct": -1.0,
             "carry_signal": "SHORT",
@@ -119,7 +270,11 @@
         },
         "momentum": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.61,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "h4_momentum": "bullish",
             "daily_momentum": "bullish",
@@ -132,7 +287,11 @@
         },
         "technical": {
           "score": 0.5,
+<<<<<<< HEAD
           "weight": 7.59,
+=======
+          "weight": 5.4,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rsi14": "ok_at_59.3",
             "macd": "bullish",
@@ -143,18 +302,31 @@
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 0.55,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "spread_pips": 1.5,
+=======
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 1.6,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "spread_ok": true,
             "atr_pips": 14.9,
             "atr_regime": "quiet_ok",
@@ -163,7 +335,11 @@
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.54,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 45,
@@ -179,6 +355,7 @@
     {
       "pair": "EUR_GBP",
       "direction": "LONG",
+<<<<<<< HEAD
       "score": 5.12,
       "verdict": "SKIP",
       "reason": "score_5.12_below_gate_7.0",
@@ -189,13 +366,29 @@
       "stop_price": 0.85617,
       "tp1_price": 0.86323,
       "tp2_price": 0.86794,
+=======
+      "score": 4.99,
+      "verdict": "SKIP",
+      "reason": "score_4.99_below_gate_7.0",
+      "size_multiplier": 0.0,
+      "environment": "practice",
+      "judged_at": "2026-09-09T17:42:56.028964+00:00",
+      "entry_price": 0.85836,
+      "stop_price": 0.85601,
+      "tp1_price": 0.86307,
+      "tp2_price": 0.86778,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "stop_pips": 24,
       "tp1_pips": 48,
       "atr14_pips": 7.8,
       "factors": {
         "carry": {
           "score": 0.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.08,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "carry_pct": -0.75,
             "carry_signal": "SHORT",
@@ -204,7 +397,11 @@
         },
         "momentum": {
           "score": 0.6,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.61,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "daily_momentum": "bullish",
             "hp_signal": "LONG",
@@ -215,7 +412,11 @@
         },
         "technical": {
           "score": 0.5,
+<<<<<<< HEAD
           "weight": 7.59,
+=======
+          "weight": 5.4,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rsi14": "ok_at_50.7",
             "macd": "bullish",
@@ -226,18 +427,31 @@
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 0.55,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "spread_pips": 1.3,
+=======
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 1.2,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "spread_ok": true,
             "atr_pips": 7.8,
             "atr_regime": "quiet_ok",
@@ -246,7 +460,11 @@
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.54,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 24,
@@ -262,23 +480,39 @@
     {
       "pair": "EUR_JPY",
       "direction": "LONG",
+<<<<<<< HEAD
       "score": 4.36,
+=======
+      "score": 4.89,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "verdict": "DISQUALIFIED",
       "reason": "G10_technical_score_0.33_below_0.40_minimum",
       "size_multiplier": 0.0,
       "environment": "practice",
+<<<<<<< HEAD
       "judged_at": "2026-09-09T19:09:06.684328+00:00",
       "entry_price": 178.6775,
       "stop_price": 176.68229,
       "tp1_price": 182.66793,
       "tp2_price": 186.65836,
+=======
+      "judged_at": "2026-09-09T17:42:56.028360+00:00",
+      "entry_price": 178.6735,
+      "stop_price": 176.67829,
+      "tp1_price": 182.66393,
+      "tp2_price": 186.65436,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "stop_pips": 200,
       "tp1_pips": 400,
       "atr14_pips": 66.5,
       "factors": {
         "carry": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.08,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "carry_pct": 4.15,
             "carry_signal": "LONG",
@@ -287,7 +521,11 @@
         },
         "momentum": {
           "score": 0.2,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.61,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "hp_signal": "LONG",
             "signals": 1,
@@ -296,7 +534,11 @@
         },
         "technical": {
           "score": 0.333,
+<<<<<<< HEAD
           "weight": 7.59,
+=======
+          "weight": 5.4,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rsi14": "ok_at_40.1",
             "macd": "bullish",
@@ -306,18 +548,31 @@
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "spread_pips": 2.5,
+=======
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 2.7,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "spread_ok": true,
             "atr_pips": 66.5,
             "atr_regime": "healthy",
@@ -326,7 +581,11 @@
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.54,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 200,
@@ -344,6 +603,7 @@
     {
       "pair": "USD_JPY",
       "direction": "LONG",
+<<<<<<< HEAD
       "score": 4.36,
       "verdict": "DISQUALIFIED",
       "reason": "G10_technical_score_0.33_below_0.40_minimum; G11_H1_regime_conflict_LONG_at_range_top",
@@ -354,13 +614,29 @@
       "stop_price": 151.646,
       "tp1_price": 157.7165,
       "tp2_price": 161.7635,
+=======
+      "score": 4.89,
+      "verdict": "DISQUALIFIED",
+      "reason": "G10_technical_score_0.33_below_0.40_minimum",
+      "size_multiplier": 0.0,
+      "environment": "practice",
+      "judged_at": "2026-09-09T17:42:56.028727+00:00",
+      "entry_price": 153.5135,
+      "stop_price": 151.49,
+      "tp1_price": 157.5605,
+      "tp2_price": 161.6075,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "stop_pips": 202,
       "tp1_pips": 404,
       "atr14_pips": 67.4,
       "factors": {
         "carry": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.08,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "carry_pct": 5.15,
             "carry_signal": "LONG",
@@ -369,7 +645,11 @@
         },
         "momentum": {
           "score": 0.2,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.61,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "hp_signal": "LONG",
             "signals": 1,
@@ -378,7 +658,11 @@
         },
         "technical": {
           "score": 0.333,
+<<<<<<< HEAD
           "weight": 7.59,
+=======
+          "weight": 5.4,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rsi14": "ok_at_39.6",
             "macd": "bullish",
@@ -388,18 +672,31 @@
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "spread_pips": 1.5,
+=======
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 1.7,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "spread_ok": true,
             "atr_pips": 67.4,
             "atr_regime": "healthy",
@@ -408,7 +705,11 @@
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.54,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 202,
@@ -420,6 +721,7 @@
       "learned_weights_active": true,
       "direction_penalty": 0.0,
       "disqualifiers": [
+<<<<<<< HEAD
         "G10_technical_score_0.33_below_0.40_minimum",
         "G11_H1_regime_conflict_LONG_at_range_top"
       ]
@@ -459,45 +761,116 @@
             "above_ma20": true,
             "signals": 3,
             "raw_score": 0.6
+=======
+        "G10_technical_score_0.33_below_0.40_minimum"
+      ]
+    },
+    {
+      "pair": "NZD_USD",
+      "direction": "SHORT",
+      "score": 4.84,
+      "verdict": "DISQUALIFIED",
+      "reason": "G10_technical_score_0.33_below_0.40_minimum",
+      "size_multiplier": 0.0,
+      "environment": "practice",
+      "judged_at": "2026-09-09T17:42:56.028199+00:00",
+      "entry_price": 0.58429,
+      "stop_price": 0.58913,
+      "tp1_price": 0.5746,
+      "tp2_price": 0.56492,
+      "stop_pips": 48,
+      "tp1_pips": 96,
+      "atr14_pips": 16.1,
+      "factors": {
+        "carry": {
+          "score": 0.4,
+          "weight": 1.08,
+          "detail": {
+            "carry_pct": 0.25,
+            "carry_signal": "NEUTRAL",
+            "raw_score": 0.4
+          }
+        },
+        "momentum": {
+          "score": 0.8,
+          "weight": 1.61,
+          "detail": {
+            "h4_momentum": "bearish",
+            "daily_momentum": "bearish",
+            "ma_cross": "bearish",
+            "below_ma20": true,
+            "signals": 4,
+            "raw_score": 0.8
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           }
         },
         "technical": {
           "score": 0.333,
+<<<<<<< HEAD
           "weight": 7.59,
           "detail": {
             "rsi14": "ok_at_52.2",
             "pivot": "above_pivot",
+=======
+          "weight": 5.4,
+          "detail": {
+            "macd": "bearish",
+            "pivot": "below_pivot",
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "points": 2,
             "raw_score": 0.333
           }
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 0.55,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "spread_pips": 1.4,
             "spread_ok": true,
             "atr_pips": 18.6,
+=======
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 2.4,
+            "spread_ok": true,
+            "atr_pips": 16.1,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "atr_regime": "quiet_ok",
             "raw_score": 0.55
           }
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 56,
             "tp1_pips": 112,
+=======
+          "weight": 0.54,
+          "detail": {
+            "rr_ratio": 2.0,
+            "stop_pips": 48,
+            "tp1_pips": 96,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.85
           }
         }
@@ -505,31 +878,137 @@
       "learned_weights_active": true,
       "direction_penalty": 0.0,
       "disqualifiers": [
+<<<<<<< HEAD
         "DEPRIORITIZED_USD_CHF_needs_7.5_got_4.34",
         "G10_technical_score_0.33_below_0.40_minimum",
         "G11_H1_regime_conflict_LONG_at_range_top"
+=======
+        "G10_technical_score_0.33_below_0.40_minimum"
+      ]
+    },
+    {
+      "pair": "AUD_USD",
+      "direction": "LONG",
+      "score": 4.73,
+      "verdict": "DISQUALIFIED",
+      "reason": "G10_technical_score_0.33_below_0.40_minimum",
+      "size_multiplier": 0.0,
+      "environment": "practice",
+      "judged_at": "2026-09-09T17:42:56.028845+00:00",
+      "entry_price": 0.72218,
+      "stop_price": 0.7183,
+      "tp1_price": 0.72992,
+      "tp2_price": 0.73766,
+      "stop_pips": 39,
+      "tp1_pips": 78,
+      "atr14_pips": 12.9,
+      "factors": {
+        "carry": {
+          "score": 0.0,
+          "weight": 1.08,
+          "detail": {
+            "carry_pct": -0.9,
+            "carry_signal": "SHORT",
+            "raw_score": 0.0
+          }
+        },
+        "momentum": {
+          "score": 1.0,
+          "weight": 1.61,
+          "detail": {
+            "h4_momentum": "bullish",
+            "daily_momentum": "bullish",
+            "hp_signal": "LONG",
+            "ma_cross": "bullish",
+            "above_ma20": true,
+            "signals": 5,
+            "raw_score": 1.0
+          }
+        },
+        "technical": {
+          "score": 0.333,
+          "weight": 5.4,
+          "detail": {
+            "rsi14": "ok_at_51.4",
+            "pivot": "above_pivot",
+            "points": 2,
+            "raw_score": 0.333
+          }
+        },
+        "session": {
+          "score": 0.75,
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+            "raw_score": 0.75
+          }
+        },
+        "volatility": {
+          "score": 0.55,
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 1.3,
+            "spread_ok": true,
+            "atr_pips": 12.9,
+            "atr_regime": "quiet_ok",
+            "raw_score": 0.55
+          }
+        },
+        "risk_reward": {
+          "score": 0.85,
+          "weight": 0.54,
+          "detail": {
+            "rr_ratio": 2.0,
+            "stop_pips": 39,
+            "tp1_pips": 78,
+            "raw_score": 0.85
+          }
+        }
+      },
+      "learned_weights_active": true,
+      "direction_penalty": 0.0,
+      "disqualifiers": [
+        "G10_technical_score_0.33_below_0.40_minimum"
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       ]
     },
     {
       "pair": "GBP_JPY",
       "direction": "LONG",
+<<<<<<< HEAD
       "score": 4.22,
+=======
+      "score": 4.65,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "verdict": "DISQUALIFIED",
       "reason": "G10_technical_score_0.33_below_0.40_minimum",
       "size_multiplier": 0.0,
       "environment": "practice",
+<<<<<<< HEAD
       "judged_at": "2026-09-09T19:09:06.684495+00:00",
       "entry_price": 208.1255,
       "stop_price": 205.83329,
       "tp1_price": 212.70993,
       "tp2_price": 217.29436,
+=======
+      "judged_at": "2026-09-09T17:42:56.028492+00:00",
+      "entry_price": 208.1595,
+      "stop_price": 205.86729,
+      "tp1_price": 212.74393,
+      "tp2_price": 217.32836,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "stop_pips": 229,
       "tp1_pips": 458,
       "atr14_pips": 76.4,
       "factors": {
         "carry": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.08,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "carry_pct": 4.9,
             "carry_signal": "LONG",
@@ -538,7 +1017,11 @@
         },
         "momentum": {
           "score": 0.2,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.61,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "hp_signal": "LONG",
             "signals": 1,
@@ -547,7 +1030,11 @@
         },
         "technical": {
           "score": 0.333,
+<<<<<<< HEAD
           "weight": 7.59,
+=======
+          "weight": 5.4,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rsi14": "ok_at_38.7",
             "macd": "bullish",
@@ -557,18 +1044,31 @@
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 0.7,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "spread_pips": 3.1,
+=======
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 3.3,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "spread_ok": true,
             "atr_pips": 76.4,
             "atr_regime": "borderline",
@@ -577,7 +1077,11 @@
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.54,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 229,
@@ -595,23 +1099,39 @@
     {
       "pair": "AUD_JPY",
       "direction": "LONG",
+<<<<<<< HEAD
       "score": 4.22,
+=======
+      "score": 4.65,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "verdict": "DISQUALIFIED",
       "reason": "G10_technical_score_0.33_below_0.40_minimum",
       "size_multiplier": 0.0,
       "environment": "practice",
+<<<<<<< HEAD
       "judged_at": "2026-09-09T19:09:06.684654+00:00",
       "entry_price": 110.893,
       "stop_price": 109.56957,
       "tp1_price": 113.53986,
       "tp2_price": 116.18671,
+=======
+      "judged_at": "2026-09-09T17:42:56.028611+00:00",
+      "entry_price": 110.862,
+      "stop_price": 109.53857,
+      "tp1_price": 113.50886,
+      "tp2_price": 116.15571,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "stop_pips": 132,
       "tp1_pips": 264,
       "atr14_pips": 44.1,
       "factors": {
         "carry": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.08,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "carry_pct": 4.25,
             "carry_signal": "LONG",
@@ -620,7 +1140,11 @@
         },
         "momentum": {
           "score": 0.2,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.61,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "hp_signal": "LONG",
             "signals": 1,
@@ -629,7 +1153,11 @@
         },
         "technical": {
           "score": 0.333,
+<<<<<<< HEAD
           "weight": 7.59,
+=======
+          "weight": 5.4,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rsi14": "ok_at_36.6",
             "macd": "bullish",
@@ -639,18 +1167,31 @@
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 0.7,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "spread_pips": 2.0,
+=======
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 2.2,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "spread_ok": true,
             "atr_pips": 44.1,
             "atr_regime": "borderline",
@@ -659,7 +1200,11 @@
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.54,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 132,
@@ -677,23 +1222,39 @@
     {
       "pair": "NZD_JPY",
       "direction": "LONG",
+<<<<<<< HEAD
       "score": 4.22,
+=======
+      "score": 4.65,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "verdict": "DISQUALIFIED",
       "reason": "G10_technical_score_0.33_below_0.40_minimum",
       "size_multiplier": 0.0,
       "environment": "practice",
+<<<<<<< HEAD
       "judged_at": "2026-09-09T19:09:06.685495+00:00",
       "entry_price": 89.6855,
       "stop_price": 88.95836,
       "tp1_price": 91.13979,
       "tp2_price": 92.59407,
+=======
+      "judged_at": "2026-09-09T17:42:56.029071+00:00",
+      "entry_price": 89.6935,
+      "stop_price": 88.96636,
+      "tp1_price": 91.14779,
+      "tp2_price": 92.60207,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "stop_pips": 73,
       "tp1_pips": 146,
       "atr14_pips": 36.4,
       "factors": {
         "carry": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.08,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "carry_pct": 5.4,
             "carry_signal": "LONG",
@@ -702,7 +1263,11 @@
         },
         "momentum": {
           "score": 0.2,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.61,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "hp_signal": "LONG",
             "signals": 1,
@@ -711,7 +1276,11 @@
         },
         "technical": {
           "score": 0.333,
+<<<<<<< HEAD
           "weight": 7.59,
+=======
+          "weight": 5.4,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rsi14": "ok_at_20.4",
             "macd": "bullish",
@@ -721,16 +1290,27 @@
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 0.7,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.81,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "spread_pips": 3.5,
             "spread_ok": true,
@@ -741,7 +1321,11 @@
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.54,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 73,
@@ -759,23 +1343,39 @@
     {
       "pair": "CAD_JPY",
       "direction": "LONG",
+<<<<<<< HEAD
       "score": 4.22,
+=======
+      "score": 4.65,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "verdict": "DISQUALIFIED",
       "reason": "G10_technical_score_0.33_below_0.40_minimum",
       "size_multiplier": 0.0,
       "environment": "practice",
+<<<<<<< HEAD
       "judged_at": "2026-09-09T19:09:06.685656+00:00",
       "entry_price": 111.305,
       "stop_price": 109.96636,
       "tp1_price": 113.98229,
       "tp2_price": 116.65957,
+=======
+      "judged_at": "2026-09-09T17:42:56.029198+00:00",
+      "entry_price": 111.2235,
+      "stop_price": 109.88486,
+      "tp1_price": 113.90079,
+      "tp2_price": 116.57807,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
       "stop_pips": 134,
       "tp1_pips": 268,
       "atr14_pips": 44.6,
       "factors": {
         "carry": {
           "score": 1.0,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.08,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "carry_pct": 4.9,
             "carry_signal": "LONG",
@@ -784,7 +1384,11 @@
         },
         "momentum": {
           "score": 0.2,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 1.61,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "hp_signal": "LONG",
             "signals": 1,
@@ -793,7 +1397,11 @@
         },
         "technical": {
           "score": 0.333,
+<<<<<<< HEAD
           "weight": 7.59,
+=======
+          "weight": 5.4,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rsi14": "ok_at_40.9",
             "macd": "bullish",
@@ -803,18 +1411,31 @@
         },
         "session": {
           "score": 0.75,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "session_quality": "new_york",
             "utc_hour": 19,
+=======
+          "weight": 0.54,
+          "detail": {
+            "session_quality": "new_york",
+            "utc_hour": 17,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "raw_score": 0.75
           }
         },
         "volatility": {
           "score": 0.7,
+<<<<<<< HEAD
           "weight": 0.48,
           "detail": {
             "spread_pips": 3.6,
+=======
+          "weight": 0.81,
+          "detail": {
+            "spread_pips": 3.5,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
             "spread_ok": true,
             "atr_pips": 44.6,
             "atr_regime": "borderline",
@@ -823,7 +1444,11 @@
         },
         "risk_reward": {
           "score": 0.85,
+<<<<<<< HEAD
           "weight": 0.48,
+=======
+          "weight": 0.54,
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
           "detail": {
             "rr_ratio": 2.0,
             "stop_pips": 134,
@@ -837,6 +1462,7 @@
       "disqualifiers": [
         "G10_technical_score_0.33_below_0.40_minimum"
       ]
+<<<<<<< HEAD
     },
     {
       "pair": "NZD_USD",
@@ -1009,6 +1635,8 @@
       "disqualifiers": [
         "G10_technical_score_0.33_below_0.40_minimum"
       ]
+=======
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
     }
   ]
 }

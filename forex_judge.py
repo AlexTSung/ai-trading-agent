@@ -28,12 +28,15 @@ GATE_BEST_ONLY   = 9.0   # Elite — full 2% equity allocation
 
 # ── Factor weights ─────────────────────────────────────────────────────────────
 # Total weight = 10.0 (scores normalize to 0-10 scale)
-W_CARRY       = 2.0   # Carry differential (hold income)
-W_MOMENTUM    = 2.5   # Price momentum + trend alignment
-W_TECHNICAL   = 2.0   # RSI, MACD, IBS, Bollinger, pivots
+# v1.3.0: rebalanced — carry raised (2.0→2.5), technical lowered (2.0→1.5).
+# Data showed technical was over-weighted (learned: 5.4) on only 6 trades — overfit.
+# Best-performing pairs (NZD/JPY 3W/0L, EUR/JPY 75%WR) are carry+momentum driven.
+W_CARRY       = 2.5   # Carry differential (hold income) — raised from 2.0
+W_MOMENTUM    = 2.0   # Price momentum + trend alignment — lowered from 2.5
+W_TECHNICAL   = 1.5   # RSI, MACD, IBS, Bollinger, pivots — lowered from 2.0
 W_SESSION     = 1.0   # Market session quality
 W_VOLATILITY  = 1.5   # ATR regime + spread check
-W_RISK_REWARD = 1.0   # Stop/TP geometry
+W_RISK_REWARD = 1.5   # Stop/TP geometry — raised from 1.0 (R:R is core edge)
 
 TOTAL_WEIGHT = W_CARRY + W_MOMENTUM + W_TECHNICAL + W_SESSION + W_VOLATILITY + W_RISK_REWARD
 

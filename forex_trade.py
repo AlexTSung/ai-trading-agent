@@ -35,10 +35,11 @@ from forex_screener import (
 MAX_OPEN_PAIRS      = 5       # G2
 MAX_JPY_POSITIONS   = 2       # G13: max correlated JPY pairs open at once (USD/JPY, AUD/JPY, CAD/JPY etc all share BOJ risk)
 COOLDOWN_HOURS      = 24      # G14: min hours before re-entering a pair after stop-loss; 48h if 2+ JPY stopped same day
-MAX_RISK_PCT        = 0.02    # G3: 2% equity per trade
+MAX_RISK_PCT        = 0.02    # G3: 2% equity per trade (JPY pairs capped at 1.5% — see compute_units)
+MAX_JPY_RISK_PCT    = 0.015   # G3b: JPY pairs — higher pip value per unit demands smaller % (v1.3.0)
 MAX_DAILY_LOSS_PCT  = 0.03    # G4: pause if daily loss > 3%
 STOP_ATR_MULT       = 2.0     # G5: stop = 2.0 × ATR(14) — give trades room to breathe (proven principle)
-TP1_RR              = 2.0     # TP1 at 2.0× risk — "1:2 R:R is the sweet spot" (principles doc)
+TP1_RR              = 1.5     # TP1 at 1.5× risk — lowered from 2.0 to capture profit before retracement (v1.3.0)
 TP2_RR              = 4.0     # TP2 at 4× risk — runner target after BE move (let profits run)
 GATE_SCORE          = 7.0     # G7: minimum judge score
 LARGE_SIZE_SCORE    = 8.0
@@ -266,6 +267,10 @@ def compute_units(pair, stop_pips, equity, size_multiplier=1.0):
         # Cross pairs: approximate via 0.0001 USD
         pip_value_per_unit = 0.0001
 
+    # JPY pairs cap at 1.5% risk — their higher ATR produces more dollar exposure per pip (v1.3.0)
+    if "JPY" in pair:
+        risk_amount = equity * MAX_JPY_RISK_PCT * size_multiplier
+
     units = int(risk_amount / (stop_pips * pip_value_per_unit))
     # Cap at 500K units (5 standard lots) — prevents runaway on bad data
     return max(1, min(units, 500_000))
@@ -397,9 +402,10 @@ def close_all_positions(reason: str = "manual") -> list:
 # ── Trailing stop management ───────────────────────────────────────────────────
 TRAILING_TRIGGER_RR   = 0.5   # Stage 1: partial close + move SL to breakeven at 0.5:1 (half the stop distance)
 BREAKEVEN_BUFFER_PIPS = 5     # Breakeven SL = entry + 5 pips buffer (cover spread + small win)
-STAGE2_TRIGGER_RR     = 2.0   # Stage 2: when remaining half reaches 2:1, trail SL to lock in 1:1 gain
-STAGE2_TRAIL_RR       = 0.75  # Stage 2: trail SL at 0.75× risk_dist behind current price
-TIME_STOP_DAYS        = 5     # Close if trade hasn't reached 1:1 within 5 trading days (up from 3)
+STAGE2_TRIGGER_RR     = 1.5   # Stage 2: trail starts when remaining half reaches TP1 (1.5:1) — was 2.0 (v1.3.0)
+STAGE2_TRAIL_RR       = 1.5   # Stage 2: trail SL 1.5× risk_dist behind price — was 0.75, widened to stop sweep (v1.3.0)
+TIME_STOP_DAYS        = 3     # Close stagnant trade at +0.5R after 72h — was 5 days (v1.3.0)
+TIME_STOP_MIN_RR      = 0.5   # Time stop fires if trade hasn't reached 0.5R within TIME_STOP_DAYS (v1.3.0)
 
 def _partial_close_trade(trade_id: str, units_to_close: int) -> dict:
     """Close a specific number of units of an open trade (partial exit)."""
@@ -498,7 +504,7 @@ def manage_trailing_stops() -> list:
                     body = {"stopLoss": {"price": new_sl_str, "timeInForce": "GTC"}}
                     sl_result = _request("PUT", f"/v3/accounts/{OANDA_ACCOUNT_ID}/trades/{trade_id}/orders", body)
                     if "error" not in sl_result:
-                        print(f"  [TRAIL2] {pair} trade {trade_id}: SL trailed to {new_sl_str} (locks in ~{round(STAGE2_TRIGGER_RR - STAGE2_TRAIL_RR, 1)}R gain)")
+                        print(f"  [TRAIL2] {pair} trade {trade_id}: SL trailed to {new_sl_str} (wide trail — stop sweep protection)")
                         results.append({"trade_id": trade_id, "pair": pair, "action": "stage2_trail", "new_sl": new_sl_str, "old_sl": current_sl})
             else:
                 stage2_sl = current_price + STAGE2_TRAIL_RR * risk_dist
@@ -508,7 +514,7 @@ def manage_trailing_stops() -> list:
                     body = {"stopLoss": {"price": new_sl_str, "timeInForce": "GTC"}}
                     sl_result = _request("PUT", f"/v3/accounts/{OANDA_ACCOUNT_ID}/trades/{trade_id}/orders", body)
                     if "error" not in sl_result:
-                        print(f"  [TRAIL2] {pair} trade {trade_id}: SL trailed to {new_sl_str} (locks in ~{round(STAGE2_TRIGGER_RR - STAGE2_TRAIL_RR, 1)}R gain)")
+                        print(f"  [TRAIL2] {pair} trade {trade_id}: SL trailed to {new_sl_str} (wide trail — stop sweep protection)")
                         results.append({"trade_id": trade_id, "pair": pair, "action": "stage2_trail", "new_sl": new_sl_str, "old_sl": current_sl})
             continue  # skip Stage 1 logic for already-trailed trades
 
@@ -596,16 +602,16 @@ def check_time_stops() -> list:
 
         if initial_stop:
             risk_dist = abs(entry - float(initial_stop))
-            reached_1r = (unreal_pl / (risk_dist * abs(units))) >= 1.0 if risk_dist and units else False
+            reached_target = (unreal_pl / (risk_dist * abs(units))) >= TIME_STOP_MIN_RR if risk_dist and units else False
         else:
             # No journal data — use unrealized P&L as proxy (positive = reached some profit)
-            reached_1r = unreal_pl > 0
+            reached_target = unreal_pl > 0
 
-        if reached_1r:
-            print(f"  [TIMESTOP] {pair} trade {trade_id}: {days_open}d old but reached 1:1 — keeping")
+        if reached_target:
+            print(f"  [TIMESTOP] {pair} trade {trade_id}: {days_open}d old but reached {TIME_STOP_MIN_RR}R — keeping")
             continue
 
-        print(f"  [TIMESTOP] {pair} trade {trade_id}: {days_open}d open, no 1:1 RR — closing (momentum dead)")
+        print(f"  [TIMESTOP] {pair} trade {trade_id}: {days_open}d open, no {TIME_STOP_MIN_RR}R RR — closing (momentum dead)")
         raw = _request("PUT", f"/v3/accounts/{OANDA_ACCOUNT_ID}/trades/{trade_id}/close")
         if "orderFillTransaction" in raw or "orderCancelTransaction" in raw:
             fill = raw.get("orderFillTransaction", {})

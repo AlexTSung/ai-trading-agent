@@ -16,7 +16,11 @@
 ## What happened vs. what I expected?
 _(Review each trade: was the outcome different from what you anticipated? Why?)_
 
+<<<<<<< HEAD
 - **AUD_JPY** LONG → manual → $+130.46
+=======
+- **AUD_JPY** SHORT → manual → $+130.46
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
   - Expected: ___  Actual: ___  Lesson: ___
 
 ## Lessons logged today

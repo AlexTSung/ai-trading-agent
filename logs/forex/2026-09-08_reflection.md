@@ -16,10 +16,17 @@
 ## What happened vs. what I expected?
 _(Review each trade: was the outcome different from what you anticipated? Why?)_
 
+<<<<<<< HEAD
 - **NZD_USD** SHORT → manual → $+643.67
   - Expected: ___  Actual: ___  Lesson: ___
 
 - **USD_CAD** SHORT → stop_loss → $+463.96
+=======
+- **USD_CAD** LONG → stop_loss → $+463.96
+  - Expected: ___  Actual: ___  Lesson: ___
+
+- **NZD_USD** LONG → manual → $+643.67
+>>>>>>> 804de0a (feat: v1.3.0 — exit mechanics overhaul + carry-balanced weights)
   - Expected: ___  Actual: ___  Lesson: ___
 
 ## Lessons logged today
