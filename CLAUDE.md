@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v1.3.1
+> **Version:** v1.4.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -542,24 +542,37 @@ Authorization: Bearer <fine-grained PAT, Actions: Read and write, this repo only
 Body: {"ref": "master"}
 ```
 
-at the same wall-clock times this file has always documented, for all four
-`{workflow}` values. The in-repo `schedule:` crons are left in place on
-every workflow as a zero-cost fallback layer — if the external service ever
-has its own outage, GitHub's own (less reliable, but free and already
-written) scheduler still gets a chance. `GUARDRAIL G1` (idempotency) and
-`G2` (time window) already make every one of these calls — scheduled or
-external, first or thirtieth — a safe no-op once the day's real work is
-done, so the external pinger needed zero new code to be safe to add.
+**What's actually configured, as of 2026-10-13: hourly, every day, no
+market-hours restriction.** The original plan in this section called for a
+handful of calls per workflow per day at fixed times mirroring the old
+`schedule:` crons. Alex's actual cron-job.org configuration is simpler and
+different: one job per workflow firing on an hourly interval, all day, every
+day — easier to set up in cron-job.org's UI than four-to-six fixed times, and
+confirmed intentional ("I am running the cron jobs every hour on
+chron-jobs org. This is expected"). The per-workflow fixed-time list below
+the table is now historical — it describes `schedule:`'s fallback crons,
+which are unchanged, not the external trigger's actual cadence.
 
-**Why not ping every few minutes instead of at fixed times.** `schedule:`'s
-documented delay is specific to that event type; `workflow_dispatch` calls
-made directly against the API haven't shown it anywhere in this repo's
-history (manual dispatches this session landed within seconds almost every
-time, one outlier queued ~5 minutes). A dense ping schedule would mostly
-burn GitHub Actions minutes — billed per job regardless of how fast G1 skips
-it — against this is a **private** repo's metered quota, for a problem the
-fixed-time calls don't actually have. A handful of calls per workflow per day,
-at the same times `schedule:` already uses, is the proportionate fix.
+The in-repo `schedule:` crons are left in place on every workflow as a
+zero-cost fallback layer — if the external service ever has its own outage,
+GitHub's own (less reliable, but free and already written) scheduler still
+gets a chance. `GUARDRAIL G1` (idempotency / rolling re-run interval) makes
+every one of these calls — scheduled or external, first or thirtieth — a safe
+no-op or a fresh useful re-run, never a duplicate trade, so the external
+pinger needed no new code to be safe to add at any frequency.
+
+**Why hourly, all day, turned out to be the right call — not just a
+tolerated one.** `research.py`'s intelligence/screener/news layers go stale
+within a day; a once- or twice-daily trigger was discarding most of that
+staleness for free. The cost is GitHub Actions minutes on this private repo's
+metered quota (billed per job regardless of how fast a guardrail skips it) —
+real, but one Alex has explicitly accepted in exchange for continuous
+scanning of current positions and candidate tickers. See `run_github.sh`'s
+GUARDRAIL G1 comment and EQUITIES_CHANGELOG.md's v1.4.0 entry for the concrete
+incident (2026-10-13) that the old one-shot-per-day lock caused: three
+Judge-APPROVEd candidates (NVDA, MSFT, NU) scored off a midnight run and never
+reached the executor, because every later trigger that day — including every
+one during actual market hours — saw the day already "handled" and skipped.
 
 **Setup is intentionally not something this session could do alone.** It
 needs a GitHub fine-grained personal access token — an account-level
@@ -569,21 +582,43 @@ storage on a third party happens inside this repo or this session.
 
 | ET | Workflow / runner | Cron (UTC) | Steps, in order |
 |---|---|---|---|
-| **9:52 AM** (+5 backups to 2:37 PM) | `morning-pipeline.yml`<br>`run_github.sh` | `52 13`, `22 14`, `52 14`, `22 15`, `7 17`, `37 18 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only |
+| **Hourly, all day, every day** (external trigger) — `schedule:` fallback crons: 9:52 AM + 5 backups to 2:37 PM ET | `morning-pipeline.yml`<br>`run_github.sh` | `52 13`, `22 14`, `52 14`, `22 15`, `7 17`, `37 18 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only, and only while the market is actually open |
 | **9:40 AM** (+4 backups to 2:35 PM) | `options-pipeline.yml`<br>`run_options_github.sh` | `40 13`, `10 14`, `10 15`, `5 17`, `35 18 * * 1-5` | `run_options.py` — manage existing positions, then screen the options watchlist for new defined-risk trades. Same 9:35 AM–4:00 PM ET window as equities morning. IV rank and the chain are freshest right after open, and widening this window trades some of that freshness for reliability — see run_options_github.sh's GUARDRAIL G2 comment. Existed only as a local `run_options*.sh` tied to one machine before this. Already off the :00/:15/:30/:45 grid, so left unchanged in the 2026-09-18 retiming. |
 | **10:37 AM, 12:07 PM, 2:07 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `37 14`, `7 16`, `7 18 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
 | **5:22 PM** (+1 backup at 6:07 PM) | `eod-pipeline.yml`<br>`run_eod_github.sh` | `22 21`, `7 22 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
 | **Sep 3, 5:30 PM** | `graduation-decision.yml` | `30 21 3 9 *` | `reviewer.py graduation` — Phase 2B verdict. Advisory only; manual approval still required. |
 
-Guardrails inside the runners: weekends skip; the morning and options jobs
-abort after 4:00 PM ET; the midday job runs only between 10:00 AM and 4:00 PM
-ET; the EOD job refuses to run before 4:00 PM ET. Every one of these is
-computed from the **real US/Eastern wall-clock time** (`TZ="America/New_York"
-date`, or `market_time.py` in the Python layer) rather than the runner's UTC
-clock compared against a fixed offset — the earlier UTC-offset version broke
-the instant a delayed run crossed midnight UTC, and separately drifted an hour
-every time DST changed twice a year. `workflow_dispatch` with `test_mode: true`
-bypasses the time windows on the morning, midday and options jobs.
+Guardrails inside the runners: weekends skip; the midday job runs only
+between 10:00 AM and 4:00 PM ET; the EOD job refuses to run before 4:00 PM
+ET. The morning job (`run_github.sh`) no longer has a time-of-day cutoff —
+removed 2026-10-13 along with the one-shot daily lock, see below — and the
+options job still aborts after 4:00 PM ET. Every one of these is computed
+from the **real US/Eastern wall-clock time** (`TZ="America/New_York" date`,
+or `market_time.py` in the Python layer) rather than the runner's UTC clock
+compared against a fixed offset — the earlier UTC-offset version broke the
+instant a delayed run crossed midnight UTC, and separately drifted an hour
+every time DST changed twice a year. `workflow_dispatch` with `test_mode:
+true` bypasses the time windows on the midday and options jobs (and, as of
+2026-10-13, has no effect on the morning job — kept only for input parity).
+
+**Morning job idempotency is now a 50-minute rolling interval, not a daily
+lock.** Through v1.3.1, GUARDRAIL G1 skipped the rest of the day the instant
+`logs/paper/$DATE.json` existed at all — correct when `schedule:` fired only
+a handful of times a day, wrong the moment the external trigger started
+firing hourly around the clock by design. On 2026-10-13 the only research run
+of the day landed at 12:01 AM ET (`market_open: false`); the Judge scored
+three APPROVEs (NVDA, MSFT, NU) off that midnight-stale pass, and every later
+hourly trigger during actual market hours skipped outright because the file
+already existed — those approvals never reached the executor. `run_github.sh`
+now re-runs whenever `$DATE.json` is missing **or** older than 50 minutes, so
+an hourly external trigger produces an hourly real pipeline run. This cannot
+cause a duplicate buy: `trade.py`'s buy path already requires `sym not in
+open_syms`, so a symbol bought earlier the same day is not re-entered by a
+later run that same day. Trading-hours safety was never this guardrail's job
+and is unaffected — `trade.py session` reads `research.get("market_open")`,
+sourced from Alpaca's real-time clock at the moment research last ran, and
+refuses to place any order when it is false, confirmed directly in
+2026-10-13's job logs (`{"status": "MARKET_CLOSED", "no_trades": true}`).
 
 Local equivalents for manual runs — these do **not** replace the schedule, they
 just let you inspect state:

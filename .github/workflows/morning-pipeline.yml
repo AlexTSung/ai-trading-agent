@@ -43,11 +43,20 @@ on:
     - cron: '52 14 * * 1-5'   # 10:52 AM ET backup
     - cron: '22 15 * * 1-5'   # 11:22 AM ET backup
     - cron: '7 17 * * 1-5'    # 1:07 PM ET backup
-    - cron: '37 18 * * 1-5'   # 2:37 PM ET backup — last chance before the 4:00 PM cutoff
+    - cron: '37 18 * * 1-5'   # 2:37 PM ET backup
+    # These schedule: crons are a zero-cost fallback layer, not the primary
+    # trigger — see CLAUDE.md "External trigger" section. The primary trigger
+    # is an external cron-job.org job calling workflow_dispatch hourly, around
+    # the clock, every day (confirmed 2026-10-13). run_github.sh's old "4:00
+    # PM cutoff, last chance before close" framing (which the "2:37 PM ET
+    # backup" comment above still reflects) no longer applies: its time-window
+    # guardrail was removed the same day in favor of a rolling re-run interval
+    # that re-runs hourly all day, so there is no longer a single "last
+    # chance" trigger to protect.
   workflow_dispatch:
     inputs:
       test_mode:
-        description: 'Skip time window guardrail (for testing outside market hours)'
+        description: 'No effect on run_github.sh since 2026-10-13 (its time-window guardrail was removed); kept for parity with the other pipelines'' workflow_dispatch inputs'
         required: false
         default: 'false'
         type: boolean

@@ -41,6 +41,72 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.4.0] — 2026-10-13
+
+**MINOR** — run_github.sh G1 changed from one-shot-per-day lock to a 50-minute rolling re-run interval, and G2's 4:00 PM cutoff removed, so the morning pipeline actually re-runs research/judge/trade hourly under the new external 24/7 cron-job.org trigger instead of locking the whole day to whichever trigger landed first (which on 2026-10-13 was 12:01 AM ET, market closed).
+
+### Why
+Alex confirmed on 2026-10-13 that cron-job.org is intentionally configured to
+call every equities workflow's `workflow_dispatch` endpoint every hour, around
+the clock — not restricted to market hours or weekdays. `run_github.sh`'s
+GUARDRAIL G1 was still the one-shot lock from v1.3.1: `if [ -f
+"$LOG_DIR/$DATE.json" ]; then skip`. Once any trigger wrote today's research
+file, every later trigger that day — including every one that landed during
+actual market hours — treated the day as already handled and skipped outright.
+
+This was not a hypothetical. 2026-10-13's research+judge run landed at 12:01
+AM ET (`market_open: false`), scored real candidates off midnight-stale data
+(APPROVE: NVDA 8.75, MSFT 8.52, NU 8.87), and then every subsequent hourly
+trigger during market hours — when those approvals could have reached the
+executor — skipped under G1. `trade.py session` itself was and is correct
+(confirmed in the job logs: `{"status": "MARKET_CLOSED", "no_trades": true}`,
+sourced from Alpaca's real-time clock via `research.get("market_open")`); the
+bug was one level up, in which trigger "won" the one-shot lock for the day.
+
+### Strategy / CLAUDE.md changes
+- None to trading criteria, Judge scoring, position sizing, or any Hard Rule.
+  This changes pipeline run *frequency*, not what the Judge or executor decide
+  once invoked.
+- CLAUDE.md's Daily Schedule section rewritten to describe the actual external
+  trigger configuration (hourly, all days, no market-hours restriction) in
+  place of the stale per-workflow minute list written before the real
+  cron-job.org config was confirmed.
+
+### Code changes
+- `run_github.sh` GUARDRAIL G1: replaced the daily-file-exists check with a
+  50-minute rolling interval (re-run if `$DATE.json` is missing or its mtime
+  is more than 50 minutes old).
+- `run_github.sh` GUARDRAIL G2 (the 4:00 PM ET cutoff): removed. It only ever
+  protected a single daily shot from landing too late to matter; with G1 now
+  re-running hourly all day, there is no longer a single "last chance" to
+  protect, and an after-hours/overnight run is exactly the continuous
+  news/intelligence scanning Alex asked for ("always scanning the internet for
+  new data related to any stocks currently in portfolio... or any future
+  trades"). `trade.py`'s own `market_open` check is unchanged and remains the
+  actual safety control against off-hours order placement — verified against
+  2026-10-13's job logs before this change was made, not assumed.
+- `morning-pipeline.yml`: updated the `test_mode` input description (G2 is
+  gone, so the input no longer has any effect on `run_github.sh`) and the
+  schedule-crons comment to stop describing the now-removed "last chance
+  before 4:00 PM" framing.
+
+### Why this didn't need a dedup/cooldown change
+Running the full pipeline hourly instead of once could in principle rebuy the
+same symbol repeatedly. It can't: `trade.py`'s buy path already requires `sym
+not in open_syms` (`trade.py:1222`) for both signal-based and dip-buy entries,
+so once a buy fills, every later run that same day sees the symbol already
+held and will not re-enter it. Avg-down adds are gated separately at a
+stricter 8.0 Judge score and are a deliberate add-to-a-position action, not a
+duplicate. No new dedup logic was needed or added.
+
+### Comparability
+No. Judge criteria, position sizing, stop logic, and every Hard Rule are
+unchanged — this only changes how often the existing pipeline is allowed to
+run, and running it more often strictly recovers trading opportunities the
+one-shot lock was discarding, never adds a new one the strategy wouldn't
+otherwise have taken.
+
+
 ## [v1.3.1] — 2026-10-12
 
 **PATCH** — Document the external-trigger fix for GitHub Actions schedule-event
