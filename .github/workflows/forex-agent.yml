@@ -8,8 +8,6 @@ on:
     - cron: '0 12,14,16,18 * * 1-5'
     # NY close + Asia pre-open carry entries Mon-Fri
     - cron: '0 22 * * 1-5'
-    # Daily briefing email — 04:00 UTC (before US wakes up) Mon-Fri
-    - cron: '5 4 * * 1-5'
     # Weekly strategy learner — Sunday 08:00 UTC (before Monday open)
     - cron: '0 8 * * 0'
   workflow_dispatch:
@@ -90,18 +88,6 @@ jobs:
             weekly-learn) python3 forex_optimizer.py weekly ;;
             patterns)     python3 forex_optimizer.py patterns ;;
           esac
-
-      - name: Daily briefing email (04:05 UTC run only)
-        if: github.event.schedule == '5 4 * * 1-5'
-        continue-on-error: true
-        env:
-          OANDA_API_KEY:      ${{ secrets.OANDA_API_KEY }}
-          OANDA_ACCOUNT_ID:   ${{ secrets.OANDA_ACCOUNT_ID }}
-          OANDA_ENV:          practice
-          GMAIL_USER:         ${{ secrets.GMAIL_USER }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          NOTIFY_EMAIL:       ${{ secrets.NOTIFY_EMAIL }}
-        run: python3 forex_notify.py --briefing
 
       - name: Graduation checker + post-trade learning
         if: always() && (github.event.inputs.mode == '' || github.event.inputs.mode == 'full')
