@@ -40,7 +40,7 @@
 ## What the Agent Learned (6 adjustments)
 - ⬇️ **carry** weight: 0.481 → 0.5 — avg score 0.30 in wins vs 1.00 in losses — not predictive (delta=-0.70)
 - ⬇️ **momentum** weight: 0.481 → 0.5 — avg score 0.40 in wins vs 1.00 in losses — not predictive (delta=-0.60)
-- ⬆️ **technical** weight: 7.594 → 7.894 — avg score 0.33 in wins vs 0.17 in losses (+0.17 predictive edge)
+- ⬆️ **technical** weight: 7.595 → 7.895 — avg score 0.33 in wins vs 0.17 in losses (+0.17 predictive edge)
 - ⬇️ **session** weight: 0.481 → 0.5 — avg score 0.44 in wins vs 0.75 in losses — not predictive (delta=-0.31)
 - ⬇️ **volatility** weight: 0.481 → 0.5 — avg score 0.31 in wins vs 0.70 in losses — not predictive (delta=-0.39)
 - ⬇️ **risk_reward** weight: 0.481 → 0.5 — avg score 0.46 in wins vs 0.85 in losses — not predictive (delta=-0.39)
