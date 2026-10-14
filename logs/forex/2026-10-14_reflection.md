@@ -1,9 +1,9 @@
 # Daily Trading Reflection — 2026-10-14
 
 ## P&L
-- Realized today: $-2230.59
-- Trades closed: 1
-- Wins: 0  Losses: 1
+- Realized today: $-3925.59
+- Trades closed: 2
+- Wins: 0  Losses: 2
 
 ## Did I follow the strategy exactly?
 - [ ] Only took trades with judge score ≥ 7.0
@@ -19,18 +19,23 @@ _(Review each trade: was the outcome different from what you anticipated? Why?)_
 - **USD_CAD** LONG → stop_loss → $-2230.59
   - Expected: ___  Actual: ___  Lesson: ___
 
+- **EUR_USD** LONG → stop_loss → $-1695.00
+  - Expected: ___  Actual: ___  Lesson: ___
+
 ## Lessons logged today
 - [risk] Stop-loss respected on USD_CAD — loss of $-2230.59 accepted. Strategy followed.
+- [risk] Stop-loss respected on EUR_USD — loss of $-1695.00 accepted. Strategy followed.
+- [psychology] Daily loss limit reached (2L today) — stopped trading to prevent revenge trading.
 
 ## One improvement for tomorrow
 _(Even a tiny improvement compounds over time — what ONE thing will you do better?)_
 
 > ___
 
-## Overall performance — 36 trades lifetime
-- Win rate: 61.1%  (target ≥55%)
-- Profit factor: 0.60  (target ≥1.3)
-- Max drawdown: 971.5%  (max 8%)
+## Overall performance — 37 trades lifetime
+- Win rate: 59.5%  (target ≥55%)
+- Profit factor: 0.54  (target ≥1.3)
+- Max drawdown: 1167.4%  (max 8%)
 
 ---
 _Remember: Individual trade results don't matter. Focus on process, not P&L._
