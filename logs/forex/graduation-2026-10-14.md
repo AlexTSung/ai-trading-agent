@@ -40,11 +40,11 @@
 | USD_CAD | 0 | 1 | $-2230.59 | -78.9 | ✅ Active |
 
 ## What the Agent Learned (5 adjustments)
-- ⬇️ **carry** weight: 0.499 → 0.5 — avg score 0.30 in wins vs 0.80 in losses — not predictive (delta=-0.50)
-- ⬇️ **momentum** weight: 0.499 → 0.5 — avg score 0.40 in wins vs 1.00 in losses — not predictive (delta=-0.60)
-- ⬇️ **session** weight: 0.499 → 0.5 — avg score 0.44 in wins vs 0.83 in losses — not predictive (delta=-0.40)
-- ⬇️ **volatility** weight: 0.499 → 0.5 — avg score 0.31 in wins vs 0.70 in losses — not predictive (delta=-0.39)
-- ⬇️ **risk_reward** weight: 0.499 → 0.5 — avg score 0.46 in wins vs 0.85 in losses — not predictive (delta=-0.39)
+- ⬇️ **carry** weight: 0.5 → 0.5 — avg score 0.30 in wins vs 0.80 in losses — not predictive (delta=-0.50)
+- ⬇️ **momentum** weight: 0.5 → 0.5 — avg score 0.40 in wins vs 1.00 in losses — not predictive (delta=-0.60)
+- ⬇️ **session** weight: 0.5 → 0.5 — avg score 0.44 in wins vs 0.83 in losses — not predictive (delta=-0.40)
+- ⬇️ **volatility** weight: 0.5 → 0.5 — avg score 0.31 in wins vs 0.70 in losses — not predictive (delta=-0.39)
+- ⬇️ **risk_reward** weight: 0.5 → 0.5 — avg score 0.46 in wins vs 0.85 in losses — not predictive (delta=-0.39)
 
 ## Direction Bias
 - Long win rate:  0.5
@@ -56,7 +56,7 @@
 {
   "carry": 0.5,
   "momentum": 0.5,
-  "technical": 7.501,
+  "technical": 7.5,
   "session": 0.5,
   "volatility": 0.5,
   "risk_reward": 0.5
