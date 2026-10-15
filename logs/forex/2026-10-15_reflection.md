@@ -1,9 +1,9 @@
 # Daily Trading Reflection — 2026-10-15
 
 ## P&L
-- Realized today: $+0.00
-- Trades closed: 0
-- Wins: 0  Losses: 0
+- Realized today: $+310.83
+- Trades closed: 1
+- Wins: 1  Losses: 0
 
 ## Did I follow the strategy exactly?
 - [ ] Only took trades with judge score ≥ 7.0
@@ -16,6 +16,9 @@
 ## What happened vs. what I expected?
 _(Review each trade: was the outcome different from what you anticipated? Why?)_
 
+- **CAD_JPY** LONG → manual → $+310.83
+  - Expected: ___  Actual: ___  Lesson: ___
+
 ## Lessons logged today
 
 ## One improvement for tomorrow
@@ -23,9 +26,9 @@ _(Even a tiny improvement compounds over time — what ONE thing will you do bet
 
 > ___
 
-## Overall performance — 37 trades lifetime
-- Win rate: 59.5%  (target ≥55%)
-- Profit factor: 0.54  (target ≥1.3)
+## Overall performance — 38 trades lifetime
+- Win rate: 60.5%  (target ≥55%)
+- Profit factor: 0.56  (target ≥1.3)
 - Max drawdown: 1167.4%  (max 8%)
 
 ---
