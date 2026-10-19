@@ -1,0 +1,95 @@
+{
+  "checked": 13,
+  "triggers": [
+    {
+      "symbol": "IWM261127C00275000",
+      "qty": "1",
+      "avg_entry": "5.67",
+      "current_price": "5.07",
+      "unrealized_plpc": -0.10582,
+      "tier": "TIER3",
+      "stop_pct": -0.1,
+      "reason": "STOP-LOSS TIER3 (-10%): down -10.6%"
+    }
+  ],
+  "inverse_max_hold": [],
+  "phantom_equity": [
+    {
+      "symbol": "LBGJ",
+      "qty": 154903.0,
+      "avg_entry_price": 0.0288,
+      "current_price": 1.63,
+      "price_ratio": 56.6,
+      "unrealized_plpc": 55.59722,
+      "reported_market_value": 252491.89,
+      "cost_basis": 4461.21,
+      "phantom_amount": 248030.68,
+      "reasons": [
+        "price $1.6300 is 57x its cost basis $0.0288",
+        "unrealized P&L 5,560% exceeds the 1,000% plausibility ceiling",
+        "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
+      ],
+      "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
+    }
+  ],
+  "closed": [
+    {
+      "symbol": "IWM261127C00275000",
+      "result": {
+        "id": "f9f22848-a0fe-4795-a206-edd378f045f6",
+        "client_order_id": "agent-sell-IWM261127C00275000-20261019140021",
+        "created_at": "2026-10-19T14:00:22.002733981Z",
+        "updated_at": "2026-10-19T14:00:22.002764997Z",
+        "submitted_at": "2026-10-19T14:00:21.992298377Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "3aed76ce-c38d-4f6a-8719-8f82c57cd4d7",
+        "symbol": "IWM261127C00275000",
+        "asset_class": "us_option",
+        "notional": null,
+        "qty": "1",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "simple",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "gtc",
+        "limit_price": "5.02",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2027-01-15T21:15:00Z",
+        "_ok": true,
+        "_agent_reason": "STOP-LOSS TIER3 (-10%): down -10.6%",
+        "_limit_price_used": 5.02,
+        "_urgent_exit": true,
+        "_released_orders": []
+      },
+      "trigger": {
+        "symbol": "IWM261127C00275000",
+        "qty": "1",
+        "avg_entry": "5.67",
+        "current_price": "5.07",
+        "unrealized_plpc": -0.10582,
+        "tier": "TIER3",
+        "stop_pct": -0.1,
+        "reason": "STOP-LOSS TIER3 (-10%): down -10.6%"
+      }
+    }
+  ],
+  "failed": [],
+  "skipped_suspect": []
+}
