@@ -324,6 +324,40 @@ def scan_patterns_all_pairs():
     return results
 
 
+def _update_non_weight_stats(cfg: dict, closed: list, n: int):
+    """Update pair stats, direction bias, confluence stats without touching weights (v1.4.0)."""
+    from collections import defaultdict
+    pair_stats = cfg.get("pair_stats", {})
+    for t in closed:
+        p = t.get("pair", "")
+        if not p:
+            continue
+        if p not in pair_stats:
+            pair_stats[p] = {"wins": 0, "losses": 0, "total_pl": 0.0, "pips": 0.0}
+        pl = t.get("realized_pl", 0)
+        if pl > 0:
+            pair_stats[p]["wins"] += 1
+        elif pl < 0:
+            pair_stats[p]["losses"] += 1
+        pair_stats[p]["total_pl"] += pl
+        pair_stats[p]["pips"] = round(pair_stats[p]["pips"] + t.get("pip_pl", 0), 1)
+    cfg["pair_stats"] = pair_stats
+
+    # Direction bias
+    longs  = [t for t in closed if t.get("direction") == "LONG"]
+    shorts = [t for t in closed if t.get("direction") == "SHORT"]
+    long_wr  = len([t for t in longs  if t.get("realized_pl", 0) > 0]) / len(longs)  if longs  else 0.5
+    short_wr = len([t for t in shorts if t.get("realized_pl", 0) > 0]) / len(shorts) if shorts else 0.5
+    cfg["direction_bias"] = {"long_wr": round(long_wr, 2), "short_wr": round(short_wr, 2), "sample": n}
+    cfg["trades_analyzed"] = n
+
+    import json as _json
+    config_path = os.path.join(os.path.dirname(__file__), "forex_config.json")
+    with open(config_path, "w") as fh:
+        _json.dump(cfg, fh, indent=2)
+    print(f"  Non-weight stats updated ({n} trades). Weights unchanged (locked until {cfg.get('weight_learning_disabled_until_trades', 50)}).")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # DAILY OPTIMIZER — tune weights from journal performance
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -359,15 +393,25 @@ def run_daily_optimizer():
         _init_config_with_patterns()
         return
 
-    # Blend ratio: ramps from 0.1 → 1.0 as trades accumulate
-    if n <= 2:
+    # v1.4.0: weight learning locked until minimum trade count
+    # The optimizer corrupted weights to technical=7.591 from only 6 trades (massively overfit).
+    learning_lock = cfg.get("weight_learning_disabled_until_trades", 50)
+    if n < learning_lock:
+        print(f"  Weight learning locked: need {learning_lock} closed trades, have {n}. Skipping weight update.")
+        # Still update pair stats, direction bias, confluence — just not weights
+        _update_non_weight_stats(cfg, closed, n)
+        return
+
+    # Blend ratio: ramps from 0.1 → 1.0 as trades accumulate beyond the lock
+    excess = n - learning_lock
+    if excess <= 5:
         blend = 0.10
-    elif n <= 5:
-        blend = 0.30
-    elif n <= 9:
-        blend = 0.60
+    elif excess <= 15:
+        blend = 0.20
+    elif excess <= 30:
+        blend = 0.40
     else:
-        blend = 1.00
+        blend = 0.60  # never go fully data-driven — always keep 40% prior
 
     print(f"\n  {n} closed trades — learning blend: {blend:.0%} data / {1-blend:.0%} defaults")
 
@@ -426,7 +470,17 @@ def run_daily_optimizer():
     scale = TOTAL_WEIGHT / sum(new_weights.values())
     new_weights = {f: round(w * scale, 2) for f, w in new_weights.items()}
 
-    print(f"\n  Updated weights (blended):")
+    # v1.4.0: hard drift cap — no weight can drift more than 40% from its base value.
+    # This prevents optimizer overfitting (technical drifted to 7.591 from base 1.5).
+    MAX_DRIFT_RATIO = 1.40  # weight can be at most 1.4× or at least 0.6× of base
+    for f in factor_names:
+        base = DEFAULT_WEIGHTS.get(f, 1.0)
+        new_weights[f] = round(max(base * (2 - MAX_DRIFT_RATIO), min(base * MAX_DRIFT_RATIO, new_weights[f])), 2)
+    # Re-normalize after capping
+    scale = TOTAL_WEIGHT / sum(new_weights.values())
+    new_weights = {f: round(w * scale, 2) for f, w in new_weights.items()}
+
+    print(f"\n  Updated weights (blended, drift-capped at ±40% of base):")
     for f, w in sorted(new_weights.items(), key=lambda x: x[1], reverse=True):
         old = cfg["weights"].get(f, DEFAULT_WEIGHTS.get(f, 0))
         print(f"    {f:15s}  {w:.2f}  (was {old:.2f}, Δ{w-old:+.2f})")

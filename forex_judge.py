@@ -29,8 +29,8 @@ GATE_BEST_ONLY   = 9.0   # Elite — full 2% equity allocation
 # ── Factor weights ─────────────────────────────────────────────────────────────
 # Total weight = 10.0 (scores normalize to 0-10 scale)
 # v1.3.0: rebalanced — carry raised (2.0→2.5), technical lowered (2.0→1.5).
-# Data showed technical was over-weighted (learned: 5.4) on only 6 trades — overfit.
-# Best-performing pairs (NZD/JPY 3W/0L, EUR/JPY 75%WR) are carry+momentum driven.
+# v1.4.0: base weights unchanged; optimizer weight learning locked until 50 closed trades.
+# Prior optimizer corrupted technical to 7.591 from only 6-trade sample (massively overfit).
 W_CARRY       = 2.5   # Carry differential (hold income) — raised from 2.0
 W_MOMENTUM    = 2.0   # Price momentum + trend alignment — lowered from 2.5
 W_TECHNICAL   = 1.5   # RSI, MACD, IBS, Bollinger, pivots — lowered from 2.0
@@ -458,6 +458,14 @@ def judge_pair(r: dict) -> dict:
         disqualifiers.append(f"G11_H1_regime_conflict_LONG_at_range_top")
     if direction == "SHORT" and "good_for_long" in (regime_h1_advice or "").lower():
         disqualifiers.append(f"G11_H1_regime_conflict_SHORT_at_range_bottom")
+
+    # G15: D1 trend alignment — never trade against the daily trend (v1.4.0)
+    # Most catastrophic losses came from H4 signals opposing the D1 structure.
+    d1_trend = r.get("d1_trend", "NEUTRAL")
+    if direction == "LONG" and d1_trend == "BEARISH":
+        disqualifiers.append(f"G15_D1_trend_BEARISH_blocks_LONG_entry")
+    if direction == "SHORT" and d1_trend == "BULLISH":
+        disqualifiers.append(f"G15_D1_trend_BULLISH_blocks_SHORT_entry")
 
     if not r.get("spread_pips") is None:
         spread = r.get("spread_pips", 0)

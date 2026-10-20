@@ -286,7 +286,25 @@ def is_good_session():
 def scan_pair(pair):
     """
     Full scan of one pair. Returns a candidate dict or None if filtered out.
+    Multi-timeframe: D1 trend must align with H4 signal (v1.4.0).
     """
+    # ── D1 trend context (required — v1.4.0) ───────────────────────────────
+    d1_candles = get_candles(pair, granularity="D", count=60)
+    d1_trend = "NEUTRAL"
+    d1_ma20 = d1_ma50 = d1_rsi = d1_price = None
+    if d1_candles and not (isinstance(d1_candles, dict) and "error" in d1_candles):
+        d1_closes, d1_highs, d1_lows, _ = parse_candles(d1_candles)
+        if len(d1_closes) >= 30:
+            d1_ma20  = compute_sma(d1_closes, 20)
+            d1_ma50  = compute_sma(d1_closes, 50) if len(d1_closes) >= 50 else None
+            d1_rsi   = compute_rsi(d1_closes, 14)
+            d1_price = d1_closes[-1]
+            if d1_ma20 and d1_ma50:
+                if d1_ma20 > d1_ma50 and d1_price > d1_ma50:
+                    d1_trend = "BULLISH"
+                elif d1_ma20 < d1_ma50 and d1_price < d1_ma50:
+                    d1_trend = "BEARISH"
+
     # Fetch candles (H4 for signal, use 100 bars)
     candles = get_candles(pair, granularity="H4", count=100)
     if isinstance(candles, dict) and "error" in candles:
@@ -360,12 +378,27 @@ def scan_pair(pair):
         ibs > 0.7,   # overbought = pullback sell
     ])
 
-    if long_signals >= 3:
+    # v1.4.0: require 4+ H4 confluence signals AND D1 trend must not oppose
+    # D1 BEARISH blocks LONGs; D1 BULLISH blocks SHORTs; NEUTRAL allows either
+    long_d1_ok  = d1_trend != "BEARISH"
+    short_d1_ok = d1_trend != "BULLISH"
+
+    min_confluence = 4  # raised from 3 (v1.4.0: stronger signal required)
+
+    if long_signals >= min_confluence and long_d1_ok:
         direction = "LONG"
         confluence = long_signals
-    elif short_signals >= 3:
+    elif short_signals >= min_confluence and short_d1_ok:
         direction = "SHORT"
         confluence = short_signals
+    elif long_signals >= min_confluence and not long_d1_ok:
+        direction = "NEUTRAL"
+        confluence = long_signals
+        # Note: would be LONG but D1 trend is BEARISH — blocked
+    elif short_signals >= min_confluence and not short_d1_ok:
+        direction = "NEUTRAL"
+        confluence = short_signals
+        # Note: would be SHORT but D1 trend is BULLISH — blocked
     else:
         direction = "NEUTRAL"
         confluence = max(long_signals, short_signals)
@@ -374,6 +407,11 @@ def scan_pair(pair):
         "pair": pair,
         "signal": direction,
         "confluence": confluence,
+        "d1_trend": d1_trend,
+        "d1_ma20": round(d1_ma20, 5) if d1_ma20 else None,
+        "d1_ma50": round(d1_ma50, 5) if d1_ma50 else None,
+        "d1_rsi": round(d1_rsi, 1) if d1_rsi else None,
+        "d1_price": round(d1_price, 5) if d1_price else None,
         "spread_pips": round(spread_pips, 2),
         "spread_ok": spread_ok,
         "current_price": round(current, 5),

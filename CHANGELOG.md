@@ -1,5 +1,38 @@
 # Forex Agent — Changelog
 
+---
+
+## v1.4.0 — 2026-10-20 (Signal Quality Overhaul — Stop Losses to Profits)
+
+**Post-mortem on 44-trade sample: profit factor 0.52 despite 59% win rate. Avg loss ($1,364) is 3.1× avg win ($437). Five catastrophic losses (>$2K each) account for $12,181 of total losses. Root causes identified and fixed.**
+
+### Root Cause Analysis
+
+- **Optimizer corrupted judge weights** — ran on only 6 trades from the v1.3.0 window, pushing `technical: 7.591` while every other factor dropped to `0.482`. The judge has been effectively broken since Oct 12: a pair could score perfectly on carry, momentum, and R:R but still be vetoed by a flawed technical score, and vice versa.
+- **Position sizing catastrophically too large** — avg units on *losses* = 380K vs avg units on *wins* = 137K. The 2% risk rule combined with the 500K unit cap was producing $2,000–$3,200 losses on pairs like EUR/GBP (500K units × 64 pips = $3,217). Winners were averaging far smaller positions.
+- **No daily (D1) trend filter** — screener used only H4 candles. Every October catastrophic loss was a H4 signal opposing the D1 structure. USD strengthened throughout Oct; agent was shorting USD pairs into a USD rally (EUR/USD, USD/CAD reversed).
+- **No cap on optimizer weight drift** — no guardrail preventing the optimizer from overriding the strategy's core weights. Learning on 6 trades at 100% blend produced worse weights than the priors.
+
+### Fixed
+
+- **G15: D1 trend alignment gate** — `forex_screener.py` now fetches D1 candles alongside H4. Computes D1 MA20/MA50/price and sets `d1_trend = BULLISH | BEARISH | NEUTRAL`. `forex_judge.py` G15 disqualifies any trade where direction opposes D1 trend (LONG blocked when D1 BEARISH, SHORT blocked when D1 BULLISH). Every Oct catastrophic loss fails this gate retroactively.
+- **Position size halved** — `MAX_RISK_PCT` 2% → 1%, `MAX_JPY_RISK_PCT` 1.5% → 0.75%, unit cap 500K → 200K. Additional `MAX_LOSS_DOLLARS = $600` hard cap: no trade can risk more than $600 regardless of the formula. This eliminates $2K–$3K catastrophic losses by construction.
+- **Min H4 confluence raised** — screener now requires 4/6 signals (up from 3). Stronger signal required before even running the judge.
+- **Optimizer weight learning locked until 50 closed trades** — `forex_config.json` now carries `weight_learning_disabled_until_trades: 50`. The optimizer skips weight updates until then, only updating pair stats and direction bias (which are safe on small samples). When learning does resume at 50+ trades, blend is capped at 60% (never 100% data-driven) and weights are bounded to ±40% of base values.
+- **Judge weights reset** — `forex_config.json` weights reset to v1.3.0 balanced values: carry=2.5, momentum=2.0, technical=1.5, session=1.0, volatility=1.5, risk_reward=1.5.
+- **Deprioritized pairs expanded** — USD/JPY, USD/CAD, EUR/GBP added to deprioritized list alongside USD/CHF (all net negative P&L). Require 7.5+ score and trade at 0.5× size until first win on each.
+- **Daily loss limit tightened** — 3% → 2% of equity.
+
+### Expected impact
+- D1 filter alone would have blocked all 5 catastrophic losses ($12,181 total).
+- Position size halving caps any single loss at ~$600, making even full-stop-out manageable.
+- Optimizer lock prevents future weight corruption until statistically meaningful sample size.
+
+### No baseline reset
+All changes are guardrails (tightening). Past results stand. Profit factor target remains ≥1.3.
+
+---
+
 Versioning follows [Semantic Versioning](https://semver.org/):
 - **MAJOR** (`X.0.0`): Breaking strategy changes — new guardrails, regime overhaul, graduation criteria reset
 - **MINOR** (`0.X.0`): New features that don't break the existing strategy — new pairs, new signals, new scoring factors

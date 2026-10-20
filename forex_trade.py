@@ -35,9 +35,10 @@ from forex_screener import (
 MAX_OPEN_PAIRS      = 5       # G2
 MAX_JPY_POSITIONS   = 2       # G13: max correlated JPY pairs open at once (USD/JPY, AUD/JPY, CAD/JPY etc all share BOJ risk)
 COOLDOWN_HOURS      = 24      # G14: min hours before re-entering a pair after stop-loss; 48h if 2+ JPY stopped same day
-MAX_RISK_PCT        = 0.02    # G3: 2% equity per trade (JPY pairs capped at 1.5% — see compute_units)
-MAX_JPY_RISK_PCT    = 0.015   # G3b: JPY pairs — higher pip value per unit demands smaller % (v1.3.0)
-MAX_DAILY_LOSS_PCT  = 0.03    # G4: pause if daily loss > 3%
+MAX_RISK_PCT        = 0.01    # G3: 1% equity per trade — halved from 2% (v1.4.0: avg loss was 380K units vs 137K on wins)
+MAX_JPY_RISK_PCT    = 0.0075  # G3b: 0.75% for JPY pairs — halved from 1.5% (v1.4.0)
+MAX_LOSS_DOLLARS    = 600     # G3c: hard cap — no trade can risk more than $600 regardless of formula (v1.4.0)
+MAX_DAILY_LOSS_PCT  = 0.02    # G4: pause if daily loss > 2% — tightened from 3% (v1.4.0)
 STOP_ATR_MULT       = 2.0     # G5: stop = 2.0 × ATR(14) — give trades room to breathe (proven principle)
 TP1_RR              = 1.5     # TP1 at 1.5× risk — lowered from 2.0 to capture profit before retracement (v1.3.0)
 TP2_RR              = 4.0     # TP2 at 4× risk — runner target after BE move (let profits run)
@@ -267,13 +268,16 @@ def compute_units(pair, stop_pips, equity, size_multiplier=1.0):
         # Cross pairs: approximate via 0.0001 USD
         pip_value_per_unit = 0.0001
 
-    # JPY pairs cap at 1.5% risk — their higher ATR produces more dollar exposure per pip (v1.3.0)
+    # JPY pairs cap at 0.75% risk — their higher ATR produces more dollar exposure per pip (v1.4.0)
     if "JPY" in pair:
         risk_amount = equity * MAX_JPY_RISK_PCT * size_multiplier
 
+    # G3c: hard dollar cap — no single trade risks more than MAX_LOSS_DOLLARS (v1.4.0)
+    risk_amount = min(risk_amount, MAX_LOSS_DOLLARS)
+
     units = int(risk_amount / (stop_pips * pip_value_per_unit))
-    # Cap at 500K units (5 standard lots) — prevents runaway on bad data
-    return max(1, min(units, 500_000))
+    # Cap at 200K units (2 standard lots) — tightened from 500K (v1.4.0)
+    return max(1, min(units, 200_000))
 
 
 # ── Place order ────────────────────────────────────────────────────────────────
