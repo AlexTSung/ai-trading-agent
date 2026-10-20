@@ -41,6 +41,61 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.4.1] — 2026-10-20
+
+**PATCH** — run_github.sh GUARDRAIL G1 used the checked-out file's filesystem mtime to measure research staleness, but actions/checkout rewrites that mtime to the run's own start time every job, so AGE_SECONDS always read ~0 and the pipeline silently regressed to one-shot-per-day for a full week (2026-10-14 through 2026-10-20), same bug v1.4.0 was meant to fix. Fixed by reading research.py's own embedded timestamp field instead of stat().
+
+### Why
+v1.4.0 replaced G1's one-shot-per-day lock with a 50-minute rolling interval,
+measured via `stat -c %Y "$LOG_DIR/$DATE.json"`. That works on a long-lived
+local checkout, which is what it was tested against — but every GitHub
+Actions job starts with a fresh `actions/checkout`, which writes the file to
+disk at checkout time. The file's mtime is therefore always "the moment this
+job started," never "the moment research.py actually produced this content."
+`AGE_SECONDS` read ~0 on every single run after the first of the day, so
+`AGE_SECONDS -lt MIN_RERUN_SECONDS` was true every time and G1 skipped —
+functionally identical to the one-shot lock it replaced.
+
+Confirmed directly in job logs: every `morning-pipeline.yml` run from
+2026-10-14 through 2026-10-20, at every hour of the day, logged `GUARDRAIL
+G1: Research ran 0m ago (< 50m) — skipping.` `logs/paper/$DATE.json`'s own
+`timestamp` field shows the only real research run each of those seven days
+landed at ~00:01 AM ET — market closed — exactly the failure mode v1.4.0 was
+written to fix, now caused by the fix's own measurement method instead of by
+the lock it replaced.
+
+**Concrete cost.** The Judge scored real APPROVE-worthy candidates off that
+midnight-stale data on three separate days, and none of them ever got a
+second look during actual market hours: NVDA/MSFT/NU (2026-10-13, documented
+in the v1.4.0 entry above), BAC (2026-10-15), and COP/NFLX/MRVL (2026-10-16).
+`trade-log.csv` shows no equities buy between 2026-10-12 (TGT/ARGX/MRK) and
+this fix landing. Separately, the book's cash reserve also fell to 7.2% by
+2026-10-19 (`logs/paper/2026-10-19.md`), well under the Hard Rule 8 floor —
+on days the Judge did evaluate fresh data, that floor would have blocked new
+buys on its own regardless of this bug, so not every quiet day traces to G1.
+But 10-13/15/16 scored real APPROVEs before the cash floor bound, and those
+specifically were lost to this bug.
+
+### Strategy / CLAUDE.md changes
+- None. No Judge criterion, Hard Rule, or sizing rule changed.
+
+### Code changes
+- `run_github.sh` GUARDRAIL G1: replaced the `stat`-based mtime check with a
+  Python one-liner that reads the `timestamp` field already written inside
+  `logs/paper/$DATE.json` by `research.py`, and compares it to the current
+  US/Eastern time via `zoneinfo`. This value lives in the committed file
+  content, not the filesystem, so a fresh `actions/checkout` cannot reset it.
+  Falls back to treating the file as maximally stale (forcing a re-run, not a
+  skip) if the JSON is missing, malformed, or lacks the field — failing open
+  toward an extra research run costs Actions minutes; failing closed toward a
+  skip costs a trading day, so the asymmetry is deliberate.
+
+### Comparability
+No. This is a correctness fix to v1.4.0's own stated intent (an hourly
+rolling re-run interval) — the code was simply wrong, not the rule. No Judge
+criterion, gate, or sizing rule changed.
+
+
 ## [v1.4.0] — 2026-10-13
 
 **MINOR** — run_github.sh G1 changed from one-shot-per-day lock to a 50-minute rolling re-run interval, and G2's 4:00 PM cutoff removed, so the morning pipeline actually re-runs research/judge/trade hourly under the new external 24/7 cron-job.org trigger instead of locking the whole day to whichever trigger landed first (which on 2026-10-13 was 12:01 AM ET, market closed).

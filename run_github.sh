@@ -64,11 +64,34 @@ cd "$AGENT_DIR"
 # re-running the pipeline hourly cannot re-buy a position it already opened
 # earlier the same day. It only changes how often stale-but-cached research
 # gets refreshed.
+#
+# GUARDRAIL G1 BUG, found 2026-10-20: the first cut of this used the file's
+# filesystem mtime (`stat -c %Y`) as "when research last ran." On GitHub
+# Actions every job does a fresh `actions/checkout`, which writes the file to
+# disk at checkout time — so its mtime is always "now," not whenever the
+# content was actually produced, and AGE_SECONDS always read ~0. Every run for
+# a full week (2026-10-14 through 2026-10-20) logged "GUARDRAIL G1: Research
+# ran 0m ago (< 50m) — skipping," so the pipeline was still landing exactly
+# once a day, at whichever hourly trigger first ran after midnight ET, same
+# as the one-shot lock this was supposed to replace. Confirmed concrete cost:
+# Judge APPROVEd NVDA/MSFT/NU (10-13), BAC (10-15), and COP/NFLX/MRVL (10-16)
+# off midnight-stale data, and none of them ever got a second look during
+# actual market hours that day — trade.py never got a chance to execute them.
+# Fixed by reading the "last ran" timestamp out of the JSON content itself
+# (research.py always writes a `timestamp` field, in US/Eastern, independent
+# of the filesystem), which survives a checkout untouched because it's data,
+# not a stat() call.
 MIN_RERUN_SECONDS=$((50 * 60))
 if [ -f "$LOG_DIR/$DATE.json" ]; then
-  LAST_RUN_EPOCH=$(stat -c %Y "$LOG_DIR/$DATE.json" 2>/dev/null || stat -f %m "$LOG_DIR/$DATE.json")
-  NOW_EPOCH=$(date +%s)
-  AGE_SECONDS=$((NOW_EPOCH - LAST_RUN_EPOCH))
+  AGE_SECONDS=$(python3 -c "
+import json
+from datetime import datetime
+from zoneinfo import ZoneInfo
+with open('$LOG_DIR/$DATE.json') as f:
+    ts = datetime.fromisoformat(json.load(f)['timestamp'])
+now = datetime.now(ZoneInfo('America/New_York'))
+print(int((now - ts).total_seconds()))
+" 2>/dev/null) || AGE_SECONDS=999999
   if [ "$AGE_SECONDS" -lt "$MIN_RERUN_SECONDS" ]; then
     echo "GUARDRAIL G1: Research ran $((AGE_SECONDS / 60))m ago (< 50m) — skipping."
     exit 0
