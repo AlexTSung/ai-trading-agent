@@ -1,16 +1,17 @@
 {
   "agent_version": "1.4.2",
-  "timestamp": "2026-10-20T16:01:43.208828-04:00",
+  "timestamp": "2026-10-20T17:01:19.863927-04:00",
   "date": "2026-10-20",
   "approved": [],
   "held": [
     "MSFT",
     "ARGX",
     "TGT",
+    "SPCX",
+    "IREN",
     "SMCI",
-    "PFE",
-    "MU",
-    "CHEF"
+    "NFLX",
+    "MU"
   ],
   "vetoed": [
     "NVDA",
@@ -23,15 +24,11 @@
     "MRK",
     "COP",
     "DT",
-    "SCHD",
-    "SRPT",
-    "DIS",
-    "HELP",
-    "SPCX",
-    "NFLX",
-    "GM",
+    "SNAP",
+    "DELL",
     "NWGL",
-    "BITO"
+    "BITO",
+    "PRF"
   ],
   "scores": {
     "NVDA": {
@@ -128,8 +125,8 @@
           "note": "STRONG_SELL \u2014 price $248.45 below MA50 $255.54"
         },
         "news": {
-          "score": 0.0,
-          "note": "NEGATIVE \u2014 2 bearish signals in recent headlines"
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
         },
         "macro": {
           "score": 0.0,
@@ -424,10 +421,147 @@
       "rationale": "Technical: WEAK_BUY \u2014 MA20 $161.15 > MA50 $150.10, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02. Portfolio: Already holding TGT \u2014 price above entry, avg-down not warranted. Volatility: VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $70B; Profitable; 11 analyst buy ratings. Source: watchlist | Gate: 8.0.",
       "_gate_used": 8.0
     },
+    "SNAP": {
+      "symbol": "SNAP",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: price $5.83 is 6.2% above MA20 $5.49 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $5.83 is 6.2% above MA20 $5.49 (limit 3%) \u2014 do not chase"
+      },
+      "_gate_used": 7.0
+    },
+    "SPCX": {
+      "symbol": "SPCX",
+      "recommendation": "HOLD",
+      "score": 7.25,
+      "approval_gate": 8.5,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 30 round trips)",
+          "Win rate 95% CI on 30 trips: 5%\u201330%",
+          "CONFIDENT tier \u2014 fitted on 30 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 30,
+        "band": 0.15
+      },
+      "vix": 18.44,
+      "is_discovery": true,
+      "is_speculative": true,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "2.0/2.0",
+        "news": "1.0/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "1.5/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "1.75/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $143.25 > MA50 $134.46, price $143.53 above both [capped 2.5\u21922.0 at weight 2.0]"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Adequate cash reserve 25%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 1.75,
+          "note": "Mega-cap $1948B; Unprofitable \u2014 burning cash; 22 analyst buy ratings \u2014 strong institutional coverage"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $143.25 > MA50 $134.46, price $143.53 above both [capped 2.5\u21922.0 at weight 2.0]. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02. Portfolio: Adequate cash reserve 25%. Volatility: VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $1948B; Unprofitable \u2014 burning cash; 22 analyst buy ratings \u2014 strong institutional coverage. Source: discovery | Gate: 8.5.",
+      "_gate_used": 8.5
+    },
+    "IREN": {
+      "symbol": "IREN",
+      "recommendation": "HOLD",
+      "score": 6.35,
+      "approval_gate": 8.5,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 30 round trips)",
+          "Win rate 95% CI on 30 trips: 5%\u201330%",
+          "CONFIDENT tier \u2014 fitted on 30 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 30,
+        "band": 0.15
+      },
+      "vix": 18.44,
+      "is_discovery": true,
+      "is_speculative": true,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "2.0/2.0",
+        "news": "1.0/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "1.5/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "0.85/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $41.57 > MA50 $40.22, price $41.59 above both [capped 2.5\u21922.0 at weight 2.0]"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Adequate cash reserve 25%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.85,
+          "note": "Large-cap $10B; Unprofitable \u2014 burning cash; 13 analyst buy ratings; Short float 21.34% \u2014 heavily shorted, risk of squeeze or continued decline"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $41.57 > MA50 $40.22, price $41.59 above both [capped 2.5\u21922.0 at weight 2.0]. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02. Portfolio: Adequate cash reserve 25%. Volatility: VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $10B; Unprofitable \u2014 burning cash; 13 analyst buy ratings; Short float 21.34% \u2014 heavily shorted, risk of squeeze or continued decline. Source: discovery | Gate: 8.5.",
+      "_gate_used": 8.5
+    },
     "SMCI": {
       "symbol": "SMCI",
       "recommendation": "HOLD",
-      "score": 6.5,
+      "score": 6.77,
       "approval_gate": 8.5,
       "size_multiplier": 1.0,
       "macro_regime": "RISK_OFF",
@@ -452,7 +586,7 @@
       "avg_down_candidate": false,
       "score_breakdown": {
         "technical": "1.5/2.0",
-        "news": "1.0/1.5",
+        "news": "1.27/1.5",
         "macro": "0.0/1.0",
         "portfolio": "1.5/2.0",
         "volatility": "1.0/1.0",
@@ -464,8 +598,8 @@
           "note": "WEAK_BUY \u2014 MA20 $37.59 > MA50 $32.88, price between MAs"
         },
         "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
+          "score": 1.27,
+          "note": "POSITIVE \u2014 3 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]"
         },
         "macro": {
           "score": 0.0,
@@ -484,192 +618,17 @@
           "note": "Large-cap $21B; Profitable; Short float 14.82% \u2014 elevated short interest"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $37.59 > MA50 $32.88, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02. Portfolio: Adequate cash reserve 25%. Volatility: VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $21B; Profitable; Short float 14.82% \u2014 elevated short interest. Source: discovery | Gate: 8.5.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $37.59 > MA50 $32.88, price between MAs. News: POSITIVE \u2014 3 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02. Portfolio: Adequate cash reserve 25%. Volatility: VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $21B; Profitable; Short float 14.82% \u2014 elevated short interest. Source: discovery | Gate: 8.5.",
       "_gate_used": 8.5
     },
-    "SCHD": {
-      "symbol": "SCHD",
-      "recommendation": "VETO",
-      "score": 5.0,
-      "approval_gate": 8.5,
-      "is_discovery": true,
-      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
-      "criteria": {
-        "technical": {
-          "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $34.72 > MA50 $33.88, price between MAs"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "Adequate cash reserve 25%"
-        },
-        "volatility": {
-          "score": 1.0,
-          "note": "VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
-        },
-        "quality": {
-          "score": 0.0,
-          "note": "Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
-          "veto": true
-        }
-      },
-      "_gate_used": 8.5
-    },
-    "PFE": {
-      "symbol": "PFE",
-      "recommendation": "HOLD",
-      "score": 7.15,
-      "approval_gate": 8.5,
-      "size_multiplier": 1.0,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 30 round trips)",
-          "Win rate 95% CI on 30 trips: 5%\u201330%",
-          "CONFIDENT tier \u2014 fitted on 30 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 30,
-        "band": 0.15
-      },
-      "vix": 18.44,
-      "is_discovery": true,
-      "is_speculative": true,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "1.5/2.0",
-        "news": "1.0/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "1.5/2.0",
-        "volatility": "1.0/1.0",
-        "quality": "2.15/2.5"
-      },
-      "criteria": {
-        "technical": {
-          "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $28.09 > MA50 $26.41, price between MAs"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "Adequate cash reserve 25%"
-        },
-        "volatility": {
-          "score": 1.0,
-          "note": "VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
-        },
-        "quality": {
-          "score": 2.15,
-          "note": "Mega-cap $172B; Profitable; 8 analyst buy ratings"
-        }
-      },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $28.09 > MA50 $26.41, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02. Portfolio: Adequate cash reserve 25%. Volatility: VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $172B; Profitable; 8 analyst buy ratings. Source: discovery | Gate: 8.5.",
-      "_gate_used": 8.5
-    },
-    "SRPT": {
-      "symbol": "SRPT",
-      "recommendation": "VETO",
-      "score": 4.65,
-      "approval_gate": 8.5,
-      "is_discovery": true,
-      "rationale": "Discovery quality veto: scored 0.15/2.5 on quality (minimum 0.5). Mid-cap $2.0B; Unprofitable \u2014 burning cash; 7 analyst buy ratings; Short float 25.85% \u2014 heavily shorted, risk of squeeze or continued decline",
-      "criteria": {
-        "technical": {
-          "score": 2.0,
-          "note": "STRONG_BUY \u2014 MA20 $20.57 > MA50 $18.55, price $20.73 above both [capped 3.0\u21922.0 at weight 2.0]"
-        },
-        "news": {
-          "score": 0.0,
-          "note": "NEGATIVE \u2014 2 bearish signals in recent headlines"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "Adequate cash reserve 25%"
-        },
-        "volatility": {
-          "score": 1.0,
-          "note": "VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
-        },
-        "quality": {
-          "score": 0.15,
-          "note": "Mid-cap $2.0B; Unprofitable \u2014 burning cash; 7 analyst buy ratings; Short float 25.85% \u2014 heavily shorted, risk of squeeze or continued decline",
-          "veto": true
-        }
-      },
-      "_gate_used": 8.5
-    },
-    "DIS": {
-      "symbol": "DIS",
+    "DELL": {
+      "symbol": "DELL",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for DIS \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
-      },
-      "_gate_used": 7.0
-    },
-    "HELP": {
-      "symbol": "HELP",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: price $13.09 is 3.7% above MA20 $12.62 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $13.09 is 3.7% above MA20 $12.62 (limit 3%) \u2014 do not chase"
-      },
-      "_gate_used": 7.0
-    },
-    "SPCX": {
-      "symbol": "SPCX",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for SPCX \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
-      },
-      "_gate_used": 7.0
-    },
-    "NFLX": {
-      "symbol": "NFLX",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NFLX \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
-      },
-      "_gate_used": 7.0
-    },
-    "GM": {
-      "symbol": "GM",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for GM \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
+        "note": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
@@ -717,6 +676,69 @@
           "veto": true
         }
       },
+      "_gate_used": 8.5
+    },
+    "NFLX": {
+      "symbol": "NFLX",
+      "recommendation": "HOLD",
+      "score": 7.0,
+      "approval_gate": 8.5,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 30 round trips)",
+          "Win rate 95% CI on 30 trips: 5%\u201330%",
+          "CONFIDENT tier \u2014 fitted on 30 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 30,
+        "band": 0.15
+      },
+      "vix": 18.44,
+      "is_discovery": true,
+      "is_speculative": true,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "1.5/2.0",
+        "news": "0.5/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "1.5/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "2.5/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $79.66 > MA50 $75.80, price between MAs"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Adequate cash reserve 25%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 2.5,
+          "note": "Mega-cap $286B; Profitable; 28 analyst buy ratings \u2014 strong institutional coverage"
+        }
+      },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $79.66 > MA50 $75.80, price between MAs. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02. Portfolio: Adequate cash reserve 25%. Volatility: VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $286B; Profitable; 28 analyst buy ratings \u2014 strong institutional coverage. Source: discovery | Gate: 8.5.",
       "_gate_used": 8.5
     },
     "MU": {
@@ -782,48 +804,21 @@
       "rationale": "Technical: WEAK_BUY \u2014 MA20 $955.74 > MA50 $926.24, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02. Portfolio: Adequate cash reserve 25%. Volatility: VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $1049B; Zero analyst buy coverage on a discovery stock. Source: discovery | Gate: 8.5.",
       "_gate_used": 8.5
     },
-    "CHEF": {
-      "symbol": "CHEF",
-      "recommendation": "HOLD",
-      "score": 6.42,
+    "PRF": {
+      "symbol": "PRF",
+      "recommendation": "VETO",
+      "score": 5.0,
       "approval_gate": 8.5,
-      "size_multiplier": 1.0,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 30 round trips)",
-          "Win rate 95% CI on 30 trips: 5%\u201330%",
-          "CONFIDENT tier \u2014 fitted on 30 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 30,
-        "band": 0.15
-      },
-      "vix": 18.44,
       "is_discovery": true,
-      "is_speculative": true,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "1.5/2.0",
-        "news": "1.27/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "1.5/2.0",
-        "volatility": "1.0/1.0",
-        "quality": "1.15/2.5"
-      },
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
       "criteria": {
         "technical": {
           "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $111.29 > MA50 $106.40, price between MAs"
+          "note": "WEAK_BUY \u2014 MA20 $56.02 > MA50 $55.42, price between MAs"
         },
         "news": {
-          "score": 1.27,
-          "note": "POSITIVE \u2014 5 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]"
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
         },
         "macro": {
           "score": 0.0,
@@ -838,11 +833,11 @@
           "note": "VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
         },
         "quality": {
-          "score": 1.15,
-          "note": "Mid-cap $4.5B; Profitable; 7 analyst buy ratings; Short float 13.04% \u2014 elevated short interest"
+          "score": 0.0,
+          "note": "Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+          "veto": true
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $111.29 > MA50 $106.40, price between MAs. News: POSITIVE \u2014 5 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $765.30 >= MA50 $759.02. Portfolio: Adequate cash reserve 25%. Volatility: VIX 18.4 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mid-cap $4.5B; Profitable; 7 analyst buy ratings; Short float 13.04% \u2014 elevated short interest. Source: discovery | Gate: 8.5.",
       "_gate_used": 8.5
     }
   }
