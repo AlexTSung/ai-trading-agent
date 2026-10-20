@@ -104,4 +104,7 @@ jobs:
         with:
           name: midday-log-${{ github.run_id }}
           path: logs/paper/
-          retention-days: 30
+          # See morning-pipeline.yml's comment on this same setting — 30-day
+          # retention across hourly runs on all 4 equities workflows exhausted
+          # the repo's Actions artifact storage quota on 2026-10-20.
+          retention-days: 1

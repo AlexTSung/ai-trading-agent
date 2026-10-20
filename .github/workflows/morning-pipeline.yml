@@ -139,4 +139,12 @@ jobs:
         with:
           name: morning-log-${{ github.run_id }}
           path: logs/paper/
-          retention-days: 30
+          # 30 days × hourly runs across 4 equities workflows exhausted the
+          # repo's Actions artifact storage quota on 2026-10-20 (every run
+          # from ~5 AM ET onward that day failed at this step with "Artifact
+          # storage quota has been hit" — the actual pipeline and git push
+          # above still succeeded; only this cosmetic upload failed, but it
+          # marked the whole job red). The artifact is redundant with
+          # logs/paper/ already being committed to git by the step above, so
+          # it only needs to survive long enough for same-day debugging.
+          retention-days: 1

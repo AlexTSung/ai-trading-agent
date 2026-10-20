@@ -41,6 +41,49 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.4.2] — 2026-10-20
+
+**PATCH** — GitHub Actions artifact storage quota was exhausted by 30-day retention on hourly log-artifact uploads across 4 equities workflows, which started marking every run 'failure' from ~5 AM ET on 2026-10-20 at the upload-artifact step (the actual pipeline logic and git commit/push in every affected run had already succeeded — this was a cosmetic/monitoring-reliability bug, not a trading-correctness one). Fixed by dropping retention-days to 1 on all 4 equities workflows' log-artifact uploads, since the same content is already committed to git by the preceding step and doesn't need a second, redundant 30-day copy; existing backlog of ~1388 old artifacts cleared via the Actions API to recover quota immediately rather than waiting weeks for them to individually expire.
+
+### Why
+Found while investigating a user-reported check-in: `options-pipeline.yml` and
+`morning-pipeline.yml` runs both showed red "failure" starting at the
+2026-10-20T09:00 UTC (5:00 AM ET) trigger and on every run since. Job logs
+showed the actual cause was the *last* step, `actions/upload-artifact@v5`:
+`##[error]Failed to CreateArtifact: Artifact storage quota has been hit.`
+Every step before it — installing deps, running the pipeline script, `git
+commit`/`git push` of `logs/paper/` or `logs/options/` — had already
+succeeded. So no research, judge, trade, or options decision was lost; the
+quota hit only broke the redundant post-hoc log backup and, as a side
+effect, painted every run red in the Actions UI going forward.
+
+Root cause: hourly `workflow_dispatch` triggers (per the external cron
+cadence documented in CLAUDE.md's Daily Schedule) across 4 equities
+workflows, each uploading a fresh `retention-days: 30` artifact of its whole
+log directory on every run, accumulated 1388 artifacts (~2.8 GB) over about
+a week — enough to exceed this private repo's Actions storage quota.
+
+### Strategy / CLAUDE.md changes
+- None. This is a CI/monitoring fix, not a change to any trading criterion,
+  Hard Rule, or Judge/executor behavior.
+
+### Code changes
+- `morning-pipeline.yml`, `midday-pipeline.yml`, `eod-pipeline.yml`,
+  `options-pipeline.yml`: `retention-days` on the log-artifact upload step
+  dropped from 30 to 1. The artifact is a convenience copy for same-day
+  debugging; `logs/paper/` and `logs/options/` are already committed to git
+  by the step immediately before it, so nothing is lost by not also keeping
+  a month of redundant zip copies.
+- Cleared the existing backlog of ~1388 artifacts via
+  `DELETE /repos/{owner}/{repo}/actions/artifacts/{id}` so quota recovers
+  immediately rather than waiting for each artifact's original 30-day window
+  to lapse individually (which would have taken until mid-November for the
+  oldest ones).
+
+### Comparability
+No. Pure CI/ops change — no Judge criterion, gate, or sizing rule touched.
+
+
 ## [v1.4.1] — 2026-10-20
 
 **PATCH** — run_github.sh GUARDRAIL G1 used the checked-out file's filesystem mtime to measure research staleness, but actions/checkout rewrites that mtime to the run's own start time every job, so AGE_SECONDS always read ~0 and the pipeline silently regressed to one-shot-per-day for a full week (2026-10-14 through 2026-10-20), same bug v1.4.0 was meant to fix. Fixed by reading research.py's own embedded timestamp field instead of stat().

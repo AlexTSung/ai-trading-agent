@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v1.4.1
+> **Version:** v1.4.2
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
