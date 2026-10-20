@@ -1,98 +1,98 @@
 {
-  "timestamp": "2026-10-20T04:00:23.607801",
+  "timestamp": "2026-10-20T17:00:19.370758",
   "run_type": "morning_intelligence",
   "fear_greed": {
     "source": "fred_vix_proxy",
-    "vix": 19.99,
-    "vix_date": "2026-10-16",
+    "vix": 18.44,
+    "vix_date": "2026-10-19",
     "score": 65,
     "rating": "Greed",
     "signal": "GREED \u2014 risk-on, watch exits",
-    "timestamp": "2026-10-20T04:00:23.844798"
+    "timestamp": "2026-10-20T17:00:19.768456"
   },
   "vix": {
     "symbol": "VIXY",
-    "price": 17.51,
+    "price": 16.85,
     "note": "VIXY proxy for VIX"
   },
   "global_markets": {
-    "timestamp": "2026-10-20T04:00:24.145497",
+    "timestamp": "2026-10-20T17:00:20.529759",
     "source": "global_etfs",
     "markets": {
       "EWJ": {
         "description": "Japan (Nikkei proxy)",
-        "prev_close": 94.87,
-        "today": 95,
-        "change_pct": 0.14,
-        "signal": "FLAT"
+        "prev_close": 95,
+        "today": 95.48,
+        "change_pct": 0.51,
+        "signal": "UP"
       },
       "EWG": {
         "description": "Germany (DAX proxy)",
-        "prev_close": 41.56,
-        "today": 41.02,
-        "change_pct": -1.3,
-        "signal": "DOWN"
+        "prev_close": 41.02,
+        "today": 41.39,
+        "change_pct": 0.9,
+        "signal": "UP"
       },
       "FXI": {
         "description": "China (HSI/CSI proxy)",
-        "prev_close": 33.85,
-        "today": 33.55,
-        "change_pct": -0.9,
-        "signal": "DOWN"
+        "prev_close": 33.55,
+        "today": 33.53,
+        "change_pct": -0.04,
+        "signal": "FLAT"
       },
       "EWU": {
         "description": "UK (FTSE proxy)",
-        "prev_close": 48.02,
-        "today": 47.34,
-        "change_pct": -1.43,
-        "signal": "DOWN"
+        "prev_close": 47.34,
+        "today": 47.74,
+        "change_pct": 0.86,
+        "signal": "UP"
       },
       "EWZ": {
         "description": "Brazil (Ibovespa proxy)",
-        "prev_close": 41.84,
-        "today": 41.95,
-        "change_pct": 0.26,
-        "signal": "FLAT"
+        "prev_close": 41.95,
+        "today": 43.13,
+        "change_pct": 2.81,
+        "signal": "UP"
       },
       "EEM": {
         "description": "Emerging markets",
-        "prev_close": 62.85,
+        "prev_close": 63.32,
         "today": 63.32,
-        "change_pct": 0.75,
-        "signal": "UP"
+        "change_pct": 0.0,
+        "signal": "FLAT"
       },
       "GLD": {
         "description": "Gold",
-        "prev_close": 382.04,
-        "today": 379.65,
-        "change_pct": -0.63,
-        "signal": "DOWN"
+        "prev_close": 379.65,
+        "today": 377.79,
+        "change_pct": -0.49,
+        "signal": "FLAT"
       },
       "USO": {
         "description": "Oil",
-        "prev_close": 161.75,
-        "today": 160.85,
-        "change_pct": -0.56,
-        "signal": "DOWN"
+        "prev_close": 160.85,
+        "today": 160.4,
+        "change_pct": -0.28,
+        "signal": "FLAT"
       },
       "TLT": {
         "description": "US 20yr Treasuries (rates proxy)",
-        "prev_close": 80.03,
-        "today": 79.46,
-        "change_pct": -0.72,
-        "signal": "DOWN"
+        "prev_close": 79.46,
+        "today": 79.88,
+        "change_pct": 0.53,
+        "signal": "UP"
       },
       "UUP": {
         "description": "US Dollar index",
-        "prev_close": 28.93,
-        "today": 29.0,
-        "change_pct": 0.21,
+        "prev_close": 29.0,
+        "today": 28.91,
+        "change_pct": -0.29,
         "signal": "FLAT"
       }
     }
   },
   "macro": {
-    "timestamp": "2026-10-20T04:00:24.920277",
+    "timestamp": "2026-10-20T17:00:21.869108",
     "source": "fred_csv",
     "macro": {
       "FEDFUNDS": {
@@ -127,259 +127,271 @@
       },
       "VIXCLS": {
         "label": "VIX Closing Price",
-        "value": "19.99",
-        "date": "2026-10-16",
+        "value": "18.44",
+        "date": "2026-10-19",
         "note": "Elevated \u2014 use standard sizing"
       }
     }
   },
   "market_discovery": {
-    "timestamp": "2026-10-20T04:00:25.199035",
+    "timestamp": "2026-10-20T17:00:22.320109",
     "source": "alpaca_discovery",
     "discovery": {
       "most_active": [
         {
+          "symbol": "NWGL",
+          "volume": 376683987,
+          "trade_count": 422031
+        },
+        {
+          "symbol": "FRTT",
+          "volume": 197838110,
+          "trade_count": 392131
+        },
+        {
+          "symbol": "PRSO",
+          "volume": 193187495,
+          "trade_count": 282112
+        },
+        {
           "symbol": "WFF",
-          "volume": 200130491,
-          "trade_count": 139947
+          "volume": 162895212,
+          "trade_count": 142603
         },
         {
-          "symbol": "TWG",
-          "volume": 195412862,
-          "trade_count": 109622
-        },
-        {
-          "symbol": "SAFX",
-          "volume": 185631302,
-          "trade_count": 186100
-        },
-        {
-          "symbol": "EYPT",
-          "volume": 184356403,
-          "trade_count": 269397
-        },
-        {
-          "symbol": "CHOW",
-          "volume": 148283651,
-          "trade_count": 338515
-        },
-        {
-          "symbol": "WORX",
-          "volume": 125947402,
-          "trade_count": 850631
+          "symbol": "SHFS",
+          "volume": 107509385,
+          "trade_count": 102805
         },
         {
           "symbol": "SDST",
-          "volume": 124242875,
-          "trade_count": 44370
-        },
-        {
-          "symbol": "NWGL",
-          "volume": 123840702,
-          "trade_count": 119527
-        },
-        {
-          "symbol": "NVD",
-          "volume": 117263538,
-          "trade_count": 23736
-        },
-        {
-          "symbol": "INTC",
-          "volume": 101636962,
-          "trade_count": 766234
-        },
-        {
-          "symbol": "CRWV",
-          "volume": 101067430,
-          "trade_count": 724757
-        },
-        {
-          "symbol": "NVDA",
-          "volume": 99388043,
-          "trade_count": 1715522
-        },
-        {
-          "symbol": "DKI",
-          "volume": 96331248,
-          "trade_count": 72685
+          "volume": 102439381,
+          "trade_count": 30925
         },
         {
           "symbol": "SOXL",
-          "volume": 95626168,
-          "trade_count": 1238193
+          "volume": 72945588,
+          "trade_count": 1000311
         },
         {
-          "symbol": "CLF",
-          "volume": 88487607,
-          "trade_count": 328505
+          "symbol": "NVD",
+          "volume": 71789866,
+          "trade_count": 15687
         },
         {
-          "symbol": "SXTC",
-          "volume": 88028097,
-          "trade_count": 47352
+          "symbol": "VVOS",
+          "volume": 69546004,
+          "trade_count": 80073
         },
         {
-          "symbol": "MASK",
-          "volume": 76889995,
-          "trade_count": 223301
+          "symbol": "WORX",
+          "volume": 69107696,
+          "trade_count": 526112
+        },
+        {
+          "symbol": "CRWV",
+          "volume": 68915673,
+          "trade_count": 502966
+        },
+        {
+          "symbol": "GCDT",
+          "volume": 62311729,
+          "trade_count": 145564
         },
         {
           "symbol": "SOXS",
-          "volume": 76122128,
-          "trade_count": 452550
+          "volume": 59603404,
+          "trade_count": 368573
+        },
+        {
+          "symbol": "BITO",
+          "volume": 59200459,
+          "trade_count": 25361
+        },
+        {
+          "symbol": "INTC",
+          "volume": 55534050,
+          "trade_count": 507976
+        },
+        {
+          "symbol": "BRZE",
+          "volume": 54027195,
+          "trade_count": 119592
+        },
+        {
+          "symbol": "HODO",
+          "volume": 53783841,
+          "trade_count": 35877
         },
         {
           "symbol": "SPCX",
-          "volume": 74118703,
-          "trade_count": 920710
+          "volume": 50146015,
+          "trade_count": 629111
         },
         {
-          "symbol": "SLN",
-          "volume": 71969240,
-          "trade_count": 104473
+          "symbol": "MSTZ",
+          "volume": 49919744,
+          "trade_count": 25000
+        },
+        {
+          "symbol": "NVDA",
+          "volume": 46586110,
+          "trade_count": 1225672
         }
       ],
       "top_gainers": [],
       "top_losers": [
         {
-          "symbol": "INLF",
-          "change_pct": -87.53,
-          "price": 0.318
+          "symbol": "SDSTW",
+          "change_pct": -58.94,
+          "price": 0.0278
         },
         {
-          "symbol": "EYPT",
-          "change_pct": -85.28,
-          "price": 0.44
+          "symbol": "CJMB",
+          "change_pct": -55.57,
+          "price": 0.853
         },
         {
-          "symbol": "ASTLW",
-          "change_pct": -75,
-          "price": 0.0002
+          "symbol": "BKHAU",
+          "change_pct": -49.48,
+          "price": 4.405
         },
         {
-          "symbol": "BCAT.RT",
-          "change_pct": -71.43,
-          "price": 0.0002
+          "symbol": "GME.WS",
+          "change_pct": -44.76,
+          "price": 0.79
         },
         {
-          "symbol": "DFSCW",
-          "change_pct": -55.08,
-          "price": 0.0106
+          "symbol": "AERTW",
+          "change_pct": -42.42,
+          "price": 0.0114
         },
         {
-          "symbol": "NWGL",
-          "change_pct": -49.15,
-          "price": 0.119
+          "symbol": "ALPXW",
+          "change_pct": -41.76,
+          "price": 0.035
         },
         {
-          "symbol": "LPAAW",
-          "change_pct": -47.39,
-          "price": 0.0252
+          "symbol": "SXTC",
+          "change_pct": -41.1,
+          "price": 0.0655
         },
         {
-          "symbol": "RUBI",
-          "change_pct": -45.32,
-          "price": 0.2138
+          "symbol": "NXGLW",
+          "change_pct": -40.83,
+          "price": 0.0071
         },
         {
-          "symbol": "DAICW",
-          "change_pct": -42.5,
-          "price": 0.0069
+          "symbol": "CYCUW",
+          "change_pct": -39.89,
+          "price": 0.0211
         },
         {
-          "symbol": "CLRO",
-          "change_pct": -42.47,
-          "price": 1.72
+          "symbol": "MNY",
+          "change_pct": -37.97,
+          "price": 0.3784
         },
         {
-          "symbol": "SGRX",
-          "change_pct": -40.82,
-          "price": 0.514
+          "symbol": "GCDT",
+          "change_pct": -34.05,
+          "price": 0.184
         },
         {
-          "symbol": "FLDDW",
-          "change_pct": -40.21,
-          "price": 0.0525
-        },
-        {
-          "symbol": "TAVIR",
-          "change_pct": -39.71,
-          "price": 0.0451
-        },
-        {
-          "symbol": "CHOW",
-          "change_pct": -37.25,
-          "price": 0.3317
-        },
-        {
-          "symbol": "SHFS",
-          "change_pct": -34.68,
-          "price": 0.094
-        },
-        {
-          "symbol": "BFRGW",
-          "change_pct": -33.46,
-          "price": 0.0865
-        },
-        {
-          "symbol": "LTRYW",
+          "symbol": "RAIL",
           "change_pct": -33.33,
-          "price": 0.0012
+          "price": 3.9
         },
         {
-          "symbol": "XCH",
-          "change_pct": -33.21,
-          "price": 1.74
+          "symbol": "KCHVR",
+          "change_pct": -32.8,
+          "price": 0.0504
         },
         {
-          "symbol": "RBNE",
-          "change_pct": -33.21,
-          "price": 0.521
+          "symbol": "SDST",
+          "change_pct": -32.44,
+          "price": 0.0177
         },
         {
-          "symbol": "CRACW",
-          "change_pct": -33,
-          "price": 0.0201
+          "symbol": "EURKR",
+          "change_pct": -32.24,
+          "price": 0.2701
+        },
+        {
+          "symbol": "INLF",
+          "change_pct": -26.98,
+          "price": 0.2322
+        },
+        {
+          "symbol": "POLA",
+          "change_pct": -26.73,
+          "price": 0.6514
+        },
+        {
+          "symbol": "BWIV.WS",
+          "change_pct": -25.92,
+          "price": 0.1629
+        },
+        {
+          "symbol": "IAUX.WS",
+          "change_pct": -25.35,
+          "price": 0.7764
+        },
+        {
+          "symbol": "IPW",
+          "change_pct": -25.02,
+          "price": 0.288
         }
       ]
     }
   },
   "reddit": {
-    "timestamp": "2026-10-20T04:00:26.487571",
+    "timestamp": "2026-10-20T17:00:23.489067",
     "source": "reddit",
     "tickers": []
   },
   "earnings_watch": {
-    "timestamp": "2026-10-20T04:00:27.644052",
+    "timestamp": "2026-10-20T17:00:25.437502",
     "earnings_watch": [
       {
         "symbol": "AAPL",
-        "headline": "Putin\u2019s Proposed Trump-Xi Summit In China Could Hurt US Stocks Long Term; Meta And Tesla Earnings Ahead",
-        "date": "2026-10-19T15:31:43Z",
+        "headline": "Apple Stock in Focus as iPhone Duo Launch, U.S. Expansion and Earnings Loom",
+        "date": "2026-10-20T13:49:40Z",
         "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
       },
       {
         "symbol": "MSFT",
-        "headline": "Putin\u2019s Proposed Trump-Xi Summit In China Could Hurt US Stocks Long Term; Meta And Tesla Earnings Ahead",
-        "date": "2026-10-19T15:31:43Z",
+        "headline": "Jim Cramer Has a Warning for AI Data Center Investors Ahead of MSFT, GOOGL and AMZN Earnings: \u2018Too Early to Say That the Coast Is Clear\u2019",
+        "date": "2026-10-20T08:31:55Z",
         "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
       },
       {
         "symbol": "NVDA",
-        "headline": "'DeepSeek Working With Huawei Technologies To Shape Design Of Future AI Chips' - The Information",
-        "date": "2026-10-19T16:08:05Z",
+        "headline": "SpaceX Earnings Prediction Market Preview: What Will Elon Musk Say?",
+        "date": "2026-10-20T14:52:46Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "GOOGL",
+        "headline": "Analysts Eye $3 Billion Ad Revenue Surge Ahead of Netflix Earnings",
+        "date": "2026-10-20T14:46:38Z",
+        "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
+      },
+      {
+        "symbol": "AMZN",
+        "headline": "Jim Cramer Has a Warning for AI Data Center Investors Ahead of MSFT, GOOGL and AMZN Earnings: \u2018Too Early to Say That the Coast Is Clear\u2019",
+        "date": "2026-10-20T08:31:55Z",
         "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
       },
       {
         "symbol": "TSLA",
-        "headline": "Tesla Q3 Earnings Preview: Can the Company Reverse Recent EPS, Revenue Misses?",
-        "date": "2026-10-19T20:52:47Z",
+        "headline": "SpaceX Earnings Prediction Market Preview: What Will Elon Musk Say?",
+        "date": "2026-10-20T14:52:46Z",
         "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
       }
     ]
   },
   "insider_activity": {
-    "timestamp": "2026-10-20T04:00:28.423165",
+    "timestamp": "2026-10-20T17:00:26.535996",
     "source": "sec_edgar",
     "insider_filings": [
       {
