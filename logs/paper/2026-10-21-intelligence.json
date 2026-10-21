@@ -1,98 +1,92 @@
 {
-  "timestamp": "2026-10-21T14:00:20.615881",
+  "timestamp": "2026-10-21T15:00:23.007091",
   "run_type": "morning_intelligence",
   "fear_greed": {
-    "source": "fred_vix_proxy",
-    "vix": 17.31,
-    "vix_date": "2026-10-20",
-    "score": 65,
-    "rating": "Greed",
-    "signal": "GREED \u2014 risk-on, watch exits",
-    "timestamp": "2026-10-21T14:00:24.655543"
+    "error": "FRED VIX: no data"
   },
   "vix": {
     "symbol": "VIXY",
-    "price": 16.93,
+    "price": 16.76,
     "note": "VIXY proxy for VIX"
   },
   "global_markets": {
-    "timestamp": "2026-10-21T14:00:24.993466",
+    "timestamp": "2026-10-21T15:00:23.779632",
     "source": "global_etfs",
     "markets": {
       "EWJ": {
         "description": "Japan (Nikkei proxy)",
         "prev_close": 95.43,
-        "today": 95.71,
-        "change_pct": 0.29,
+        "today": 95.56,
+        "change_pct": 0.14,
         "signal": "FLAT"
       },
       "EWG": {
         "description": "Germany (DAX proxy)",
         "prev_close": 41.44,
-        "today": 41.87,
-        "change_pct": 1.04,
+        "today": 41.69,
+        "change_pct": 0.6,
         "signal": "UP"
       },
       "FXI": {
         "description": "China (HSI/CSI proxy)",
         "prev_close": 33.52,
-        "today": 33.01,
-        "change_pct": -1.52,
+        "today": 32.85,
+        "change_pct": -1.98,
         "signal": "DOWN"
       },
       "EWU": {
         "description": "UK (FTSE proxy)",
         "prev_close": 47.74,
-        "today": 47.92,
-        "change_pct": 0.37,
+        "today": 47.74,
+        "change_pct": 0.0,
         "signal": "FLAT"
       },
       "EWZ": {
         "description": "Brazil (Ibovespa proxy)",
         "prev_close": 42.94,
-        "today": 42.79,
-        "change_pct": -0.35,
-        "signal": "FLAT"
+        "today": 42.7,
+        "change_pct": -0.56,
+        "signal": "DOWN"
       },
       "EEM": {
         "description": "Emerging markets",
         "prev_close": 63.33,
         "today": 63.41,
-        "change_pct": 0.12,
+        "change_pct": 0.13,
         "signal": "FLAT"
       },
       "GLD": {
         "description": "Gold",
         "prev_close": 377.68,
-        "today": 378.42,
-        "change_pct": 0.2,
+        "today": 378.4,
+        "change_pct": 0.19,
         "signal": "FLAT"
       },
       "USO": {
         "description": "Oil",
         "prev_close": 160.68,
-        "today": 158.58,
-        "change_pct": -1.31,
-        "signal": "DOWN"
+        "today": 159.88,
+        "change_pct": -0.5,
+        "signal": "FLAT"
       },
       "TLT": {
         "description": "US 20yr Treasuries (rates proxy)",
         "prev_close": 80.12,
-        "today": 80.39,
-        "change_pct": 0.33,
+        "today": 80.15,
+        "change_pct": 0.04,
         "signal": "FLAT"
       },
       "UUP": {
         "description": "US Dollar index",
-        "prev_close": 29.0,
-        "today": 28.91,
-        "change_pct": -0.28,
+        "prev_close": 28.91,
+        "today": 28.94,
+        "change_pct": 0.09,
         "signal": "FLAT"
       }
     }
   },
   "macro": {
-    "timestamp": "2026-10-21T14:00:25.669659",
+    "timestamp": "2026-10-21T15:00:24.609289",
     "source": "fred_csv",
     "macro": {
       "FEDFUNDS": {
@@ -101,142 +95,118 @@
         "date": "2026-09-01",
         "note": ""
       },
-      "CPIAUCSL": {
-        "label": "CPI (inflation)",
-        "value": "336.298",
-        "date": "2026-09-01",
-        "note": "CPI index level 336.298 \u2014 watch YoY % change"
-      },
-      "UNRATE": {
-        "label": "Unemployment Rate",
-        "value": "4.2",
-        "date": "2026-09-01",
-        "note": ""
-      },
-      "T10Y2Y": {
-        "label": "Yield Curve (10yr-2yr spread)",
-        "value": "0.33",
-        "date": "2026-10-20",
-        "note": "Flat curve \u2014 caution"
-      },
       "DGS10": {
         "label": "10-Year Treasury Yield",
         "value": "5.15",
         "date": "2026-10-19",
         "note": ""
-      },
-      "VIXCLS": {
-        "label": "VIX Closing Price",
-        "value": "17.31",
-        "date": "2026-10-20",
-        "note": "LOW VOL \u2014 risk-on, full sizing allowed"
       }
     }
   },
   "market_discovery": {
-    "timestamp": "2026-10-21T14:00:25.982560",
+    "timestamp": "2026-10-21T15:00:25.261560",
     "source": "alpaca_discovery",
     "discovery": {
       "most_active": [
         {
           "symbol": "SHFS",
-          "volume": 319940280,
-          "trade_count": 314724
+          "volume": 368050863,
+          "trade_count": 367072
         },
         {
           "symbol": "SXTC",
-          "volume": 178079623,
-          "trade_count": 110237
+          "volume": 198455562,
+          "trade_count": 122716
         },
         {
           "symbol": "OLOX",
-          "volume": 97128212,
-          "trade_count": 275463
-        },
-        {
-          "symbol": "RBNE",
-          "volume": 65276363,
-          "trade_count": 312267
-        },
-        {
-          "symbol": "WHLR",
-          "volume": 62641648,
-          "trade_count": 189263
+          "volume": 107139644,
+          "trade_count": 302802
         },
         {
           "symbol": "SPCX",
-          "volume": 60105541,
-          "trade_count": 792174
+          "volume": 103265746,
+          "trade_count": 1265953
+        },
+        {
+          "symbol": "RBNE",
+          "volume": 82304582,
+          "trade_count": 358750
+        },
+        {
+          "symbol": "WHLR",
+          "volume": 66750523,
+          "trade_count": 198894
         },
         {
           "symbol": "WFF",
-          "volume": 56419009,
-          "trade_count": 46459
+          "volume": 66086094,
+          "trade_count": 55574
         },
         {
           "symbol": "SDST",
-          "volume": 49744770,
-          "trade_count": 12190
+          "volume": 57757731,
+          "trade_count": 14332
         },
         {
           "symbol": "AMOD",
-          "volume": 40006704,
-          "trade_count": 184147
+          "volume": 49528052,
+          "trade_count": 218836
         },
         {
-          "symbol": "SPHL",
-          "volume": 27326903,
-          "trade_count": 258641
+          "symbol": "SDEV",
+          "volume": 43715836,
+          "trade_count": 121125
         },
         {
           "symbol": "NFLX",
-          "volume": 26810133,
-          "trade_count": 236161
+          "volume": 41776255,
+          "trade_count": 375948
+        },
+        {
+          "symbol": "REED",
+          "volume": 41171157,
+          "trade_count": 78406
         },
         {
           "symbol": "SMCI",
-          "volume": 26735806,
-          "trade_count": 201682
+          "volume": 39937165,
+          "trade_count": 297064
         },
         {
-          "symbol": "RCT",
-          "volume": 24645243,
-          "trade_count": 19632
+          "symbol": "SPHL",
+          "volume": 39233795,
+          "trade_count": 360923
         },
         {
-          "symbol": "SPCH",
-          "volume": 22624517,
-          "trade_count": 65734
+          "symbol": "NVD",
+          "volume": 37731442,
+          "trade_count": 9704
         },
         {
-          "symbol": "DKI",
-          "volume": 22438892,
-          "trade_count": 11182
+          "symbol": "BITO",
+          "volume": 35146049,
+          "trade_count": 15011
         },
         {
           "symbol": "SOXL",
-          "volume": 21821582,
-          "trade_count": 345836
+          "volume": 35054917,
+          "trade_count": 519593
         },
         {
-          "symbol": "KORU",
-          "volume": 20427973,
-          "trade_count": 87394
+          "symbol": "SPCH",
+          "volume": 34772044,
+          "trade_count": 88645
         },
         {
-          "symbol": "TSLL",
-          "volume": 19879489,
-          "trade_count": 37846
+          "symbol": "CRWV",
+          "volume": 33207553,
+          "trade_count": 251319
         },
         {
-          "symbol": "SNXX",
-          "volume": 19748920,
-          "trade_count": 59645
-        },
-        {
-          "symbol": "SOXS",
-          "volume": 19093036,
-          "trade_count": 128711
+          "symbol": "NVDA",
+          "volume": 31784078,
+          "trade_count": 643401
         }
       ],
       "top_gainers": [],
@@ -252,14 +222,19 @@
           "price": 0.0344
         },
         {
+          "symbol": "BEATW",
+          "change_pct": -44.92,
+          "price": 0.013
+        },
+        {
           "symbol": "SWAGW",
           "change_pct": -41.51,
           "price": 0.0031
         },
         {
-          "symbol": "ADSEW",
-          "change_pct": -35.59,
-          "price": 0.1285
+          "symbol": "MKDWW",
+          "change_pct": -36.9,
+          "price": 0.0053
         },
         {
           "symbol": "SLND.WS",
@@ -267,24 +242,44 @@
           "price": 0.0104
         },
         {
-          "symbol": "BEATW",
-          "change_pct": -32.2,
-          "price": 0.016
-        },
-        {
           "symbol": "CJMB",
-          "change_pct": -30.6,
-          "price": 0.458
+          "change_pct": -34.84,
+          "price": 0.43
         },
         {
-          "symbol": "TKNO",
-          "change_pct": -30.18,
-          "price": 5.16
+          "symbol": "WORX",
+          "change_pct": -27.87,
+          "price": 2.64
+        },
+        {
+          "symbol": "SKYAW",
+          "change_pct": -27.55,
+          "price": 0.0405
+        },
+        {
+          "symbol": "PRSO",
+          "change_pct": -27.29,
+          "price": 0.43
         },
         {
           "symbol": "INLF",
-          "change_pct": -27.05,
-          "price": 0.1907
+          "change_pct": -25.48,
+          "price": 0.1948
+        },
+        {
+          "symbol": "TKNO",
+          "change_pct": -25.44,
+          "price": 5.51
+        },
+        {
+          "symbol": "NIVF",
+          "change_pct": -25.17,
+          "price": 0.187
+        },
+        {
+          "symbol": "QUMSR",
+          "change_pct": -25,
+          "price": 0.105
         },
         {
           "symbol": "DUKRW",
@@ -292,9 +287,9 @@
           "price": 0.9001
         },
         {
-          "symbol": "SMCZ",
-          "change_pct": -24.18,
-          "price": 5.08
+          "symbol": "AVEX",
+          "change_pct": -24.34,
+          "price": 10.8501
         },
         {
           "symbol": "CDIOW",
@@ -302,55 +297,30 @@
           "price": 0.0094
         },
         {
-          "symbol": "SNK",
-          "change_pct": -23.19,
-          "price": 11.06
-        },
-        {
-          "symbol": "SPCQ",
-          "change_pct": -22.96,
-          "price": 8.035
-        },
-        {
-          "symbol": "SAIQ",
-          "change_pct": -22.67,
-          "price": 5.2896
-        },
-        {
-          "symbol": "SSPC",
+          "symbol": "BFRGW",
           "change_pct": -22.64,
-          "price": 6.7229
+          "price": 0.0851
         },
         {
-          "symbol": "SPCG",
-          "change_pct": -22.59,
-          "price": 11.55
+          "symbol": "SMCZ",
+          "change_pct": -21.79,
+          "price": 5.24
         },
         {
-          "symbol": "LOFD",
-          "change_pct": -22.22,
-          "price": 4.9
-        },
-        {
-          "symbol": "NIVF",
-          "change_pct": -22.09,
-          "price": 0.1947
-        },
-        {
-          "symbol": "OPTU",
-          "change_pct": -21.08,
-          "price": 0.6564
+          "symbol": "AIIOW",
+          "change_pct": -21.43,
+          "price": 0.0132
         }
       ]
     }
   },
   "reddit": {
-    "timestamp": "2026-10-21T14:00:27.284908",
+    "timestamp": "2026-10-21T15:00:26.595951",
     "source": "reddit",
     "tickers": []
   },
   "earnings_watch": {
-    "timestamp": "2026-10-21T14:00:28.894395",
+    "timestamp": "2026-10-21T15:00:28.076993",
     "earnings_watch": [
       {
         "symbol": "NVDA",
@@ -372,14 +342,14 @@
       },
       {
         "symbol": "TSLA",
-        "headline": "Tesla Earnings Prediction Market Preview: Will Elon Musk Discuss a SpaceX Merger?",
-        "date": "2026-10-21T12:26:45Z",
+        "headline": "Tesla Stock Is Trading Just Under Its 200-Day Average Into Earnings. Here\u2019s What Investors Are Watching",
+        "date": "2026-10-21T14:12:37Z",
         "warning": "EARNINGS ACTIVITY DETECTED \u2014 check before entering position"
       }
     ]
   },
   "insider_activity": {
-    "timestamp": "2026-10-21T14:00:29.709286",
+    "timestamp": "2026-10-21T15:00:28.947625",
     "source": "sec_edgar",
     "insider_filings": [
       {
@@ -432,13 +402,13 @@
       },
       {
         "company": "",
-        "filed": "2026-10-15",
+        "filed": "2026-10-20",
         "form": "4",
         "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
       },
       {
         "company": "",
-        "filed": "2026-10-20",
+        "filed": "2026-10-15",
         "form": "4",
         "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
       },
