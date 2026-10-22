@@ -1,47 +1,101 @@
 {
   "date": "2026-10-22",
-  "timestamp": "2026-10-22T00:01:18.712335",
+  "timestamp": "2026-10-22T01:01:11.800549",
   "source": "StockTwits",
   "max_age_days": 7,
   "top_tickers": [
     {
-      "ticker": "AMPX",
-      "title": "Amprius Technologies Inc",
-      "watchlist_count": 9413,
+      "ticker": "DOGE.X",
+      "title": "Dogecoin",
+      "watchlist_count": 352455,
       "sentiment": "BULLISH",
-      "bull_pct": 70.0,
-      "msg_count": 30,
-      "bullish": 21,
-      "bearish": 0,
-      "momentum": 87.2,
+      "bull_pct": 86.2,
+      "msg_count": 29,
+      "bullish": 25,
+      "bearish": 1,
+      "momentum": 93.3,
       "top_messages": [
         {
-          "id": 667072202,
-          "body": "$AMPX",
+          "id": 667076389,
+          "body": "$DOGE.X",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:57:36Z",
+          "likes": 0,
+          "user": "Gjingxu"
+        },
+        {
+          "id": 667074929,
+          "body": "$DOGE.X \ud83d\ude0e \ud83c\udfb6",
           "sentiment": "Bullish",
-          "created": "2026-10-21T23:39:11Z",
-          "likes": 2,
-          "user": "teeeeer"
+          "created": "2026-10-22T00:28:48Z",
+          "likes": 3,
+          "user": "Ben_Goodnow"
         },
         {
-          "id": 667069788,
-          "body": "$AMPX can this see $10 again?",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:03:01Z",
+          "id": 667074896,
+          "body": "$DOGE.X salsa yes",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:28:11Z",
           "likes": 2,
-          "user": "moneygrabber55"
-        },
-        {
-          "id": 667069770,
-          "body": "$AMPX  the market seems reluctant to let this fade.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:02:43Z",
-          "likes": 2,
-          "user": "topstockalerts"
+          "user": "deadlife"
         }
       ],
       "pump_risk": {
-        "symbol": "AMPX",
+        "symbol": "DOGE.X",
+        "is_pump": true,
+        "has_flags": true,
+        "safe_to_judge": false,
+        "verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE",
+        "vetoes": [
+          "PRICE_UNKNOWN: no usable price for this ticker \u2014 cannot verify the $5.00 floor, so it is rejected rather than assumed safe"
+        ],
+        "flags": [
+          "EXTREME_SENTIMENT: 86% bullish is suspiciously uniform \u2014 organic sentiment rarely exceeds 85%. Requires verified news catalyst.",
+          "SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal before approving. Social buzz without technical confirmation = pump risk."
+        ],
+        "price_data": {}
+      },
+      "safe_to_judge": false,
+      "pump_verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE"
+    },
+    {
+      "ticker": "GME",
+      "title": "GameStop Corp",
+      "watchlist_count": 308295,
+      "sentiment": "BULLISH",
+      "bull_pct": 66.7,
+      "msg_count": 30,
+      "bullish": 20,
+      "bearish": 0,
+      "momentum": 88.0,
+      "top_messages": [
+        {
+          "id": 667076154,
+          "body": "$GME",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:52:29Z",
+          "likes": 2,
+          "user": "Recessionproof"
+        },
+        {
+          "id": 667075863,
+          "body": "$GME closed at 26.29, so 28.30 has to clear before 32 matters. With warrants expiring October 30, a spike will not do it. It has to hold.",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:46:35Z",
+          "likes": 0,
+          "user": "TopOptionAlert"
+        },
+        {
+          "id": 667075834,
+          "body": "$GME so what happens to the free warrant we got",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:45:57Z",
+          "likes": 1,
+          "user": "matmasr"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "GME",
         "is_pump": false,
         "has_flags": true,
         "safe_to_judge": true,
@@ -51,13 +105,13 @@
           "SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal before approving. Social buzz without technical confirmation = pump risk."
         ],
         "price_data": {
-          "current_price": 9.42,
-          "today_open": 7.83,
+          "current_price": 10000.0,
+          "today_open": 26.39,
           "prev_close": 0,
           "intraday_move": 0,
           "intraday_pct": 0,
           "avg_volume_20d": 0,
-          "today_volume": 6253718,
+          "today_volume": 6489150,
           "volume_ratio": 0
         }
       },
@@ -65,165 +119,122 @@
       "pump_verdict": "\u26a0\ufe0f  FLAGGED \u2014 Judge must verify MA + news before approving"
     },
     {
-      "ticker": "NLST",
-      "title": "Netlist Inc",
-      "watchlist_count": 28086,
-      "sentiment": "BULLISH",
-      "bull_pct": 63.3,
-      "msg_count": 30,
-      "bullish": 19,
-      "bearish": 0,
-      "momentum": 86.9,
-      "top_messages": [
-        {
-          "id": 667073447,
-          "body": "$NLST anyway for Tesla to work with Netlist, it would blow up",
-          "sentiment": "Bullish",
-          "created": "2026-10-22T00:00:22Z",
-          "likes": 0,
-          "user": "MolonLab3"
-        },
-        {
-          "id": 667073087,
-          "body": "$NLST ~ Googly literally has NO LEGS TO STAND ON! My patience is renewed because if Google continues to play Russian roulette with Netlist\u2019s loaded gun, the judge will likely award triple damages to a",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:54:21Z",
-          "likes": 9,
-          "user": "monkeestone"
-        },
-        {
-          "id": 667072890,
-          "body": "$NLST was there a negative ruling against Netlist today or a delay",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:51:02Z",
-          "likes": 2,
-          "user": "Furrione1960"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "NLST",
-        "is_pump": true,
-        "has_flags": true,
-        "safe_to_judge": false,
-        "verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE",
-        "vetoes": [
-          "PRICE_FLOOR: $2.19 is below $5.00 minimum \u2014 penny stocks are primary pump vehicles"
-        ],
-        "flags": [
-          "SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal before approving. Social buzz without technical confirmation = pump risk."
-        ],
-        "price_data": {
-          "current_price": 2.19
-        }
-      },
-      "safe_to_judge": false,
-      "pump_verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE"
-    },
-    {
-      "ticker": "BONK.X",
-      "title": "BONK",
-      "watchlist_count": 15344,
-      "sentiment": "BULLISH",
-      "bull_pct": 63.3,
-      "msg_count": 30,
-      "bullish": 19,
-      "bearish": 0,
-      "momentum": 86.9,
-      "top_messages": [
-        {
-          "id": 667071922,
-          "body": "$DOGE.X $SHIB.X $BONK.X \nThey got so mald they delisted \n\nYou can delist \n\n,but you can\u2019t delist dis dick in ya mouf",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:34:23Z",
-          "likes": 0,
-          "user": "tradershadoww"
-        },
-        {
-          "id": 667071561,
-          "body": "$DOGE.X $SHIB.X $BONK.X \nThey can delist us \n\nBut they you delist deeez nutzzzzz",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:28:17Z",
-          "likes": 0,
-          "user": "tradershadoww"
-        },
-        {
-          "id": 667069628,
-          "body": "$BONK.X would be nice to ge tto break even in the .04\u2019s \ud83e\udd23 ive just been holding and dgaf",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:00:30Z",
-          "likes": 0,
-          "user": "When2pickem"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "BONK.X",
-        "is_pump": true,
-        "has_flags": true,
-        "safe_to_judge": false,
-        "verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE",
-        "vetoes": [
-          "PRICE_UNKNOWN: no usable price for this ticker \u2014 cannot verify the $5.00 floor, so it is rejected rather than assumed safe"
-        ],
-        "flags": [
-          "SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal before approving. Social buzz without technical confirmation = pump risk."
-        ],
-        "price_data": {}
-      },
-      "safe_to_judge": false,
-      "pump_verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE"
-    },
-    {
-      "ticker": "BTC.X",
-      "title": "Bitcoin",
-      "watchlist_count": 684518,
+      "ticker": "NOW",
+      "title": "ServiceNow Inc",
+      "watchlist_count": 44475,
       "sentiment": "BULLISH",
       "bull_pct": 60.0,
       "msg_count": 30,
       "bullish": 18,
-      "bearish": 5,
+      "bearish": 1,
       "momentum": 85.8,
       "top_messages": [
         {
-          "id": 667073415,
-          "body": "$BTC.X $MSTR $MSTZ $ASST $BTC \n$83K killed by the Asian market.  Next.\nWe might never see $83K again.",
+          "id": 667073937,
+          "body": "$NOW\n\nPrice: $153.12\nVolume: Average or below\nCatalyst: Shares are consolidating after broader software sector weakness tied to rate-cut uncertainty and rotation out of high-multiple tech names.\nResis",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:09:17Z",
+          "likes": 0,
+          "user": "VolumeSpreadAnalysis"
+        },
+        {
+          "id": 667073812,
+          "body": "$NOW love this stock",
           "sentiment": "Bullish",
-          "created": "2026-10-21T23:59:55Z",
+          "created": "2026-10-22T00:06:57Z",
           "likes": 0,
-          "user": "NotFinancialAdviceDummy"
+          "user": "Inny"
         },
         {
-          "id": 667073346,
-          "body": "$BTC.X crashyyyyy time",
+          "id": 667073802,
+          "body": "$NOW $200 when?",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:58:49Z",
-          "likes": 0,
-          "user": "Ai84"
-        },
-        {
-          "id": 667073332,
-          "body": "$BTC.X \n\nJust emptied the rest of my BTC up here\n\nOfficially holding no more bitcoin now\n\nWas a fun bounce from high 60s but im taking my profits\n\nGood luck to all\n\nI prob wont be going long crypto mu",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:58:41Z",
-          "likes": 2,
-          "user": "Steve_TheBull_Rogers"
+          "created": "2026-10-22T00:06:44Z",
+          "likes": 1,
+          "user": "tradingmonkey16"
         }
       ],
       "pump_risk": {
-        "symbol": "BTC.X",
-        "is_pump": true,
+        "symbol": "NOW",
+        "is_pump": false,
         "has_flags": true,
-        "safe_to_judge": false,
-        "verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE",
-        "vetoes": [
-          "PRICE_UNKNOWN: no usable price for this ticker \u2014 cannot verify the $5.00 floor, so it is rejected rather than assumed safe"
-        ],
+        "safe_to_judge": true,
+        "verdict": "\u26a0\ufe0f  FLAGGED \u2014 Judge must verify MA + news before approving",
+        "vetoes": [],
         "flags": [
           "SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal before approving. Social buzz without technical confirmation = pump risk."
         ],
-        "price_data": {}
+        "price_data": {
+          "current_price": 144.25,
+          "today_open": 149.64,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 13068793,
+          "volume_ratio": 0
+        }
       },
-      "safe_to_judge": false,
-      "pump_verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE"
+      "safe_to_judge": true,
+      "pump_verdict": "\u26a0\ufe0f  FLAGGED \u2014 Judge must verify MA + news before approving"
+    },
+    {
+      "ticker": "SOXX",
+      "title": "iShares Semiconductor ETF",
+      "watchlist_count": 11286,
+      "sentiment": "BULLISH",
+      "bull_pct": 53.3,
+      "msg_count": 30,
+      "bullish": 16,
+      "bearish": 1,
+      "momentum": 83.6,
+      "top_messages": [
+        {
+          "id": 667075798,
+          "body": "$SOXX $SOXL $SPY $QQQ  \n \n$META going all in capital raise for capex spend on compute for Muse. \n \nhttps://x.com/pequityresearch/status/2113061813231243600",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:45:12Z",
+          "likes": 3,
+          "user": "ezekeil"
+        },
+        {
+          "id": 667075760,
+          "body": "$SOXS lol. What was bullish last night on this? I didn\u2019t hear anything to want to buy this. Semis still in huge demand. Did I miss something???? $SPY $SOXX $$SNDK $MU",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:44:28Z",
+          "likes": 3,
+          "user": "JoeB07"
+        },
+        {
+          "id": 667075488,
+          "body": "$KORU just sitting on the bid. Everyone needs to watch here for tomorrow. The dog about to wag the tail. $SPY $QQQ $SOXX $MU",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:39:18Z",
+          "likes": 3,
+          "user": "JoeB07"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "SOXX",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 509.31,
+          "today_open": 509.74,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 8577788,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
       "ticker": "SQQQ",
@@ -237,11 +248,19 @@
       "momentum": 83.6,
       "top_messages": [
         {
+          "id": 667075415,
+          "body": "$SQQQ \u2026. as the bullshit roller coaster continues everything was wonderful today. AI is going to blast through the stratosphere but tomorrow their lies the change AI will be in the shitter again becau",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:37:58Z",
+          "likes": 0,
+          "user": "Kumbaya171"
+        },
+        {
           "id": 667072083,
           "body": "$SQQQ can we see 39 tommorow \ud83e\udd1e\ud83c\udffb\ud83d\ude4f\ud83c\udffb\ud83e\udd1e\ud83c\udffb\ud83d\ude4f\ud83c\udffb\ud83e\udd11\ud83d\udc0d",
           "sentiment": "Neutral",
           "created": "2026-10-21T23:37:08Z",
-          "likes": 1,
+          "likes": 2,
           "user": "StockSnake"
         },
         {
@@ -249,18 +268,11 @@
           "body": "$SQQQ I am becoming a better trader.",
           "sentiment": "Neutral",
           "created": "2026-10-21T23:10:34Z",
-          "likes": 1,
+          "likes": 2,
           "user": "MrAppleseed23"
-        },
-        {
-          "id": 667058238,
-          "body": "$QQQ ~ Surprising AI-Driven Profitability: SpaceX reported a total Q3 2026 revenue of 14.6 billion, soundly beating Wall Street estimates &amp; achieving 4.4 billion in net income. Growth was heavily ",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T20:40:34Z",
-          "likes": 4,
-          "user": "CUPandHANDLE_CHARTS"
         }
       ],
+      "source": "watchlist",
       "pump_risk": {
         "symbol": "SQQQ",
         "is_pump": false,
@@ -286,7 +298,7 @@
     {
       "ticker": "ASST",
       "title": "Strive Inc.",
-      "watchlist_count": 20139,
+      "watchlist_count": 20140,
       "sentiment": "BULLISH",
       "bull_pct": 50.0,
       "msg_count": 30,
@@ -295,11 +307,19 @@
       "momentum": 82.5,
       "top_messages": [
         {
+          "id": 667075565,
+          "body": "$ASST if you use the may high as a metric &amp; compare ASST to $MSTR its kind of wild to see how much better Strive is doing compared to Mstr. Feel like Mstr is using too much capital to fix the pref",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:40:53Z",
+          "likes": 5,
+          "user": "Jay_Trades_"
+        },
+        {
           "id": 667073415,
           "body": "$BTC.X $MSTR $MSTZ $ASST $BTC \n$83K killed by the Asian market.  Next.\nWe might never see $83K again.",
           "sentiment": "Bullish",
           "created": "2026-10-21T23:59:55Z",
-          "likes": 0,
+          "likes": 7,
           "user": "NotFinancialAdviceDummy"
         },
         {
@@ -309,14 +329,6 @@
           "created": "2026-10-21T23:53:43Z",
           "likes": 2,
           "user": "PaddyOoohhYeah"
-        },
-        {
-          "id": 667072829,
-          "body": "$BTC.X $BTC $MSTR $MSTZ $ASST \nBy December 31 2027 Bitcoin will be 0.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:50:03Z",
-          "likes": 2,
-          "user": "NotFinancialAdviceDummy"
         }
       ],
       "pump_risk": {
@@ -342,9 +354,180 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
+      "ticker": "DXYZ",
+      "title": "DESTINY TECH 100 INC",
+      "watchlist_count": 8910,
+      "sentiment": "BULLISH",
+      "bull_pct": 60.0,
+      "msg_count": 30,
+      "bullish": 18,
+      "bearish": 0,
+      "momentum": 82.2,
+      "top_messages": [
+        {
+          "id": 667075907,
+          "body": "$VCX $DXYZ $SPCX $META \n\nhttps://finance.yahoo.com/markets/article/anthropic-to-publicly-file-for-ipo-as-early-as-friday-sources-say-135343841.html",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:47:29Z",
+          "likes": 4,
+          "user": "Xavier75"
+        },
+        {
+          "id": 667039316,
+          "body": "@__TigerTrades__  I think the floor is around $45 based on anticpated year-end NAV (released in Feb), but that is based on the value of SPCX, Anthropic and Open AI holdings--not Anthropic alone.  Also",
+          "sentiment": "Neutral",
+          "created": "2026-10-21T17:37:56Z",
+          "likes": 0,
+          "user": "jac1973"
+        },
+        {
+          "id": 667033205,
+          "body": "$DXYZ $ZM $SKM $VCX $ANTHZZX.P \nFavorite anthropic proxy? \n\ufffc",
+          "sentiment": "Neutral",
+          "created": "2026-10-21T16:44:22Z",
+          "likes": 0,
+          "user": "Zebrarian"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "DXYZ",
+        "is_pump": false,
+        "has_flags": true,
+        "safe_to_judge": true,
+        "verdict": "\u26a0\ufe0f  FLAGGED \u2014 Judge must verify MA + news before approving",
+        "vetoes": [],
+        "flags": [
+          "SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal before approving. Social buzz without technical confirmation = pump risk."
+        ],
+        "price_data": {
+          "current_price": 29.96,
+          "today_open": 28.6,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 422188,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u26a0\ufe0f  FLAGGED \u2014 Judge must verify MA + news before approving"
+    },
+    {
+      "ticker": "NLST",
+      "title": "Netlist Inc",
+      "watchlist_count": 28089,
+      "sentiment": "BULLISH",
+      "bull_pct": 51.7,
+      "msg_count": 29,
+      "bullish": 15,
+      "bearish": 0,
+      "momentum": 82.0,
+      "top_messages": [
+        {
+          "id": 667076435,
+          "body": "$NLST connecting the dots and why this is important:\n\nThe Samsung settlement includes support to Netlist for pursuing legal action against infringers. \n\nThe Samsung and Micron settlement includes sign",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:58:58Z",
+          "likes": 1,
+          "user": "GoNetlist"
+        },
+        {
+          "id": 667076259,
+          "body": "$NLST after lot of bad actors are here tonight spreading false information, to be clear we are set to jet and let the shorts taste rocket fuel fumes.",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:54:43Z",
+          "likes": 0,
+          "user": "Point_land"
+        },
+        {
+          "id": 667075896,
+          "body": "$NLST More fun speculations. Lol. Google and Netlist reach a settlement prior to a CAFC decision (Hong has already stated that the two are in negotiations, but he could not talk about it any detail ye",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:47:12Z",
+          "likes": 5,
+          "user": "bluefever"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "NLST",
+        "is_pump": true,
+        "has_flags": false,
+        "safe_to_judge": false,
+        "verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE",
+        "vetoes": [
+          "PRICE_FLOOR: $2.19 is below $5.00 minimum \u2014 penny stocks are primary pump vehicles"
+        ],
+        "flags": [],
+        "price_data": {
+          "current_price": 2.19
+        }
+      },
+      "safe_to_judge": false,
+      "pump_verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE"
+    },
+    {
+      "ticker": "TGTX",
+      "title": "TG Therapeutics Inc",
+      "watchlist_count": 21698,
+      "sentiment": "BULLISH",
+      "bull_pct": 46.7,
+      "msg_count": 30,
+      "bullish": 14,
+      "bearish": 0,
+      "momentum": 81.4,
+      "top_messages": [
+        {
+          "id": 667075998,
+          "body": "$TGTX https://www.thegatewaypundit.com/2026/10/why-fauci-must-rot-prison-peter-navarro-releases/",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:49:13Z",
+          "likes": 0,
+          "user": "OlDocAngus"
+        },
+        {
+          "id": 667074656,
+          "body": "$TGTX Pain",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:23:24Z",
+          "likes": 1,
+          "user": "ngyojiw"
+        },
+        {
+          "id": 667074234,
+          "body": "$TGTX Latest company news, Oct 21, 2026: TG Therapeutics presented BRIUMVI data at MSToronto 2026. In the seven-year ULTIMATE I/II follow-up, 88.3% of patients on continuous BRIUMVI were free from 24-",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:15:07Z",
+          "likes": 3,
+          "user": "Merlintrader"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "TGTX",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 61.68,
+          "today_open": 54.51,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 1178136,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
       "ticker": "NOK",
       "title": "Nokia Corp",
-      "watchlist_count": 114928,
+      "watchlist_count": 114931,
       "sentiment": "BULLISH",
       "bull_pct": 40.0,
       "msg_count": 30,
@@ -353,28 +536,28 @@
       "momentum": 79.2,
       "top_messages": [
         {
+          "id": 667074520,
+          "body": "$NOK Nvidia\u2019s Jensen Huang Sees 100GW AI Opportunity In Telecom Networks, With TMUS, NOK Already Making Moves                                              https://finance.yahoo.com/technology/ai/artic",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:20:29Z",
+          "likes": 0,
+          "user": "myman1956"
+        },
+        {
+          "id": 667074442,
+          "body": "$NOK SMCI Teams Up With Nokia, Nvidia To Bring AI Computing To 5G Networks \u2014 Eyes AI-Native 6G Expansion                                                           https://finance.yahoo.com/technology/",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:19:04Z",
+          "likes": 0,
+          "user": "myman1956"
+        },
+        {
           "id": 667073286,
           "body": "@SilverTrader47 I got destroyed on nflx. Ha I went high and it went lowwwee but I traded xe today and recovered my losses almost fully and now I\u2019m trading $NOK tonight into earnings before bell",
           "sentiment": "Neutral",
           "created": "2026-10-21T23:57:54Z",
           "likes": 0,
           "user": "Scottykinnns"
-        },
-        {
-          "id": 667068187,
-          "body": "@escuintla $NOK is a $170 stock\u2026",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T22:41:10Z",
-          "likes": 2,
-          "user": "RaTrade"
-        },
-        {
-          "id": 667065957,
-          "body": "$NOK if good report then $12+ , mediocre report under $7",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T22:10:11Z",
-          "likes": 3,
-          "user": "escuintla"
         }
       ],
       "source": "watchlist",
@@ -401,44 +584,43 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
-      "ticker": "SOXS",
-      "title": "Direxion Daily Semiconductor Bear 3X ETF",
-      "watchlist_count": 19025,
+      "ticker": "ARM",
+      "title": "Arm Holdings Plc.",
+      "watchlist_count": 33989,
       "sentiment": "BULLISH",
-      "bull_pct": 40.0,
+      "bull_pct": 36.7,
       "msg_count": 30,
-      "bullish": 12,
-      "bearish": 2,
-      "momentum": 79.2,
+      "bullish": 11,
+      "bearish": 1,
+      "momentum": 78.1,
       "top_messages": [
         {
-          "id": 667072334,
-          "body": "$SOXL $SOXS Told you play the game easy money \ud83d\udcb2\ud83e\udd11\ud83d\udcb2",
+          "id": 667075750,
+          "body": "$ARM The democrats still have blacks enslaved except this time they don&#39;t even realize it and they vote for their captors every year ....... WAKE UP the Republicans ended slavery and fought for th",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:41:37Z",
-          "likes": 0,
-          "user": "WhosYourDaddy_"
+          "created": "2026-10-22T00:44:19Z",
+          "likes": 1,
+          "user": "jd4308"
         },
         {
-          "id": 667071049,
-          "body": "$SOXS \ud83d\udc40",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:20:25Z",
-          "likes": 0,
-          "user": "TradeMark79"
+          "id": 667075738,
+          "body": "$ARM it&#39;s all a fuckin illusion ..., make the blacks and immigrants hate the whites ... over lies ....make the people hate billionaires who create all the wealth for democrats..... and keep promot",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:44:05Z",
+          "likes": 1,
+          "user": "jd4308"
         },
         {
-          "id": 667070035,
-          "body": "$KORU $QQQ $SOXS $SOXX $SPY Plenty of cracks in the system and more growing everyday. You\u2019re just too stupid and blinded by your own arrogance to see it happening. Enjoy the ride down.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:06:09Z",
-          "likes": 8,
-          "user": "mkt75"
+          "id": 667075721,
+          "body": "$ARM After the Mid-Terms once they CUNT-RAG loser democrats get smoked ai will go back to normal and this will RIP higher once again ..... Donald Trump swore to drain the swamp and drain the swamp he ",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:43:45Z",
+          "likes": 1,
+          "user": "jd4308"
         }
       ],
-      "source": "watchlist",
       "pump_risk": {
-        "symbol": "SOXS",
+        "symbol": "ARM",
         "is_pump": false,
         "has_flags": false,
         "safe_to_judge": true,
@@ -446,13 +628,13 @@
         "vetoes": [],
         "flags": [],
         "price_data": {
-          "current_price": 44.74,
-          "today_open": 44.51,
+          "current_price": 257.64,
+          "today_open": 225.01,
           "prev_close": 0,
           "intraday_move": 0,
           "intraday_pct": 0,
           "avg_volume_20d": 0,
-          "today_volume": 64016887,
+          "today_volume": 3284472,
           "volume_ratio": 0
         }
       },
@@ -460,43 +642,43 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
-      "ticker": "BE",
-      "title": "Bloom Energy Corp - Ordinary Shares - Class A",
-      "watchlist_count": 37498,
-      "sentiment": "BULLISH",
+      "ticker": "META",
+      "title": "Meta Platforms Inc",
+      "watchlist_count": 614715,
+      "sentiment": "MIXED",
       "bull_pct": 33.3,
       "msg_count": 30,
       "bullish": 10,
-      "bearish": 3,
+      "bearish": 7,
       "momentum": 77.0,
       "top_messages": [
         {
-          "id": 667073437,
-          "body": "$BE and just like that, they flip the switch in a second and suddenly every AI stock is red \ud83d\ude02\nShake it all you want. I know these games. I\u2019m holding.",
+          "id": 667076463,
+          "body": "$META Why my rocket ship is so slow ?",
           "sentiment": "Bullish",
-          "created": "2026-10-22T00:00:15Z",
-          "likes": 0,
-          "user": "O26"
-        },
-        {
-          "id": 667073295,
-          "body": "$BE $200",
-          "sentiment": "Bearish",
-          "created": "2026-10-21T23:57:59Z",
-          "likes": 0,
-          "user": "BreadNButters"
-        },
-        {
-          "id": 667072831,
-          "body": "$BE going to be big tomorrow. 350 next week",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:50:05Z",
+          "created": "2026-10-22T00:59:28Z",
           "likes": 1,
-          "user": "jeepdisease"
+          "user": "Alex_a"
+        },
+        {
+          "id": 667076441,
+          "body": "$META",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:59:11Z",
+          "likes": 1,
+          "user": "Undercover_007"
+        },
+        {
+          "id": 667076420,
+          "body": "Triple Sputter $IBM $META $TSLA https://talkmarkets.com/article/triple-sputter",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:58:09Z",
+          "likes": 0,
+          "user": "TalkMarkets"
         }
       ],
       "pump_risk": {
-        "symbol": "BE",
+        "symbol": "META",
         "is_pump": false,
         "has_flags": false,
         "safe_to_judge": true,
@@ -504,13 +686,71 @@
         "vetoes": [],
         "flags": [],
         "price_data": {
-          "current_price": 227.86,
-          "today_open": 235.36,
+          "current_price": 661.39,
+          "today_open": 697.6,
           "prev_close": 0,
           "intraday_move": 0,
           "intraday_pct": 0,
           "avg_volume_20d": 0,
-          "today_volume": 12467547,
+          "today_volume": 29252300,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "TSLA",
+      "title": "Tesla Inc",
+      "watchlist_count": 1070365,
+      "sentiment": "BULLISH",
+      "bull_pct": 30.0,
+      "msg_count": 30,
+      "bullish": 9,
+      "bearish": 5,
+      "momentum": 75.9,
+      "top_messages": [
+        {
+          "id": 667076433,
+          "body": "$TSLA these bears will choke themselves soon. \ud83d\udc40",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:58:55Z",
+          "likes": 1,
+          "user": "JesusizKing"
+        },
+        {
+          "id": 667076420,
+          "body": "Triple Sputter $IBM $META $TSLA https://talkmarkets.com/article/triple-sputter",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:58:09Z",
+          "likes": 0,
+          "user": "TalkMarkets"
+        },
+        {
+          "id": 667076416,
+          "body": "$TSLA all things being equal it\u2019s encouraging, modest beat on revenue, more cash on hand than was feared.  Yes, their are problems &amp; vulnerabilities but Elon will get us their.  1K per share by 20",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:58:01Z",
+          "likes": 0,
+          "user": "JesusizKing"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "TSLA",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 386.95,
+          "today_open": 381.43,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 49150839,
           "volume_ratio": 0
         }
       },
@@ -520,7 +760,7 @@
     {
       "ticker": "MSTR",
       "title": "Strategy",
-      "watchlist_count": 83523,
+      "watchlist_count": 83524,
       "sentiment": "BULLISH",
       "bull_pct": 30.0,
       "msg_count": 30,
@@ -529,28 +769,28 @@
       "momentum": 75.9,
       "top_messages": [
         {
-          "id": 667073415,
-          "body": "$BTC.X $MSTR $MSTZ $ASST $BTC \n$83K killed by the Asian market.  Next.\nWe might never see $83K again.",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:59:55Z",
+          "id": 667076316,
+          "body": "$MSTR wow got bard from here because",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:55:49Z",
           "likes": 0,
-          "user": "NotFinancialAdviceDummy"
+          "user": "MrProfits"
         },
         {
-          "id": 667073344,
-          "body": "$MSTR So from early august when bitcoin was 62600, MSTR +64.3%, Bitcoin +34.5%.\n\nYes, the 2x multiplier has dropped since both peaked, but the leverage still outperforming from the lows despite volati",
+          "id": 667075972,
+          "body": "$MSTR that did Wow I what the girly",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:58:48Z",
-          "likes": 0,
-          "user": "Tommojg"
-        },
-        {
-          "id": 667073182,
-          "body": "$MSTR jesus  karan bible",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:55:56Z",
+          "created": "2026-10-22T00:48:47Z",
           "likes": 1,
           "user": "MrProfits"
+        },
+        {
+          "id": 667075836,
+          "body": "$MSTR  okay this is holding way better than expected",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:45:59Z",
+          "likes": 2,
+          "user": "topstockalerts"
         }
       ],
       "pump_risk": {
@@ -578,37 +818,37 @@
     {
       "ticker": "AVGO",
       "title": "Broadcom Inc",
-      "watchlist_count": 76144,
-      "sentiment": "BULLISH",
+      "watchlist_count": 76147,
+      "sentiment": "MIXED",
       "bull_pct": 31.0,
       "msg_count": 29,
       "bullish": 9,
-      "bearish": 6,
+      "bearish": 8,
       "momentum": 75.1,
       "top_messages": [
         {
-          "id": 667073442,
-          "body": "$AVGO everything lost half its gains in after hours meanwhile we lost everything + more already\u2026 and all these other semi\u2019s are the one who bounced 3x more than us everyday yet we get sold off more, h",
-          "sentiment": "Neutral",
-          "created": "2026-10-22T00:00:18Z",
+          "id": 667076246,
+          "body": "$AVGO Like I said. PT=$250",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:54:21Z",
           "likes": 0,
+          "user": "hm2000"
+        },
+        {
+          "id": 667075820,
+          "body": "$AVGO $SMH $QQQ  I remember how fucked up $MSFT was in the frontlines of the sAaSpOcAlYpSe. It was infinite red days, non-stop downtrend. Everyday was rape. Until the whales and scammers decided to pr",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:45:43Z",
+          "likes": 3,
+          "user": "BearVirus"
+        },
+        {
+          "id": 667074964,
+          "body": "$AVGO this POS can just sneeze and instantly drop 3% for no reason but then it takes the life and soul out of it just to reclaim the 1% it bled off",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:29:22Z",
+          "likes": 4,
           "user": "PutsOnMyself"
-        },
-        {
-          "id": 667072819,
-          "body": "$AVGO This is so sensitive for other other stock, after hours it going down due to $LRCX and that also for its weak guidance.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:49:56Z",
-          "likes": 2,
-          "user": "mori2024"
-        },
-        {
-          "id": 667071826,
-          "body": "$MU $LRCX $AVGO $SNDK  This market sucks donkey&#39;s ass \ud83e\udd2c",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:32:57Z",
-          "likes": 9,
-          "user": "bullsbearsrtds"
         }
       ],
       "pump_risk": {
@@ -634,97 +874,39 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
-      "ticker": "TSLA",
-      "title": "Tesla Inc",
-      "watchlist_count": 1070359,
-      "sentiment": "MIXED",
-      "bull_pct": 26.7,
-      "msg_count": 30,
-      "bullish": 8,
-      "bearish": 8,
-      "momentum": 74.8,
-      "top_messages": [
-        {
-          "id": 667073326,
-          "body": "$TSLA $400 by midnight?",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:58:35Z",
-          "likes": 3,
-          "user": "kirby77"
-        },
-        {
-          "id": 667073313,
-          "body": "$TSLA possible break out and then retest of daily 200ema",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:58:18Z",
-          "likes": 2,
-          "user": "penniesANDcrypto"
-        },
-        {
-          "id": 667073294,
-          "body": "$TSLA $SPCX President Donald Trump officially denied ordering the Starlink and Starshield satellite slowdown in Ukraine, stating firmly to reporters, &quot;I don&#39;t know who did it, but I was not i",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:57:58Z",
-          "likes": 3,
-          "user": "ElGordoGekko"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "TSLA",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 386.95,
-          "today_open": 381.43,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 49150839,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
       "ticker": "BIDU",
       "title": "Baidu Inc - ADR",
-      "watchlist_count": 66516,
+      "watchlist_count": 66520,
       "sentiment": "BULLISH",
       "bull_pct": 26.7,
       "msg_count": 30,
       "bullish": 8,
-      "bearish": 5,
+      "bearish": 4,
       "momentum": 74.8,
       "top_messages": [
         {
-          "id": 667072664,
-          "body": "$BIDU NOV20 81C \u00b7 still actionable\n\nZone: $78.27 to $79.37\nInvalidation: close under $77\nObjectives: $83.50, then $88.50\n\nThe math: up 5.9% to the first objective and 12.3% to the second, against 2.3%",
+          "id": 667076011,
+          "body": "$BABA $BIDU $NIO China \ud83c\udde8\ud83c\uddf3 still seeing \ud83e\ude78  \n \nBut the setups aren\u2019t super compelling yet from an RSI perspective",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:47:25Z",
-          "likes": 0,
-          "user": "TopOptionAlert"
+          "created": "2026-10-22T00:49:29Z",
+          "likes": 1,
+          "user": "PolycarpFX"
         },
         {
-          "id": 667072026,
-          "body": "$BABA $BIDU $SPY $QQQ will be watching  for Chinese stock going into eow if markets continue to be funky \n\nVolume made more sense in bidu/baba vs JD  \n\nJD attracted my attention today because volume c",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:36:17Z",
+          "id": 667074691,
+          "body": "$BIDU market pricing this as a search engine with declining ad revenue. Treating $BABA as the ecommerce platform that is losing market share. Market is always right, they say. But is it? $SPY $QQQ",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:24:08Z",
           "likes": 3,
-          "user": "MF__DOOM"
+          "user": "Kylea1"
         },
         {
-          "id": 667071617,
-          "body": "$BABA $BIDU   Let the moronic dumbo retail bulltards flushie flush!!!!  These idiotic fools will continue paying dearly the steep price for their insolence, ignorance, cockiness and arrogance.  They a",
-          "sentiment": "Bearish",
-          "created": "2026-10-21T23:29:11Z",
-          "likes": 4,
-          "user": "villancico"
+          "id": 667074568,
+          "body": "$BIDU remember they have self driving software, I know the hype faded for ai but this will rebound",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:21:29Z",
+          "likes": 2,
+          "user": "MichaellaFinancial"
         }
       ],
       "pump_risk": {
@@ -750,125 +932,9 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
-      "ticker": "GOOGL",
-      "title": "Alphabet Inc Class A",
-      "watchlist_count": 234467,
-      "sentiment": "BULLISH",
-      "bull_pct": 26.7,
-      "msg_count": 30,
-      "bullish": 8,
-      "bearish": 1,
-      "momentum": 74.8,
-      "top_messages": [
-        {
-          "id": 667073059,
-          "body": "$GOOG $GOOGL I&#39;m ready\ud83d\ude4f\ud83c\udffd\u2705",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:53:52Z",
-          "likes": 4,
-          "user": "Sir_DumpsALot"
-        },
-        {
-          "id": 667072584,
-          "body": "$GOOGL $333.33. i want to buy at $222.22, but its more likely going to $444.44",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:45:58Z",
-          "likes": 1,
-          "user": "Inajiffy"
-        },
-        {
-          "id": 667071601,
-          "body": "$GOOGL NOV20 345C \u00b7 still actionable\n\nZone: $332.42 to $337.10\nInvalidation: close under $330.38\nObjectives: $355, then $375\n\nThe math: up 6.0% to the first objective and 12.0% to the second, against ",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:29:00Z",
-          "likes": 1,
-          "user": "TopOptionAlert"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "GOOGL",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 320.15,
-          "today_open": 336.98,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 29339201,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "MGNI",
-      "title": "Magnite Inc",
-      "watchlist_count": 12038,
-      "sentiment": "BULLISH",
-      "bull_pct": 26.7,
-      "msg_count": 30,
-      "bullish": 8,
-      "bearish": 0,
-      "momentum": 74.8,
-      "top_messages": [
-        {
-          "id": 667072621,
-          "body": "$MGNI WOW ! SOME OF YOU GUYS BEEN HERE FAR TOO LONG \n \nDiversify",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:46:42Z",
-          "likes": 0,
-          "user": "SpaceAGE123"
-        },
-        {
-          "id": 667070803,
-          "body": "$MGNI works in programmatic advertising, the plumbing that connects an ad slot to an advertiser. When a large streamer says its ad product capabilities rolled out slower than planned, that is a statem",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:17:05Z",
-          "likes": 0,
-          "user": "Techdamentals"
-        },
-        {
-          "id": 667058126,
-          "body": "$MGNI",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T20:39:40Z",
-          "likes": 0,
-          "user": "FauciOuchie"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "MGNI",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 28.36,
-          "today_open": 23.57,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 1189237,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "MSFT",
-      "title": "Microsoft Corp",
-      "watchlist_count": 553472,
+      "ticker": "NVDA",
+      "title": "NVIDIA Corp",
+      "watchlist_count": 672543,
       "sentiment": "BULLISH",
       "bull_pct": 26.7,
       "msg_count": 30,
@@ -877,377 +943,28 @@
       "momentum": 74.8,
       "top_messages": [
         {
-          "id": 667071336,
-          "body": "$MSFT if Mag 7 go down these next 13 days: Correction, Bear Market is upon us ~\nCash is king",
+          "id": 667076495,
+          "body": "CoreWeave is facing mounting investor concerns as rising interest rates and AI infrastructure spending pressures weigh on its stock and debt. Shares have fallen 29% in October, reducing its market cap",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:24:29Z",
-          "likes": 1,
-          "user": "sorensosorry"
-        },
-        {
-          "id": 667068654,
-          "body": "$MSFT sits on both sides of this story, with a cloud business hosting affected servers and a security business defending them. But the genuinely new part is elsewhere: an AI model found one of these f",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T22:47:44Z",
+          "created": "2026-10-22T01:00:18Z",
           "likes": 0,
-          "user": "Techdamentals"
+          "user": "topstockalerts"
         },
         {
-          "id": 667068381,
-          "body": "$MSFT I think we\u2019re gonna get smoked at earnings",
+          "id": 667076413,
+          "body": "$MU major electricity bottleneck coming that will completely crush all the AI buildout thesis. this will be the narrative very soon to make the semis crash hard. $INTC $NVDA $AMD",
           "sentiment": "Bearish",
-          "created": "2026-10-21T22:43:47Z",
-          "likes": 2,
-          "user": "BMcD20"
-        }
-      ],
-      "source": "watchlist",
-      "pump_risk": {
-        "symbol": "MSFT",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 556.5,
-          "today_open": 529.44,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 14016360,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "TSLL",
-      "title": "Direxion Daily TSLA Bull 2X Shares",
-      "watchlist_count": 9356,
-      "sentiment": "BULLISH",
-      "bull_pct": 26.7,
-      "msg_count": 30,
-      "bullish": 8,
-      "bearish": 1,
-      "momentum": 72.7,
-      "top_messages": [
-        {
-          "id": 667071947,
-          "body": "$TSLA $TSLL  \n \nJust wait until the Overnight Session kicks in on weak volume. \n \nShare Holders tonight \n\u2b07\ufe0f",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:34:46Z",
-          "likes": 3,
-          "user": "NauticalTrader"
-        },
-        {
-          "id": 667069606,
-          "body": "The most recent Filtered Momentum signal on $TSLL triggered on 2026-10-21. The expected return for the selected horizon is +35.78% with a historical profit probability of +65.71%. Learn more: https://",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:00:07Z",
+          "created": "2026-10-22T00:58:00Z",
           "likes": 0,
-          "user": "AXLFI_HQ"
+          "user": "TheMer0vingian"
         },
         {
-          "id": 667069504,
-          "body": "$SPY $QQQ  \n \n$TSLA $TSLL  \n \nCurrent Share Holders",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T22:58:59Z",
-          "likes": 8,
-          "user": "NauticalTrader"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "TSLL",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 10.67,
-          "today_open": 10.28,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 81424309,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "GOOG",
-      "title": "Alphabet Inc - Ordinary Shares - Class C",
-      "watchlist_count": 312521,
-      "sentiment": "MIXED",
-      "bull_pct": 20.0,
-      "msg_count": 30,
-      "bullish": 6,
-      "bearish": 6,
-      "momentum": 72.6,
-      "top_messages": [
-        {
-          "id": 667073064,
-          "body": "$GOOG Are they going out of business?!",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:53:56Z",
-          "likes": 2,
-          "user": "30theta70"
-        },
-        {
-          "id": 667073059,
-          "body": "$GOOG $GOOGL I&#39;m ready\ud83d\ude4f\ud83c\udffd\u2705",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:53:52Z",
-          "likes": 4,
-          "user": "Sir_DumpsALot"
-        },
-        {
-          "id": 667072707,
-          "body": "$GOOG wtf",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:48:12Z",
-          "likes": 2,
-          "user": "Judy11"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "GOOG",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 343.47,
-          "today_open": 333.32,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 19327156,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "META",
-      "title": "Meta Platforms Inc",
-      "watchlist_count": 614699,
-      "sentiment": "MIXED",
-      "bull_pct": 16.7,
-      "msg_count": 30,
-      "bullish": 5,
-      "bearish": 4,
-      "momentum": 71.5,
-      "top_messages": [
-        {
-          "id": 667073419,
-          "body": "$META Dump like crazy tmrw",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:59:55Z",
-          "likes": 2,
-          "user": "Rob1827"
-        },
-        {
-          "id": 667073384,
-          "body": "$META 680 open tomorrow. Short everything till open",
+          "id": 667076377,
+          "body": "$NVDA Jensen Huang is full of lies. Spark is trash.\nhttps://youtu.be/HFbLI71G5DM?is=rcTTXQ6J5vLa2Gd0",
           "sentiment": "Bearish",
-          "created": "2026-10-21T23:59:23Z",
-          "likes": 1,
-          "user": "fredbull"
-        },
-        {
-          "id": 667073349,
-          "body": "Why are $SOXX $NVDA semiconductors and chips down because of $META \u2018s reckless spending and negative FCF?\nI guess tomorrow software and $XLC stocks down and chip stocks rip?",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:58:54Z",
-          "likes": 2,
-          "user": "PredictionFLO1"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "META",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 661.39,
-          "today_open": 697.6,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 29252300,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "CRWV",
-      "title": "CoreWeave Inc",
-      "watchlist_count": 52461,
-      "sentiment": "BEARISH",
-      "bull_pct": 16.7,
-      "msg_count": 30,
-      "bullish": 5,
-      "bearish": 9,
-      "momentum": 71.5,
-      "top_messages": [
-        {
-          "id": 667073463,
-          "body": "$CRWV the music has stopped here. Game over.",
-          "sentiment": "Neutral",
-          "created": "2026-10-22T00:00:41Z",
+          "created": "2026-10-22T00:57:14Z",
           "likes": 0,
-          "user": "thatsright21"
-        },
-        {
-          "id": 667073451,
-          "body": "$CRWV look familiar? Identical to coreweave but it\u2019s nebius. Moving in lockstep after Tesla miss. Nothing to do with debt or the company. Keep pushing that fake narrative bears. Will pop off support o",
-          "sentiment": "Bullish",
-          "created": "2026-10-22T00:00:26Z",
-          "likes": 0,
-          "user": "hoagied"
-        },
-        {
-          "id": 667073366,
-          "body": "$CRWV fucker couldnt oump with $SPCX but its going down with everything else rn",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:59:10Z",
-          "likes": 0,
-          "user": "thatsright21"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "CRWV",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 58.6,
-          "today_open": 64.36,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 77845724,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "AAOI",
-      "title": "Applied Optoelectronics Inc",
-      "watchlist_count": 26730,
-      "sentiment": "BEARISH",
-      "bull_pct": 16.7,
-      "msg_count": 30,
-      "bullish": 5,
-      "bearish": 8,
-      "momentum": 71.5,
-      "top_messages": [
-        {
-          "id": 667073033,
-          "body": "$AAOI  will it fill?",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:53:32Z",
-          "likes": 0,
-          "user": "AStrokeOfLuck"
-        },
-        {
-          "id": 667072729,
-          "body": "$AAOI 100%",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:48:35Z",
-          "likes": 0,
-          "user": "Reacherman"
-        },
-        {
-          "id": 667072526,
-          "body": "$AAOI looks like it wants to test the fvg on the daily I think bottom is 66-68 on this one. With the weakness it showed today I\u2019m sure it will get there.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:44:57Z",
-          "likes": 0,
-          "user": "papui"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "AAOI",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 73.53,
-          "today_open": 80.92,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 7887869,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "NVDA",
-      "title": "NVIDIA Corp",
-      "watchlist_count": 672542,
-      "sentiment": "MIXED",
-      "bull_pct": 16.7,
-      "msg_count": 30,
-      "bullish": 5,
-      "bearish": 4,
-      "momentum": 71.5,
-      "top_messages": [
-        {
-          "id": 667073454,
-          "body": "$NVDA keynote https://www.youtube.com/live/PvFjbPYEOZI?si=qtpj5U37n1zxOY4V",
-          "sentiment": "Neutral",
-          "created": "2026-10-22T00:00:32Z",
-          "likes": 0,
-          "user": "Trader412pgh"
-        },
-        {
-          "id": 667073352,
-          "body": "$NVDA what is actually going on right now? Why is this tanking so hard?",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:58:56Z",
-          "likes": 2,
-          "user": "natetradr"
-        },
-        {
-          "id": 667073349,
-          "body": "Why are $SOXX $NVDA semiconductors and chips down because of $META \u2018s reckless spending and negative FCF?\nI guess tomorrow software and $XLC stocks down and chip stocks rip?",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:58:54Z",
-          "likes": 2,
-          "user": "PredictionFLO1"
+          "user": "Buy_to_Close"
         }
       ],
       "source": "watchlist",
@@ -1274,44 +991,44 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
-      "ticker": "AAPL",
-      "title": "Apple Inc",
-      "watchlist_count": 998075,
+      "ticker": "MSFT",
+      "title": "Microsoft Corp",
+      "watchlist_count": 553473,
       "sentiment": "BULLISH",
-      "bull_pct": 16.7,
+      "bull_pct": 26.7,
       "msg_count": 30,
-      "bullish": 5,
-      "bearish": 3,
-      "momentum": 71.5,
+      "bullish": 8,
+      "bearish": 2,
+      "momentum": 74.8,
       "top_messages": [
         {
-          "id": 667073269,
-          "body": "$SPY  When people give their &quot;views&quot; to Sell or Buy I say thats great, now show us where you bought &amp; sold $META, where you saw tha value in the $500&#39;s this year &amp; how you saw it",
+          "id": 667075820,
+          "body": "$AVGO $SMH $QQQ  I remember how fucked up $MSFT was in the frontlines of the sAaSpOcAlYpSe. It was infinite red days, non-stop downtrend. Everyday was rape. Until the whales and scammers decided to pr",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:57:34Z",
+          "created": "2026-10-22T00:45:43Z",
+          "likes": 3,
+          "user": "BearVirus"
+        },
+        {
+          "id": 667071336,
+          "body": "$MSFT if Mag 7 go down these next 13 days: Correction, Bear Market is upon us ~\nCash is king",
+          "sentiment": "Neutral",
+          "created": "2026-10-21T23:24:29Z",
           "likes": 2,
-          "user": "GoodNewsBull"
+          "user": "sorensosorry"
         },
         {
-          "id": 667073225,
-          "body": "$AAPL Law of large numbers will bring this down hard.",
-          "sentiment": "Bearish",
-          "created": "2026-10-21T23:56:51Z",
-          "likes": 1,
-          "user": "esrouter"
-        },
-        {
-          "id": 667072957,
-          "body": "$AAPL HEY, TERNNY. IM WAITIN 4 THE LAUNCH.",
+          "id": 667068654,
+          "body": "$MSFT sits on both sides of this story, with a cloud business hosting affected servers and a security business defending them. But the genuinely new part is elsewhere: an AI model found one of these f",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:52:19Z",
+          "created": "2026-10-21T22:47:44Z",
           "likes": 1,
-          "user": "QUEZ_DA_GREATEST"
+          "user": "Techdamentals"
         }
       ],
       "source": "watchlist",
       "pump_risk": {
-        "symbol": "AAPL",
+        "symbol": "MSFT",
         "is_pump": false,
         "has_flags": false,
         "safe_to_judge": true,
@@ -1319,13 +1036,479 @@
         "vetoes": [],
         "flags": [],
         "price_data": {
-          "current_price": 356.48,
-          "today_open": 339.36,
+          "current_price": 556.5,
+          "today_open": 529.44,
           "prev_close": 0,
           "intraday_move": 0,
           "intraday_pct": 0,
           "avg_volume_20d": 0,
-          "today_volume": 35761575,
+          "today_volume": 14016360,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "USO",
+      "title": "United States Oil Fund",
+      "watchlist_count": 75670,
+      "sentiment": "MIXED",
+      "bull_pct": 23.3,
+      "msg_count": 30,
+      "bullish": 7,
+      "bearish": 5,
+      "momentum": 73.7,
+      "top_messages": [
+        {
+          "id": 667076423,
+          "body": "$USO I think you interpret this wrong. All of those troops are sitting ducks waiting to get vaporized by hypersonic missiles they can&#39;t see coming or intercept. The US is sending a third carrier g",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:58:18Z",
+          "likes": 0,
+          "user": "Lolichocho"
+        },
+        {
+          "id": 667076222,
+          "body": "$USO wen?",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:53:52Z",
+          "likes": 2,
+          "user": "ricky_lafleur"
+        },
+        {
+          "id": 667075725,
+          "body": "$USO At the end of the day Russia is not a friend of USA. Russia always muscles up to the USA in competition.  \nNow China is just sitting back and laughing at both Russia and USA for wearing out their",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:43:50Z",
+          "likes": 3,
+          "user": "IdioSyncro"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "USO",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 154.45,
+          "today_open": 159.41,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 5943942,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "QQQ",
+      "title": "Invesco QQQ Trust Series 1",
+      "watchlist_count": 281423,
+      "sentiment": "BULLISH",
+      "bull_pct": 23.3,
+      "msg_count": 30,
+      "bullish": 7,
+      "bearish": 1,
+      "momentum": 73.7,
+      "top_messages": [
+        {
+          "id": 667076489,
+          "body": "Trump says US will &#39;burn&#39; like France if &#39;radical Democrats&#39; come to power \n \nGuess what me and all my friend will vote against you this time you clown.. So for sure you will lose!!  \n",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T01:00:08Z",
+          "likes": 2,
+          "user": "Etrading"
+        },
+        {
+          "id": 667076456,
+          "body": "$DRAM $MU $QQQ $SPY go fuck yourself \ud83e\udd21",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:59:24Z",
+          "likes": 2,
+          "user": "Grinder247"
+        },
+        {
+          "id": 667076406,
+          "body": "$QQQ $SPY So, Ken Griffin calling out an AI Bubble. Remember, Ken and Citadel FAILED to call out the Credit Crisis and the Internet Bubble. Obviously, Ken doesn&#39;t want to be called out this time. ",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:57:53Z",
+          "likes": 3,
+          "user": "green_going_up"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "QQQ",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 726.0,
+          "today_open": 722.22,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 32877253,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "GLD",
+      "title": "SPDR Gold Shares ETF",
+      "watchlist_count": 96741,
+      "sentiment": "BULLISH",
+      "bull_pct": 23.3,
+      "msg_count": 30,
+      "bullish": 7,
+      "bearish": 3,
+      "momentum": 73.7,
+      "top_messages": [
+        {
+          "id": 667076021,
+          "body": "$GLD $SLV.X Silver went down 50% from the highs, gold should do the same eventually, back to  $2500 hopefully in 2027 !!",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:49:40Z",
+          "likes": 0,
+          "user": "QEBubble"
+        },
+        {
+          "id": 667075755,
+          "body": "$GLD Adding to shorts!!! About to fall off a cliff to $3900&#39;s finally.",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:44:22Z",
+          "likes": 0,
+          "user": "QEBubble"
+        },
+        {
+          "id": 667075367,
+          "body": "$GLD gold will test $4000. You know it, schiff knows it",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:36:49Z",
+          "likes": 1,
+          "user": "Tommojg"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "GLD",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 378.88,
+          "today_open": 379.17,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 6967854,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "SPY",
+      "title": "SPDR S&P 500 ETF Trust",
+      "watchlist_count": 638957,
+      "sentiment": "MIXED",
+      "bull_pct": 23.3,
+      "msg_count": 30,
+      "bullish": 7,
+      "bearish": 6,
+      "momentum": 73.7,
+      "top_messages": [
+        {
+          "id": 667076489,
+          "body": "Trump says US will &#39;burn&#39; like France if &#39;radical Democrats&#39; come to power \n \nGuess what me and all my friend will vote against you this time you clown.. So for sure you will lose!!  \n",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T01:00:08Z",
+          "likes": 2,
+          "user": "Etrading"
+        },
+        {
+          "id": 667076488,
+          "body": "$SPY the funniest part of all this is y&#39;all started shitting your pants over nothing. There&#39;s no one thing going on right now that you all collectively decided to panic",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T01:00:07Z",
+          "likes": 1,
+          "user": "PreciousJohnnyCakes"
+        },
+        {
+          "id": 667076456,
+          "body": "$DRAM $MU $QQQ $SPY go fuck yourself \ud83e\udd21",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:59:24Z",
+          "likes": 2,
+          "user": "Grinder247"
+        }
+      ],
+      "source": "watchlist",
+      "pump_risk": {
+        "symbol": "SPY",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 773.26,
+          "today_open": 771.17,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 32006780,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "GOOGL",
+      "title": "Alphabet Inc Class A",
+      "watchlist_count": 234468,
+      "sentiment": "BULLISH",
+      "bull_pct": 23.3,
+      "msg_count": 30,
+      "bullish": 7,
+      "bearish": 1,
+      "momentum": 73.7,
+      "top_messages": [
+        {
+          "id": 667074787,
+          "body": "$GOOGL",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:26:09Z",
+          "likes": 2,
+          "user": "Nourman81"
+        },
+        {
+          "id": 667073675,
+          "body": "$GOOG $GOOGL",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:04:52Z",
+          "likes": 4,
+          "user": "AStrokeOfLuck"
+        },
+        {
+          "id": 667073059,
+          "body": "$GOOG $GOOGL I&#39;m ready\ud83d\ude4f\ud83c\udffd\u2705",
+          "sentiment": "Bullish",
+          "created": "2026-10-21T23:53:52Z",
+          "likes": 7,
+          "user": "Sir_DumpsALot"
+        }
+      ],
+      "source": "watchlist",
+      "pump_risk": {
+        "symbol": "GOOGL",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 320.15,
+          "today_open": 336.98,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 29339201,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "LRCX",
+      "title": "Lam Research Corp.",
+      "watchlist_count": 22421,
+      "sentiment": "MIXED",
+      "bull_pct": 20.0,
+      "msg_count": 30,
+      "bullish": 6,
+      "bearish": 5,
+      "momentum": 72.6,
+      "top_messages": [
+        {
+          "id": 667076202,
+          "body": "$LRCX Looking very scary here.",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:53:19Z",
+          "likes": 1,
+          "user": "FundaTech"
+        },
+        {
+          "id": 667075986,
+          "body": "$LRCX even this going to rebound soon. Babamb$!$!$!!$!",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:49:01Z",
+          "likes": 1,
+          "user": "JoeB07"
+        },
+        {
+          "id": 667075555,
+          "body": "$LRCX Q1 FY27 Earnings: Textbook AI Supercycle Beat &amp; Raise, but missed \u201cwhisper\u201d numbers. \n\n$LRCX standout Q1 results, topping consensus with $8.22B in revenue (+22% QoQ) &amp; Non-GAAP EPS of $2",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:40:45Z",
+          "likes": 3,
+          "user": "PhoTime"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "LRCX",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 250.8,
+          "today_open": 270.9,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 16033641,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "VOO",
+      "title": "Vanguard S&P 500 ETF",
+      "watchlist_count": 53605,
+      "sentiment": "BULLISH",
+      "bull_pct": 16.7,
+      "msg_count": 30,
+      "bullish": 5,
+      "bearish": 1,
+      "momentum": 71.5,
+      "top_messages": [
+        {
+          "id": 667074557,
+          "body": "@extrahenny that\u2019s all I need brother, slowly realizing gains on my individual names and dumping it into $VOO &amp; chill, let it burst in 2028 and I\u2019m fine w that haha",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:21:20Z",
+          "likes": 0,
+          "user": "ForestLiR8pdme"
+        },
+        {
+          "id": 667073223,
+          "body": "TSLA Stock Reverses After-Hours Gains As Tesla Cuts Full-Year Capex Guidance To $20B, Musk Tempers Optimus Timeline\n\n$TSLA $VTI $VOO\n\nhttps://stocktwits.com/news/equity/markets/tsla-stock-reverses-aft",
+          "sentiment": "Neutral",
+          "created": "2026-10-21T23:56:49Z",
+          "likes": 0,
+          "user": "StocktwitsNews"
+        },
+        {
+          "id": 667073210,
+          "body": "@Stef_Gee I\u2019ve wasted so much time on here too, looking forward to slowly transitioning my stocks in etfs, $VGT $VOO &amp; chill",
+          "sentiment": "Neutral",
+          "created": "2026-10-21T23:56:34Z",
+          "likes": 0,
+          "user": "ForestLiR8pdme"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "VOO",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 710.72,
+          "today_open": 708.84,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 6305813,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "ORCL",
+      "title": "Oracle Corp.",
+      "watchlist_count": 72436,
+      "sentiment": "MIXED",
+      "bull_pct": 16.7,
+      "msg_count": 30,
+      "bullish": 5,
+      "bearish": 5,
+      "momentum": 71.5,
+      "top_messages": [
+        {
+          "id": 667076285,
+          "body": "$ORCL back to 135 \ud83c\udfaf",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:55:12Z",
+          "likes": 0,
+          "user": "Calirose11"
+        },
+        {
+          "id": 667076043,
+          "body": "$ORCL more!",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:50:07Z",
+          "likes": 1,
+          "user": "tifa_lockhart"
+        },
+        {
+          "id": 667075729,
+          "body": "\u26a0\ufe0f $ORCL \u2014 Bearish Bias Remains Intact as a Deeper Correction Unfolds \n \nOracle continues to correct from its $345.72 September 2025 peak. Wave (c) has already broken below the prior $134.57 low, keep",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:43:57Z",
+          "likes": 1,
+          "user": "ElliottwaveForecast"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "ORCL",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 135.0,
+          "today_open": 133.12,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 26340879,
           "volume_ratio": 0
         }
       },
@@ -1335,7 +1518,7 @@
     {
       "ticker": "AMZN",
       "title": "Amazon.com Inc",
-      "watchlist_count": 707657,
+      "watchlist_count": 707660,
       "sentiment": "BULLISH",
       "bull_pct": 16.7,
       "msg_count": 30,
@@ -1344,28 +1527,28 @@
       "momentum": 71.5,
       "top_messages": [
         {
-          "id": 667073173,
-          "body": "$BB https://www.prnewswire.com/news-releases/blackberry-launches-blackberry-ivy-advisory-council-to-fuel-smart-mobility-innovation-301317067.html \n \n$BRK.B for GEICO $T.TSX in there too \n \nInsurance i",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:55:45Z",
+          "id": 667075660,
+          "body": "$AMZN raising the target to $275\ud83c\udfaf",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:42:35Z",
           "likes": 1,
-          "user": "snowPOW"
+          "user": "Calirose11"
         },
         {
-          "id": 667072203,
-          "body": "$BB This could be done quickly with Blackberry and Vectors&#39; Alloy Kore! $GM already uses QNX. \n \nIt would also kickstart how auto insurance is going to change. $BRK.B with GEICO has a seat with $A",
+          "id": 667075604,
+          "body": "@kp570 $AMZN 264 rejection on a market flush is a weaker fail. Retake 264 and it flips, we track that reclaim daily at https://spartantrades.com",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:39:12Z",
-          "likes": 7,
-          "user": "snowPOW"
+          "created": "2026-10-22T00:41:44Z",
+          "likes": 0,
+          "user": "SpartanTradeAlerts"
         },
         {
-          "id": 667072108,
-          "body": "$AMZN $NVDA $META $TSLA What a sad state of affairs this once great county has become. The leader of the free world, a complete and total embarrassment, the most powerful person in the world answers a",
+          "id": 667075007,
+          "body": "$AMZN 264 rejection but that coincided with whole market selling off so maybe all the bulls left early for the day. If we can\u2019t break through next test may get weary",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:37:33Z",
-          "likes": 8,
-          "user": "NunzioKnows"
+          "created": "2026-10-22T00:30:15Z",
+          "likes": 1,
+          "user": "kp570"
         }
       ],
       "source": "watchlist",
@@ -1510,276 +1693,44 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
-      "ticker": "BABA",
-      "title": "Alibaba Group Holding Ltd",
-      "watchlist_count": 425281,
-      "sentiment": "BEARISH",
+      "ticker": "AAPL",
+      "title": "Apple Inc",
+      "watchlist_count": 998078,
+      "sentiment": "MIXED",
       "bull_pct": 13.3,
       "msg_count": 30,
       "bullish": 4,
-      "bearish": 6,
+      "bearish": 4,
       "momentum": 70.4,
       "top_messages": [
         {
-          "id": 667072715,
-          "body": "$BABA my husband speaks Mandarin, he says the West is portraying china wrong, my husband has all the insights through china state tv, baba undervalued",
+          "id": 667076305,
+          "body": "@HoodedOne that $AAPL 340 put at 11.20 needs 328.80 by expiry just to break even. steep hill from here",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:48:21Z",
-          "likes": 2,
-          "user": "MichaellaFinancial"
-        },
-        {
-          "id": 667072575,
-          "body": "$BABA 9:30PM this will be under $100",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:45:55Z",
-          "likes": 2,
-          "user": "OilStonks"
-        },
-        {
-          "id": 667072026,
-          "body": "$BABA $BIDU $SPY $QQQ will be watching  for Chinese stock going into eow if markets continue to be funky \n\nVolume made more sense in bidu/baba vs JD  \n\nJD attracted my attention today because volume c",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:36:17Z",
-          "likes": 3,
-          "user": "MF__DOOM"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "BABA",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 119.18,
-          "today_open": 106.03,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 11865790,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "LRCX",
-      "title": "Lam Research Corp.",
-      "watchlist_count": 22416,
-      "sentiment": "BEARISH",
-      "bull_pct": 10.0,
-      "msg_count": 30,
-      "bullish": 3,
-      "bearish": 5,
-      "momentum": 69.3,
-      "top_messages": [
-        {
-          "id": 667073452,
-          "body": "$LRCX buying this trash tomorrow",
-          "sentiment": "Bullish",
-          "created": "2026-10-22T00:00:29Z",
+          "created": "2026-10-22T00:55:33Z",
           "likes": 0,
-          "user": "Slickmizzle"
+          "user": "SpartanTradeAlerts"
         },
         {
-          "id": 667072819,
-          "body": "$AVGO This is so sensitive for other other stock, after hours it going down due to $LRCX and that also for its weak guidance.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:49:56Z",
-          "likes": 2,
-          "user": "mori2024"
-        },
-        {
-          "id": 667072534,
-          "body": "I have sat through this exact movie before. The numbers are fine, the guide is only fine, and the stock gets treated like the story broke. $LRCX did beat, 8.22B against 8.13B expected, so demand did n",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:45:04Z",
-          "likes": 0,
-          "user": "TopOptionAlert"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "LRCX",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 250.8,
-          "today_open": 270.9,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 16033641,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "QQQ",
-      "title": "Invesco QQQ Trust Series 1",
-      "watchlist_count": 281421,
-      "sentiment": "BEARISH",
-      "bull_pct": 10.0,
-      "msg_count": 30,
-      "bullish": 3,
-      "bearish": 5,
-      "momentum": 69.3,
-      "top_messages": [
-        {
-          "id": 667073427,
-          "body": "$QQQ the whole after hours sessions\n Was straight down",
-          "sentiment": "Neutral",
-          "created": "2026-10-22T00:00:03Z",
-          "likes": 0,
-          "user": "Ninjaman"
-        },
-        {
-          "id": 667073411,
-          "body": "$SPY $QQQ Boomerslop ai ads have completely taken over everything you can&#39;t walk down the street without seeing at least 1 of these ads",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:59:49Z",
-          "likes": 0,
-          "user": "10D_west"
-        },
-        {
-          "id": 667073360,
-          "body": "$QQQ damn",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:59:03Z",
-          "likes": 0,
-          "user": "GlobalTradersAcademy"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "QQQ",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 726.0,
-          "today_open": 722.22,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 32877253,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "CMG",
-      "title": "Chipotle Mexican Grill",
-      "watchlist_count": 62440,
-      "sentiment": "BEARISH",
-      "bull_pct": 10.0,
-      "msg_count": 30,
-      "bullish": 3,
-      "bearish": 8,
-      "momentum": 69.3,
-      "top_messages": [
-        {
-          "id": 667072961,
-          "body": "$CMG it will bounce tomorrow. Acting strong after market even after $SPY sell off. But what do I know.",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:52:25Z",
-          "likes": 2,
-          "user": "SaintKitty"
-        },
-        {
-          "id": 667072785,
-          "body": "$CMG  calling it\u2026. $19.99 then it becomes Block Buster and Radio Shack",
+          "id": 667076091,
+          "body": "$AAPL i bought a 340 put for 11.20 so... #plsgodown",
           "sentiment": "Bearish",
-          "created": "2026-10-21T23:49:33Z",
-          "likes": 1,
-          "user": "EdgePointVA"
+          "created": "2026-10-22T00:51:08Z",
+          "likes": 2,
+          "user": "HoodedOne"
         },
         {
-          "id": 667071510,
-          "body": "$CMG $25 ?",
-          "sentiment": "Bearish",
-          "created": "2026-10-21T23:27:21Z",
-          "likes": 1,
-          "user": "warumono"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "CMG",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 29.72,
-          "today_open": 29.03,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 27921115,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "SPY",
-      "title": "SPDR S&P 500 ETF Trust",
-      "watchlist_count": 638958,
-      "sentiment": "MIXED",
-      "bull_pct": 10.0,
-      "msg_count": 30,
-      "bullish": 3,
-      "bearish": 3,
-      "momentum": 69.3,
-      "top_messages": [
-        {
-          "id": 667073455,
-          "body": "$SPY \n\n\u201cUNCH\u201d\n\nconfirmation must be by way of gap \ud83d\udc40",
+          "id": 667074426,
+          "body": "@extrahenny you think so?  Names like $NVDA $CRDO and $AMKR look quite cheap on a fwpe and peg ratio.  I always found stocks like $WMT and $AAPL to be ones crazy overvalued but they seem to just keep ",
           "sentiment": "Neutral",
-          "created": "2026-10-22T00:00:34Z",
-          "likes": 0,
-          "user": "TheVulcanDevilWhale"
-        },
-        {
-          "id": 667073446,
-          "body": "$SPY this should make my calls print.  Inverse illogical market only goes up \ud83e\udd23 \nhttps://youtu.be/BZmp_G58mSg?is=Ya8viXFY4qI9MWqS",
-          "sentiment": "Neutral",
-          "created": "2026-10-22T00:00:20Z",
-          "likes": 0,
-          "user": "WolfofWalgreensXXS"
-        },
-        {
-          "id": 667073411,
-          "body": "$SPY $QQQ Boomerslop ai ads have completely taken over everything you can&#39;t walk down the street without seeing at least 1 of these ads",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:59:49Z",
-          "likes": 0,
-          "user": "10D_west"
+          "created": "2026-10-22T00:18:48Z",
+          "likes": 2,
+          "user": "ForestLiR8pdme"
         }
       ],
       "source": "watchlist",
       "pump_risk": {
-        "symbol": "SPY",
+        "symbol": "AAPL",
         "is_pump": false,
         "has_flags": false,
         "safe_to_judge": true,
@@ -1787,13 +1738,71 @@
         "vetoes": [],
         "flags": [],
         "price_data": {
-          "current_price": 773.26,
-          "today_open": 771.17,
+          "current_price": 356.48,
+          "today_open": 339.36,
           "prev_close": 0,
           "intraday_move": 0,
           "intraday_pct": 0,
           "avg_volume_20d": 0,
-          "today_volume": 32006780,
+          "today_volume": 35761575,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "MOS",
+      "title": "Mosaic Company",
+      "watchlist_count": 7456,
+      "sentiment": "BULLISH",
+      "bull_pct": 36.7,
+      "msg_count": 30,
+      "bullish": 11,
+      "bearish": 2,
+      "momentum": 69.7,
+      "top_messages": [
+        {
+          "id": 667074835,
+          "body": "$MOS new 6 years low...at this pace this will go to the covid low...",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:27:09Z",
+          "likes": 0,
+          "user": "Arcides"
+        },
+        {
+          "id": 667074019,
+          "body": "$MOS Last year around same time , it had dumping for more than a week. maybe it is just the time for tax sales. But this time so many shares ate dumped",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:10:49Z",
+          "likes": 0,
+          "user": "wsun1"
+        },
+        {
+          "id": 667070677,
+          "body": "@Scottykinnns Besides $XE, what about trading $GT, $MOS, $NFLX, and $VALE?",
+          "sentiment": "Bullish",
+          "created": "2026-10-21T23:15:30Z",
+          "likes": 1,
+          "user": "SilverTrader47"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "MOS",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 16.95,
+          "today_open": 17.93,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 12565648,
           "volume_ratio": 0
         }
       },
@@ -1803,37 +1812,37 @@
     {
       "ticker": "IBM",
       "title": "International Business Machines Corp.",
-      "watchlist_count": 69659,
-      "sentiment": "BEARISH",
-      "bull_pct": 6.7,
+      "watchlist_count": 69669,
+      "sentiment": "BULLISH",
+      "bull_pct": 10.0,
       "msg_count": 30,
-      "bullish": 2,
-      "bearish": 4,
-      "momentum": 68.2,
+      "bullish": 3,
+      "bearish": 2,
+      "momentum": 69.3,
       "top_messages": [
         {
-          "id": 667073425,
-          "body": "$IBM just bought 700 shares at $240 . This will be over $290 within two weeks",
+          "id": 667076420,
+          "body": "Triple Sputter $IBM $META $TSLA https://talkmarkets.com/article/triple-sputter",
           "sentiment": "Neutral",
-          "created": "2026-10-22T00:00:01Z",
+          "created": "2026-10-22T00:58:09Z",
           "likes": 0,
-          "user": "Libertyhillbilly"
+          "user": "TalkMarkets"
         },
         {
-          "id": 667073396,
-          "body": "$IBM earning beats don\u2019t mean shit, every stocks beats earnings it drops regardless. \ud83e\udd26",
+          "id": 667076338,
+          "body": "@ThisIsShootersTour agreed, $IBM weekly pin after a drop to the 240 area holds it. The reset levels past 271 sit at https://spartantrades.com",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:59:36Z",
+          "created": "2026-10-22T00:56:27Z",
           "likes": 0,
-          "user": "IGetThatArabMoney"
+          "user": "SpartanTradeAlerts"
         },
         {
-          "id": 667073109,
-          "body": "$IBM you got to remember it\u2019s up 8% on the week so these earnings might be priced in.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:54:43Z",
-          "likes": 2,
-          "user": "TS10"
+          "id": 667076315,
+          "body": "$IBM How is the quantum business coming along?",
+          "sentiment": "Bullish",
+          "created": "2026-10-22T00:55:49Z",
+          "likes": 0,
+          "user": "Rudder64"
         }
       ],
       "pump_risk": {
@@ -1859,43 +1868,43 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
-      "ticker": "DJT",
-      "title": "Trump Media & Technology Group Corp.",
-      "watchlist_count": 115743,
+      "ticker": "BABA",
+      "title": "Alibaba Group Holding Ltd",
+      "watchlist_count": 425287,
       "sentiment": "BEARISH",
-      "bull_pct": 6.7,
+      "bull_pct": 10.0,
       "msg_count": 30,
-      "bullish": 2,
-      "bearish": 11,
-      "momentum": 68.2,
+      "bullish": 3,
+      "bearish": 7,
+      "momentum": 69.3,
       "top_messages": [
         {
-          "id": 667073246,
-          "body": "$DJT\n\nYeah, he&#39;s really proud of that.\n\nSuch a petulant dumbass.\n\nhttps://x.com/HQNewsNow/status/2113052235844211139",
+          "id": 667076011,
+          "body": "$BABA $BIDU $NIO China \ud83c\udde8\ud83c\uddf3 still seeing \ud83e\ude78  \n \nBut the setups aren\u2019t super compelling yet from an RSI perspective",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:57:17Z",
+          "created": "2026-10-22T00:49:29Z",
+          "likes": 1,
+          "user": "PolycarpFX"
+        },
+        {
+          "id": 667075795,
+          "body": "$TSLA this kind of sad earning report would drop $BABA 20% in an instant. Market is paying hundreds% premium for Tesla.",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:45:08Z",
           "likes": 2,
-          "user": "ArgusDune1971"
+          "user": "Kylea1"
         },
         {
-          "id": 667073193,
-          "body": "$DJT $SPY FEMA needs to be overhauled. They picked and chose who to help in FL based on their political designation. We all saw it.",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:56:10Z",
-          "likes": 3,
-          "user": "PaddyOoohhYeah"
-        },
-        {
-          "id": 667073119,
-          "body": "$DJT what took you so long?",
+          "id": 667075639,
+          "body": "$BABA the idiot Xi killed Chinese market.",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:54:56Z",
-          "likes": 0,
-          "user": "WayToLate"
+          "created": "2026-10-22T00:42:17Z",
+          "likes": 2,
+          "user": "RedAndRed"
         }
       ],
       "pump_risk": {
-        "symbol": "DJT",
+        "symbol": "BABA",
         "is_pump": false,
         "has_flags": false,
         "safe_to_judge": true,
@@ -1903,13 +1912,13 @@
         "vetoes": [],
         "flags": [],
         "price_data": {
-          "current_price": 7.55,
-          "today_open": 6.61,
+          "current_price": 119.18,
+          "today_open": 106.03,
           "prev_close": 0,
           "intraday_move": 0,
           "intraday_pct": 0,
           "avg_volume_20d": 0,
-          "today_volume": 4171327,
+          "today_volume": 11865790,
           "volume_ratio": 0
         }
       },
@@ -1917,39 +1926,331 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
-      "ticker": "FUN",
-      "title": "Six Flags Entertainment Corp",
-      "watchlist_count": 7112,
-      "sentiment": "MIXED",
-      "bull_pct": 23.3,
+      "ticker": "UAL",
+      "title": "United Airlines Holdings Inc",
+      "watchlist_count": 39917,
+      "sentiment": "BULLISH",
+      "bull_pct": 10.0,
       "msg_count": 30,
-      "bullish": 7,
-      "bearish": 6,
-      "momentum": 64.2,
+      "bullish": 3,
+      "bearish": 1,
+      "momentum": 69.3,
       "top_messages": [
         {
-          "id": 667072553,
-          "body": "$FUN fool me once shame on you, fool me twice shame on me.",
-          "sentiment": "Bearish",
-          "created": "2026-10-21T23:45:30Z",
-          "likes": 2,
-          "user": "Burky90"
-        },
-        {
-          "id": 667072489,
-          "body": "$FUN you buy this thinking you own cedar point and other six flags parks but really all you own is 5 billion of unservicable debt",
-          "sentiment": "Bearish",
-          "created": "2026-10-21T23:44:19Z",
-          "likes": 1,
-          "user": "Burky90"
-        },
-        {
-          "id": 667070173,
-          "body": "$FUN I think it\u2019s trending cause I see a lot of articles on Kelce getting killed on his investment.",
+          "id": 667073954,
+          "body": "$UAL",
           "sentiment": "Neutral",
-          "created": "2026-10-21T23:08:11Z",
-          "likes": 5,
-          "user": "joeylatzz"
+          "created": "2026-10-22T00:09:40Z",
+          "likes": 0,
+          "user": "AStrokeOfLuck"
+        },
+        {
+          "id": 667073883,
+          "body": "$UAL Latest company news, Oct 21, 2026: Moody&#39;s downgraded several of United&#39;s EETC ratings (aircraft-backed bonds) and left all other ratings unchanged. On the analyst call, CEO Scott Kirby s",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:08:10Z",
+          "likes": 0,
+          "user": "Merlintrader"
+        },
+        {
+          "id": 667071903,
+          "body": "$UAL just popped nearly 4% after their Q3 earnings\n\nRecord revenue and solid Q4 guidance but EPS is under consensus thanks to higher fuel costs\n\nOptions flow is leaning towards calls but still two-sid",
+          "sentiment": "Neutral",
+          "created": "2026-10-21T23:34:06Z",
+          "likes": 0,
+          "user": "QuantInsider"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "UAL",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 96.91,
+          "today_open": 97.5,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 10653278,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "T",
+      "title": "AT&T Inc",
+      "watchlist_count": 110897,
+      "sentiment": "BULLISH",
+      "bull_pct": 10.0,
+      "msg_count": 30,
+      "bullish": 3,
+      "bearish": 2,
+      "momentum": 69.3,
+      "top_messages": [
+        {
+          "id": 667076251,
+          "body": "$TSLA Apples and oranges and all that but the disparity between these two reporting today is worth a mention: \n1. $T 32+B revs - 150B mkt cap \n2. $TSLA 28B revs - 1.5T mkt cap",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:54:27Z",
+          "likes": 1,
+          "user": "RobertLemire"
+        },
+        {
+          "id": 667076194,
+          "body": "$T can we get $22.50 + tomorrow?",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:53:12Z",
+          "likes": 0,
+          "user": "srapp123"
+        },
+        {
+          "id": 667073703,
+          "body": "$T stock hasn\u2019t moved in 15 years \ud83e\udd23\ud83e\udd23\ud83e\udd23\ud83e\udd23\ud83e\udd23\ud83e\udd23\ud83e\udd23\ud83e\udd23\ud83e\udd23\ud83e\udd23",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:05:19Z",
+          "likes": 0,
+          "user": "AppleKING1"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "T",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 23.06,
+          "today_open": 21.89,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 84536783,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "CoreWeave Inc",
+      "watchlist_count": 52465,
+      "sentiment": "BEARISH",
+      "bull_pct": 10.0,
+      "msg_count": 30,
+      "bullish": 3,
+      "bearish": 8,
+      "momentum": 69.3,
+      "top_messages": [
+        {
+          "id": 667076495,
+          "body": "CoreWeave is facing mounting investor concerns as rising interest rates and AI infrastructure spending pressures weigh on its stock and debt. Shares have fallen 29% in October, reducing its market cap",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T01:00:18Z",
+          "likes": 0,
+          "user": "topstockalerts"
+        },
+        {
+          "id": 667076106,
+          "body": "$CRWV going bankrupt",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:51:31Z",
+          "likes": 3,
+          "user": "Buy_to_Close"
+        },
+        {
+          "id": 667076089,
+          "body": "$CRWV $SPY any month now they will default on the debt and this entire ai house of cards comes tumbling down, but bright side is you\u2019ll have winners and losers.\ufffc",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:51:03Z",
+          "likes": 4,
+          "user": "NoCryingInDaCasino69"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "CRWV",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 58.6,
+          "today_open": 64.36,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 77845724,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "GE",
+      "title": "GE Aerospace",
+      "watchlist_count": 155035,
+      "sentiment": "BEARISH",
+      "bull_pct": 10.0,
+      "msg_count": 30,
+      "bullish": 3,
+      "bearish": 6,
+      "momentum": 69.3,
+      "top_messages": [
+        {
+          "id": 667073963,
+          "body": "$GE NOV20 305C \u00b7 still actionable\n\nZone: $293.81 to $297.95\nInvalidation: close under $287.35\nObjectives: $313.62, then $328.67\n\nThe math: up 6.0% to the first objective and 11.1% to the second, again",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:09:47Z",
+          "likes": 0,
+          "user": "TopOptionAlert"
+        },
+        {
+          "id": 667052672,
+          "body": "$GE Do you get depressed when it\u2019s red?",
+          "sentiment": "Neutral",
+          "created": "2026-10-21T19:30:45Z",
+          "likes": 0,
+          "user": "FundaTech"
+        },
+        {
+          "id": 667051523,
+          "body": "$GE What the fuck",
+          "sentiment": "Neutral",
+          "created": "2026-10-21T19:22:10Z",
+          "likes": 2,
+          "user": "TitsMcGeee"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "GE",
+        "is_pump": false,
+        "has_flags": false,
+        "safe_to_judge": true,
+        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
+        "vetoes": [],
+        "flags": [],
+        "price_data": {
+          "current_price": 281.01,
+          "today_open": 302.48,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 7462523,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
+    },
+    {
+      "ticker": "BTDR",
+      "title": "Bitdeer Technologies Holding Co",
+      "watchlist_count": 4276,
+      "sentiment": "BULLISH",
+      "bull_pct": 63.3,
+      "msg_count": 30,
+      "bullish": 19,
+      "bearish": 1,
+      "momentum": 68.0,
+      "top_messages": [
+        {
+          "id": 667073662,
+          "body": "$BTDR back to been trash tomo \ud83e\udd26\ud83c\udffb\u200d\u2642\ufe0f",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:04:37Z",
+          "likes": 0,
+          "user": "Ita186"
+        },
+        {
+          "id": 667056427,
+          "body": "$BTDR shorts keep on attacking us! yestarday was 15m and now 7m\ud83d\ude21",
+          "sentiment": "Neutral",
+          "created": "2026-10-21T20:26:27Z",
+          "likes": 0,
+          "user": "Ita186"
+        },
+        {
+          "id": 667055854,
+          "body": "$BTDR atleast hold 8!",
+          "sentiment": "Bullish",
+          "created": "2026-10-21T19:55:44Z",
+          "likes": 0,
+          "user": "Ita186"
+        }
+      ],
+      "pump_risk": {
+        "symbol": "BTDR",
+        "is_pump": false,
+        "has_flags": true,
+        "safe_to_judge": true,
+        "verdict": "\u26a0\ufe0f  FLAGGED \u2014 Judge must verify MA + news before approving",
+        "vetoes": [],
+        "flags": [
+          "SOCIAL_ONLY: High social sentiment noted \u2014 Judge must confirm MA buy signal before approving. Social buzz without technical confirmation = pump risk."
+        ],
+        "price_data": {
+          "current_price": 8.07,
+          "today_open": 8.14,
+          "prev_close": 0,
+          "intraday_move": 0,
+          "intraday_pct": 0,
+          "avg_volume_20d": 0,
+          "today_volume": 9333048,
+          "volume_ratio": 0
+        }
+      },
+      "safe_to_judge": true,
+      "pump_verdict": "\u26a0\ufe0f  FLAGGED \u2014 Judge must verify MA + news before approving"
+    },
+    {
+      "ticker": "FUN",
+      "title": "Six Flags Entertainment Corp",
+      "watchlist_count": 7115,
+      "sentiment": "MIXED",
+      "bull_pct": 16.7,
+      "msg_count": 30,
+      "bullish": 5,
+      "bearish": 7,
+      "momentum": 62.0,
+      "top_messages": [
+        {
+          "id": 667075768,
+          "body": "$FUN Although Warren Buffett advised to buy stocks when there is &quot;blood in the streets&quot; - in this case, there really was blood on the amusement park street and the uncertainty about legal ra",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:44:40Z",
+          "likes": 3,
+          "user": "Nuclear_Elvis"
+        },
+        {
+          "id": 667075538,
+          "body": "$FUN I think this goes to zero within 6 months",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:40:30Z",
+          "likes": 1,
+          "user": "Undercover_007"
+        },
+        {
+          "id": 667074247,
+          "body": "$FUN this turkey is a carcass being picked clean by creditors",
+          "sentiment": "Neutral",
+          "created": "2026-10-22T00:15:21Z",
+          "likes": 4,
+          "user": "Bloodmooncapital"
         }
       ],
       "pump_risk": {
@@ -1975,323 +2276,39 @@
       "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
     },
     {
-      "ticker": "PINS",
-      "title": "Pinterest Inc",
-      "watchlist_count": 45396,
-      "sentiment": "BULLISH",
-      "bull_pct": 35.3,
-      "msg_count": 17,
-      "bullish": 6,
-      "bearish": 1,
-      "momentum": 63.3,
-      "top_messages": [
-        {
-          "id": 667072878,
-          "body": "$PINS no effect of a positive Meta ER?? Is this ever gonna get some wind behind it?",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:50:52Z",
-          "likes": 0,
-          "user": "bamboozle"
-        },
-        {
-          "id": 667070846,
-          "body": "$PINS competes for the same advertising dollars that streaming ad tiers are trying to attract. The Netflix release is a reminder that building an advertising business is not only about having an audie",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:17:38Z",
-          "likes": 0,
-          "user": "Techdamentals"
-        },
-        {
-          "id": 667034931,
-          "body": "$PINS $SNAP these junk names benefactor of MUSE $META . IF meta earnings are good, these can go",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T16:58:53Z",
-          "likes": 1,
-          "user": "Albino_Trader123"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "PINS",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 24.71,
-          "today_open": 22.62,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 11951764,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "KORU",
-      "title": "Direxion Daily South Korea Bull 3X Shares",
-      "watchlist_count": 3756,
+      "ticker": "AVEX",
+      "title": "AEVEX Corp",
+      "watchlist_count": 1724,
       "sentiment": "BULLISH",
       "bull_pct": 26.7,
       "msg_count": 30,
       "bullish": 8,
-      "bearish": 2,
-      "momentum": 54.2,
+      "bearish": 4,
+      "momentum": 47.5,
       "top_messages": [
         {
-          "id": 667073102,
-          "body": "$KORU Bank of Korea rate hike decision tonight, Korean market will rally if they do not hike again.",
+          "id": 667076272,
+          "body": "$AVEX",
+          "sentiment": "Bearish",
+          "created": "2026-10-22T00:54:54Z",
+          "likes": 0,
+          "user": "Gjingxu"
+        },
+        {
+          "id": 667075303,
+          "body": "$AVEX new here. Looks like a good opportunity. Entered 10.29",
           "sentiment": "Bullish",
-          "created": "2026-10-21T23:54:39Z",
-          "likes": 0,
-          "user": "zepga1"
+          "created": "2026-10-22T00:35:32Z",
+          "likes": 6,
+          "user": "Sly1939"
         },
         {
-          "id": 667072487,
-          "body": "$KORU  Korean bros are entering the stage in 20 minutes. I feel like at a rock concert.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:44:18Z",
-          "likes": 1,
-          "user": "TheChartiste"
-        },
-        {
-          "id": 667070035,
-          "body": "$KORU $QQQ $SOXS $SOXX $SPY Plenty of cracks in the system and more growing everyday. You\u2019re just too stupid and blinded by your own arrogance to see it happening. Enjoy the ride down.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:06:09Z",
-          "likes": 8,
-          "user": "mkt75"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "KORU",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 11.96,
-          "today_open": 12.3,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 42052175,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "TTMI",
-      "title": "TTM Technologies Inc",
-      "watchlist_count": 2061,
-      "sentiment": "BULLISH",
-      "bull_pct": 29.6,
-      "msg_count": 27,
-      "bullish": 8,
-      "bearish": 1,
-      "momentum": 46.3,
-      "top_messages": [
-        {
-          "id": 667073039,
-          "body": "$TTMI $90?",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:53:35Z",
-          "likes": 0,
-          "user": "Baazigar123"
-        },
-        {
-          "id": 667070972,
-          "body": "$TTMI will most likely go to 85 even with good earnings unfortunately",
+          "id": 667074960,
+          "body": "$AVEX people shorted on fake news. They will cover tomorrow bringing this back to $13",
           "sentiment": "Bullish",
-          "created": "2026-10-21T23:19:31Z",
-          "likes": 0,
-          "user": "papui"
-        },
-        {
-          "id": 667063997,
-          "body": "$TTMI sold the assigned shares from the 95 puts STO Friday thanks for all the fish",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T21:45:21Z",
-          "likes": 1,
-          "user": "Dojimon"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "TTMI",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 107.17,
-          "today_open": 99.76,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 4575057,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "SPXS",
-      "title": "Direxion Daily S&P 500 Bear 3X Shares",
-      "watchlist_count": 14067,
-      "sentiment": "BEARISH",
-      "bull_pct": 16.7,
-      "msg_count": 6,
-      "bullish": 1,
-      "bearish": 3,
-      "momentum": 45.1,
-      "top_messages": [
-        {
-          "id": 667016632,
-          "body": "$SPY $VOO $SPXS $VIXY",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T14:35:55Z",
-          "likes": 2,
-          "user": "DidYouReadThis"
-        },
-        {
-          "id": 666889776,
-          "body": "$SPXS  hmmm",
-          "sentiment": "Bullish",
-          "created": "2026-10-20T03:09:11Z",
-          "likes": 1,
-          "user": "TheChartiste"
-        },
-        {
-          "id": 666783917,
-          "body": "Clues for Stock market directions-  \n                                                                                                                                                     \n MAG 7 &amp; ",
-          "sentiment": "Neutral",
-          "created": "2026-10-18T04:21:31Z",
-          "likes": 1,
-          "user": "ArcValueTrade"
-        }
-      ],
-      "source": "watchlist",
-      "pump_risk": {
-        "symbol": "SPXS",
-        "is_pump": false,
-        "has_flags": false,
-        "safe_to_judge": true,
-        "verdict": "\u2705 CLEAN \u2014 No pump indicators detected",
-        "vetoes": [],
-        "flags": [],
-        "price_data": {
-          "current_price": 23.88,
-          "today_open": 24.1,
-          "prev_close": 0,
-          "intraday_move": 0,
-          "intraday_pct": 0,
-          "avg_volume_20d": 0,
-          "today_volume": 17114364,
-          "volume_ratio": 0
-        }
-      },
-      "safe_to_judge": true,
-      "pump_verdict": "\u2705 CLEAN \u2014 No pump indicators detected"
-    },
-    {
-      "ticker": "NZDUSD",
-      "title": "New Zealand Dollar / US Dollar",
-      "watchlist_count": 4098,
-      "sentiment": "BEARISH",
-      "bull_pct": 0.0,
-      "msg_count": 28,
-      "bullish": 0,
-      "bearish": 1,
-      "momentum": 44.3,
-      "top_messages": [
-        {
-          "id": 667072853,
-          "body": "$NZDUSD 4-Hour chart shows a corrective pullback unfolding in the current cycle. While price remains below 0.59857, the recovery is expected to stay capped and eventually resume lower in line with the",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:50:23Z",
-          "likes": 0,
-          "user": "EWF_Sandile"
-        },
-        {
-          "id": 667072504,
-          "body": "$NZDUSD\u2019s three-wave recovery from the summer decline keeps unfolding as anticipated\u2014the before-and-after charts show the path mapped ahead of the bounce. \n4H Update: All 4H charts have been updated f",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:44:27Z",
-          "likes": 0,
-          "user": "ElliottwaveForecast"
-        },
-        {
-          "id": 667047158,
-          "body": "$NZDUSD\u2019s 1H impulse could end soon\u2014the next setup is a three-wave pullback before further upside. \nG1 1H Update: All G1 1H charts have been updated for members. https://elliottwave-forecast.com/ \nTra",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T18:48:33Z",
-          "likes": 0,
-          "user": "ElliottwaveForecast"
-        }
-      ],
-      "pump_risk": {
-        "symbol": "NZDUSD",
-        "is_pump": true,
-        "has_flags": false,
-        "safe_to_judge": false,
-        "verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE",
-        "vetoes": [
-          "PRICE_UNKNOWN: no usable price for this ticker \u2014 cannot verify the $5.00 floor, so it is rejected rather than assumed safe"
-        ],
-        "flags": [],
-        "price_data": {}
-      },
-      "safe_to_judge": false,
-      "pump_verdict": "\ud83d\udeab PUMP_RISK \u2014 DO NOT TRADE"
-    },
-    {
-      "ticker": "AVEX",
-      "title": "AEVEX Corp",
-      "watchlist_count": 1708,
-      "sentiment": "MIXED",
-      "bull_pct": 13.3,
-      "msg_count": 30,
-      "bullish": 4,
-      "bearish": 3,
-      "momentum": 43.0,
-      "top_messages": [
-        {
-          "id": 667072482,
-          "body": "$AVEX THE PLOT THICKENS!!!",
-          "sentiment": "Bullish",
-          "created": "2026-10-21T23:44:15Z",
-          "likes": 3,
-          "user": "Ted_turnberry"
-        },
-        {
-          "id": 667072458,
-          "body": "Agreed, this one has the smell of a headline doing more damage than the facts. The company said no orders were stopped, and that matters more than the first report. What I would watch is simple. If $A",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:43:45Z",
-          "likes": 0,
-          "user": "TopOptionAlert"
-        },
-        {
-          "id": 667072216,
-          "body": "$AVEX  shorts are going to have a sleepless night.  Company has denied the cancellation.",
-          "sentiment": "Neutral",
-          "created": "2026-10-21T23:39:30Z",
-          "likes": 4,
-          "user": "Nakuldesai"
+          "created": "2026-10-22T00:29:19Z",
+          "likes": 7,
+          "user": "jojoraizza"
         }
       ],
       "pump_risk": {
