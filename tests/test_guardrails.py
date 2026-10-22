@@ -2392,6 +2392,62 @@ class TestNewsFirehoseTickerValidation(unittest.TestCase):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# S&P 500 universe fetch — a regex scrape silently degraded to 37 symbols
+# ══════════════════════════════════════════════════════════════════════════════
+class TestSP500UniverseFetch(unittest.TestCase):
+    """
+    get_sp500_symbols() used to regex-scrape Wikipedia's HTML table. Found
+    2026-10-22: it had been returning [] on every call for at least two months
+    (universe-cache.json dated 2026-08-21 held exactly the 37-symbol
+    NDX_EXTRAS fallback, in that exact order) -- the "S&P 500 + Nasdaq 100"
+    screener this repo documents had actually been scanning 37 mega-cap tech
+    names. Replaced with a fetch of a maintained, structured CSV dataset.
+    """
+
+    SAMPLE_CSV = (
+        "Symbol,Security,GICS Sector,GICS Sub-Industry,Headquarters Location,Date added,CIK,Founded\n"
+        "MMM,3M,Industrials,Industrial Conglomerates,\"Saint Paul, Minnesota\",1957-03-04,66740,1902\n"
+        "AOS,A. O. Smith,Industrials,Building Products,\"Milwaukee, Wisconsin\",2017-07-26,91142,1916\n"
+        "BRK.B,Berkshire Hathaway,Financials,Multi-Sector Holdings,\"Omaha, Nebraska\",2010-02-16,1067983,1839\n"
+    )
+
+    def test_parses_symbol_column_from_csv(self):
+        with mock.patch.object(screener, "requests") as mock_requests:
+            mock_requests.get.return_value = mock.Mock(status_code=200, text=self.SAMPLE_CSV)
+            mock_requests.get.return_value.raise_for_status = mock.Mock()
+            symbols = screener.get_sp500_symbols()
+        self.assertEqual(symbols, ["MMM", "AOS", "BRK-B"],
+                         "dots in symbols (BRK.B) must convert to dashes (BRK-B), matching Alpaca's symbology")
+
+    def test_request_failure_returns_empty_list(self):
+        with mock.patch.object(screener, "requests") as mock_requests:
+            mock_requests.get.side_effect = Exception("network down")
+            symbols = screener.get_sp500_symbols()
+        self.assertEqual(symbols, [])
+
+    def test_degraded_universe_is_not_cached(self):
+        """A failed S&P 500 fetch must not lock in the 37-symbol fallback for 7 days."""
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(screener, "JOURNAL_DIR", tmp), \
+             mock.patch.object(screener, "get_sp500_symbols", return_value=[]):
+            universe = screener.get_cached_universe()
+            cache_path = os.path.join(tmp, "universe-cache.json")
+            self.assertEqual(len(universe), 37, "falls back to NDX_EXTRAS for this run")
+            self.assertFalse(os.path.exists(cache_path),
+                             "a degraded (<100 symbol) universe must not be written to cache")
+
+    def test_healthy_universe_is_cached(self):
+        fake_sp500 = [f"SYM{i}" for i in range(503)]
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.object(screener, "JOURNAL_DIR", tmp), \
+             mock.patch.object(screener, "get_sp500_symbols", return_value=fake_sp500):
+            universe = screener.get_cached_universe()
+            cache_path = os.path.join(tmp, "universe-cache.json")
+            self.assertGreater(len(universe), 500)
+            self.assertTrue(os.path.exists(cache_path), "a healthy universe should be cached")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Fundamentals fallback chain — Yahoo 401'd on 63/68 symbols on 2026-09-18
 # ══════════════════════════════════════════════════════════════════════════════
 class TestFundamentalsFallbackChain(unittest.TestCase):

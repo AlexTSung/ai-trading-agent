@@ -41,6 +41,66 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.4.4] — 2026-10-22
+
+**PATCH** — screener.py's S&P 500 universe fetch regex-scraped Wikipedia's HTML table and silently returned [] on every call for at least two months (universe-cache.json dated 2026-08-21 held exactly the 37-symbol NDX_EXTRAS fallback, in that exact order -- the only way that happens is if get_sp500_symbols() returned [] every single refresh). The documented 'S&P 500 + Nasdaq 100 full market screener' had actually been scanning 37 mega-cap tech names the whole time. Fixed by fetching a maintained structured CSV dataset instead of scraping Wikipedia's HTML, and by refusing to cache a degraded (<100 symbol) universe for 7 days so a future fetch failure fails loud and short-lived instead of silent and week-long.
+
+### Why
+Found while sizing up a user request for a broad (1000+ symbol) value-investing
+scan during the current sell-off. Checking what the live screener actually
+covers, `logs/paper/universe-cache.json` held exactly 37 symbols, in exactly
+the order of the hardcoded `NDX_EXTRAS` fallback list in `get_cached_universe()`
+-- not a plausible real S&P 500 sample, a precise match. That only happens if
+`get_sp500_symbols()` had returned `[]` every time the cache refreshed. The
+dev branch's own copy of this file is dated 2026-08-21, so this had been true
+for at least two months: CLAUDE.md's "full market screener (S&P 500 + Nasdaq
+100 + news firehose)" was actually running against 37 mega-cap tech names.
+Nothing errored, because a 37-symbol universe is a completely valid input to
+every downstream step -- it just silently finds far fewer candidates than
+documented, exactly the "a broad except Exception: return [] is where a real
+bug goes to hide" pattern already in this file's Lessons Learned.
+
+`en.wikipedia.org` was unreachable from this session's own sandbox, so the
+exact HTML change that broke the regex couldn't be directly inspected; it
+doesn't matter why a regex tied to one page's current markup broke, only
+that it did, silently, and that regex-scraping an unversioned HTML page is
+the wrong approach regardless. Replaced with a fetch against
+`datasets/s-and-p-500-companies`'s maintained `constituents.csv` on GitHub --
+confirmed reachable and correctly structured (`Symbol` as the first column)
+before writing the fix, parsed with the standard library `csv` module instead
+of a hand-rolled pattern.
+
+### Strategy / CLAUDE.md changes
+- None. This restores the documented screening universe; no Judge criterion,
+  Hard Rule, or sizing rule changed.
+
+### Code changes
+- `screener.py`: `get_sp500_symbols()` now fetches
+  `raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv`
+  and parses it with `csv.DictReader`, instead of a regex over Wikipedia's
+  HTML. Symbols with a `.` (e.g. `BRK.B`) are still normalized to `-` to match
+  Alpaca's symbology.
+- `get_cached_universe()`: a fetch that returns fewer than 100 symbols is no
+  longer written to the 7-day cache -- it's used for that one run (falling
+  back to the 37-symbol `NDX_EXTRAS` list, same as before) and logged loudly,
+  but the next run retries the real fetch instead of inheriting a silently
+  degraded universe for a week.
+- Removed `NDX100_URL`, a module-level constant that was assigned and never
+  read anywhere in the file.
+- `tests/test_guardrails.py`: added `TestSP500UniverseFetch` (4 tests) —
+  CSV parsing including the `BRK.B` → `BRK-B` normalization, request-failure
+  handling, and that a degraded universe is excluded from the cache while a
+  healthy one is cached.
+- Deleted the stale `logs/paper/universe-cache.json` (dated 2026-08-21) so
+  the next real pipeline run regenerates it with the fixed fetch rather than
+  reusing the 37-symbol result for up to 7 more days.
+
+### Comparability
+No. This restores the documented screening universe — it doesn't change any
+Judge criterion, gate, or sizing rule. More candidates reaching the Judge is
+a wider funnel, not a different one.
+
+
 ## [v1.4.3] — 2026-10-22
 
 **PATCH** — journal.py's displayed 'Cash Reserve' percentage divided cash by Alpaca's raw reported portfolio_value (phantom-inflated by LBGJ), not honest equity -- the same denominator bug Hard Rule 11 exists to prevent, except here it only affected the human-facing daily report, not actual Judge/trade decisions (judge.py and trade.py already divide by honest_portfolio_value correctly). On 2026-10-21 this understated the true cash reserve as 9.6% when the Judge's own honest-equity math shows 34.7% -- a 3.6x discrepancy that made the book look cash-starved when it was not. Fixed by adding the same honest_portfolio_value helper (matching judge.py's and trade.py's existing copies) and computing Cash Reserve against it; the journal now also shows both the reported and honest portfolio value side by side so the two numbers are never silently conflated again.

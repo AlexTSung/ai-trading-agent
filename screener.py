@@ -37,18 +37,32 @@ def _headers():
     return {"APCA-API-KEY-ID": ALPACA_KEY, "APCA-API-SECRET-KEY": ALPACA_SECRET}
 
 
-# ── Universe: S&P 500 + Nasdaq 100 via Wikipedia ─────────────────────────────
-SP500_URL  = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-NDX100_URL = "https://en.wikipedia.org/wiki/Nasdaq-100"
+# ── Universe: S&P 500 via a maintained structured dataset ────────────────────
+# Was a regex scrape of Wikipedia's HTML table. That was silently broken —
+# confirmed 2026-10-22: universe-cache.json held exactly the 37-symbol
+# NDX_EXTRAS fallback below, in that exact order, which only happens if
+# get_sp500_symbols() returned [] every single time the weekly cache
+# refreshed. The "full market screener (S&P 500 + Nasdaq 100)" this repo's
+# own docs describe had actually been scanning 37 mega-cap tech names, not
+# ~500+, for as long as that cache existed — nobody noticed because a
+# narrower-than-documented universe doesn't throw an error, it just quietly
+# finds fewer candidates. A regex tied to one page's current HTML markup is
+# exactly the kind of brittle parsing this file's own Lessons Learned section
+# warns about; this fetches a maintained, structured CSV instead; it can
+# still fail (network, schema change) but fails on `raise_for_status()` or a
+# missing column, not on a silent table-layout drift.
+SP500_URL = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
 
 def get_sp500_symbols():
-    """Scrape S&P 500 tickers from Wikipedia. Returns list of symbols."""
+    """Fetch current S&P 500 tickers from the datasets/s-and-p-500-companies
+    GitHub dataset. Returns list of symbols."""
     try:
-        import re
-        r = requests.get(SP500_URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
-        tickers = re.findall(r'<td><a[^>]*>([A-Z]{1,5})</a></td>', r.text)
-        # Wikipedia table has symbol in first column of each row
-        symbols = list(dict.fromkeys(tickers))[:505]
+        import csv
+        import io
+        r = requests.get(SP500_URL, timeout=15)
+        r.raise_for_status()
+        reader = csv.DictReader(io.StringIO(r.text))
+        symbols = [row["Symbol"] for row in reader if row.get("Symbol")]
         return [s.replace(".", "-") for s in symbols if len(s) <= 5]
     except Exception as e:
         print(f"  [screener] S&P 500 fetch failed: {e}", file=sys.stderr)
@@ -80,6 +94,21 @@ def get_cached_universe():
                   "KLAC","SNPS","CDNS","MRVL","ON","MPWR","FTNT","PANW","CRWD",
                   "DDOG","ZS","SNOW","TEAM","WDAY","VEEV","HUBS","MDB","ESTC"]
     universe = list(dict.fromkeys(sp500 + ndx_extras))
+
+    # If the S&P 500 fetch failed, `universe` silently degrades to just the
+    # 37-symbol ndx_extras fallback -- exactly the bug found 2026-10-22: that
+    # degraded result was being written to cache and trusted for 7 days,
+    # repeatedly, since at least 2026-08-21, with nothing to show it had
+    # happened short of counting the universe by hand. A sanity floor well
+    # under the real S&P 500 count (503) but well above the 37-symbol
+    # fallback means a fetch failure is loud and short-lived instead of
+    # silent and week-long: skip the cache write so the very next run retries
+    # the fetch, rather than locking in the crippled universe.
+    if len(sp500) < 100:
+        print(f"  [screener] WARNING: S&P 500 fetch returned only {len(sp500)} symbols "
+              f"-- using {len(universe)}-symbol fallback universe for this run only, "
+              f"NOT caching it. Check get_sp500_symbols().", file=sys.stderr)
+        return universe
 
     with open(cache_path, "w") as f:
         json.dump({"date": date.today().isoformat(), "symbols": universe}, f)
