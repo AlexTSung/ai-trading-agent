@@ -1,8 +1,14 @@
 {
-  "timestamp": "2026-10-22T04:00:21.106828",
+  "timestamp": "2026-10-22T05:00:24.124208",
   "run_type": "morning_intelligence",
   "fear_greed": {
-    "error": "FRED VIX: no data"
+    "source": "fred_vix_proxy",
+    "vix": 17.31,
+    "vix_date": "2026-10-20",
+    "score": 65,
+    "rating": "Greed",
+    "signal": "GREED \u2014 risk-on, watch exits",
+    "timestamp": "2026-10-22T05:00:24.312101"
   },
   "vix": {
     "symbol": "VIXY",
@@ -10,7 +16,7 @@
     "note": "VIXY proxy for VIX"
   },
   "global_markets": {
-    "timestamp": "2026-10-22T04:00:21.400620",
+    "timestamp": "2026-10-22T05:00:24.722162",
     "source": "global_etfs",
     "markets": {
       "EWJ": {
@@ -86,12 +92,49 @@
     }
   },
   "macro": {
-    "timestamp": "2026-10-22T04:00:22.084416",
+    "timestamp": "2026-10-22T05:00:24.975626",
     "source": "fred_csv",
-    "macro": {}
+    "macro": {
+      "FEDFUNDS": {
+        "label": "Fed Funds Rate",
+        "value": "3.75",
+        "date": "2026-09-01",
+        "note": ""
+      },
+      "CPIAUCSL": {
+        "label": "CPI (inflation)",
+        "value": "336.298",
+        "date": "2026-09-01",
+        "note": "CPI index level 336.298 \u2014 watch YoY % change"
+      },
+      "UNRATE": {
+        "label": "Unemployment Rate",
+        "value": "4.2",
+        "date": "2026-09-01",
+        "note": ""
+      },
+      "T10Y2Y": {
+        "label": "Yield Curve (10yr-2yr spread)",
+        "value": "0.32",
+        "date": "2026-10-21",
+        "note": "Flat curve \u2014 caution"
+      },
+      "DGS10": {
+        "label": "10-Year Treasury Yield",
+        "value": "5.12",
+        "date": "2026-10-20",
+        "note": ""
+      },
+      "VIXCLS": {
+        "label": "VIX Closing Price",
+        "value": "17.31",
+        "date": "2026-10-20",
+        "note": "LOW VOL \u2014 risk-on, full sizing allowed"
+      }
+    }
   },
   "market_discovery": {
-    "timestamp": "2026-10-22T04:00:22.201783",
+    "timestamp": "2026-10-22T05:00:25.389782",
     "source": "alpaca_discovery",
     "discovery": {
       "most_active": [
@@ -302,12 +345,12 @@
     }
   },
   "reddit": {
-    "timestamp": "2026-10-22T04:00:22.994210",
+    "timestamp": "2026-10-22T05:00:26.721753",
     "source": "reddit",
     "tickers": []
   },
   "earnings_watch": {
-    "timestamp": "2026-10-22T04:00:23.443938",
+    "timestamp": "2026-10-22T05:00:28.468897",
     "earnings_watch": [
       {
         "symbol": "NVDA",
@@ -330,7 +373,7 @@
     ]
   },
   "insider_activity": {
-    "timestamp": "2026-10-22T04:00:24.197531",
+    "timestamp": "2026-10-22T05:00:28.958457",
     "source": "sec_edgar",
     "insider_filings": [
       {
@@ -413,13 +456,13 @@
       },
       {
         "company": "",
-        "filed": "2026-10-15",
+        "filed": "2026-10-19",
         "form": "4",
         "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
       },
       {
         "company": "",
-        "filed": "2026-10-19",
+        "filed": "2026-10-15",
         "form": "4",
         "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
       },
