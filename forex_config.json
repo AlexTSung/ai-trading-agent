@@ -1,18 +1,18 @@
 {
   "version": 2,
-  "last_updated": "2026-10-22T13:01:14.762888+00:00",
-  "trades_analyzed": 45,
+  "last_updated": "2026-10-22T00:00:00.000000+00:00",
+  "trades_analyzed": 44,
   "weights": {
-    "carry": 0.481,
-    "momentum": 0.481,
-    "technical": 7.595,
-    "session": 0.481,
-    "volatility": 0.481,
-    "risk_reward": 0.481
+    "carry": 2.5,
+    "momentum": 2.0,
+    "technical": 1.5,
+    "session": 1.0,
+    "volatility": 1.5,
+    "risk_reward": 1.5
   },
   "gate_trade": 7.0,
   "gate_large": 8.0,
-  "max_risk_pct": 0.02,
+  "max_risk_pct": 0.01,
   "stop_atr_mult": 2.0,
   "tp1_rr": 1.5,
   "tp2_rr": 3.0,
@@ -30,39 +30,39 @@
   "pair_stats": {
     "USD_CHF": {
       "wins": 1,
-      "losses": 4,
-      "total_pl": -537.4466,
-      "pips": 39.1
+      "losses": 2,
+      "total_pl": 12.89,
+      "pips": 54.4
     },
     "USD_JPY": {
-      "wins": 5,
-      "losses": 2,
-      "total_pl": -1032.2199000000005,
-      "pips": 113.5
+      "wins": 3,
+      "losses": 3,
+      "total_pl": -3430.72,
+      "pips": 0.4
     },
     "EUR_JPY": {
-      "wins": 4,
-      "losses": 0,
-      "total_pl": 936.3771,
-      "pips": 77.0
+      "wins": 3,
+      "losses": 1,
+      "total_pl": 925.51,
+      "pips": 76.2
     },
-    "AUD_USD": {
+    "NZD_USD": {
       "wins": 2,
       "losses": 1,
-      "total_pl": 1532.2017,
-      "pips": 58.1
+      "total_pl": -514.09,
+      "pips": 8.7
     },
     "GBP_JPY": {
       "wins": 2,
       "losses": 4,
-      "total_pl": -1652.2199999999998,
-      "pips": 1.0
+      "total_pl": -1652.22,
+      "pips": 2.0
     },
-    "AUD_JPY": {
-      "wins": 2,
+    "USD_CAD": {
+      "wins": 1,
       "losses": 2,
-      "total_pl": -1971.8899999999999,
-      "pips": -0.3
+      "total_pl": -3096.67,
+      "pips": -67.1
     },
     "CAD_JPY": {
       "wins": 3,
@@ -70,23 +70,17 @@
       "total_pl": -315.52,
       "pips": 0.5
     },
-    "USD_CAD": {
-      "wins": 1,
-      "losses": 2,
-      "total_pl": -3096.67,
-      "pips": -66.9
-    },
-    "NZD_USD": {
+    "AUD_JPY": {
       "wins": 2,
-      "losses": 1,
-      "total_pl": -514.0900000000001,
-      "pips": 8.7
+      "losses": 2,
+      "total_pl": -1971.89,
+      "pips": 0.1
     },
     "GBP_USD": {
-      "wins": 2,
+      "wins": 3,
       "losses": 0,
-      "total_pl": 1277.47,
-      "pips": 128.5
+      "total_pl": 1921.16,
+      "pips": 202.8
     },
     "EUR_USD": {
       "wins": 1,
@@ -105,16 +99,27 @@
       "losses": 0,
       "total_pl": 1390.8,
       "pips": 0.9
+    },
+    "AUD_USD": {
+      "wins": 1,
+      "losses": 1,
+      "total_pl": 12.45,
+      "pips": 15.7
     }
   },
-  "learnings_count": 8,
+  "learnings_count": 0,
   "confluence_stats": {},
   "direction_bias": {
     "long_wr": 0.56,
-    "short_wr": 0.59,
+    "short_wr": 0.6,
     "sample": 45
   },
   "deprioritized_pairs": [
-    "USD_CHF"
-  ]
+    "USD_CHF",
+    "USD_JPY",
+    "USD_CAD",
+    "EUR_GBP"
+  ],
+  "weight_learning_disabled_until_trades": 50,
+  "_note": "v1.4.0 weights corrected 2026-10-22 \u2014 rebase conflict kept old corrupted weights (technical=7.5). Now reset: carry=2.5, momentum=2.0, technical=1.5, session=1.0, vol=1.5, rr=1.5. Lock active until 50 closed trades."
 }
