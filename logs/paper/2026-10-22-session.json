@@ -1,6 +1,6 @@
 {
-  "agent_version": "1.4.2",
-  "timestamp": "2026-10-22T10:01:23.448071-04:00",
+  "agent_version": "1.4.3",
+  "timestamp": "2026-10-22T11:01:58.401347-04:00",
   "trades": [
     {
       "symbol": "MSFT",
@@ -8,11 +8,11 @@
       "qty": 9,
       "limit_price": 494.39,
       "order": {
-        "id": "506d6785-e84f-4553-bd15-5e276b82be77",
-        "client_order_id": "agent-buy-MSFT-20261022140123",
-        "created_at": "2026-10-22T14:01:24.064955086Z",
-        "updated_at": "2026-10-22T14:01:24.066100774Z",
-        "submitted_at": "2026-10-22T14:01:24.064955086Z",
+        "id": "e45bd72f-e8c8-454f-a00b-1302aade3803",
+        "client_order_id": "agent-buy-MSFT-20261022150159",
+        "created_at": "2026-10-22T15:02:00.110753015Z",
+        "updated_at": "2026-10-22T15:02:00.333310487Z",
+        "submitted_at": "2026-10-22T15:02:00.110753015Z",
         "filled_at": null,
         "expired_at": null,
         "canceled_at": null,
@@ -45,12 +45,12 @@
         "source": null,
         "expires_at": "2027-01-20T21:00:00Z",
         "_ok": true,
-        "_agent_reason": "Signal: STRONG_BUY | MA20-target $494.39 | Limit: $494.39 | Budget (5% cap): $4714.11 \u2192 9 shares @ $494.39 | Tier TIER1 stop -20% | TIF gtc",
+        "_agent_reason": "Signal: STRONG_BUY | MA20-target $494.39 | Limit: $494.39 | Budget (5% cap): $4713.98 \u2192 9 shares @ $494.39 | Tier TIER1 stop -20% | TIF gtc",
         "_limit_price_used": 494.39
       },
       "exits": "deferred_until_fill",
       "tif": "gtc",
-      "note": "Signal: STRONG_BUY | MA20-target $494.39 | Limit: $494.39 | Budget (5% cap): $4714.11 \u2192 9 shares @ $494.39 | Tier TIER1 stop -20% | TIF gtc",
+      "note": "Signal: STRONG_BUY | MA20-target $494.39 | Limit: $494.39 | Budget (5% cap): $4713.98 \u2192 9 shares @ $494.39 | Tier TIER1 stop -20% | TIF gtc",
       "judge_score": 8.0
     },
     {
@@ -59,11 +59,11 @@
       "qty": 13,
       "limit_price": 356.84,
       "order": {
-        "id": "d1dd0001-20a1-404c-8980-31135a3a2adc",
-        "client_order_id": "agent-buy-TSLA-20261022140124",
-        "created_at": "2026-10-22T14:01:24.225591764Z",
-        "updated_at": "2026-10-22T14:01:24.226884053Z",
-        "submitted_at": "2026-10-22T14:01:24.225591764Z",
+        "id": "59732df3-2286-4be7-9c39-5575e67c2073",
+        "client_order_id": "agent-buy-TSLA-20261022150201",
+        "created_at": "2026-10-22T15:02:01.187160591Z",
+        "updated_at": "2026-10-22T15:02:01.195356465Z",
+        "submitted_at": "2026-10-22T15:02:01.187160591Z",
         "filled_at": null,
         "expired_at": null,
         "canceled_at": null,
@@ -96,50 +96,74 @@
         "source": null,
         "expires_at": "2027-01-20T21:00:00Z",
         "_ok": true,
-        "_agent_reason": "Signal: STRONG_BUY | MA20-target $356.84 | Limit: $356.84 | Budget (5% cap): $4714.09 \u2192 13 shares @ $356.84 | Tier TIER2 stop -12% | TIF gtc",
+        "_agent_reason": "Signal: STRONG_BUY | MA20-target $356.84 | Limit: $356.84 | Budget (5% cap): $4714.14 \u2192 13 shares @ $356.84 | Tier TIER2 stop -12% | TIF gtc",
         "_limit_price_used": 356.84
       },
       "exits": "deferred_until_fill",
       "tif": "gtc",
-      "note": "Signal: STRONG_BUY | MA20-target $356.84 | Limit: $356.84 | Budget (5% cap): $4714.09 \u2192 13 shares @ $356.84 | Tier TIER2 stop -12% | TIF gtc",
+      "note": "Signal: STRONG_BUY | MA20-target $356.84 | Limit: $356.84 | Budget (5% cap): $4714.14 \u2192 13 shares @ $356.84 | Tier TIER2 stop -12% | TIF gtc",
       "judge_score": 9.12
     },
     {
       "symbol": "PYPL",
       "action": "SELL",
       "result": {
-        "_ok": false,
-        "error": "Order rejected (HTTP 403)",
-        "broker_message": "insufficient qty available for order (requested: 84, available: 51)",
-        "status_code": 403,
-        "submitted": {
-          "symbol": "PYPL",
-          "qty": "84",
-          "side": "sell",
-          "type": "limit",
-          "time_in_force": "day",
-          "limit_price": "57.37",
-          "client_order_id": "agent-sell-PYPL-20261022140124"
-        },
+        "id": "68fddfec-406f-47fa-b5e5-b67e229705d2",
+        "client_order_id": "agent-sell-PYPL-20261022150201",
+        "created_at": "2026-10-22T15:02:02.170730698Z",
+        "updated_at": "2026-10-22T15:02:02.171396697Z",
+        "submitted_at": "2026-10-22T15:02:02.170730698Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "24cbba8c-831b-44e2-8503-dd0c2ed7af8f",
+        "symbol": "PYPL",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "84",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "day",
+        "limit_price": "57.28",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-10-22T20:00:00Z",
+        "_ok": true,
         "_agent_reason": "Sell signal: STRONG_SELL",
-        "_limit_price_used": 57.37,
+        "_limit_price_used": 57.28,
         "_urgent_exit": false,
         "_released_orders": [
           {
-            "order_id": "7950afdd-c556-4ab7-8eb1-895c88cde900",
-            "client_order_id": "t2-oco-20261008193228-PYPL",
+            "order_id": "c5ed1173-94c7-49b1-bfb6-9978e065a8ae",
+            "client_order_id": "t2-oco-20261022150158-PYPL",
             "status_code": 204
           },
           {
-            "order_id": "15e0bb40-b5a0-4ab6-a44b-43bf14eedd90",
-            "client_order_id": "t1-oco-20261008193228-PYPL",
+            "order_id": "906e0521-0fce-4ceb-88ff-863c050408c4",
+            "client_order_id": "t1-oco-20261022150158-PYPL",
             "status_code": 204
           }
         ]
       }
     },
     {
-      "error": "PRICE_MISMATCH: live ask $146.5800 deviates 10.0% from researched close $133.2100 (limit 10%). Likely stale bars or a corporate action \u2014 no order placed.",
+      "error": "PRICE_MISMATCH: live ask $149.6100 deviates 12.3% from researched close $133.2100 (limit 10%). Likely stale bars or a corporate action \u2014 no order placed.",
       "symbol": "COP",
       "action": "BUY",
       "judge_score": 8.62
@@ -222,11 +246,6 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "DOW",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
       "symbol": "SOXL",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
@@ -237,7 +256,12 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "CAT",
+      "symbol": "HD",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "COHR",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -257,12 +281,12 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "RBNE",
+      "symbol": "SDST",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "SDST",
+      "symbol": "RBNE",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -277,21 +301,6 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "PFSA",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "WFF",
-      "signal": "WEAK_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "SDEV",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
       "symbol": "XLAB",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
@@ -302,32 +311,40 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
+      "symbol": "PFSA",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "NVD",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
       "symbol": "INTC",
       "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "SNXX",
-      "signal": "HOLD",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "ASTS",
+      "symbol": "NFLX",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "MRP",
+      "symbol": "CBRE",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "AMD",
-      "signal": "HOLD",
-      "reason": "HOLD or no qualifying signal"
+      "symbol": "PNT",
+      "reason": "object of type 'NoneType' has no len()"
     },
     {
-      "symbol": "AGNC",
+      "symbol": "INS",
+      "reason": "object of type 'NoneType' has no len()"
+    },
+    {
+      "symbol": "USA",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     }
@@ -388,13 +405,13 @@
       "rationale": "CHASE VETO: price $55.83 is 7.1% above MA20 $52.11 (limit 3%) \u2014 do not chase"
     },
     {
-      "symbol": "META",
-      "signal": "STRONG_BUY",
+      "symbol": "GLD",
+      "signal": "WEAK_BUY",
       "judge_recommendation": "VETO",
-      "judge_score": 0.0,
-      "approval_gate": 7.0,
-      "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 88 is above 60 \u2014 overbought, wait for a pullback"
+      "judge_score": 5.5,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock"
     },
     {
       "symbol": "IBM",
@@ -403,25 +420,16 @@
       "judge_score": 8.15,
       "approval_gate": 8.5,
       "is_discovery": true,
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $236.35 > MA50 $233.48, price $237.74 above both [capped 3.0\u21922.0 at weight 2.0]. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Adequate cash reserve 35%. Volatility: VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $231B; Profitable; 9 analyst buy ratings. Source: discovery | Gate: 8.5."
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $236.35 > MA50 $233.48, price $237.74 above both [capped 3.0\u21922.0 at weight 2.0]. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Adequate cash reserve 35%. Volatility: VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $233B; Profitable; 9 analyst buy ratings. Source: discovery | Gate: 8.5."
     },
     {
-      "symbol": "SLV",
-      "signal": "WEAK_BUY",
+      "symbol": "IREN",
+      "signal": "STRONG_BUY",
       "judge_recommendation": "VETO",
-      "judge_score": 5.0,
-      "approval_gate": 8.5,
-      "is_discovery": true,
-      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock"
-    },
-    {
-      "symbol": "GLD",
-      "signal": "WEAK_BUY",
-      "judge_recommendation": "VETO",
-      "judge_score": 5.5,
-      "approval_gate": 8.5,
-      "is_discovery": true,
-      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock"
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for IREN \u2014 auto-veto per Hard Rule 9"
     },
     {
       "symbol": "CJMB",
@@ -442,6 +450,15 @@
       "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
+      "symbol": "TSLL",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 6.5,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock"
+    },
+    {
       "symbol": "SXTC",
       "signal": "WEAK_BUY",
       "judge_recommendation": "VETO",
@@ -451,13 +468,31 @@
       "rationale": "Quality veto: MICRO_CAP VETO: $0.00B market cap \u2014 too small for discovery buys"
     },
     {
-      "symbol": "TSLL",
+      "symbol": "TSLG",
       "signal": "STRONG_BUY",
       "judge_recommendation": "VETO",
       "judge_score": 6.5,
       "approval_gate": 8.5,
       "is_discovery": true,
       "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock"
+    },
+    {
+      "symbol": "META",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 88 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "SGA",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "VOO",
@@ -480,8 +515,201 @@
   ],
   "stop_losses": [],
   "orphan_cancels": [],
-  "resting_entries": [],
-  "exits_attached": [],
+  "resting_entries": [
+    {
+      "symbol": "TSLA",
+      "action": "KEPT",
+      "order_id": "d1dd0001-20a1-404c-8980-31135a3a2adc",
+      "reason": "still valid \u2014 bid rests"
+    },
+    {
+      "symbol": "MSFT",
+      "action": "KEPT",
+      "order_id": "506d6785-e84f-4553-bd15-5e276b82be77",
+      "reason": "still valid \u2014 bid rests"
+    }
+  ],
+  "exits_attached": [
+    {
+      "symbol": "PYPL",
+      "qty": 84,
+      "entry": 55.169524,
+      "exits": [
+        {
+          "id": "906e0521-0fce-4ceb-88ff-863c050408c4",
+          "client_order_id": "t1-oco-20261022150158-PYPL",
+          "created_at": "2026-10-22T15:01:59.165699164Z",
+          "updated_at": "2026-10-22T15:01:59.16629685Z",
+          "submitted_at": "2026-10-22T15:01:59.165699164Z",
+          "filled_at": null,
+          "expired_at": null,
+          "canceled_at": null,
+          "failed_at": null,
+          "replaced_at": null,
+          "replaced_by": null,
+          "replaces": null,
+          "asset_id": "24cbba8c-831b-44e2-8503-dd0c2ed7af8f",
+          "symbol": "PYPL",
+          "asset_class": "us_equity",
+          "notional": null,
+          "qty": "33",
+          "filled_qty": "0",
+          "filled_avg_price": null,
+          "order_class": "oco",
+          "order_type": "limit",
+          "type": "limit",
+          "side": "sell",
+          "position_intent": "sell_to_close",
+          "time_in_force": "gtc",
+          "limit_price": "66.21",
+          "stop_price": null,
+          "status": "pending_new",
+          "extended_hours": false,
+          "legs": [
+            {
+              "id": "e4472b2f-df7c-405c-ad99-e8d8f076c04b",
+              "client_order_id": "8d23ca61-4b35-4841-b139-38a0a033ed54",
+              "created_at": "2026-10-22T15:01:59.165699164Z",
+              "updated_at": "2026-10-22T15:01:59.166268818Z",
+              "submitted_at": "2026-10-22T15:01:59.165699164Z",
+              "filled_at": null,
+              "expired_at": null,
+              "canceled_at": null,
+              "failed_at": null,
+              "replaced_at": null,
+              "replaced_by": null,
+              "replaces": null,
+              "asset_id": "24cbba8c-831b-44e2-8503-dd0c2ed7af8f",
+              "symbol": "PYPL",
+              "asset_class": "us_equity",
+              "notional": null,
+              "qty": "33",
+              "filled_qty": "0",
+              "filled_avg_price": null,
+              "order_class": "oco",
+              "order_type": "stop",
+              "type": "stop",
+              "side": "sell",
+              "position_intent": "sell_to_close",
+              "time_in_force": "gtc",
+              "limit_price": null,
+              "stop_price": "49.65",
+              "status": "held",
+              "extended_hours": false,
+              "legs": null,
+              "trail_percent": null,
+              "trail_price": null,
+              "hwm": null,
+              "group_id": "3a1cd6b2-5faf-4d65-a40d-27eecc7d176c",
+              "group_role": "stop_loss",
+              "subtag": null,
+              "source": null,
+              "expires_at": "2027-01-20T21:00:00Z"
+            }
+          ],
+          "trail_percent": null,
+          "trail_price": null,
+          "hwm": null,
+          "group_id": "3a1cd6b2-5faf-4d65-a40d-27eecc7d176c",
+          "group_role": "take_profit",
+          "subtag": null,
+          "source": null,
+          "expires_at": "2027-01-20T21:00:00Z",
+          "_ok": true,
+          "_label": "t1",
+          "_target_price": 66.21,
+          "_stop_price": 49.65,
+          "_tier": "TIER3"
+        },
+        {
+          "id": "c5ed1173-94c7-49b1-bfb6-9978e065a8ae",
+          "client_order_id": "t2-oco-20261022150158-PYPL",
+          "created_at": "2026-10-22T15:01:59.350729183Z",
+          "updated_at": "2026-10-22T15:01:59.35320742Z",
+          "submitted_at": "2026-10-22T15:01:59.350729183Z",
+          "filled_at": null,
+          "expired_at": null,
+          "canceled_at": null,
+          "failed_at": null,
+          "replaced_at": null,
+          "replaced_by": null,
+          "replaces": null,
+          "asset_id": "24cbba8c-831b-44e2-8503-dd0c2ed7af8f",
+          "symbol": "PYPL",
+          "asset_class": "us_equity",
+          "notional": null,
+          "qty": "33",
+          "filled_qty": "0",
+          "filled_avg_price": null,
+          "order_class": "oco",
+          "order_type": "limit",
+          "type": "limit",
+          "side": "sell",
+          "position_intent": "sell_to_close",
+          "time_in_force": "gtc",
+          "limit_price": "71.73",
+          "stop_price": null,
+          "status": "pending_new",
+          "extended_hours": false,
+          "legs": [
+            {
+              "id": "51cb9795-06a7-4317-93e7-e6998ef55ff1",
+              "client_order_id": "ffc8b14e-8ffa-4203-84c4-531ec596ca51",
+              "created_at": "2026-10-22T15:01:59.350729183Z",
+              "updated_at": "2026-10-22T15:01:59.353178707Z",
+              "submitted_at": "2026-10-22T15:01:59.350729183Z",
+              "filled_at": null,
+              "expired_at": null,
+              "canceled_at": null,
+              "failed_at": null,
+              "replaced_at": null,
+              "replaced_by": null,
+              "replaces": null,
+              "asset_id": "24cbba8c-831b-44e2-8503-dd0c2ed7af8f",
+              "symbol": "PYPL",
+              "asset_class": "us_equity",
+              "notional": null,
+              "qty": "33",
+              "filled_qty": "0",
+              "filled_avg_price": null,
+              "order_class": "oco",
+              "order_type": "stop",
+              "type": "stop",
+              "side": "sell",
+              "position_intent": "sell_to_close",
+              "time_in_force": "gtc",
+              "limit_price": null,
+              "stop_price": "49.65",
+              "status": "held",
+              "extended_hours": false,
+              "legs": null,
+              "trail_percent": null,
+              "trail_price": null,
+              "hwm": null,
+              "group_id": "32848d6d-52b1-4794-9821-5419a12484e0",
+              "group_role": "stop_loss",
+              "subtag": null,
+              "source": null,
+              "expires_at": "2027-01-20T21:00:00Z"
+            }
+          ],
+          "trail_percent": null,
+          "trail_price": null,
+          "hwm": null,
+          "group_id": "32848d6d-52b1-4794-9821-5419a12484e0",
+          "group_role": "take_profit",
+          "subtag": null,
+          "source": null,
+          "expires_at": "2027-01-20T21:00:00Z",
+          "_ok": true,
+          "_label": "t2",
+          "_target_price": 71.73,
+          "_stop_price": 49.65,
+          "_tier": "TIER3"
+        }
+      ]
+    }
+  ],
   "blocked_by_rules": [
     {
       "symbol": "AMZN",
@@ -495,15 +723,15 @@
       "symbol": "LBGJ",
       "qty": 154903.0,
       "avg_entry_price": 0.0288,
-      "current_price": 1.6497,
-      "price_ratio": 57.28,
-      "unrealized_plpc": 56.28125,
-      "reported_market_value": 255543.48,
+      "current_price": 1.61,
+      "price_ratio": 55.9,
+      "unrealized_plpc": 54.90278,
+      "reported_market_value": 249393.83,
       "cost_basis": 4461.21,
-      "phantom_amount": 251082.27,
+      "phantom_amount": 244932.62,
       "reasons": [
-        "price $1.6497 is 57x its cost basis $0.0288",
-        "unrealized P&L 5,628% exceeds the 1,000% plausibility ceiling",
+        "price $1.6100 is 56x its cost basis $0.0288",
+        "unrealized P&L 5,490% exceeds the 1,000% plausibility ceiling",
         "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
       ],
       "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
