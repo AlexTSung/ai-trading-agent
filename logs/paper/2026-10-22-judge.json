@@ -1,20 +1,22 @@
 {
   "agent_version": "1.4.4",
-  "timestamp": "2026-10-22T16:01:34.773590-04:00",
+  "timestamp": "2026-10-22T17:01:48.723976-04:00",
   "date": "2026-10-22",
   "approved": [
     "TSLA",
     "COP",
     "KDP",
     "NOW",
-    "PFE"
+    "PFE",
+    "ET"
   ],
   "held": [
     "SOXS",
     "MRK",
     "TGT",
-    "VZ",
-    "VAL"
+    "SNDK",
+    "SKYD",
+    "VZ"
   ],
   "vetoed": [
     "QQQ",
@@ -25,19 +27,20 @@
     "NOK",
     "ARGX",
     "DT",
+    "JEPQ",
     "BE",
-    "GLD",
-    "MRNA",
+    "NEM",
+    "LITE",
     "SPCX",
     "CJMB",
     "TSLG",
     "TSLL",
-    "RWM",
-    "SKYD",
     "SMCI",
     "HPQ",
     "META",
-    "LNN"
+    "UAE",
+    "TOP",
+    "MRNA"
   ],
   "scores": {
     "QQQ": {
@@ -132,7 +135,7 @@
         },
         "news": {
           "score": 1.27,
-          "note": "POSITIVE \u2014 5 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]"
+          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
         },
         "macro": {
           "score": 1.0,
@@ -151,7 +154,7 @@
           "note": "Mega-cap $1479B; Profitable; 15 analyst buy ratings"
         }
       },
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $358.63 > MA50 $351.08, price $366.02 above both [capped 3.0\u21922.0 at weight 2.0]. News: POSITIVE \u2014 5 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 40%. Volatility: VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $1479B; Profitable; 15 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $358.63 > MA50 $351.08, price $366.02 above both [capped 3.0\u21922.0 at weight 2.0]. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 40%. Volatility: VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $1479B; Profitable; 15 analyst buy ratings. Source: watchlist | Gate: 8.0.",
       "_gate_used": 8.0
     },
     "NOK": {
@@ -437,6 +440,42 @@
       "rationale": "Technical: WEAK_BUY \u2014 MA20 $161.29 > MA50 $151.19, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Already holding TGT \u2014 price above entry, avg-down not warranted. Volatility: VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $72B; Profitable; 11 analyst buy ratings. Source: watchlist | Gate: 8.0.",
       "_gate_used": 8.0
     },
+    "JEPQ": {
+      "symbol": "JEPQ",
+      "recommendation": "VETO",
+      "score": 6.5,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+      "criteria": {
+        "technical": {
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $59.64 > MA50 $59.39, price $59.93 above both [capped 3.0\u21922.0 at weight 2.0]"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 1.0,
+          "note": "RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 40%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.0,
+          "note": "Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+          "veto": true
+        }
+      },
+      "_gate_used": 8.5
+    },
     "BE": {
       "symbol": "BE",
       "recommendation": "VETO",
@@ -447,26 +486,88 @@
       },
       "_gate_used": 7.0
     },
-    "GLD": {
-      "symbol": "GLD",
+    "NEM": {
+      "symbol": "NEM",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for GLD \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NEM \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
       "_gate_used": 7.0
     },
-    "MRNA": {
-      "symbol": "MRNA",
+    "LITE": {
+      "symbol": "LITE",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LITE \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "_gate_used": 7.0
+    },
+    "SNDK": {
+      "symbol": "SNDK",
+      "recommendation": "HOLD",
+      "score": 8.25,
+      "approval_gate": 8.5,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_ON",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 30 round trips)",
+          "Win rate 95% CI on 30 trips: 5%\u201330%",
+          "CONFIDENT tier \u2014 fitted on 30 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 30,
+        "band": 0.15
+      },
+      "vix": 16.68,
+      "is_discovery": true,
+      "is_speculative": true,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "2.0/2.0",
+        "news": "1.0/1.5",
+        "macro": "1.0/1.0",
+        "portfolio": "2.0/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "1.25/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $1581.72 > MA50 $1505.37, price $1614.35 above both [capped 3.0\u21922.0 at weight 2.0]"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 1.0,
+          "note": "RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 40%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 1.25,
+          "note": "Mega-cap $236B; Zero analyst buy coverage on a discovery stock"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $1581.72 > MA50 $1505.37, price $1614.35 above both [capped 3.0\u21922.0 at weight 2.0]. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 40%. Volatility: VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $236B; Zero analyst buy coverage on a discovery stock. Source: discovery | Gate: 8.5.",
+      "_gate_used": 8.5
     },
     "SPCX": {
       "symbol": "SPCX",
@@ -562,26 +663,68 @@
       },
       "_gate_used": 8.5
     },
-    "RWM": {
-      "symbol": "RWM",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
     "SKYD": {
       "symbol": "SKYD",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for SKYD \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
+      "recommendation": "HOLD",
+      "score": 7.52,
+      "approval_gate": 8.5,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_ON",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 30 round trips)",
+          "Win rate 95% CI on 30 trips: 5%\u201330%",
+          "CONFIDENT tier \u2014 fitted on 30 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 30,
+        "band": 0.15
       },
-      "_gate_used": 7.0
+      "vix": 16.68,
+      "is_discovery": true,
+      "is_speculative": true,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "1.5/2.0",
+        "news": "1.27/1.5",
+        "macro": "1.0/1.0",
+        "portfolio": "2.0/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "0.75/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $10.70 > MA50 $9.68, price between MAs"
+        },
+        "news": {
+          "score": 1.27,
+          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
+        },
+        "macro": {
+          "score": 1.0,
+          "note": "RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 40%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.75,
+          "note": "Large-cap $39B; Unprofitable \u2014 burning cash; Short float 15.73% \u2014 elevated short interest"
+        }
+      },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $10.70 > MA50 $9.68, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 40%. Volatility: VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $39B; Unprofitable \u2014 burning cash; Short float 15.73% \u2014 elevated short interest. Source: discovery | Gate: 8.5.",
+      "_gate_used": 8.5
     },
     "KDP": {
       "symbol": "KDP",
@@ -868,10 +1011,57 @@
       },
       "_gate_used": 7.0
     },
-    "VAL": {
-      "symbol": "VAL",
-      "recommendation": "HOLD",
-      "score": 7.0,
+    "UAE": {
+      "symbol": "UAE",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "TOP": {
+      "symbol": "TOP",
+      "recommendation": "VETO",
+      "score": 6.5,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Small-cap $2.0B \u2014 limited institutional support; Unprofitable \u2014 burning cash; Zero analyst buy coverage on a discovery stock",
+      "criteria": {
+        "technical": {
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $15.21 > MA50 $9.78, price $15.43 above both [capped 3.0\u21922.0 at weight 2.0]"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 1.0,
+          "note": "RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 40%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.0,
+          "note": "Small-cap $2.0B \u2014 limited institutional support; Unprofitable \u2014 burning cash; Zero analyst buy coverage on a discovery stock",
+          "veto": true
+        }
+      },
+      "_gate_used": 8.5
+    },
+    "ET": {
+      "symbol": "ET",
+      "recommendation": "APPROVE",
+      "score": 8.87,
       "approval_gate": 8.5,
       "size_multiplier": 1.0,
       "macro_regime": "RISK_ON",
@@ -896,20 +1086,20 @@
       "avg_down_candidate": false,
       "score_breakdown": {
         "technical": "1.5/2.0",
-        "news": "0.5/1.5",
+        "news": "1.27/1.5",
         "macro": "1.0/1.0",
         "portfolio": "2.0/2.0",
         "volatility": "1.0/1.0",
-        "quality": "1.0/2.5"
+        "quality": "2.1/2.5"
       },
       "criteria": {
         "technical": {
           "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $86.14 > MA50 $82.30, price between MAs"
+          "note": "WEAK_BUY \u2014 MA20 $21.37 > MA50 $20.79, price between MAs"
         },
         "news": {
-          "score": 0.5,
-          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+          "score": 1.27,
+          "note": "POSITIVE \u2014 2 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]"
         },
         "macro": {
           "score": 1.0,
@@ -924,21 +1114,50 @@
           "note": "VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
         },
         "quality": {
-          "score": 1.0,
-          "note": "Mid-cap $6.4B; Profitable; Short float 10.67% \u2014 elevated short interest"
+          "score": 2.1,
+          "note": "Large-cap $69B; Profitable; 15 analyst buy ratings"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $86.14 > MA50 $82.30, price between MAs. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 40%. Volatility: VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mid-cap $6.4B; Profitable; Short float 10.67% \u2014 elevated short interest. Source: discovery | Gate: 8.5.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $21.37 > MA50 $20.79, price between MAs. News: POSITIVE \u2014 2 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 40%. Volatility: VIX 16.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $69B; Profitable; 15 analyst buy ratings. Source: discovery | Gate: 8.5.",
       "_gate_used": 8.5
     },
-    "LNN": {
-      "symbol": "LNN",
+    "MRNA": {
+      "symbol": "MRNA",
       "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LNN \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
+      "score": 6.5,
+      "dip_buy_candidate": true,
+      "dip_buy_approved": false,
+      "dip_pct_drop": 17.5,
+      "score_breakdown": {
+        "fundamentals": "1.0/4.0",
+        "news_catalyst": "2.0/3.0",
+        "macro": "1.5/1.0",
+        "portfolio": "2.0/2.0",
+        "knife_penalty": "-0.0"
       },
+      "criteria": {
+        "fundamentals": {
+          "score": 1.0,
+          "note": "4 analyst buy ratings; Revenue growing 2.10%"
+        },
+        "news_catalyst": {
+          "score": 2.0,
+          "note": "No confirmed catalyst \u2014 may be sympathy selling or macro fear"
+        },
+        "macro": {
+          "score": 1.5,
+          "note": "RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 40%"
+        },
+        "falling_knife": {
+          "penalty": 0.0,
+          "note": "Clean entry (no knife risk). Clean single-day shock on healthy stock"
+        }
+      },
+      "rationale": "DIP BUY \u2014 stock down 18% today. Knife check: Clean single-day shock on healthy stock. Fundamentals: 4 analyst buy ratings; Revenue growing 2.10%. News: No confirmed catalyst \u2014 may be sympathy selling or macro fear. Macro: RISK-ON \u2014 SPY MA20 $764.31 > MA50 $759.50. Raw score 6.5 \u2212 knife penalty 0.0 = 6.5/10 (gate \u22658.0). VETO.",
       "_gate_used": 7.0
     }
   }
