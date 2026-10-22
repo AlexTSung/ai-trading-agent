@@ -41,6 +41,43 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.4.3] — 2026-10-22
+
+**PATCH** — journal.py's displayed 'Cash Reserve' percentage divided cash by Alpaca's raw reported portfolio_value (phantom-inflated by LBGJ), not honest equity -- the same denominator bug Hard Rule 11 exists to prevent, except here it only affected the human-facing daily report, not actual Judge/trade decisions (judge.py and trade.py already divide by honest_portfolio_value correctly). On 2026-10-21 this understated the true cash reserve as 9.6% when the Judge's own honest-equity math shows 34.7% -- a 3.6x discrepancy that made the book look cash-starved when it was not. Fixed by adding the same honest_portfolio_value helper (matching judge.py's and trade.py's existing copies) and computing Cash Reserve against it; the journal now also shows both the reported and honest portfolio value side by side so the two numbers are never silently conflated again.
+
+### Why
+Found while sizing up a user request to trim winning positions and lower the
+20% cash floor to free up more capital for trading. The premise driving that
+request — cash reserve reading 7-10% in recent journals — turned out to be
+measuring the wrong thing. `journal.py`'s "Cash Reserve" line used
+`cash / account["portfolio_value"]`, Alpaca's raw figure, which still
+includes LBGJ's ~$250K of phantom equity from the unreconciled reverse split.
+`judge.py`'s `score_portfolio()` and `trade.py`'s sizing logic were never
+affected — both already call their own `honest_portfolio_value()` — so no
+trading decision was distorted. But every daily journal since LBGJ went bad
+(2026-08-03 onward) has been reporting a cash reserve number roughly 3-4x
+lower than what the Judge actually checks, making the book look chronically
+cash-starved in the one place a human reads it.
+
+### Strategy / CLAUDE.md changes
+- None. `judge.py`'s and `trade.py`'s Hard Rule 8 enforcement were already
+  correct; this only fixes what the daily journal displays to a human reader.
+
+### Code changes
+- `journal.py`: added `honest_portfolio_value()`, matching the existing
+  copies in `judge.py` and `trade.py` (same docstring lineage, same
+  `detect_phantom_equity` reuse). The EOD journal's "Portfolio Status"
+  section now shows both `Portfolio Value (reported)` and
+  `Portfolio Value (honest — phantom equity at cost)`, and "Cash Reserve" is
+  computed against the honest figure with a note that this is what Hard
+  Rule 8 and the Judge actually gate on.
+
+### Comparability
+No. This is a reporting fix — the Judge and executor's actual cash-floor
+enforcement is unchanged and was already correct. Only what the journal
+displays to a human reader changes.
+
+
 ## [v1.4.2] — 2026-10-20
 
 **PATCH** — GitHub Actions artifact storage quota was exhausted by 30-day retention on hourly log-artifact uploads across 4 equities workflows, which started marking every run 'failure' from ~5 AM ET on 2026-10-20 at the upload-artifact step (the actual pipeline logic and git commit/push in every affected run had already succeeded — this was a cosmetic/monitoring-reliability bug, not a trading-correctness one). Fixed by dropping retention-days to 1 on all 4 equities workflows' log-artifact uploads, since the same content is already committed to git by the preceding step and doesn't need a second, redundant 30-day copy; existing backlog of ~1388 old artifacts cleared via the Actions API to recover quota immediately rather than waiting weeks for them to individually expire.

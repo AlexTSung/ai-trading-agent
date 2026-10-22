@@ -51,6 +51,30 @@ def get_positions():
     r.raise_for_status()
     return r.json()
 
+def honest_portfolio_value(account, positions):
+    """
+    Portfolio value with phantom equity marked back to cost basis.
+
+    trade.py and judge.py each already enforce the 20% cash floor (Hard Rule 8)
+    against this honest figure, not Alpaca's raw reported `portfolio_value` —
+    but this journal's own "Cash Reserve" line divided by the raw figure
+    instead, which understates the true reserve whenever phantom equity (LBGJ)
+    inflates the denominator. A journal reporting 7-10% while the Judge was
+    actually gating on ~35% isn't a rounding difference — it reads as the book
+    being starved of cash when it was not, and would mislead exactly the kind
+    of "do we have room to trade more" decision this file exists to inform.
+    Reuses the executor's detector, same pattern as judge.py's own copy of this
+    function, so journal/judge/trade all agree on what counts as real.
+    """
+    reported = float(account.get("portfolio_value", 0) or 0)
+    try:
+        from trade import detect_phantom_equity
+        excess = sum(f.get("phantom_amount", 0.0)
+                     for f in detect_phantom_equity(positions or []))
+    except Exception:
+        return reported
+    return max(0.0, reported - excess)
+
 def get_orders_today():
     today = et_today_iso()
     r = requests.get(f"{BASE_URL}/v2/orders", headers=_headers(), params={"status": "all", "after": today, "limit": 100})
@@ -102,6 +126,7 @@ def write_eod_journal():
     cash           = float(account.get("cash", 0))
     portfolio_val  = float(account.get("portfolio_value", 0))
     equity         = float(account.get("equity", 0))
+    honest_val     = honest_portfolio_value(account, positions)
 
     positions_summary = ""
     if positions:
@@ -226,9 +251,10 @@ def write_eod_journal():
 
 ## Portfolio Status
 - **Cash**: ${cash:,.2f}
-- **Portfolio Value**: ${portfolio_val:,.2f}
+- **Portfolio Value (reported)**: ${portfolio_val:,.2f}
+- **Portfolio Value (honest — phantom equity at cost)**: ${honest_val:,.2f}
 - **Equity**: ${equity:,.2f}
-- **Cash Reserve**: {(cash / portfolio_val * 100) if portfolio_val else 0:.1f}% (target: ≥20%)
+- **Cash Reserve**: {(cash / honest_val * 100) if honest_val else 0:.1f}% of honest equity (target: ≥20% — this is what Hard Rule 8 and the Judge actually gate on)
 
 ### Open Positions
 {positions_summary}
