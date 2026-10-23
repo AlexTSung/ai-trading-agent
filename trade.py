@@ -1022,7 +1022,7 @@ def cancel_all_orders():
 # ── Trading Session ───────────────────────────────────────────────────────────
 def load_judge_output(today: str) -> dict:
     """Load today's Judge scores. Returns empty dict if not found."""
-    judge_path = os.path.join(os.path.dirname(__file__), "logs", "paper", f"{today}-judge.json")
+    judge_path = os.path.join(LOGS_DIR, f"{today}-judge.json")
     if os.path.exists(judge_path):
         with open(judge_path) as f:
             return json.load(f)
@@ -1035,7 +1035,7 @@ def run_trading_session():
     Only executes trades approved by the Judge with score >= 7.0.
     """
     today        = et_today_iso()
-    logs_dir     = os.path.join(os.path.dirname(__file__), "logs", "paper")
+    logs_dir     = LOGS_DIR
     research_path = os.path.join(logs_dir, f"{today}.json")
 
     # Load research
@@ -1147,6 +1147,25 @@ def run_trading_session():
     symbols_data = research.get("symbols", {})
     open_syms    = {p["symbol"] for p in positions}
 
+    # A symbol with an unfilled resting entry bid is not yet a position, so
+    # `sym not in open_syms` alone does not stop a second (or third...) buy
+    # order from stacking on top of it. Found 2026-10-23: once the pipeline
+    # started firing reliably every hour (v1.4.1), a symbol that stayed
+    # Judge-APPROVE across several consecutive hourly runs while its limit
+    # order sat unfilled picked up a brand-new order each run — PFE
+    # accumulated 4 separate resting buy orders, COP 3, in a single morning.
+    # If more than one of a symbol's stacked limits ever fills, the resulting
+    # position silently exceeds every conviction-sizing cap in Hard Rule 6,
+    # since each order was sized independently as if it were the only one.
+    # A patient GTC entry resting across hours/sessions was the intended
+    # design (see "0b. Re-validate resting GTC entry bids" above) — the gap
+    # was never re-checking for one before placing another.
+    open_buy_order_syms = {
+        o.get("symbol") for o in open_orders
+        if o.get("side") == "buy"
+        and str(o.get("client_order_id") or "").startswith("agent-buy-")
+    }
+
     AVG_DOWN_MIN_SCORE = 8.0  # Stricter gate for adding to existing positions
 
     for sym, data in symbols_data.items():
@@ -1218,8 +1237,8 @@ def run_trading_session():
         # 48-hour re-entry cooling-off after a stop-out (CLAUDE.md Hard Rule 4).
         # Applies to every buy path below, including dip buys and avg-downs.
         wants_to_buy = (
-            (is_dip and is_dip_approved and sym not in open_syms)
-            or (signal in ("STRONG_BUY", "WEAK_BUY") and sym not in open_syms)
+            (is_dip and is_dip_approved and sym not in open_syms and sym not in open_buy_order_syms)
+            or (signal in ("STRONG_BUY", "WEAK_BUY") and sym not in open_syms and sym not in open_buy_order_syms)
             or (is_avg_down and sym in open_syms)
         )
         if wants_to_buy:
@@ -1247,7 +1266,7 @@ def run_trading_session():
                     "entry_limit": trade_result.get("limit_price"),
                 }
 
-        if is_dip and is_dip_approved and sym not in open_syms:
+        if is_dip and is_dip_approved and sym not in open_syms and sym not in open_buy_order_syms:
             # Dip buy — stock down 25%+, fundamentals intact, high conviction
             account = get_account()
             trade   = buy_with_guardrails(sym, f"DIP_BUY_{judge_result.get('dip_pct_drop', 0):.0f}pct",
@@ -1264,7 +1283,7 @@ def run_trading_session():
             results["trades"].append(trade)
             _record_entry(trade)
 
-        elif signal in ("STRONG_BUY", "WEAK_BUY") and sym not in open_syms:
+        elif signal in ("STRONG_BUY", "WEAK_BUY") and sym not in open_syms and sym not in open_buy_order_syms:
             # Gate is source-aware: 7.0 for watchlist, 8.5 for discovery stocks
             gate = judge_result.get("approval_gate", 7.0)
             if judge_rec != "APPROVE" or judge_score < gate:
@@ -1314,6 +1333,13 @@ def run_trading_session():
             trade["judge_score"] = judge_score
             trade["action"] = "AVG_DOWN"
             results["trades"].append(trade)
+
+        elif sym in open_buy_order_syms and sym not in open_syms:
+            results["skipped"].append({
+                "symbol": sym, "signal": signal,
+                "reason": "Already has a resting buy order — not stacking a second one "
+                          "(see GUARDRAIL: open_buy_order_syms, trade.py)",
+            })
 
         else:
             results["skipped"].append({"symbol": sym, "signal": signal,

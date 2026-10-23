@@ -41,6 +41,61 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.5.1] — 2026-10-23
+
+**PATCH** — run_trading_session's buy gate was 'sym not in open_syms' (filled positions only), so an unfilled resting limit order was not recognized as already pending -- a symbol that stayed Judge-APPROVE across consecutive hourly runs while its entry bid sat unfilled picked up a brand-new duplicate buy order every run. Found live on the paper account 2026-10-23: PFE had 4 separate resting buy orders and COP 3, accumulated in a single morning now that the pipeline fires reliably every hour (v1.4.1). If more than one of a symbol's stacked limits ever fills, the resulting position silently exceeds every conviction-sizing cap in Hard Rule 6. Fixed by also checking open orders for an existing agent-placed buy order on the same symbol before placing another.
+
+### Why
+Found while running the v1.5.0 watchlist additions through the normal
+pipeline at the user's request. Two near-simultaneous triggers (a manual
+dispatch landing ~45 seconds after the natural hourly cron) both reached the
+buy loop, and inspecting the resulting `resting_entries` in that run's
+session output showed PFE with 4 distinct order IDs and COP with 3 — all
+placed the same morning. The root cause predates the near-simultaneous
+trigger, though: `revalidate_resting_entries` ("0b" in `run_trading_session`)
+already re-checks every resting GTC entry bid every run specifically because
+entries now rest *across* sessions (a deliberate v1.x design choice so a
+patient limit at MA20 support can wait for a pullback instead of expiring
+nightly) — but nothing before step "2. Execute only Judge-approved buys"
+cross-referenced that same resting-order list against new buy candidates.
+Any single hourly re-run where a symbol was still Judge-APPROVE and its
+earlier bid hadn't filled would place another. This was effectively dormant
+before v1.4.1 (one-shot-per-day research meant a symbol rarely got evaluated
+twice in a day before its order either filled or went stale) and became live
+the moment hourly re-evaluation started working as designed.
+
+### Strategy / CLAUDE.md changes
+- None. Hard Rule 6's conviction-scaled sizing was already correct per
+  order; this closes the path by which multiple orders for the same symbol
+  could each be sized as if it were the only one.
+
+### Code changes
+- `trade.py` `run_trading_session()`: added `open_buy_order_syms`, built from
+  the same `open_orders` fetch already used for resting-entry revalidation,
+  matching on `side == "buy"` and the existing `agent-buy-` client-order-id
+  prefix convention (same prefix `revalidate_resting_entries` already
+  filters on). All three buy-gating sites (`wants_to_buy`, the dip-buy branch,
+  the signal-buy branch) now also require `sym not in open_buy_order_syms`.
+  A symbol skipped for this reason gets its own explicit skip reason instead
+  of falling into the generic "HOLD or no qualifying signal" bucket.
+- Consolidated two inline recomputations of `logs/paper`'s path
+  (`load_judge_output`, `run_trading_session`) to use the existing
+  module-level `LOGS_DIR` constant instead of each re-deriving it from
+  `os.path.dirname(__file__)` — no behavior change, but it's what made this
+  change's own test possible to write without touching real log files.
+- `tests/test_guardrails.py`: added `TestNoDuplicateRestingBuyOrders` (4
+  tests, mutation-tested to confirm each fails if the new check is removed) —
+  a fresh buy still places an order with no existing one; one resting
+  agent-placed buy order blocks a second; a non-agent order on the same
+  symbol does not false-positive as a duplicate; a resting *sell* order
+  (e.g. a take-profit) does not block a new buy.
+
+### Comparability
+No. This is a correctness fix restoring the sizing guarantee Hard Rule 6
+already assumed (one order, one size, per entry) — it doesn't change what
+the Judge approves or how a single order is sized.
+
+
 ## [v1.5.0] — 2026-10-23
 
 **MINOR** — Added 8 new watchlist symbols (IBM, PFE, KDP, VZ, LRCX, ADBE, CMCSA, CSX) at the user's direction, from a value-investing review of the 2026-10-22 broad market scan. MSFT and COP from the same review were already on the watchlist. This adds candidates for the normal research/judge/trade pipeline to evaluate -- it does not pre-approve any of them or change any Judge criterion, gate, or sizing rule.

@@ -2803,3 +2803,101 @@ class TestRunScanConsultsNewGates(unittest.TestCase):
             run_options.run_scan(dry_run=True)
         self.assertEqual(mock_exec.call_args.kwargs.get("qty"), 1,
                          "elevated VIX must cap short-premium sizing at 1 contract")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Duplicate resting buy orders — a gate against positions, not against orders
+# ══════════════════════════════════════════════════════════════════════════════
+class TestNoDuplicateRestingBuyOrders(unittest.TestCase):
+    """
+    run_trading_session()'s buy gate was `sym not in open_syms`, where
+    open_syms came from filled positions only. An unfilled resting limit
+    order is not a position, so a symbol that stayed Judge-APPROVE across
+    several consecutive hourly runs while its entry bid sat unfilled picked
+    up a brand-new order every run. Found 2026-10-23, live on the paper
+    account: PFE had accumulated 4 separate resting buy orders and COP 3,
+    in a single morning, once the pipeline started firing reliably every
+    hour (v1.4.1). If more than one of a symbol's stacked limits ever fills,
+    the resulting position silently exceeds every conviction-sizing cap in
+    Hard Rule 6, since each order was sized independently as if it were the
+    only one.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.today = "2026-10-23"
+        with open(os.path.join(self.tmp, f"{self.today}.json"), "w") as f:
+            json.dump({
+                "market_open": True,
+                "symbols": {
+                    "PFE": {
+                        "technicals": {"signal": "WEAK_BUY", "limit_price": 27.50,
+                                       "last_close": 27.63, "ma20": 28.06, "ma50": 26.62},
+                    },
+                },
+            }, f)
+        with open(os.path.join(self.tmp, f"{self.today}-judge.json"), "w") as f:
+            json.dump({
+                "scores": {
+                    "PFE": {"recommendation": "APPROVE", "score": 9.0,
+                            "approval_gate": 7.0, "size_multiplier": 1.0,
+                            "macro_regime": "RISK_ON"},
+                },
+            }, f)
+        self.state_path = os.path.join(self.tmp, "agent-state.json")
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _run(self, open_orders):
+        with mock.patch.object(trade, "LOGS_DIR", self.tmp), \
+             mock.patch.object(trade, "STATE_PATH", self.state_path), \
+             mock.patch.object(trade, "et_today_iso", return_value=self.today), \
+             mock.patch.object(trade, "get_account", return_value={"cash": "100000", "portfolio_value": "500000"}), \
+             mock.patch.object(trade, "get_positions", return_value=[]), \
+             mock.patch.object(trade, "get_orders", return_value=open_orders), \
+             mock.patch.object(trade, "load_watchlist_config", return_value={"watchlist": []}), \
+             mock.patch.object(trade, "detect_phantom_equity", return_value=[]), \
+             mock.patch.object(trade, "cancel_orphan_exits", return_value=[]), \
+             mock.patch.object(trade, "check_stop_loss", return_value=[]), \
+             mock.patch.object(trade, "check_inverse_etf_max_hold", return_value=[]), \
+             mock.patch.object(trade, "ensure_exits_for_positions", return_value=[]), \
+             mock.patch.object(trade, "buy_with_guardrails") as mock_buy:
+            mock_buy.return_value = {"symbol": "PFE", "order": {"status": "pending_new"},
+                                      "qty": 1, "limit_price": 27.50}
+            results = trade.run_trading_session()
+        return results, mock_buy
+
+    def test_no_existing_order_places_a_new_buy(self):
+        results, mock_buy = self._run(open_orders=[])
+        mock_buy.assert_called_once()
+        self.assertEqual(results["trades"][0]["symbol"], "PFE")
+
+    def test_one_resting_buy_order_blocks_a_second(self):
+        existing_order = {
+            "id": "existing-order-1", "symbol": "PFE", "side": "buy",
+            "client_order_id": "agent-buy-PFE-20261023090000", "status": "open",
+        }
+        results, mock_buy = self._run(open_orders=[existing_order])
+        mock_buy.assert_not_called()
+        skipped_syms = [s["symbol"] for s in results["skipped"]]
+        self.assertIn("PFE", skipped_syms,
+                      "a symbol with an unfilled resting buy order must not get a second one")
+
+    def test_non_agent_order_does_not_block(self):
+        """A manually-placed or exit order on the same symbol must not look like a duplicate entry."""
+        manual_order = {
+            "id": "manual-1", "symbol": "PFE", "side": "buy",
+            "client_order_id": "some-other-system-order", "status": "open",
+        }
+        results, mock_buy = self._run(open_orders=[manual_order])
+        mock_buy.assert_called_once()
+
+    def test_sell_side_order_does_not_block_a_buy(self):
+        sell_order = {
+            "id": "sell-1", "symbol": "PFE", "side": "sell",
+            "client_order_id": "agent-sell-PFE-20261023090000", "status": "open",
+        }
+        results, mock_buy = self._run(open_orders=[sell_order])
+        mock_buy.assert_called_once()
