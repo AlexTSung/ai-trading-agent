@@ -156,6 +156,57 @@
       "max_allocation_pct": 0,
       "type": "signal_only",
       "notes": "SIGNAL ONLY — never buy. judge.py score_volatility reads VIXY technicals as the VIX proxy for the Citadel sizing rule. Without it in the watchlist, every stock silently received a free full-weight volatility point and the 'reduce size when VIX > 25' rule never activated. max_allocation_pct 0 keeps it out of the buy path."
+    },
+    {
+      "symbol": "IBM",
+      "description": "Enterprise AI / hybrid cloud — mega-cap turnaround compounder",
+      "max_allocation_pct": 5,
+      "notes": "Added 2026-10-23 from the 2026-10-22 broad-scan value review. Mega-cap $234B, profitable, 9 analyst buy ratings. Sitting almost exactly on MA20 after the broader market pullback — a support-level entry, not a chase. Not in trade.py's TIER1/TIER2 hardcoded sets despite the market cap, so it defaults to the TIER3 -10% stop; flagged here since that's tighter than its quality would otherwise warrant."
+    },
+    {
+      "symbol": "PFE",
+      "description": "Pfizer — large-cap pharma, defensive healthcare",
+      "max_allocation_pct": 5,
+      "notes": "Added 2026-10-23 from the 2026-10-22 broad-scan value review. Mega-cap $172B, profitable, 8 analyst buy ratings. Healthcare tends to be a rotation-INTO sector during a growth-led selloff, not out of it. TIER3 stop by default (not in TIER1/TIER2 sets)."
+    },
+    {
+      "symbol": "KDP",
+      "description": "Keurig Dr Pepper — consumer staples, beverages",
+      "max_allocation_pct": 5,
+      "correlation_group": "consumer_staples",
+      "notes": "Added 2026-10-23 from the 2026-10-22 broad-scan value review. Large-cap $48B, profitable, 8 analyst buy ratings. Same defensive-rotation logic as PFE/TGT. TIER3 stop by default."
+    },
+    {
+      "symbol": "VZ",
+      "description": "Verizon — telecom, high dividend yield",
+      "max_allocation_pct": 5,
+      "correlation_group": "telecom",
+      "notes": "Added 2026-10-23 from the 2026-10-22 broad-scan value review. Mega-cap $186B, profitable, 8 analyst buy ratings, but 2 bearish headlines flagged by the Judge's news score — a real sentiment overhang, not just noise. CORRELATION: tagged with CMCSA (also telecom/media) — treat as one bet. TIER3 stop by default."
+    },
+    {
+      "symbol": "LRCX",
+      "description": "Lam Research — semiconductor capital equipment",
+      "max_allocation_pct": 5,
+      "notes": "Added 2026-10-23 from the 2026-10-22 broad-scan value review. RSI 28.6, -10% below MA20 on 2026-10-22 — deeply oversold alongside the broader semi complex (NVDA/INTC/SMCI/SOXX all down the same day), reads as sector rotation rather than a company-specific break. CORRELATION NOTE: judge.py's hardcoded tech_names correlation set does not include LRCX, so it will not trigger the existing tech-correlation penalty against the open NVDA position even though the two are genuinely correlated (both semis) — size with that gap in mind, not just what the Judge reports. Contrarian/value entry, not a system-endorsed momentum signal: STRONG_SELL technical as of 2026-10-22."
+    },
+    {
+      "symbol": "ADBE",
+      "description": "Adobe — creative/marketing software, recurring revenue",
+      "max_allocation_pct": 5,
+      "notes": "Added 2026-10-23 from the 2026-10-22 broad-scan value review. RSI 30.5, -6.5% below MA20 on 2026-10-22 — pressured by sector-wide AI-disruption-risk repricing, not a reported earnings miss. Contrarian/value entry, not system-endorsed: STRONG_SELL technical as of 2026-10-22."
+    },
+    {
+      "symbol": "CMCSA",
+      "description": "Comcast — cable/broadband, NBCUniversal/Peacock",
+      "max_allocation_pct": 5,
+      "correlation_group": "telecom",
+      "notes": "Added 2026-10-23 from the 2026-10-22 broad-scan value review. RSI 25.2, -11.5% below MA20 on 2026-10-22 — deepest oversold reading in that scan. Already priced for well-known cord-cutting concerns, which is exactly why it's cheap. CORRELATION: tagged with VZ (also telecom/media) — treat as one bet. Contrarian/value entry, not system-endorsed: STRONG_SELL technical as of 2026-10-22."
+    },
+    {
+      "symbol": "CSX",
+      "description": "CSX Corporation — Class I freight railroad",
+      "max_allocation_pct": 5,
+      "notes": "Added 2026-10-23 from the 2026-10-22 broad-scan value review. RSI 21.8 on 2026-10-22, a sharp fast drop (milder MA20 gap than the RSI alone suggests) — rails are high-barrier infrastructure reacting to macro-slowdown fear, read as cyclical rather than structural. Contrarian/value entry, not system-endorsed: STRONG_SELL technical as of 2026-10-22."
     }
   ],
   "cash_reserve_pct": 20,
@@ -164,5 +215,5 @@
     "sources": ["alpaca_most_active", "alpaca_market_movers", "stocktwits_screener", "alpaca_news_scan"],
     "notes": "Each morning, run discovery before researcher. Pull top 10 most active + top 5 gainers. Filter: price > $5, market cap > $500M, not already pumped > 8%. Feed qualified tickers into researcher alongside watchlist."
   },
-  "notes": "Expanded 2026-08-26. Added CEG, VST, GEV, LLY, MRK, ARGX, COP, DTM, DT, TGT — deliberately outside mega-cap tech. As of 2026-08-26 the prior watchlist was ~100% tech plus inverse ETFs, and every tech name showed MA20 < MA50 while energy (+22% YTD), consumer defensives (+13.3%), industrials and utilities led. Five consecutive sessions produced zero buys because the universe had no pullback setups, not because the gates were wrong. Correlation groups: ai_power (CEG/VST) and observability (DT + the open DDOG position) each count as ONE position. Earlier: expanded 2026-06-29 with GOOGL, AMZN, TSLA and SQQQ, SPXS, SOXS."
+  "notes": "Expanded 2026-10-23. Added IBM, PFE, KDP, VZ, LRCX, ADBE, CMCSA, CSX from a user-directed value-investing review of the 2026-10-22 broad market scan (the first genuinely broad S&P 500 scan since screener.py's universe-fetch bug was fixed the same day — see EQUITIES_CHANGELOG v1.4.4). MSFT and COP from that same review were already on the watchlist. Half are Judge-endorsed pullback-to-support entries (IBM, PFE, KDP, VZ); half are deeper, Judge-would-currently-VETO contrarian value bets on names in a confirmed STRONG_SELL downtrend (LRCX, ADBE, CMCSA, CSX) — added so the normal research/judge/trade pipeline evaluates and reports on them, not to pre-approve any of them. New correlation group: telecom (VZ/CMCSA). Earlier: expanded 2026-08-26 with CEG, VST, GEV, LLY, MRK, ARGX, COP, DTM, DT, TGT — deliberately outside mega-cap tech. As of 2026-08-26 the prior watchlist was ~100% tech plus inverse ETFs, and every tech name showed MA20 < MA50 while energy (+22% YTD), consumer defensives (+13.3%), industrials and utilities led. Five consecutive sessions produced zero buys because the universe had no pullback setups, not because the gates were wrong. Correlation groups: ai_power (CEG/VST) and observability (DT + the open DDOG position) each count as ONE position. Earlier: expanded 2026-06-29 with GOOGL, AMZN, TSLA and SQQQ, SPXS, SOXS."
 }

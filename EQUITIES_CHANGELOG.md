@@ -41,6 +41,56 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v1.5.0] — 2026-10-23
+
+**MINOR** — Added 8 new watchlist symbols (IBM, PFE, KDP, VZ, LRCX, ADBE, CMCSA, CSX) at the user's direction, from a value-investing review of the 2026-10-22 broad market scan. MSFT and COP from the same review were already on the watchlist. This adds candidates for the normal research/judge/trade pipeline to evaluate -- it does not pre-approve any of them or change any Judge criterion, gate, or sizing rule.
+
+### Why
+The user asked for a broad value-investing scan during the current pullback
+(enabled by v1.4.4's screener universe fix), then asked for the resulting
+top-10 list to be "run through the normal path" so the existing
+research/judge/trade pipeline — not an ad hoc manual trade — decides what
+actually gets bought. Two of the ten (MSFT, COP) were already watchlist
+members; the other eight were only reachable via screener.py's volume-based
+discovery, which is not guaranteed to resurface the same names two days
+running. Adding them to `watchlist.json` is the supported way to guarantee
+`research.py full` evaluates a specific symbol every run, same mechanism
+the 2026-08-26 and 2026-06-29 expansions used.
+
+Four of the eight (IBM, PFE, KDP, VZ) were already Judge-APPROVE-tier
+pullback entries as of 2026-10-22 — adding them is unlikely to change much on
+its own. The other four (LRCX, ADBE, CMCSA, CSX) were in a confirmed
+STRONG_SELL downtrend that day, which the Judge's trend-following technical
+criterion scores at 0 regardless of quality — these are added specifically so
+the pipeline's verdict on them is visible and attributable, not to pre-load an
+approval the system's own logic wouldn't currently give.
+
+### Strategy / CLAUDE.md changes
+- `watchlist.json`: 8 new entries (symbol, description, max_allocation_pct 5%
+  each, notes dated and attributed to this review). New `telecom` correlation
+  group tagging VZ and CMCSA, since both are legitimate media/telecom
+  correlation risk per the Correlation Check (Bridgewater) section.
+- Noted but not changed: none of the 8 new symbols are in `trade.py`'s
+  hardcoded `TIER1_SYMBOLS`/`TIER2_SYMBOLS` sets, so all default to the
+  TIER3 -10% stop regardless of actual market cap/quality (IBM and PFE are
+  both $170B+ mega-caps). Also noted: `judge.py`'s hardcoded `tech_names`
+  correlation set does not include LRCX, so it will not trigger the existing
+  tech-correlation penalty against the open NVDA position despite both being
+  semiconductor-sector bets. Both are pre-existing gaps in those hardcoded
+  sets, not something this change fixes — flagged in the watchlist notes so
+  a human reviewing position sizing sees the gap even though the code
+  doesn't account for it.
+
+### Code changes
+- None.
+
+### Comparability
+No. Adding watchlist candidates is explicitly listed as a MINOR, safe-with-
+the-record change in this file's own versioning table — it widens what the
+Judge gets asked to look at, it doesn't change how the Judge, executor, or
+any Hard Rule decides once asked.
+
+
 ## [v1.4.4] — 2026-10-22
 
 **PATCH** — screener.py's S&P 500 universe fetch regex-scraped Wikipedia's HTML table and silently returned [] on every call for at least two months (universe-cache.json dated 2026-08-21 held exactly the 37-symbol NDX_EXTRAS fallback, in that exact order -- the only way that happens is if get_sp500_symbols() returned [] every single refresh). The documented 'S&P 500 + Nasdaq 100 full market screener' had actually been scanning 37 mega-cap tech names the whole time. Fixed by fetching a maintained structured CSV dataset instead of scraping Wikipedia's HTML, and by refusing to cache a degraded (<100 symbol) universe for 7 days so a future fetch failure fails loud and short-lived instead of silent and week-long.
