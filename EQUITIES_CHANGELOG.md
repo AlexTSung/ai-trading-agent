@@ -41,6 +41,71 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v2.1.0] — 2026-10-27
+
+**MINOR** — Add `self_review.py`: a recursive self-improvement proposal log
+that turns `learning_agent.py` patterns with no automatic handler into dated,
+approvable proposals, plus `logs/real/` scaffolding for the eventual
+Robinhood journal. Requested by Alex: "the agent to review and start having
+a recursive self improvement and I approve each suggestion from the agent
+before creating a new version."
+
+### Strategy / CLAUDE.md changes
+- New section **"Recursive Self-Improvement — Agent Proposes, Alex
+  Approves"**, placed right after the existing Learned-hints rails. Explains
+  the gap it closes: `learning_agent.py`'s three auto-applied weight-hint
+  actions stay exactly as-is, but two of its detected patterns
+  (`tighten_entry_checklist`, `tighten_tier3_stop`) imply an actual Hard Rule
+  change that `learning_agent.py` is explicitly forbidden from making, and
+  previously just became inert prose in Lessons Learned with no path
+  forward.
+- Explicit, repeated statement that approving a proposal authorizes the
+  *idea*, not the change — implementation still goes through the full
+  existing discipline (edit, test, `version.py bump`, changelog entry,
+  commit) as a separate step. This is the same "no auto-graduation ever"
+  principle applied to the agent's own code, not just to trading real money.
+- `Tools Available` lists `learning_agent.py` and `self_review.py`.
+
+### Code changes
+- `self_review.py` (new): `propose()` reuses
+  `learning_agent.load_calibration()` / `load_judge_lines()` /
+  `detect_patterns()` — no duplicated detection logic. Skips any action
+  already in `learning_agent.AUTO_HANDLED_ACTIONS`-equivalent set (reduce
+  news weight, tighten risk-off gate, raise approve threshold — these stay
+  on their existing safe path) and any purely informational action
+  (`graduation_check`). For everything else, writes/refreshes a PENDING
+  entry in `logs/proposals/proposals.json`: id, evidence, a concrete
+  proposed change, and a suggested MAJOR/MINOR/PATCH level. `decide()`
+  flips status to APPROVED/REJECTED with a note and records
+  `count_at_decision`, so a rejected pattern only resurfaces as a *new*
+  dated entry if its count actually grew past that point — recurrence at
+  the same count isn't new information and doesn't reopen it. Neither
+  `propose()` nor `decide()` writes to any file but
+  `logs/proposals/proposals.json`.
+- `logs/real/trade-log.csv` created with header only (same columns as
+  `logs/paper/trade-log.csv`) and `logs/real/README.md` explaining why it's
+  still empty (interactive-only execution, per the v2.0.0 entry).
+- `.github/workflows/weekly-self-review.yml` (new): Monday-morning cadence,
+  runs `self_review.py propose`, commits `logs/proposals/proposals.json`.
+  No broker secrets required — every input is a local file already written
+  by the existing paper pipeline.
+- `tests/test_self_review.py` (new, 8 tests): covers unhandled-action →
+  PENDING proposal, auto-handled/informational actions never proposed,
+  re-propose refreshes rather than duplicates, approve/reject set status
+  without touching any other file, and the reject→recurrence rule (same
+  count stays closed, higher count reopens as a new dated entry
+  referencing the prior decision). Mutation-tested: removing the
+  auto-handled/informational skip makes `test_auto_handled_action_is_not_proposed`
+  and `test_informational_action_is_not_proposed` fail, confirming the gate
+  is load-bearing.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Nothing here
+  changes scoring, sizing, or execution — it only adds a reporting/proposal
+  layer that writes to a brand-new file. No existing test's expected
+  behavior changed.
+
+
 ## [v2.0.0] — 2026-10-27
 
 **MAJOR** — Alex explicitly overrode the Phase 2B graduation gate and authorized

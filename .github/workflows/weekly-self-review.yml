@@ -1,0 +1,69 @@
+name: Weekly Self-Review Proposals
+
+# Runs self_review.py's pattern scan weekly and commits logs/proposals/proposals.json.
+#
+# This workflow NEVER implements anything. It only turns patterns
+# learning_agent.py has no safe automatic handler for into dated PENDING
+# proposals for Alex to review. Approving a proposal in a later session
+# authorizes the idea; implementing it (editing code/CLAUDE.md, bumping
+# EQUITIES_VERSION, committing) stays a separate, reviewed step -- the same
+# "no auto-graduation ever" rule applies to the agent improving its own
+# code, not just to trading real money. No broker credentials are needed:
+# every input is a local file (calibration-log.csv, judge *.md files).
+
+on:
+  schedule:
+    # 13:15 UTC Monday = ~9:15 AM ET, after the weekend, before the week's
+    # first morning-pipeline run. Off the :00/:15/:30/:45 grid per the
+    # 2026-09-18 retiming lesson (see CLAUDE.md Daily Schedule section).
+    - cron: '15 13 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  self-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Scan for proposals
+        run: |
+          python3 self_review.py propose
+          echo ""
+          echo "--- pending proposals ---"
+          python3 self_review.py list
+
+      - name: Commit proposals log
+        if: always()
+        run: |
+          git config user.name "Trading Agent"
+          git config user.email "agent@youversion.com"
+          git add logs/proposals/
+          git diff --staged --quiet || git commit -m "chore: weekly self-review proposals $(date +%Y-%m-%d)"
+          git pull --rebase origin ${{ github.ref_name }} || true
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload proposals as artifact
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: self-review-proposals-${{ github.run_id }}
+          path: logs/proposals/proposals.json
+          retention-days: 90

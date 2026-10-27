@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v2.0.0
+> **Version:** v2.1.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -146,6 +146,8 @@ Do not proceed until the user confirms. No exceptions.
 - **research.py** — MA signal computation and watchlist summary
 - **journal.py** — EOD markdown + CSV trade log
 - **trade.py** — trade session execution logic
+- **learning_agent.py** — judge weight hints (auto-applied, tighten-only, clamped) + Lessons Learned
+- **self_review.py** — turns patterns with no automatic handler into approvable proposals (see "Recursive Self-Improvement")
 
 ## Agent Stack (Judge-Executor Model)
 ```
@@ -731,6 +733,56 @@ reaches −15% at 30.
 
 `learning_agent.py` may append to the **Lessons Learned** section of this file
 and nothing else. It cannot edit Hard Rules or graduation criteria.
+
+## Recursive Self-Improvement — Agent Proposes, Alex Approves
+
+`learning_agent.py`'s weight hints above are intentionally narrow: three
+actions (`reduce_news_weight`, `tighten_risk_off_gate`,
+`raise_approve_threshold`) apply automatically, but only as small, clamped,
+tighten-only multipliers inside judge.py's existing scoring — never a Hard
+Rule, never a new capability, never a version bump. Two of
+`detect_patterns()`'s actions have never had anywhere to go:
+`tighten_entry_checklist` and `tighten_tier3_stop` both imply an actual Hard
+Rule change, which `learning_agent.py` is explicitly forbidden from making —
+so historically they just sat as prose in Lessons Learned, below, with no
+structured path to becoming a real change.
+
+`self_review.py` closes that gap, without opening the much larger one of
+letting the agent edit itself. It scans the same evidence
+(`learning_agent.detect_patterns()`), and for any pattern with **no** safe
+automatic handler, writes a dated entry to `logs/proposals/proposals.json`
+with the evidence, a concrete proposed change, and a suggested versioning
+level (MAJOR/MINOR/PATCH per the table at the top of this file) — then
+stops. It never edits this file, never edits code, never touches
+`EQUITIES_VERSION`, never calls `version.py`.
+
+```
+python3 self_review.py propose              # scan evidence, write/refresh proposals
+python3 self_review.py list                 # show PENDING proposals
+python3 self_review.py show <id>            # full detail for one proposal
+python3 self_review.py approve <id> [note]  # mark APPROVED -- does not implement it
+python3 self_review.py reject <id> [note]   # mark REJECTED
+```
+
+**Approving a proposal authorizes the idea, not the change.** The same
+discipline that governs every other version bump in this repo still applies
+after approval: implement it, run `python3 -m unittest discover -s tests`,
+bump `EQUITIES_VERSION` with `version.py bump`, write the
+`EQUITIES_CHANGELOG.md` entry, and commit — as a separate, reviewed step, not
+something `self_review.py approve` triggers by itself. "No auto-graduation
+ever" applies to the agent promoting its own code exactly as it applies to
+trading real money: a human decides when a *suggestion* becomes a *version*.
+
+A rejected proposal does not vanish and does not keep nagging at the same
+evidence: it stays in the log with its rejection reason, and only resurfaces
+as a new dated entry if the underlying pattern's count actually grows past
+where it stood at rejection — recurrence at the same count is not new
+information.
+
+`.github/workflows/weekly-self-review.yml` runs `self_review.py propose` on
+a Monday-morning cadence and commits the result. It needs no broker
+credentials — every input (`calibration-log.csv`, judge `.md` files) is
+already a local file by the time this runs.
 
 ### File ownership
 Two agents have already collided on these files, silently reverting safety
