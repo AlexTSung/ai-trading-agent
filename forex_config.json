@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "last_updated": "2026-10-24T18:00:22.509911+00:00",
+  "last_updated": "2026-10-27T20:53:52.288903+00:00",
   "trades_analyzed": 45,
   "weights": {
-    "carry": 0.481,
-    "momentum": 0.481,
-    "technical": 7.595,
-    "session": 0.481,
-    "volatility": 0.481,
-    "risk_reward": 0.481
+    "carry": 2.5,
+    "momentum": 2.0,
+    "technical": 1.5,
+    "session": 1.0,
+    "volatility": 1.5,
+    "risk_reward": 1.5
   },
   "gate_trade": 7.0,
   "gate_large": 8.0,
@@ -121,5 +121,5 @@
     "EUR_GBP"
   ],
   "weight_learning_disabled_until_trades": 50,
-  "_note": "v1.4.0 weights corrected 2026-10-22 \u2014 rebase conflict kept old corrupted weights (technical=7.5). Now reset: carry=2.5, momentum=2.0, technical=1.5, session=1.0, vol=1.5, rr=1.5. Lock active until 50 closed trades."
+  "_note": "v1.4.0 weights reset 2026-10-27 \u2014 forex_graduation.learn_from_trades() had no lock check, ratcheted technical to 7.595 over 5 EOD runs from a corrupted starting point. Lock now applied in both forex_optimizer.py and forex_graduation.py."
 }

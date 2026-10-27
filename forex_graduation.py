@@ -166,6 +166,12 @@ def learn_from_trades(records, cfg):
         print("  [LEARN] Need at least 3 closed trades to learn. Skipping.")
         return cfg, []
 
+    # v1.4.0: weight lock — prevent overfitting on small sample (same lock as forex_optimizer.py)
+    learning_lock = cfg.get("weight_learning_disabled_until_trades", 50)
+    if len(records) < learning_lock:
+        print(f"  [LEARN] Weight learning locked: need {learning_lock} closed trades, have {len(records)}. Skipping weight update.")
+        return cfg, []
+
     wins   = [r for r in records if r["win"]]
     losses = [r for r in records if not r["win"]]
 
