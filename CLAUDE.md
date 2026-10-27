@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v2.1.0
+> **Version:** v2.2.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -99,7 +99,7 @@ Your persona evolves. Each week, review your journal for patterns in your wins a
 | **Broker** | Alpaca | Alpaca (options) | Robinhood |
 | **Money** | FAKE — simulated | FAKE — simulated | REAL — your actual money |
 | **Executor** | `trade.py` | `options_trade.py` | `mcp__robinhood-trading__*` |
-| **Journal folder** | `logs/paper/` | `logs/options/` | `logs/real/` |
+| **Journal folder** | `logs/paper/` | `logs/options/` | separate private repo: [`ai-trading-agent-real-logs`](https://github.com/AlexTSung/ai-trading-agent-real-logs) |
 | **Purpose** | Strategy testing | Premium selling / vol | Live trading, real P&L |
 
 Robinhood is used **read-only** by `robinhood_screener.py` for live IV and
@@ -118,7 +118,7 @@ Do not proceed until the user confirms. No exceptions.
 2. **Never call `mcp__alpaca__place_stock_order` and `mcp__robinhood-trading__place_equity_order` in the same turn.**
 3. **If the user says "place the order" without specifying which account, ASK before acting.**
 4. **Research and signals are account-agnostic — only execution tools are account-specific.**
-5. **Always log trades to the correct subfolder: `logs/paper/` for Alpaca, `logs/real/` for Robinhood.**
+5. **Always log trades to the correct destination: `logs/paper/` for Alpaca, the private `ai-trading-agent-real-logs` repo (`logs/`) for Robinhood.** Never commit real-money activity to this repo, even accidentally — it's public.
 
 ---
 
@@ -133,8 +133,28 @@ Do not proceed until the user confirms. No exceptions.
 ### Robinhood (Real Money)
 - **Platform**: Robinhood Agentic (live account)
 - **Auth**: OAuth via MCP — never store tokens in files or chat
-- **Journal**: `logs/real/YYYY-MM-DD.md`
-- **Trade log**: `logs/real/trade-log.csv`
+- **Journal and trade log live in a separate private repo**, not here:
+  [`ai-trading-agent-real-logs`](https://github.com/AlexTSung/ai-trading-agent-real-logs)
+  (private, created 2026-10-27). This public repo's `.gitignore` already
+  excluded `logs/real/` — "personal trading records" — since early in the
+  project; going public in v1.x made that exclusion load-bearing rather
+  than just tidy, and a public repo can never be the destination for real
+  account activity regardless of gitignore. The private repo mirrors
+  `logs/paper/`'s exact layout and file formats (`trade-log.csv` schema,
+  `journal-template.md`) so `journal.py`/`reviewer.py`/`self_review.py`-style
+  tooling needs only a log-directory override to operate on it, not a
+  rewrite.
+  - **Journal**: `logs/YYYY-MM-DD.md` in that repo
+  - **Trade log**: `logs/trade-log.csv` in that repo
+  - **No GitHub Actions secret needed for it.** Nothing automated writes
+    there — the Mandatory Confirmation Protocol means execution for this
+    book is interactive-only (see Phase 3 below), so whoever runs that
+    session just needs their own ordinary git push access to the private
+    repo, the same as pushing to any repo they own.
+  - **Nothing writes there yet.** The repo has its structure
+    (`trade-log.csv` header, `journal-template.md`) but no executor
+    produces real entries until the interactive Robinhood execution flow
+    is built — tracked as follow-up work, not yet started as of v2.1.0.
 
 ## Tools Available
 - **Alpaca MCP** — use for all account queries, order placement, position management,

@@ -41,6 +41,43 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v2.2.0] — 2026-10-27
+
+**MINOR** — Real-money journal and trade-log destination is now a separate
+private repo, [`ai-trading-agent-real-logs`](https://github.com/AlexTSung/ai-trading-agent-real-logs)
+(created by Alex 2026-10-27), replacing the gitignored local `logs/real/`
+scaffolding from v2.0.0/v2.1.0. That local scaffolding was never going to
+work as this repo's actual memory model: `logs/real/` has been in
+`.gitignore` since early in the project ("personal trading records"), which
+means nothing written there would ever be committed, visible to a future
+session, or usable by `self_review.py`-style tooling — exactly the three
+things Alex asked for ("a log and repository to learn from... to go back
+and see any details").
+
+### Strategy / CLAUDE.md changes
+- Environment section's Robinhood subsection rewritten: journal and
+  trade-log location, why a separate repo is structurally necessary (not
+  just a style choice), the file-format parity with `logs/paper/` that lets
+  existing tooling read it with only a log-directory override, and that no
+  GitHub Actions secret is needed since nothing automated writes there.
+- Account Guardrails "Three Books" table's Journal folder row and Hard Rule
+  5 updated to point at the private repo instead of `logs/real/`.
+
+### Code changes
+- None in this repo. The private repo received its own initial commit:
+  `README.md` (purpose, privacy requirement, structure, access pattern) and
+  `logs/trade-log.csv` (header only, identical columns to
+  `logs/paper/trade-log.csv`) and `logs/journal-template.md` (copy of this
+  repo's `journal-template.md`). No executor writes to it yet — that's
+  still the same follow-up work flagged in v2.0.0/v2.1.0, now with a real
+  destination ready for it.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Pure
+  infrastructure/documentation; no scoring, sizing, or execution logic
+  changed in this repo.
+
+
 ## [v2.1.0] — 2026-10-27
 
 **MINOR** — Add `self_review.py`: a recursive self-improvement proposal log
