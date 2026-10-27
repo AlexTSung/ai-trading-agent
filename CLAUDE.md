@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v1.5.1
+> **Version:** v2.0.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -215,6 +215,14 @@ Robinhood access is earned only when ALL of these are met in paper:
 
 **Plus: manual approval by Alex** — no auto-graduation ever.
 
+**2026-10-27 note**: Alex exercised manual approval to unlock Phase 3 while
+these criteria were still failing (see Experiment Timeline Decision log and
+`EQUITIES_CHANGELOG.md` v2.0.0). That is a real, owner-level override this
+file's "Plus" always allowed — but it did not retroactively pass the
+criteria above, and does not change what this section requires for any
+future graduation question. Read "real money is live" and "the agent met
+its bar" as two separate facts.
+
 Why both halves. A high win rate proves nothing on its own: 60% winners at +2%
 against 40% losers at −6% clears every process criterion and still loses money.
 Equally, one lucky trade can carry the return while the process is unsound. And
@@ -416,7 +424,7 @@ Findings applied, with what each did and did not support:
 | Phase 1 — initial paper run | June 16–30, 2026 | Complete | Extended — all realized positions negative; rules overhauled on paper but **never implemented in code** |
 | Phase 2 — extended paper run | July 1 – Aug 20, 2026 | **Void — not a valid test** | The overhauled ruleset existed only in this file. Code ran a flat −8% stop, flat 5% sizing, no cooldown, no minimum hold, and an over-counting Judge. Results measure the old ruleset plus defects, not the intended strategy. |
 | Phase 2B — first real test of the ruleset | Aug 20 – Sep 3, 2026 | **Active** | Baseline reset 2026-08-20. First period where the documented rules are actually executing. |
-| Phase 3 — real money (Robinhood) | TBD | Locked | Unlocks only after Phase 2B criteria are met **and** manual approval |
+| Phase 3 — real money (Robinhood) | Begins 2026-10-27 | **Unlocked — manual override** | Alex explicitly overrode the gate on 2026-10-27; criteria were **not** met (see Decision log). Not a graduation — a deliberate owner decision to proceed anyway. |
 
 ### Phase 2B baseline — reset 2026-08-20
 
@@ -453,6 +461,32 @@ short on 2026-09-03, extend rather than graduate.
 **Decision log**
 - **2026-06-29** — Alex extended by 7 days after all 6 closed positions were negative. Ruleset overhauled in this file. *In hindsight: the overhaul was documentation only; none of it reached the code, so the extension tested nothing new.*
 - **2026-08-20** — Phase 2 declared void and baseline reset. Root causes fixed and merged to `master`: Judge weight clamp, $5 price floor, research-vs-execution price check, tiered stops, conviction sizing, 48h cooldown, 30-day minimum hold, phantom-equity detection, real VIX sizing, earnings-watch veto, insider-buy signal. Phase 2B opened through 2026-09-03. Real money remains locked.
+- **2026-10-27** — Alex overrode the Phase 3 gate and authorized real-money
+  Robinhood trading despite `reviewer.py graduation` returning **DO NOT
+  GRADUATE** that same day against the still-open Phase 2B baseline:
+
+  | Criterion | Required | Actual | |
+  |---|---|---|---|
+  | Occurrences (scored buys) | ≥15 | 8 | ❌ |
+  | Closed round trips | ≥10 | 6 | ❌ |
+  | Net return | ≥+3.0% | unavailable | ❌ |
+  | Profit factor (realized) | ≥1.5 | 11.57 | ✅ |
+  | Expectancy/round trip | >0.0% | +6.24% | ✅ |
+  | Realized win rate | ≥55% | 83.3% | ✅ |
+  | Reviewer win rate | ≥55% | 50.0% | ❌ |
+  | Avg Judge score | ≥7.0 | 8.63 | ✅ |
+  | Avg Reviewer score | ≥6.0 | 8.31 | ✅ |
+  | Beats SPY | required | unavailable | ❌ |
+
+  5 of 10 criteria failing, binding constraint is sample size (8/15
+  occurrences, 6/10 round trips — both under half the floor). This is a
+  one-sided unlock by owner decision, not a graduation: the Phase 2B paper
+  baseline is unchanged and not reset, and this entry exists so no future
+  reader mistakes "real money is live" for "the agent proved itself." See
+  `EQUITIES_CHANGELOG.md` v2.0.0 for the full entry, including why real-money
+  execution cannot run on the same unattended GitHub Actions schedule as
+  paper (the Mandatory Confirmation Protocol requires a human in the loop on
+  every order, with no exceptions).
 
 ## Daily Schedule — SINGLE SOURCE OF TRUTH (all times ET, weekdays only)
 

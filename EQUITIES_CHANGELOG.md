@@ -41,6 +41,75 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v2.0.0] — 2026-10-27
+
+**MAJOR** — Alex explicitly overrode the Phase 2B graduation gate and authorized
+real-money Robinhood trading despite measured criteria not being met. The
+2026-10-27 `graduation-decision.yml` run (baseline 2026-08-20) scored:
+
+| Criterion | Required | Actual |
+|---|---|---|
+| Occurrences (scored buys) | ≥15 | 8 |
+| Closed round trips | ≥10 | 6 |
+| Net return | ≥+3.0% | unavailable (broker/benchmark fetch failed — fails closed per rule) |
+| Profit factor (realized) | ≥1.5 | 11.57 |
+| Expectancy/round trip | >0.0% | +6.24% |
+| Realized win rate | ≥55% | 83.3% |
+| Reviewer win rate | ≥55% | 50.0% |
+| Avg Judge score | ≥7.0 | 8.63 |
+| Avg Reviewer score | ≥6.0 | 8.31 |
+| Beats SPY | required | unavailable |
+
+Verdict was **DO NOT GRADUATE** — 5 of 10 criteria failing, binding constraint
+is sample size (8 scored buys / 6 round trips, both under half the required
+floor). Alex was told this directly and chose to override anyway: "Override
+the gate now, go live anyway." Phase 3 unlocks by that explicit instruction,
+not by the agent having earned it under its own documented bar.
+
+### Strategy / CLAUDE.md changes
+- Experiment Timeline Phase 3 row changed from `Locked` to
+  `Unlocked — manual override 2026-10-27`, with the criteria table above
+  reproduced in the Decision log so a future reader sees the override was
+  made against the record, not because of it.
+- Graduation Rules section gets an explicit note: this override does not
+  retroactively mean the criteria were met, and does not change what future
+  graduation decisions require — the next time this gate matters (e.g. sizing
+  conviction, or a future "should we have gone live" retrospective), the
+  actual measured numbers above are what happened, not a passing verdict.
+- No Hard Rule, stop-loss tier, position-sizing formula, or Judge scoring
+  logic changed. Every existing guardrail (stop-loss tiers, 48h cooldown,
+  cash floor, VIX ladder, phantom-equity detection, earnings blackout, the
+  Mandatory Confirmation Protocol) applies identically to the real-money book.
+- **Execution architecture constraint, newly documented**: the Mandatory
+  Confirmation Protocol requires a human to confirm every real-money order
+  "in chat," with "no exceptions." That is fundamentally incompatible with
+  the unattended, hourly GitHub Actions automation the paper book runs on —
+  there is no human present in a scheduled workflow run to confirm anything.
+  Real-money execution therefore cannot be wired into `trade.py` /
+  `morning-pipeline.yml` the way paper is. Research and Judge scoring stay
+  automated (they're account-agnostic); the real-money executor is a
+  human-in-the-loop interactive step only, run from a session where Alex is
+  present to type the confirmation — never a cron trigger, never
+  `workflow_dispatch` on a schedule.
+
+### Code changes
+- None yet. `robinhood_screener.py` (read-only IV/greeks) is the only
+  existing Robinhood-touching code; there is no real-money executor, no
+  `logs/real/` directory, and no `reviewer.py`/`journal.py` support for a
+  third book yet. Those are tracked as follow-up work, not part of this
+  version bump — this bump documents the policy/gate change only.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** The Phase 2B
+  paper baseline (reset 2026-08-20) and every trade counted toward it are
+  unchanged and remain the valid, honest measurement of the ruleset's
+  performance. This bump does not reset that baseline — it records a
+  separate, explicit decision to begin real-money trading *despite* that
+  record not yet clearing the bar. A future reader comparing real-money
+  results against the Phase 2B numbers should know the gate was overridden,
+  not passed, on this date.
+
+
 ## [v1.5.1] — 2026-10-23
 
 **PATCH** — run_trading_session's buy gate was 'sym not in open_syms' (filled positions only), so an unfilled resting limit order was not recognized as already pending -- a symbol that stayed Judge-APPROVE across consecutive hourly runs while its entry bid sat unfilled picked up a brand-new duplicate buy order every run. Found live on the paper account 2026-10-23: PFE had 4 separate resting buy orders and COP 3, accumulated in a single morning now that the pipeline fires reliably every hour (v1.4.1). If more than one of a symbol's stacked limits ever fills, the resulting position silently exceeds every conviction-sizing cap in Hard Rule 6. Fixed by also checking open orders for an existing agent-placed buy order on the same symbol before placing another.
