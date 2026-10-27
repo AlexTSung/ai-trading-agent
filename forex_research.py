@@ -378,6 +378,19 @@ def research_pair(pair, scan_data=None):
     regime = detect_market_regime(highs_h4, lows_h4, closes_h4, atr14_h4, lookback=20)
     stop_mult = regime.get("stop_mult", 2.0)  # 2.0 trending, 3.0 ranging
 
+    # v1.5.0: use per-pair learned stop multiplier if available (recursive learning)
+    try:
+        import json as _json
+        _cfg_path = os.path.join(os.path.dirname(__file__), "forex_config.json")
+        if os.path.exists(_cfg_path):
+            with open(_cfg_path) as _f:
+                _cfg = _json.load(_f)
+            _pair_mults = _cfg.get("pair_stop_multipliers", {})
+            if pair in _pair_mults:
+                stop_mult = _pair_mults[pair]
+    except Exception:
+        pass  # fall back to regime default
+
     # 1H regime check for entry timing
     atr14_h1 = compute_atr(highs_h1, lows_h1, closes_h1, 14)
     regime_h1 = detect_market_regime(highs_h1, lows_h1, closes_h1, atr14_h1, lookback=20) if atr14_h1 else {}

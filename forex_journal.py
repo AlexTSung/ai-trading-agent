@@ -190,15 +190,42 @@ def sync_closed_trades():
         existing_ids.add(trade_id)
         new_closes += 1
 
-    # Update open positions with current unrealized P&L
+    # Update open positions with current unrealized P&L and MFE/MAE tracking
     _ot_result = get_open_trades()
     open_trades = _ot_result if isinstance(_ot_result, list) else _ot_result.get("trades", [])
     for ot in open_trades:
         trade_id = str(ot.get("id", ""))
         match = next((t for t in journal if str(t.get("trade_id")) == trade_id), None)
         if match:
-            match["unrealized_pl"] = float(ot.get("unrealizedPL", 0))
-            match["current_price"]  = float(ot.get("price", 0))
+            unrealized = float(ot.get("unrealizedPL", 0))
+            current_price = float(ot.get("price", 0))
+            match["unrealized_pl"] = unrealized
+            match["current_price"]  = current_price
+
+            # MFE/MAE tracking: max favorable / max adverse excursion in P&L terms
+            # Positive unrealized_pl → currently favorable; update MFE
+            # Negative unrealized_pl → currently adverse; update MAE
+            if unrealized > match.get("mfe_pl", 0):
+                match["mfe_pl"] = round(unrealized, 2)
+            if unrealized < match.get("mae_pl", 0):
+                match["mae_pl"] = round(unrealized, 2)
+
+            # Also track MFE/MAE relative to risk (R-multiple)
+            stop_price = match.get("stop_price")
+            entry_price = match.get("entry_price")
+            if stop_price and entry_price and current_price:
+                risk_dist = abs(float(entry_price) - float(stop_price))
+                direction = match.get("direction", "LONG")
+                if risk_dist > 0:
+                    if direction == "LONG":
+                        profit_dist = current_price - float(entry_price)
+                    else:
+                        profit_dist = float(entry_price) - current_price
+                    current_r = round(profit_dist / risk_dist, 3)
+                    if current_r > match.get("mfe_r", 0):
+                        match["mfe_r"] = current_r
+                    if current_r < match.get("mae_r", 0):
+                        match["mae_r"] = current_r
 
     save_journal(journal)
     print(f"Synced: {new_closes} new closes. Total journal entries: {len(journal)}")

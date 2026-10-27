@@ -22,7 +22,7 @@ os.makedirs(JOURNAL_DIR, exist_ok=True)
 from forex_screener import _check_auth, OANDA_ENV
 
 # ── Score gates (G7 guardrail) ────────────────────────────────────────────────
-GATE_TRADE       = 7.0   # Minimum to place a trade
+GATE_TRADE       = 7.5   # Minimum to place a trade — raised from 7.0 (v1.5.0: filter weak entries)
 GATE_LARGE_SIZE  = 8.0   # Minimum for 1.5× sizing
 GATE_BEST_ONLY   = 9.0   # Elite — full 2% equity allocation
 

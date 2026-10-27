@@ -2,6 +2,51 @@
 
 ---
 
+## v1.5.0 — 2026-10-27 (Recursive Self-Learning + Profit Factor Fixes)
+
+**Baseline reset:** No — all changes tighten or add capability.
+
+### Root cause analysis from 45 closed trades
+- Avg win $437 vs avg loss $1,193 (0.37× ratio — need 0.95× for PF≥1.3 at 57.8% WR)
+- Only 1 TP hit in 45 trades — TP1 at 2R was never being reached
+- 71% stop loss rate — most trades hit stop before 0.5R partial-close trigger
+- EUR/JPY: infinite halving bug — float precision caused `already_trailed` to read False after SL set to breakeven, re-triggering Stage 1 every hour (120k→60k→30k→15k→...)
+- SHORTs: −$11,371. LONGs: +$66. Directional filter too weak.
+
+### Fixes (all tightening — MINOR)
+
+**1. Infinite-halving bug fixed (forex_trade.py)**
+- `already_trailed` now uses unit-count comparison (`current_units < initial_units`) as
+  primary check, with float-tolerance SL comparison as fallback. A position that has
+  already been partially closed never re-enters Stage 1 regardless of SL rounding.
+
+**2. MFE/MAE tracking added (forex_journal.py)**
+- Every hourly journal sync now records `mfe_pl`, `mae_pl`, `mfe_r`, `mae_r` on open
+  positions (max favorable / max adverse excursion in $ and R-multiple terms).
+- These fields persist to closed trades, giving the optimizer real movement data.
+
+**3. Recursive stop/TP optimizer (forex_optimizer.py)**
+- `optimize_stops_and_targets()`: runs on every daily optimizer call (even under the
+  weight lock) and analyzes MFE/MAE data to:
+  - Track partial-close hit rate per pair (did price reach 0.5R before stop?)
+  - Auto-deprioritize pairs with <20% partial-close hit rate (consistently bad entries)
+  - Adjust per-pair `stop_atr_mult` in `pair_stop_multipliers`: if avg MAE is shallow
+    (<0.3R), stop is too tight; if avg MAE is deep (>0.8R), stop too wide
+- forex_research.py reads `pair_stop_multipliers` and uses pair-specific stop distance
+  rather than the global 2.0×ATR for all pairs.
+
+**4. Judge gate raised 7.0 → 7.5 (forex_judge.py)**
+- Trades scoring 7.0–7.4 had below-average outcomes. Raising the gate reduces trade
+  frequency but improves quality. Fewer bad entries is the fastest path to a better
+  profit factor.
+
+### What this enables
+The recursive loop is now:
+  Trade → MFE/MAE recorded hourly → optimizer fits per-pair stop distance → research
+  uses learned distance → better entries → fewer full-stop losses → higher profit factor
+
+---
+
 ## v1.4.0 — 2026-10-20 (Signal Quality Overhaul — Stop Losses to Profits)
 
 **Post-mortem on 44-trade sample: profit factor 0.52 despite 59% win rate. Avg loss ($1,364) is 3.1× avg win ($437). Five catastrophic losses (>$2K each) account for $12,181 of total losses. Root causes identified and fixed.**

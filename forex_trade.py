@@ -483,11 +483,21 @@ def manage_trailing_stops() -> list:
         if direction == "LONG":
             profit_dist = current_price - entry
             new_sl = entry + BREAKEVEN_BUFFER_PIPS * get_pip_size(pair)
-            already_trailed = current_sl is not None and current_sl >= new_sl
+            # Use unit-count comparison to detect prior partial close — avoids float
+            # precision false-negatives where rounded SL reads as < new_sl after update
+            initial_units_abs = abs(int(float(trade.get("initialUnits", units))))
+            current_units_abs = abs(int(units))
+            already_trailed = (current_units_abs < initial_units_abs) or (
+                current_sl is not None and current_sl >= new_sl - get_pip_size(pair)
+            )
         else:
             profit_dist = entry - current_price
             new_sl = entry - BREAKEVEN_BUFFER_PIPS * get_pip_size(pair)
-            already_trailed = current_sl is not None and current_sl <= new_sl
+            initial_units_abs = abs(int(float(trade.get("initialUnits", units))))
+            current_units_abs = abs(int(units))
+            already_trailed = (current_units_abs < initial_units_abs) or (
+                current_sl is not None and current_sl <= new_sl + get_pip_size(pair)
+            )
 
         at_1r = profit_dist >= TRAILING_TRIGGER_RR * risk_dist  # at or past 1:1
 
@@ -525,8 +535,6 @@ def manage_trailing_stops() -> list:
         # Stage 1: if not yet trailed, do partial close (50%) + move SL to BE
         if not already_trailed:
             # Partial close — take profit on half the position
-            initial_units_abs = abs(int(float(trade.get("initialUnits", units))))
-            current_units_abs = abs(int(units))
             half = max(1, current_units_abs // 2)
 
             partial = _partial_close_trade(trade_id, half)

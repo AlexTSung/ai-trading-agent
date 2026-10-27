@@ -400,6 +400,9 @@ def run_daily_optimizer():
         print(f"  Weight learning locked: need {learning_lock} closed trades, have {n}. Skipping weight update.")
         # Still update pair stats, direction bias, confluence — just not weights
         _update_non_weight_stats(cfg, closed, n)
+        # Still run recursive stop/TP learning even when weight lock is active
+        optimize_stops_and_targets(closed, cfg)
+        save_config(cfg)
         return
 
     # Blend ratio: ramps from 0.1 → 1.0 as trades accumulate beyond the lock
@@ -579,6 +582,111 @@ def _init_config_with_patterns():
     cfg = load_config()
     save_config(cfg)
     print("  Default config initialized at forex_config.json")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RECURSIVE STOP/TP OPTIMIZER — learns optimal stop distance from MFE/MAE data
+# ═══════════════════════════════════════════════════════════════════════════════
+
+MIN_TRADES_FOR_STOP_LEARNING = 5   # min closed trades per pair before adjusting its stop_atr_mult
+DEFAULT_STOP_ATR_MULT = 2.0
+MAX_STOP_DRIFT = 0.5               # stop_atr_mult can drift at most ±0.5 from default (1.5–2.5)
+
+def optimize_stops_and_targets(closed: list, cfg: dict) -> dict:
+    """
+    Analyse MFE/MAE data from closed trades to learn:
+      1. Per-pair optimal partial-close hit rate (did price reach 0.5R before stop?)
+      2. Pairs that consistently fail to reach the partial-close trigger → deprioritize
+      3. Per-pair stop_atr_mult adjustments (tighten if MAE is small, widen if noise is large)
+
+    Updates cfg['pair_stop_multipliers'] and cfg['deprioritized_pairs'].
+    Returns a dict of findings for logging.
+    """
+    from collections import defaultdict
+
+    findings = {}
+    pair_data = defaultdict(lambda: {
+        "n": 0, "reached_partial": 0,
+        "mfe_r_list": [], "mae_r_list": [],
+        "stop_r_list": [],  # how far price went before hitting stop (loss trades)
+    })
+
+    for t in closed:
+        pair = t.get("pair")
+        if not pair:
+            continue
+        d = pair_data[pair]
+        d["n"] += 1
+
+        mfe_r = t.get("mfe_r")
+        mae_r = t.get("mae_r")
+        PARTIAL_CLOSE_TRIGGER_R = 0.5  # mirrors TRAILING_TRIGGER_RR in forex_trade.py
+
+        if mfe_r is not None:
+            d["mfe_r_list"].append(mfe_r)
+            if mfe_r >= PARTIAL_CLOSE_TRIGGER_R:
+                d["reached_partial"] += 1
+        if mae_r is not None:
+            d["mae_r_list"].append(mae_r)
+
+        if t.get("close_reason") == "stop_loss" and mfe_r is not None:
+            # MFE before stop: how close did it get to partial trigger?
+            d["stop_r_list"].append(mfe_r)
+
+    adjustments = []
+    new_deprio = list(cfg.get("deprioritized_pairs", []))
+
+    for pair, d in pair_data.items():
+        n = d["n"]
+        if n < MIN_TRADES_FOR_STOP_LEARNING:
+            continue
+
+        partial_rate = d["reached_partial"] / n
+        avg_mfe = sum(d["mfe_r_list"]) / len(d["mfe_r_list"]) if d["mfe_r_list"] else None
+        avg_mae = sum(d["mae_r_list"]) / len(d["mae_r_list"]) if d["mae_r_list"] else None
+
+        findings[pair] = {
+            "n": n, "partial_rate": round(partial_rate, 2),
+            "avg_mfe_r": round(avg_mfe, 3) if avg_mfe is not None else None,
+            "avg_mae_r": round(avg_mae, 3) if avg_mae is not None else None,
+        }
+
+        # Auto-deprioritize pairs where price reaches partial close <20% of the time
+        # These pairs' entries are consistently wrong — not a stop-distance problem
+        if partial_rate < 0.20 and n >= MIN_TRADES_FOR_STOP_LEARNING and pair not in new_deprio:
+            new_deprio.append(pair)
+            adjustments.append(f"  ⛔ AUTO-DEPRIORITIZE {pair}: partial-close hit rate {partial_rate*100:.0f}% < 20% threshold ({n} trades)")
+
+        # Per-pair stop_atr_mult: if avg MAE is shallow (< 0.3R adverse), stop is too tight
+        # If avg MAE is deep (> 0.8R adverse), stop is too wide — we're giving too much room
+        if avg_mae is not None and n >= MIN_TRADES_FOR_STOP_LEARNING:
+            pair_stops = cfg.setdefault("pair_stop_multipliers", {})
+            current_mult = pair_stops.get(pair, DEFAULT_STOP_ATR_MULT)
+            new_mult = current_mult
+
+            if avg_mae > -0.3:  # price barely moves against us before stopping out → stop too tight
+                new_mult = min(current_mult + 0.1, DEFAULT_STOP_ATR_MULT + MAX_STOP_DRIFT)
+                if new_mult != current_mult:
+                    adjustments.append(f"  ↑ {pair} stop_mult {current_mult:.1f}→{new_mult:.1f} (avg MAE {avg_mae:.2f}R — stop too tight)")
+            elif avg_mae < -0.8:  # price goes far against us → stop too wide, tighten
+                new_mult = max(current_mult - 0.1, DEFAULT_STOP_ATR_MULT - MAX_STOP_DRIFT)
+                if new_mult != current_mult:
+                    adjustments.append(f"  ↓ {pair} stop_mult {current_mult:.1f}→{new_mult:.1f} (avg MAE {avg_mae:.2f}R — stop too wide)")
+
+            pair_stops[pair] = round(new_mult, 2)
+
+    cfg["deprioritized_pairs"] = sorted(set(new_deprio))
+    cfg["stop_optimization_findings"] = findings
+    cfg["last_stop_optimization"] = datetime.now(timezone.utc).isoformat()
+
+    if adjustments:
+        print("  [STOP-OPT] Adjustments:")
+        for a in adjustments:
+            print(a)
+    else:
+        print(f"  [STOP-OPT] No stop/TP adjustments needed ({len(findings)} pairs analyzed).")
+
+    return findings
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
