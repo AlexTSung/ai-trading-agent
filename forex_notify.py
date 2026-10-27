@@ -35,7 +35,7 @@ def now_utc():
 
 
 def run_scan() -> list:
-    from forex_screener import screen_all_pairs
+    from forex_screener import scan_all as screen_all_pairs
     from forex_research  import research_pair
     from forex_judge     import judge_pair
 
