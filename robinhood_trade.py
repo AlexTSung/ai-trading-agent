@@ -46,6 +46,7 @@ import trade  # reused: tier_for, stop_pct_for, position_pct_for,
               # regime_adjusted_position_pct, is_buyable, allocation_cap_for,
               # check_stop_loss, check_inverse_etf_max_hold, detect_phantom_equity,
               # cooldown_remaining_hours
+from market_time import et_timestamp
 
 CASH_RESERVE_PCT = trade.CASH_RESERVE_PCT   # Hard Rule 8's 20% floor, same number
 MIN_TRADE_PRICE  = trade.MIN_TRADE_PRICE
@@ -252,6 +253,124 @@ def confirmation_prompt(candidate: dict) -> str:
 
 
 # ── journal / trade-log writing (private repo only) ───────────────────────────
+
+def render_journal_entry(date: str, account: dict, positions: list, state: dict,
+                          fills_today: list = None, stop_losses: list = None,
+                          phantom_flags: list = None, skipped: list = None,
+                          reflection: dict = None) -> str:
+    """
+    Build the day's real-money journal markdown, following the same template
+    and section order as journal-template.md / journal.py's write_eod_journal
+    — same shape, deliberately not account-agnostic research (that's already
+    in the public repo's logs/paper/{date}.md for the same day; duplicating
+    it here would be two copies of the same Market Research section drifting
+    apart, exactly the thing this repo's "Doc/code drift is a real bug, not a
+    typo" lesson warns about).
+
+    Pure string-building only — takes already-fetched/already-decided data,
+    writes nothing. Pair with write_journal_file() to persist it.
+    """
+    fills_today   = fills_today or []
+    stop_losses   = stop_losses or []
+    phantom_flags = phantom_flags or []
+    skipped       = skipped or []
+    reflection    = reflection or {}
+
+    cash          = float(account.get("cash", 0))
+    portfolio_val = float(account.get("portfolio_value", 0))
+    honest_val    = honest_equity(account, positions, state)
+    reserve_pct   = (cash / honest_val * 100) if honest_val else 0.0
+
+    positions_section = ""
+    if positions:
+        for p in positions:
+            pl_pct = float(p.get("unrealized_plpc", 0)) * 100
+            positions_section += (
+                f"- {p['symbol']}: {p['qty']} shares @ ${float(p['avg_entry_price']):.2f} "
+                f"| Current: ${float(p['current_price']):.2f} | P&L: {pl_pct:+.2f}%\n")
+    else:
+        positions_section = "- No open positions\n"
+
+    trades_table = "| Time | Symbol | Action | Qty | Price | Reason |\n|------|--------|--------|-----|-------|--------|\n"
+    if fills_today:
+        for f in fills_today:
+            trades_table += (
+                f"| {f.get('time', '')} | {f['symbol']} | {f['side'].upper()} | "
+                f"{f['qty']} | ${float(f['filled_price']):.2f} | {f.get('reason', '')} |\n")
+    else:
+        trades_table += "| — | — | No trades executed today | — | — | — |\n"
+
+    stops_section = "## Stop-Losses\nNone triggered today.\n"
+    if stop_losses:
+        stops_section = "## ⚠️ Stop-Losses Triggered\n"
+        for sl in stop_losses:
+            stops_section += f"- **{sl['symbol']}** ({sl['tier']}): {sl['reason']}\n"
+
+    phantom_section = ""
+    if phantom_flags:
+        phantom_section = "\n## ⚠️ Phantom Equity Flags (Hard Rule 11)\n"
+        for p in phantom_flags:
+            phantom_section += f"- **{p['symbol']}**: {p['action']}\n"
+            for r in p["reasons"]:
+                phantom_section += f"  - {r}\n"
+
+    skipped_section = ""
+    if skipped:
+        skipped_section = "\n## Candidates Considered, Not Taken\n"
+        for s in skipped:
+            skipped_section += f"- **{s['symbol']}**: {'; '.join(s['reasons'])}\n"
+
+    return f"""# Real-Money Trade Journal — {date}
+*Generated: {et_timestamp()}*
+
+Research and Judge scoring are account-agnostic and shared with the paper
+book — see `logs/paper/{date}.md` in the public `ai-trading-agent` repo for
+that day's Market Research and Judge Summary sections. This journal covers
+this book's own account state, fills, and decisions only.
+
+---
+
+## Portfolio Status
+- **Cash**: ${cash:,.2f}
+- **Portfolio Value (reported)**: ${portfolio_val:,.2f}
+- **Portfolio Value (honest — phantom equity at cost)**: ${honest_val:,.2f}
+- **Cash Reserve**: {reserve_pct:.1f}% of honest equity (target: ≥20% — Hard Rule 8)
+
+### Open Positions
+{positions_section}
+---
+
+## Trades Executed
+{trades_table}
+---
+
+{stops_section}{phantom_section}{skipped_section}
+---
+
+## End-of-Day Reflection
+
+### What Worked
+{reflection.get('what_worked', '- ')}
+
+### What I'm Uncertain About
+{reflection.get('uncertain', '- ')}
+
+### Lessons / Pattern Observations
+{reflection.get('lessons', '- ')}
+
+### Watch List for Tomorrow
+{reflection.get('watch_list', '- ')}
+"""
+
+
+def write_journal_file(logs_dir: str, date: str, markdown: str) -> str:
+    """Persist a rendered journal entry to the private repo. Returns the path."""
+    logs_dir = _require_logs_dir(logs_dir)
+    path = os.path.join(logs_dir, f"{date}.md")
+    with open(path, "w") as f:
+        f.write(markdown)
+    return path
+
 
 def append_fill(logs_dir: str, fill: dict) -> None:
     """

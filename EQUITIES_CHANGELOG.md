@@ -41,6 +41,52 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v2.4.0] — 2026-10-28
+
+**MINOR** — Add `robinhood_trade.py`'s journal entry writer, completing step
+9 of the Robinhood Execution Procedure, plus a full synthetic end-to-end dry
+run. Alex asked for the journal writer and "a thorough QA of everything
+built so far." The dry run is the strongest QA possible without a live
+Robinhood session: it proves the whole pipeline — state, stop/phantom
+checks, candidate building, confirmation prompt, recording a fill,
+journaling, persisting state — chains together correctly, using synthetic
+data only. It is explicitly not, and cannot be, a substitute for an actual
+live test with a real account connection, which this session does not have
+(no Robinhood MCP tools are available here, and the standing prerequisite —
+confirming Trade Approval is genuinely on — remains unverified).
+
+### Strategy / CLAUDE.md changes
+- None directly; the Robinhood Execution Procedure already documented step
+  9 referencing these functions by name before they existed.
+
+### Code changes
+- `robinhood_trade.py`: `render_journal_entry()` builds the day's markdown —
+  same section order as `journal-template.md`, but deliberately does **not**
+  duplicate the Market Research section. Research and Judge scoring are
+  account-agnostic and already live in `logs/paper/{date}.md` in the public
+  repo for the same day; re-rendering technicals/news here would be a second
+  copy of the same data free to drift from the first, exactly the "Doc/code
+  drift is a real bug, not a typo" lesson. The real journal instead points
+  at the shared one by path and covers only this book's own account state,
+  fills, stop-losses, phantom flags, skipped candidates, and reflection.
+  `write_journal_file()` persists it to `{logs_dir}/{date}.md`, `logs_dir`
+  required with no default, same as every other function in this module.
+- `tests/test_robinhood_trade.py`: 6 new tests for the journal writer
+  (empty day, fills in the trades table, stop-loss/phantom/skipped sections,
+  the no-duplicate-research-section invariant, `logs_dir` required).
+- `tests/test_robinhood_dry_run.py` (new): one full synthetic session —
+  fresh state, a position that's breached its stop, a Judge APPROVE that
+  should buy, a second APPROVE that should be cooldown-skipped, a simulated
+  confirmed fill, journaling, and a final reload proving state/trade-log/
+  journal all landed correctly and nowhere near the public repo. No network
+  call, no MCP tool, no real account anywhere in the file.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** New tooling
+  for a book that has placed zero trades; no scoring, sizing, or execution
+  logic changed in the paper/options books.
+
+
 ## [v2.3.1] — 2026-10-28
 
 **PATCH** — `intelligence.py` and `screener.py` were missed by the

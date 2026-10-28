@@ -173,6 +173,61 @@ class TestConfirmationPrompt(unittest.TestCase):
             rt.confirmation_prompt({"action": "SKIP", "reasons": ["x"]})
 
 
+class TestRenderJournalEntry(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.account = _account(portfolio_value=100_000.0)
+        self.state = {"entries": {}, "stop_outs": {}}
+
+    def test_no_activity_day_still_produces_valid_entry(self):
+        md = rt.render_journal_entry("2026-10-28", self.account, [], self.state)
+        self.assertIn("# Real-Money Trade Journal — 2026-10-28", md)
+        self.assertIn("No trades executed today", md)
+        self.assertIn("No open positions", md)
+        self.assertIn("None triggered today", md)
+
+    def test_fills_appear_in_trades_table(self):
+        fills = [{"time": "10:15", "symbol": "AAPL", "side": "buy", "qty": 10,
+                  "filled_price": 150.25, "reason": "Judge APPROVE 9.0"}]
+        md = rt.render_journal_entry("2026-10-28", self.account, [], self.state,
+                                      fills_today=fills)
+        self.assertIn("AAPL", md)
+        self.assertIn("BUY", md)
+        self.assertIn("$150.25", md)
+
+    def test_stop_loss_and_phantom_and_skipped_sections_render(self):
+        stop_losses = [{"symbol": "WAB", "tier": "TIER2", "reason": "STOP-LOSS TIER2 (-12%): down 13.0%"}]
+        phantom = [{"symbol": "LBGJ", "action": "TRADING_BLOCKED", "reasons": ["price ratio implausible"]}]
+        skipped = [{"symbol": "PFE", "reasons": ["in cooldown for 10.0 more hours"]}]
+        md = rt.render_journal_entry("2026-10-28", self.account, [], self.state,
+                                      stop_losses=stop_losses, phantom_flags=phantom,
+                                      skipped=skipped)
+        self.assertIn("Stop-Losses Triggered", md)
+        self.assertIn("WAB", md)
+        self.assertIn("Phantom Equity Flags", md)
+        self.assertIn("LBGJ", md)
+        self.assertIn("Candidates Considered, Not Taken", md)
+        self.assertIn("PFE", md)
+
+    def test_never_duplicates_market_research_section(self):
+        # The real journal must point at the shared research journal, not
+        # re-render technicals/news -- that's the public repo's job, and a
+        # second copy here is exactly how the two would drift apart.
+        md = rt.render_journal_entry("2026-10-28", self.account, [], self.state)
+        self.assertNotIn("## Market Research", md)
+        self.assertIn("logs/paper/2026-10-28.md", md)
+
+    def test_write_journal_file_requires_logs_dir(self):
+        with self.assertRaises(rt.RealLogsDirNotSet):
+            rt.write_journal_file(None, "2026-10-28", "content")
+
+    def test_write_journal_file_persists_to_date_named_file(self):
+        path = rt.write_journal_file(self.tmp, "2026-10-28", "hello")
+        self.assertEqual(path, os.path.join(self.tmp, "2026-10-28.md"))
+        with open(path) as f:
+            self.assertEqual(f.read(), "hello")
+
+
 class TestAppendFill(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
