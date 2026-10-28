@@ -1,0 +1,270 @@
+#!/usr/bin/env python3
+"""
+robinhood_trade.py — guardrails, sizing, and journaling for the real-money
+Robinhood book. See CLAUDE.md's "Robinhood Execution Procedure" section for
+how this module is actually used end to end.
+
+Pure logic only — no Robinhood API or MCP calls live here. MCP tools are
+only callable from an interactive agent turn, not a Python subprocess, so
+every function below takes already-fetched account/position/order data as
+plain dicts, the same pattern robinhood_screener.py already established in
+this repo (see its module docstring).
+
+Reuses trade.py's account-agnostic Hard Rule functions verbatim where it is
+safe to (tier_for, stop_pct_for, position_pct_for, regime_adjusted_position_pct,
+is_buyable, allocation_cap_for, check_stop_loss, check_inverse_etf_max_hold,
+detect_phantom_equity, cooldown_remaining_hours) rather than duplicating
+them — a second copy of a stop-loss tier table or a conviction-sizing
+formula is exactly how the two books' Hard Rules would silently drift apart.
+
+Two functions are deliberately NOT reused: trade.honest_portfolio_value()
+and trade.calculate_max_shares() both internally call
+trade.detect_phantom_equity(positions) with no state argument, which falls
+back to trade.load_state() — the PAPER book's logs/paper/agent-state.json.
+Calling either of those here would make a real-money position-size decision
+quietly consult Alpaca's state file. honest_equity() and max_shares_for()
+below run the identical formula but always pass this book's own state
+explicitly, never trade.py's.
+
+State (cooldowns, entry dates/judge scores) is never trade.py's
+logs/paper/agent-state.json — it lives in the private
+ai-trading-agent-real-logs checkout, passed in via a logs_dir argument that
+traces back to the REAL_LOGS_DIR an interactive session points at that
+checkout. There is no default path inside this repo for it: an unset or
+empty logs_dir is a hard error, not a silent fallback, because the one
+outcome worse than this script refusing to run is it writing real trading
+data into the public repo.
+"""
+
+import csv
+import json
+import math
+import os
+from datetime import datetime
+
+import trade  # reused: tier_for, stop_pct_for, position_pct_for,
+              # regime_adjusted_position_pct, is_buyable, allocation_cap_for,
+              # check_stop_loss, check_inverse_etf_max_hold, detect_phantom_equity,
+              # cooldown_remaining_hours
+
+CASH_RESERVE_PCT = trade.CASH_RESERVE_PCT   # Hard Rule 8's 20% floor, same number
+MIN_TRADE_PRICE  = trade.MIN_TRADE_PRICE
+
+TRADE_LOG_HEADER = ["date", "symbol", "side", "qty", "filled_price", "order_id", "status"]
+
+
+class RealLogsDirNotSet(RuntimeError):
+    """Raised instead of silently defaulting anywhere inside the public repo."""
+
+
+def _require_logs_dir(logs_dir: str | None) -> str:
+    if not logs_dir:
+        raise RealLogsDirNotSet(
+            "logs_dir is not set. This must be a local checkout of the private "
+            "ai-trading-agent-real-logs repo -- there is no default, on purpose, "
+            "because the one thing worse than this script refusing to run is it "
+            "writing real trading data into the public repo."
+        )
+    return logs_dir
+
+
+# ── state (private repo only) ─────────────────────────────────────────────────
+
+def load_real_state(logs_dir: str) -> dict:
+    logs_dir = _require_logs_dir(logs_dir)
+    path = os.path.join(logs_dir, "agent-state.json")
+    state = {}
+    if os.path.exists(path):
+        try:
+            with open(path) as f:
+                state = json.load(f)
+        except ValueError:
+            state = {}
+    state.setdefault("stop_outs", {})
+    state.setdefault("entries", {})
+    return state
+
+
+def save_real_state(logs_dir: str, state: dict) -> None:
+    logs_dir = _require_logs_dir(logs_dir)
+    with open(os.path.join(logs_dir, "agent-state.json"), "w") as f:
+        json.dump(state, f, indent=2, sort_keys=True)
+
+
+def record_entry(state: dict, symbol: str, judge_score, qty: float) -> None:
+    """Mirrors trade.py's post-fill bookkeeping, for this book's own
+    cooldown/min-hold tracking. Never touches trade.py's state."""
+    state.setdefault("entries", {})[symbol] = {
+        "date": datetime.now().isoformat(),
+        "judge_score": judge_score,
+        "qty": qty,
+    }
+
+
+def record_stop_out(state: dict, symbol: str) -> None:
+    """Starts this book's own 48h re-entry cooldown (Hard Rule 4)."""
+    state.setdefault("stop_outs", {})[symbol] = datetime.now().isoformat()
+
+
+# ── sizing — same formulas as trade.py, state always explicit ────────────────
+
+def honest_equity(account: dict, positions: list, state: dict) -> float:
+    """Same formula as trade.honest_portfolio_value, but never defaults state."""
+    reported = float(account.get("portfolio_value", 0) or 0)
+    excess = sum(f.get("phantom_amount", 0.0)
+                 for f in trade.detect_phantom_equity(positions, state))
+    return max(0.0, reported - excess)
+
+
+def max_shares_for(account: dict, positions: list, state: dict,
+                    limit_price: float, pos_pct: float) -> tuple:
+    """Same formula as trade.calculate_max_shares, but never defaults state."""
+    if limit_price <= 0:
+        return 0, f"Invalid limit price ${limit_price}"
+
+    portfolio_value = honest_equity(account, positions, state)
+    min_cash = portfolio_value * CASH_RESERVE_PCT
+    current_cash = float(account["cash"])
+    available = min(current_cash, float(account.get("buying_power", current_cash)))
+    deployable_cash = available - min_cash
+    max_by_pct = portfolio_value * pos_pct
+
+    budget = min(deployable_cash, max_by_pct)
+    if budget <= 0:
+        return 0, (f"Insufficient deployable cash: ${deployable_cash:.2f} "
+                   f"(reserve floor: ${min_cash:.2f})")
+
+    shares = math.floor(budget / limit_price)
+    if shares == 0:
+        return 0, f"Budget ${budget:.2f} buys 0 whole shares at ${limit_price:.2f}"
+    return shares, (f"Budget ({pos_pct:.0%} cap): ${budget:.2f} -> {shares} shares "
+                     f"@ ${limit_price:.2f}")
+
+
+# ── candidate building ─────────────────────────────────────────────────────────
+
+def build_buy_candidates(judge_approvals: list, account: dict, positions: list,
+                          state: dict, watchlist: dict, macro_regime: str = "NEUTRAL",
+                          vix_size_multiplier: float = 1.0) -> list:
+    """
+    Turn today's Judge APPROVE rows into sized, guardrail-checked candidates.
+
+    Each row in judge_approvals must already carry a `limit_price` computed
+    per Hard Rule 2 (MA20 x 0.995 pullback, or ask x 0.997 value entry) from
+    research.json plus a live Robinhood quote -- that price discovery is the
+    interactive agent's job, not this function's, since it needs a live quote
+    this module has no way to fetch.
+
+    Returns a list of dicts. Places no orders, calls no MCP tool -- every
+    entry is either {"action": "SKIP", "reasons": [...]} or a sized
+    {"action": "BUY", ...} ready to be shown via confirmation_prompt().
+    """
+    open_syms = {p["symbol"] for p in positions}
+    candidates = []
+
+    for row in judge_approvals:
+        sym = row["symbol"]
+        reasons_skip = []
+
+        buyable, why = trade.is_buyable(sym, watchlist)
+        if not buyable:
+            reasons_skip.append(why)
+
+        if sym in open_syms:
+            reasons_skip.append(f"{sym} already held -- no averaging down in this book yet")
+
+        cooldown = trade.cooldown_remaining_hours(sym, state)
+        if cooldown > 0:
+            reasons_skip.append(f"{sym} in cooldown for {cooldown:.1f} more hours")
+
+        limit_price = row.get("limit_price")
+        if not limit_price or limit_price < MIN_TRADE_PRICE:
+            reasons_skip.append(
+                f"limit price {limit_price!r} missing or below ${MIN_TRADE_PRICE:.2f} floor")
+
+        if row.get("signal") not in ("STRONG_BUY", "WEAK_BUY"):
+            reasons_skip.append(f"signal {row.get('signal')} is not a buy signal")
+
+        if macro_regime == "RISK_OFF" and row.get("signal") != "STRONG_BUY":
+            reasons_skip.append("RISK_OFF regime requires STRONG_BUY only (Dalio check)")
+
+        if reasons_skip:
+            candidates.append({"symbol": sym, "action": "SKIP", "reasons": reasons_skip})
+            continue
+
+        conviction_pct = trade.allocation_cap_for(sym, watchlist, row.get("judge_score"))
+        pos_pct, notes = trade.regime_adjusted_position_pct(
+            conviction_pct, macro_regime, vix_size_multiplier)
+        shares, size_note = max_shares_for(account, positions, state, limit_price, pos_pct)
+
+        if shares <= 0:
+            candidates.append({"symbol": sym, "action": "SKIP", "reasons": [size_note]})
+            continue
+
+        tier = trade.tier_for(sym)
+        stop_pct = trade.stop_pct_for(sym)
+        candidates.append({
+            "symbol": sym,
+            "action": "BUY",
+            "qty": shares,
+            "limit_price": limit_price,
+            "judge_score": row.get("judge_score"),
+            "tier": tier,
+            "stop_price": round(limit_price * (1 + stop_pct), 2),
+            "position_pct": pos_pct,
+            "sizing_notes": notes + [size_note],
+        })
+
+    return candidates
+
+
+def check_stops(positions: list, state: dict) -> dict:
+    """Thin wrapper over trade.py's stop-loss and inverse-ETF-hold checks,
+    always with this book's own state. Returns candidates to SELL, not an
+    executed action -- still goes through the confirmation protocol."""
+    return {
+        "stop_losses": trade.check_stop_loss(positions, state),
+        "inverse_etf_max_hold": trade.check_inverse_etf_max_hold(positions, state),
+    }
+
+
+def phantom_audit(positions: list, state: dict) -> list:
+    """Hard Rule 11, this book's own state. A flagged symbol is blocked from
+    trading regardless of which book it's in."""
+    return trade.detect_phantom_equity(positions, state)
+
+
+def confirmation_prompt(candidate: dict) -> str:
+    """
+    The exact line the Mandatory Confirmation Protocol requires, built in one
+    place so it is never phrased differently from one session to the next.
+    Only valid for action == "BUY"; a SKIP candidate is never shown to the
+    user as something to confirm.
+    """
+    if candidate.get("action") != "BUY":
+        raise ValueError("confirmation_prompt() is only for BUY candidates")
+    c = candidate
+    return (
+        "This is a REAL MONEY trade on Robinhood. Confirm?\n"
+        f"  BUY {c['qty']} {c['symbol']} @ ${c['limit_price']:.2f} limit "
+        f"(Judge {c.get('judge_score')}, {c['tier']}, stop ${c['stop_price']:.2f})"
+    )
+
+
+# ── journal / trade-log writing (private repo only) ───────────────────────────
+
+def append_fill(logs_dir: str, fill: dict) -> None:
+    """
+    Append one already-confirmed, already-placed fill to the private repo's
+    trade-log.csv. `fill` must reflect a real order result returned by the
+    Robinhood MCP tool after the user confirmed it -- this function records
+    a trade that already happened, it never places one.
+    """
+    logs_dir = _require_logs_dir(logs_dir)
+    path = os.path.join(logs_dir, "trade-log.csv")
+    new_file = not os.path.exists(path)
+    with open(path, "a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=TRADE_LOG_HEADER)
+        if new_file:
+            writer.writeheader()
+        writer.writerow({k: fill.get(k, "") for k in TRADE_LOG_HEADER})

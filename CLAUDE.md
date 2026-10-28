@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v2.2.0
+> **Version:** v2.3.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -151,10 +151,58 @@ Do not proceed until the user confirms. No exceptions.
     book is interactive-only (see Phase 3 below), so whoever runs that
     session just needs their own ordinary git push access to the private
     repo, the same as pushing to any repo they own.
-  - **Nothing writes there yet.** The repo has its structure
-    (`trade-log.csv` header, `journal-template.md`) but no executor
-    produces real entries until the interactive Robinhood execution flow
-    is built — tracked as follow-up work, not yet started as of v2.1.0.
+  - **`robinhood_trade.py` exists as of v2.3.0** — guardrails and sizing,
+    reusing `trade.py`'s account-agnostic Hard Rule logic. See "Robinhood
+    Execution Procedure" below for how a session actually runs it. **It has
+    never been run end-to-end against a live account.** The standing
+    prerequisite from the 2026-10-27 setup conversation — confirming Trade
+    Approval is genuinely ON in Robinhood's Agent Settings, not just
+    assumed — is still unverified as of this entry. Do not run step 8 below
+    (placing a real order) until that has been checked.
+
+### Robinhood Execution Procedure
+
+Run only from an interactive session with both Robinhood MCP tools
+available *and* this exact confirmation protocol in effect — never from an
+unattended workflow (see above for why that's structural, not a preference).
+
+1. **Verify Trade Approval is ON** in the Robinhood app's Agent Settings
+   before doing anything else in this procedure, if it hasn't been
+   confirmed this session. Don't take a prior session's word for it.
+2. Clone/pull both repos: this one (code, read-only for this procedure) and
+   `ai-trading-agent-real-logs` (data — `logs_dir` below is a checkout of
+   this one, never a path inside the public repo).
+3. Fetch the real account and positions via the Robinhood MCP tools. Map
+   them into the plain dict shapes `robinhood_trade.py` expects: account
+   needs `cash`, `buying_power`, `portfolio_value`; each position needs
+   `symbol`, `qty`, `avg_entry_price`, `current_price`, `unrealized_plpc`.
+4. `state = robinhood_trade.load_real_state(logs_dir)`.
+5. Run stop/phantom checks **before** considering any new buy, same order
+   as `trade.py`'s session: `robinhood_trade.check_stops(positions, state)`
+   and `robinhood_trade.phantom_audit(positions, state)`. Any flag here
+   means a confirmed SELL to propose, following the same confirmation
+   protocol as a buy — never an automatic exit.
+6. Read today's `logs/paper/{date}-judge.json` for APPROVE rows (research
+   and Judge scoring are account-agnostic and already ran automatically —
+   Hard Rule 4 in Account Guardrails). For each candidate symbol, compute a
+   Hard-Rule-2-compliant limit price (`MA20 x 0.995` pullback or
+   `ask x 0.997` value entry) from that day's research data plus a **live**
+   Robinhood quote — `robinhood_trade.py` has no way to fetch that live
+   price itself, so this step happens in the interactive session, not in
+   the module.
+7. `candidates = robinhood_trade.build_buy_candidates(judge_approvals, account, positions, state, watchlist, macro_regime, vix_size_multiplier)`.
+8. For each `BUY` candidate, print `robinhood_trade.confirmation_prompt(candidate)`
+   **verbatim** and wait for the user's explicit confirmation in that same
+   turn. Only then call `mcp__robinhood-trading__place_equity_order`. Never
+   call `mcp__alpaca__place_stock_order` in the same turn (Hard Rule 2,
+   Account Guardrails).
+9. On a real fill: `robinhood_trade.record_entry(state, symbol, judge_score, qty)`,
+   `robinhood_trade.append_fill(logs_dir, fill)`,
+   `robinhood_trade.save_real_state(logs_dir, state)`, write the day's
+   journal entry in the private repo using `journal-template.md`, then
+   commit and push the private repo.
+10. A `SKIP` candidate is never shown to the user as something to confirm —
+    `confirmation_prompt()` raises if it's handed one, on purpose.
 
 ## Tools Available
 - **Alpaca MCP** — use for all account queries, order placement, position management,
@@ -168,6 +216,7 @@ Do not proceed until the user confirms. No exceptions.
 - **trade.py** — trade session execution logic
 - **learning_agent.py** — judge weight hints (auto-applied, tighten-only, clamped) + Lessons Learned
 - **self_review.py** — turns patterns with no automatic handler into approvable proposals (see "Recursive Self-Improvement")
+- **robinhood_trade.py** — guardrails, sizing, and journaling for the real-money book (see "Robinhood Execution Procedure"). Pure logic only; places no orders itself.
 
 ## Agent Stack (Judge-Executor Model)
 ```

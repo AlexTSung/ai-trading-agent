@@ -41,6 +41,67 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v2.3.0] — 2026-10-28
+
+**MINOR** — Add `robinhood_trade.py`: guardrails, sizing, and journaling for
+the real-money book. Alex: "Start on that next" (the interactive executor
+deferred in v2.1.0/v2.2.0). This is new tooling only — it places no orders
+itself, and has not been run end-to-end against a live account. The
+standing prerequisite from the 2026-10-27 setup conversation (confirming
+Trade Approval is genuinely ON in Robinhood's Agent Settings) remains
+unverified.
+
+### Strategy / CLAUDE.md changes
+- New **"Robinhood Execution Procedure"** section, a numbered 10-step
+  sequence for the only way this book may trade: an interactive session
+  with Robinhood MCP tools, confirming Trade Approval is on, fetching
+  real account/position data, running stop/phantom checks before any new
+  buy (same order as `trade.py`'s session), building sized candidates,
+  and showing the exact Mandatory Confirmation Protocol line before
+  placing anything. Step 1 explicitly says not to take a prior session's
+  word for Trade Approval being on.
+- Robinhood environment subsection and Tools Available both reference the
+  new module and procedure.
+
+### Code changes
+- `robinhood_trade.py` (new): pure logic only — no Robinhood API/MCP calls,
+  same pattern `robinhood_screener.py` already established in this repo
+  (functions take already-fetched data as plain dicts). Reuses `trade.py`'s
+  account-agnostic Hard Rule functions verbatim: `tier_for`, `stop_pct_for`,
+  `position_pct_for`, `regime_adjusted_position_pct`, `is_buyable`,
+  `allocation_cap_for`, `check_stop_loss`, `check_inverse_etf_max_hold`,
+  `detect_phantom_equity`, `cooldown_remaining_hours`.
+- **Deliberately not reused**: `trade.honest_portfolio_value()` and
+  `trade.calculate_max_shares()` both internally call
+  `trade.detect_phantom_equity(positions)` with no state argument, which
+  falls back to `trade.load_state()` — the *paper* book's
+  `logs/paper/agent-state.json`. Calling either here would have made a
+  real-money sizing decision quietly consult Alpaca's state file.
+  `honest_equity()` and `max_shares_for()` run the identical formula but
+  always take this book's own state explicitly. Caught by writing
+  `TestStateIsolationFromPaperBook`, which asserts `trade.load_state` is
+  never called, before writing the implementation.
+- `logs_dir` has no default anywhere in this module — `load_real_state`,
+  `save_real_state`, and `append_fill` all raise `RealLogsDirNotSet` on an
+  empty/missing value rather than falling back to a path inside this repo.
+  Mutation-tested: making `_require_logs_dir` a no-op fails 3 tests.
+- `confirmation_prompt()` builds the Mandatory Confirmation Protocol's exact
+  line in one place and refuses to render a `SKIP` candidate.
+- `build_buy_candidates()`: no averaging down (a symbol already held is
+  skipped, not resized), 48h cooldown (Hard Rule 4), `$5` price floor,
+  watchlist `signal_only`/`max_allocation_pct` respected, RISK_OFF requires
+  STRONG_BUY only (Dalio check) and the risk-off ceiling composes correctly
+  with VIX sizing via the reused `regime_adjusted_position_pct`.
+- `tests/test_robinhood_trade.py` (new, 18 tests). Mutation-tested: removing
+  the cooldown check fails `test_cooldown_blocks_reentry`; neutering
+  `_require_logs_dir` fails 3 logs-dir tests.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** No scoring,
+  sizing, or execution logic in the paper/options books changed. This adds
+  a new, currently-unused code path for a book that has placed zero trades.
+
+
 ## [v2.2.0] — 2026-10-27
 
 **MINOR** — Real-money journal and trade-log destination is now a separate
