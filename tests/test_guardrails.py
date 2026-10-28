@@ -1512,11 +1512,50 @@ class TestMarketTime(unittest.TestCase):
         """
         Guards against a future edit quietly reintroducing date.today() in one
         module while the others move on. All must resolve through market_time.
+
+        intelligence.py and screener.py were missing from this list until
+        2026-10-28 -- they were never migrated by the original 2026-08-31 fix,
+        and this exact test would have caught that omission immediately if it
+        had covered them from the start.
         """
-        for mod in (journal, reviewer, research, judge, trade):
+        for mod in (journal, reviewer, research, judge, trade, intelligence, screener):
             with self.subTest(module=mod.__name__):
                 self.assertTrue(hasattr(mod, "et_today_iso"),
                                 f"{mod.__name__} lost its market_time import")
+
+    def test_intelligence_and_screener_filenames_agree_with_research_lookup(self):
+        """
+        Live incident, 2026-10-28: intelligence.py and screener.py named their
+        output with raw date.today() (the GitHub Actions runner's UTC clock)
+        while research.py looks up f"{et_today_iso()}-intelligence.json" /
+        f"{et_today_iso()}-screener.json". Any run between UTC midnight and ET
+        midnight -- roughly 8 PM-11:59 PM ET every single evening under the
+        hourly cadence -- wrote files one calendar day ahead of what research.py
+        would ever look for, so research silently fell back to that morning's
+        stale intelligence/screener data for about four hours a night.
+
+        Confirmed on the live data: 2026-10-28-intelligence.json and
+        2026-10-28-screener.json exist in logs/paper/ from a 9 PM ET run on
+        2026-10-27, while research.py's own output from that same run is
+        correctly dated 2026-10-27.
+
+        This exercises the actual path-builder functions the write call sites
+        use (intelligence_output_path/reddit_report_path/screener_output_path)
+        rather than just checking that et_today_iso is importable -- an
+        earlier version of this test only checked the import and would not
+        have caught the bug it's named for.
+        """
+        with mock.patch.object(market_time, "et_now", side_effect=self._fake_et_now):
+            # The exact failing moment again: 03:09 UTC on the 29th == 11:09 PM
+            # ET on the 28th -- date.today() on the runner would say the 29th.
+            expected = "2026-08-28"
+            self.assertIn(f"{expected}-intelligence.json", intelligence.intelligence_output_path())
+            self.assertIn(f"{expected}-reddit.md", intelligence.reddit_report_path())
+            self.assertIn(f"{expected}-screener.json", screener.screener_output_path())
+            # research.py's lookup path always resolves `today` the same way --
+            # the invariant that matters is that whichever date research.py
+            # looks under is exactly the date these two will have written.
+            self.assertEqual(research.et_today_iso(), expected)
 
 
 class TestRestingEntryOrders(unittest.TestCase):

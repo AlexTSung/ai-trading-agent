@@ -16,6 +16,7 @@ import sys
 import json
 import requests
 from datetime import datetime, date, timedelta
+from market_time import et_today_iso
 from statistics import mean
 
 # ── Load .env ────────────────────────────────────────────────────────────────
@@ -392,6 +393,14 @@ def detect_dip_opportunities(snapshots, min_drop_pct=15.0, min_price=5.0, min_vo
 
 
 # ── Full morning scan ─────────────────────────────────────────────────────────
+def screener_output_path() -> str:
+    """Isolated on purpose: the write call site in full_scan() just calls
+    this, so a test can verify the path without exercising the whole heavy
+    scan (S&P 500 fetch, batch snapshots, news firehose, congressional
+    trades)."""
+    return os.path.join(JOURNAL_DIR, f"{et_today_iso()}-screener.json")
+
+
 def full_scan(top_n=50):
     """
     Complete market scan:
@@ -445,7 +454,7 @@ def full_scan(top_n=50):
 
     # Save output
     os.makedirs(JOURNAL_DIR, exist_ok=True)
-    out_path = os.path.join(JOURNAL_DIR, f"{date.today().isoformat()}-screener.json")
+    out_path = screener_output_path()
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2)
     print(f"  [screener] Saved to {out_path}", file=sys.stderr)

@@ -41,6 +41,76 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v2.3.1] — 2026-10-28
+
+**PATCH** — `intelligence.py` and `screener.py` were missed by the
+2026-08-31 naive-clock fix (`naive_clock_mislabelled_as_ET`, Lessons
+Learned): both still named their output with raw `date.today()` — the
+GitHub Actions runner's UTC clock — instead of `market_time.et_today_iso()`,
+while `research.py` looks up `{et_today_iso()}-intelligence.json` /
+`{et_today_iso()}-screener.json`. Found during a QA pass requested by Alex
+("thorough QA of everything built so far... other parts of agent are
+working"), by noticing `logs/paper/2026-10-28-intelligence.json` and
+`-screener.json` existed with no corresponding `2026-10-28.json` research
+output — the pipeline had run at 9 PM ET on 2026-10-27, still the 27th in
+ET but already the 28th in UTC.
+
+**Confirmed as live, ongoing data loss, not a one-off:** any run landing
+between UTC midnight and ET midnight — roughly 8 PM–11:59 PM ET, every
+single evening — has written that evening's intelligence/screener output
+one calendar day ahead of the name `research.py` would ever look under.
+`research.py` then silently fell back to whichever same-day-morning file
+it last found correctly named, discarding the evening's fresh VIX/fear-greed
+reading, insider-buy scan, earnings watch, market discovery, and S&P 500
+screen for roughly 4 hours a night — every night since the hourly cadence
+began on 2026-10-13.
+
+### Strategy / CLAUDE.md changes
+- None. This restores the already-documented intent of the 2026-08-31 fix
+  ("used everywhere 'today' determines a filename or cross-script lookup")
+  rather than changing it.
+
+### Code changes
+- `intelligence.py`: added `from market_time import et_today_iso`.
+  Extracted `intelligence_output_path()` and `reddit_report_path()` so the
+  path-construction logic is unit-testable without exercising
+  `morning_intelligence()`'s full pipeline (VIX, FRED macro, Alpaca
+  discovery, Reddit scan, SEC EDGAR). Both now resolve via `et_today_iso()`;
+  `write_reddit_report()` and `morning_intelligence()` call the helpers
+  instead of inlining `date.today()`.
+- `screener.py`: same pattern — `screener_output_path()` extracted and used
+  by `full_scan()`, resolving via `et_today_iso()`. Left the S&P 500
+  universe cache's staleness check (`date.today()` on both the read at line
+  ~83 and the write at line ~114) untouched on purpose: it's a
+  self-consistent pair measuring elapsed calendar days for a cache
+  freshness check, not a cross-script filename lookup — exactly the
+  exception the original 2026-08-31 fix already carved out, and touching
+  only one side would raise `TypeError: can't subtract offset-naive and
+  offset-aware datetimes` for no benefit. Same reasoning applied to the news
+  lookback windows in both files (`cutoff = date.today() - timedelta(...)`)
+  — left as pure elapsed-day arithmetic, not identity.
+- `tests/test_guardrails.py`: `test_pipeline_modules_import_the_shared_helper_not_bare_datetime`
+  now also covers `intelligence` and `screener` — it would have caught this
+  immediately had it covered them from the start. Added
+  `test_intelligence_and_screener_filenames_agree_with_research_lookup`,
+  which calls the new path-builder functions directly under the same
+  UTC-crosses-midnight fixture as the original 2026-08-31 incident test.
+  Mutation-tested: an initial version of this test only checked that
+  `et_today_iso` was importable and did **not** fail when the actual write
+  call sites were reverted to `date.today()` — rewritten to call
+  `intelligence_output_path()`/`reddit_report_path()`/`screener_output_path()`
+  directly, confirmed both mutations now fail it.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** This restores
+  intended freshness of intelligence/screener data during a ~4-hour evening
+  window; it does not change any scoring, sizing, or Hard Rule. Evening
+  trading decisions during the affected window used somewhat staler
+  discovery/sentiment context than intended, which is a data-quality
+  degradation, not a different ruleset — the Judge still scored against
+  whatever context it was actually given.
+
+
 ## [v2.3.0] — 2026-10-28
 
 **MINOR** — Add `robinhood_trade.py`: guardrails, sizing, and journaling for

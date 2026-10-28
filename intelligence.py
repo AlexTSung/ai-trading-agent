@@ -22,6 +22,7 @@ import sys
 import json
 import requests
 from datetime import datetime, timedelta, date
+from market_time import et_today_iso
 
 # ── Load .env ────────────────────────────────────────────────────────────────
 # setup.sh writes a .env file, but nothing used to read it, so filling in keys
@@ -150,7 +151,7 @@ def write_reddit_report(reddit_data, out_dir=None):
     os.makedirs(out_dir, exist_ok=True)
     tickers = reddit_data.get("tickers", []) if reddit_data else []
 
-    lines = [f"# Reddit Trending Tickers — {date.today().isoformat()}", ""]
+    lines = [f"# Reddit Trending Tickers — {et_today_iso()}", ""]
     if not tickers:
         lines.append("No tickers surfaced today (scrape failed or nothing trending).")
     else:
@@ -163,7 +164,7 @@ def write_reddit_report(reddit_data, out_dir=None):
                 lines.append(f"    \"{t['top_post']}\" ({t.get('url', '')})")
     report = "\n".join(lines) + "\n"
 
-    out_path = os.path.join(out_dir, f"{date.today().isoformat()}-reddit.md")
+    out_path = reddit_report_path(out_dir)
     with open(out_path, "w") as f:
         f.write(report)
     print(f"  [reddit report] Saved to {out_path}", file=sys.stderr)
@@ -577,6 +578,19 @@ def get_market_discovery():
     return {"timestamp": datetime.now().isoformat(), "source": "alpaca_discovery", "discovery": results}
 
 
+def intelligence_output_path(log_dir: str = None) -> str:
+    """Isolated on purpose: the write call site below just calls this, so a
+    test can verify the path without exercising the whole heavy pipeline
+    (VIX/FRED/Alpaca/Reddit/SEC calls) that morning_intelligence() runs."""
+    log_dir = log_dir or os.path.join(os.path.dirname(__file__), "logs", "paper")
+    return os.path.join(log_dir, f"{et_today_iso()}-intelligence.json")
+
+
+def reddit_report_path(out_dir: str = None) -> str:
+    out_dir = out_dir or os.path.join(os.path.dirname(__file__), "logs", "paper")
+    return os.path.join(out_dir, f"{et_today_iso()}-reddit.md")
+
+
 def morning_intelligence():
     """
     Full pre-market intelligence scan. Run at 8:30 AM ET before market open.
@@ -615,9 +629,8 @@ def morning_intelligence():
     output["insider_activity"] = get_insider_buys()
 
     # Save to logs
-    log_dir = os.path.join(os.path.dirname(__file__), "logs", "paper")
-    os.makedirs(log_dir, exist_ok=True)
-    out_path = os.path.join(log_dir, f"{date.today().isoformat()}-intelligence.json")
+    out_path = intelligence_output_path()
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2)
     print(f"  Saved to {out_path}", file=sys.stderr)
