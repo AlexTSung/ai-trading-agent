@@ -41,6 +41,66 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v2.4.1] — 2026-10-28
+
+**PATCH** — `get_bars()` has returned stale price data since the very first
+commit (2026-07-01). It requested `sort="asc"` over a ~120-calendar-day
+window (`start = today - limit*2 days`, `limit=60`, no `end`, no pagination
+handling). A 120-day window holds roughly 82 trading days — far more than
+60 — and Alpaca's bars endpoint returns the *first* `limit` results in sort
+order when more exist, not the most recent `limit`. So every call silently
+received the **oldest** 60 bars in the window, not the newest: `closes[-1]`
+("last_close") was roughly 4-5 weeks stale, for every symbol, every day,
+for the life of this project.
+
+**Found while QA-ing the first live Robinhood attempt.** Alex's terminal
+session refused to build real-money candidates because today's Judge
+approvals (NOK, COP, IBM, PFE, KDP) disagreed with live Robinhood quotes by
+5-17%, in mixed directions — exactly the signature of a stale window (each
+stock's own drift over its own missing weeks), not a market-wide outage or
+a Robinhood data problem. Independently verified against Yahoo Finance,
+Google Finance, Morningstar, CNN, Bloomberg, and MarketChameleon: IBM
+closed 10/27 at $250.25 and COP at $147.96 — both match Robinhood exactly;
+research.json's $232.65 and $128.10 do not. Robinhood's data was correct.
+
+### Strategy / CLAUDE.md changes
+- None directly. See the open question below — this may still need one.
+
+### Code changes
+- `research.py`: `get_bars()` now requests `sort="desc"` (truncates from the
+  *recent* end instead of the old one) and reverses the result to ascending
+  order before returning, so `compute_technicals()` and
+  `compute_moving_averages()` — both of which index from the end expecting
+  `closes[-1]` to be the latest close — are unaffected by the change in
+  fetch direction.
+- `tests/test_guardrails.py`: `TestGetBarsReturnsLatestNotOldest` (3 tests)
+  — asserts `closes[-1]` is the true latest bar under a synthetic 90-bar
+  window (more than `limit`, reproducing the exact over-window condition),
+  asserts the request actually uses `sort="desc"` (direct mutation guard),
+  and an empty-response sanity check. Mutation-tested against the original
+  code: 2 of 3 tests failed when reverted to `sort="asc"` with no reversal,
+  confirming the regression is caught.
+
+### Comparability — open question, not resolved by this patch
+**Does this invalidate the prior performance record? Unclear — this is a
+governance question, not a code question, and is being raised to Alex
+rather than decided here.** Every technical signal (MA20/MA50 crossover,
+RSI, MACD, Bollinger %, Hard Rule 2's pullback/breakout read) the Judge has
+ever scored was computed on a rolling window roughly a month stale. The
+mitigating factor: `trade.py`'s actual paper-book buy path always
+reconciles the entry limit against a **live** ask price
+(`min(ask, research_limit_price)`), so fills were anchored to real
+tradable prices, not the stale ones — this is not the same shape of
+corruption as the Judge-weight bug that voided Phase 2. But the Judge's
+*entry-timing judgment* (was this actually a pullback, was RSI actually
+below 45, was the trend actually intact) has been evaluated against
+month-old levels throughout Phase 2B, which is a real data-quality question
+for whether that record means what it was assumed to mean. This patch
+fixes the code; it does not, on its own, decide whether Phase 2B needs
+re-baselining the way Phase 2 did on 2026-08-20. That decision is Alex's,
+the same way the Phase 2 void was.
+
+
 ## [v2.4.0] — 2026-10-28
 
 **MINOR** — Add `robinhood_trade.py`'s journal entry writer, completing step

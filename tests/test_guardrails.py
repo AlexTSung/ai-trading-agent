@@ -2940,3 +2940,70 @@ class TestNoDuplicateRestingBuyOrders(unittest.TestCase):
         }
         results, mock_buy = self._run(open_orders=[sell_order])
         mock_buy.assert_called_once()
+
+
+class TestGetBarsReturnsLatestNotOldest(unittest.TestCase):
+    """
+    Live incident, 2026-10-28: get_bars() requested sort="asc" over a
+    ~120-calendar-day window (roughly 82 trading days) with limit=60 and no
+    pagination. Alpaca's bars endpoint returns the FIRST `limit` results in
+    sort order when more exist, so every call silently got the OLDEST 60
+    bars in the window instead of the most recent 60 -- closes[-1] was
+    roughly 4-5 weeks stale, for every symbol, every day, since this
+    function was first written on 2026-07-01.
+
+    Confirmed on live data the same day: research.json's IBM/COP last_close
+    were 7-17% off the verified real Oct 27 close, in different directions
+    for different symbols -- exactly the signature of a stale window (each
+    stock's own move over the missing weeks), not a market-wide data outage.
+    """
+
+    def _synthetic_bars(self, n):
+        """n ascending daily bars with distinguishable closes, oldest first --
+        bar i has close = 100 + i, so bar n-1 (the real latest) is highest."""
+        from datetime import date, timedelta
+        start = date(2026, 1, 1)
+        return [{"t": (start + timedelta(days=i)).isoformat(), "c": 100.0 + i,
+                 "h": 100.0 + i, "l": 100.0 + i, "v": 1000} for i in range(n)]
+
+    def _mock_response(self, bars_desc):
+        resp = mock.Mock(status_code=200)
+        resp.json.return_value = {"bars": bars_desc}
+        resp.raise_for_status = mock.Mock()
+        return resp
+
+    def test_closes_last_is_the_true_latest_bar_not_a_month_stale_one(self):
+        # 90 bars exist in the requested window; Alpaca (correctly, with
+        # sort="desc") returns only the newest 60, newest-first.
+        all_bars_asc = self._synthetic_bars(90)
+        newest_60_desc = list(reversed(all_bars_asc[-60:]))
+
+        with mock.patch.object(research, "requests") as mock_requests:
+            mock_requests.get.return_value = self._mock_response(newest_60_desc)
+            result = research.get_bars("AAPL", limit=60)
+
+        closes = [b["c"] for b in result["bars"]]
+        self.assertEqual(closes[-1], 189.0,
+                         "closes[-1] must be the true latest bar (close=189), "
+                         "not a stale one from a month-old truncated window")
+        self.assertEqual(closes, sorted(closes),
+                         "bars must come back ascending (oldest first) -- "
+                         "compute_technicals indexes from the end expecting this")
+
+    def test_requests_sort_desc_not_asc(self):
+        """
+        Mutation guard: sort="asc" over a window wider than `limit` is
+        exactly the bug. This fails immediately if someone reverts it.
+        """
+        with mock.patch.object(research, "requests") as mock_requests:
+            mock_requests.get.return_value = self._mock_response([])
+            research.get_bars("AAPL", limit=60)
+
+        _, kwargs = mock_requests.get.call_args
+        self.assertEqual(kwargs["params"]["sort"], "desc")
+
+    def test_empty_bars_response_does_not_crash(self):
+        with mock.patch.object(research, "requests") as mock_requests:
+            mock_requests.get.return_value = self._mock_response([])
+            result = research.get_bars("AAPL", limit=60)
+        self.assertEqual(result["bars"], [])

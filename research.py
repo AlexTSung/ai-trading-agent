@@ -56,7 +56,28 @@ def _check_auth():
 
 # ── Market Data ──────────────────────────────────────────────────────────────
 def get_bars(symbol, timeframe="1Day", limit=60):
-    """Fetch historical OHLCV bars. Passes explicit start date so free-tier returns full history."""
+    """
+    Fetch the most recent `limit` daily bars, oldest-to-newest.
+
+    Bug fixed 2026-10-28: this used to request sort="asc" over a ~120-day
+    window with no `end` and no pagination. A 120-calendar-day window holds
+    roughly 82 trading days -- far more than limit=60 -- and Alpaca's bars
+    endpoint returns the *first* `limit` results in sort order when more
+    exist, not the most recent `limit`. With sort="asc" that meant every
+    single call silently returned the OLDEST 60 bars in the window, so
+    closes[-1] ("last_close") was roughly 4-5 weeks stale, for every symbol,
+    every day, since this function was first written (2026-07-01) -- not a
+    one-off incident. Confirmed live on 2026-10-28: research.json's IBM/COP
+    last_close were 7-17% off the real Oct 27 close (verified against
+    independent sources), in both directions depending on each stock's own
+    move over the stale window, which is exactly the signature of this bug
+    rather than a market-wide data outage.
+
+    Fix: request the newest `limit` bars (sort="desc", which truncates from
+    the *recent* end), then reverse to ascending so every existing caller
+    (compute_technicals, compute_moving_averages -- both index from the end
+    expecting closes[-1] to be the latest close) is unaffected by this change.
+    """
     from datetime import date, timedelta
     start = (date.today() - timedelta(days=limit * 2)).isoformat()  # 2x buffer for weekends/holidays
     url = f"{DATA_URL}/v2/stocks/{symbol}/bars"
@@ -65,12 +86,15 @@ def get_bars(symbol, timeframe="1Day", limit=60):
         "limit": limit,
         "start": start,
         "adjustment": "raw",
-        "sort": "asc",
+        "sort": "desc",
         "feed": "iex",
     }
     r = requests.get(url, headers=_headers(), params=params)
     r.raise_for_status()
-    return r.json()
+    data = r.json()
+    if data.get("bars"):
+        data["bars"] = list(reversed(data["bars"]))
+    return data
 
 def get_latest_quote(symbol):
     """Get the latest bid/ask for a symbol."""
