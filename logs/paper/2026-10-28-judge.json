@@ -1,6 +1,6 @@
 {
   "agent_version": "2.4.1",
-  "timestamp": "2026-10-28T18:02:15.542916-04:00",
+  "timestamp": "2026-10-28T19:02:09.753944-04:00",
   "date": "2026-10-28",
   "approved": [
     "AAPL",
@@ -8,7 +8,8 @@
     "DT"
   ],
   "held": [
-    "QQQ"
+    "QQQ",
+    "ON"
   ],
   "vetoed": [
     "NVDA",
@@ -20,14 +21,12 @@
     "IBM",
     "PFE",
     "KDP",
+    "S",
     "EBAY",
-    "AMD",
     "NOW",
     "EQT",
     "KMI",
-    "YOU",
-    "SPIN",
-    "IA"
+    "PDS"
   ],
   "scores": {
     "QQQ": {
@@ -113,7 +112,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding NVDA \u2014 only 2.3% below entry (need \u22653%)"
+          "note": "Already holding NVDA \u2014 only 2.6% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 1.0,
@@ -400,21 +399,22 @@
       },
       "_gate_used": 7.0
     },
+    "S": {
+      "symbol": "S",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: price $25.60 is 5.5% above MA20 $24.26 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $25.60 is 5.5% above MA20 $24.26 (limit 3%) \u2014 do not chase"
+      },
+      "_gate_used": 7.0
+    },
     "EBAY": {
       "symbol": "EBAY",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for EBAY \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
-      },
-      "_gate_used": 7.0
-    },
-    "AMD": {
-      "symbol": "AMD",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for AMD \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
@@ -434,10 +434,9 @@
       "symbol": "EQT",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for EQT \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "_gate_used": 7.0
     },
@@ -452,28 +451,44 @@
       },
       "_gate_used": 7.0
     },
-    "YOU": {
-      "symbol": "YOU",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
-    "SPIN": {
-      "symbol": "SPIN",
-      "recommendation": "VETO",
-      "score": 6.5,
+    "ON": {
+      "symbol": "ON",
+      "recommendation": "HOLD",
+      "score": 8.35,
       "approval_gate": 8.5,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_ON",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
+          "Win rate 95% CI on 34 trips: 12%\u201340%",
+          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 34,
+        "band": 0.15
+      },
+      "vix": 17.52,
       "is_discovery": true,
-      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
+      "is_speculative": true,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "1.5/2.0",
+        "news": "1.0/1.5",
+        "macro": "1.0/1.0",
+        "portfolio": "2.0/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "1.85/2.5"
+      },
       "criteria": {
         "technical": {
           "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $33.82 > MA50 $33.23, price between MAs"
+          "note": "WEAK_BUY \u2014 MA20 $77.40 > MA50 $74.84, price between MAs"
         },
         "news": {
           "score": 1.0,
@@ -492,21 +507,20 @@
           "note": "VIX 17.5 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
         },
         "quality": {
-          "score": 0.0,
-          "note": "Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock",
-          "veto": true
+          "score": 1.85,
+          "note": "Large-cap $29B; Profitable; 13 analyst buy ratings; Short float 10.73% \u2014 elevated short interest"
         }
       },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $77.40 > MA50 $74.84, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-ON \u2014 SPY MA20 $770.90 > MA50 $767.61 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 58%. Volatility: VIX 17.5 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $29B; Profitable; 13 analyst buy ratings; Short float 10.73% \u2014 elevated short interest. Source: discovery | Gate: 8.5.",
       "_gate_used": 8.5
     },
-    "IA": {
-      "symbol": "IA",
+    "PDS": {
+      "symbol": "PDS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for PDS \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "_gate_used": 7.0
     }
