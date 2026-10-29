@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v2.4.1
+> **Version:** v3.0.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -108,13 +108,36 @@ only `mcp__robinhood-trading__place_equity_order` touches real money, and it
 stays gated behind the confirmation protocol below.
 
 ### Mandatory Confirmation Protocol
-Before placing ANY order, you must state out loud (in chat):
-> "This is a [PAPER / REAL MONEY] trade on [Alpaca / Robinhood]. Confirm?"
 
-Do not proceed until the user confirms. No exceptions.
+**As of v3.0.0 (2026-10-29), this protocol no longer applies uniformly to
+every order.** See "Robinhood Automated Execution — v3.0.0" below for the
+full rationale; summary:
+
+- **Alpaca (paper)** orders have always executed autonomously via the
+  scheduled pipeline (`trade.py`) — there was never a human in the loop to
+  confirm with, so nothing changes here.
+- **Robinhood (real money) orders built through the documented Robinhood
+  Execution Procedure, via `robinhood_trade.build_buy_candidates()`** no
+  longer require a chat confirmation. Alex made this decision explicitly on
+  2026-10-29, with Robinhood's own Trade Approval (confirmed ON) substituted
+  as the human check for this specific, guardrail-vetted order flow.
+- **Any other order — an ad hoc instruction outside that documented
+  pipeline, on either broker** — still requires the original protocol in
+  full: state out loud (in chat) "This is a [PAPER / REAL MONEY] trade on
+  [Alpaca / Robinhood]. Confirm?" and wait for explicit confirmation. No
+  exceptions for this category. An order nobody's guardrail code has sized,
+  tiered, or cooldown-checked is exactly the case this protocol still exists
+  to catch.
 
 ### Hard Rules to Prevent Account Confusion
-1. **Never call `mcp__robinhood-trading__place_equity_order` without explicit "real money" confirmation from the user in the same conversation turn.**
+1. **`mcp__robinhood-trading__place_equity_order` may be called without a chat
+   confirmation only when the order came from
+   `robinhood_trade.build_buy_candidates()` via the documented Robinhood
+   Execution Procedure, and only after Trade Approval has been confirmed ON
+   this session (Execution Procedure step 1).** Any other real-money order —
+   anything not built through that pipeline — still requires explicit "real
+   money" confirmation from the user in the same conversation turn, with no
+   exception.
 2. **Never call `mcp__alpaca__place_stock_order` and `mcp__robinhood-trading__place_equity_order` in the same turn.**
 3. **If the user says "place the order" without specifying which account, ASK before acting.**
 4. **Research and signals are account-agnostic — only execution tools are account-specific.**
@@ -146,19 +169,17 @@ Do not proceed until the user confirms. No exceptions.
   rewrite.
   - **Journal**: `logs/YYYY-MM-DD.md` in that repo
   - **Trade log**: `logs/trade-log.csv` in that repo
-  - **No GitHub Actions secret needed for it.** Nothing automated writes
-    there — the Mandatory Confirmation Protocol means execution for this
-    book is interactive-only (see Phase 3 below), so whoever runs that
-    session just needs their own ordinary git push access to the private
-    repo, the same as pushing to any repo they own.
+  - **No GitHub Actions secret needed for it.** Execution for this book is
+    still interactive-only (see Phase 3 below, and "Robinhood Automated
+    Execution — v3.0.0"), so whoever runs that session just needs their own
+    ordinary git push access to the private repo, the same as pushing to
+    any repo they own.
   - **`robinhood_trade.py` exists as of v2.3.0** — guardrails and sizing,
     reusing `trade.py`'s account-agnostic Hard Rule logic. See "Robinhood
-    Execution Procedure" below for how a session actually runs it. **It has
-    never been run end-to-end against a live account.** The standing
-    prerequisite from the 2026-10-27 setup conversation — confirming Trade
-    Approval is genuinely ON in Robinhood's Agent Settings, not just
-    assumed — is still unverified as of this entry. Do not run step 8 below
-    (placing a real order) until that has been checked.
+    Execution Procedure" below for how a session actually runs it.
+  - **As of v3.0.0 (2026-10-29), step 8 no longer waits for a chat
+    confirmation** — see "Robinhood Automated Execution — v3.0.0" for the
+    full rationale and what still hasn't changed.
 
 ### Robinhood Execution Procedure
 
@@ -191,18 +212,72 @@ unattended workflow (see above for why that's structural, not a preference).
    price itself, so this step happens in the interactive session, not in
    the module.
 7. `candidates = robinhood_trade.build_buy_candidates(judge_approvals, account, positions, state, watchlist, macro_regime, vix_size_multiplier)`.
-8. For each `BUY` candidate, print `robinhood_trade.confirmation_prompt(candidate)`
-   **verbatim** and wait for the user's explicit confirmation in that same
-   turn. Only then call `mcp__robinhood-trading__place_equity_order`. Never
-   call `mcp__alpaca__place_stock_order` in the same turn (Hard Rule 2,
-   Account Guardrails).
+8. For each `BUY` candidate: log `robinhood_trade.confirmation_prompt(candidate)`
+   as the day's record of what was proposed and why (append it to the
+   journal entry being built for step 9 — this is now an audit record, not
+   a prompt waiting on a reply), then call
+   `mcp__robinhood-trading__place_equity_order` directly. **No chat
+   confirmation step** — Robinhood's own Trade Approval, verified ON in
+   step 1, is the human check for this pipeline as of v3.0.0 (see
+   "Robinhood Automated Execution — v3.0.0" below). Never call
+   `mcp__alpaca__place_stock_order` in the same turn (Hard Rule 2, Account
+   Guardrails).
 9. On a real fill: `robinhood_trade.record_entry(state, symbol, judge_score, qty)`,
    `robinhood_trade.append_fill(logs_dir, fill)`,
    `robinhood_trade.save_real_state(logs_dir, state)`, write the day's
-   journal entry in the private repo using `journal-template.md`, then
+   journal entry in the private repo using `journal-template.md` (including
+   step 8's logged confirmation-prompt text for each order placed), then
    commit and push the private repo.
 10. A `SKIP` candidate is never shown to the user as something to confirm —
     `confirmation_prompt()` raises if it's handed one, on purpose.
+
+## Robinhood Automated Execution — v3.0.0
+
+**Alex's explicit decision, 2026-10-29: "Yes change the architecture... I
+want this agent to send orders directly to Robinhood... I already have the
+safeguard in place on the Robinhood side... This is my decision."** This is
+a Hard Rule loosening — the versioning table at the top of this file is
+explicit that any Hard Rule loosened is MAJOR, so this shipped as v3.0.0,
+not a minor tweak.
+
+**What changed.** Step 8 of the Robinhood Execution Procedure no longer
+waits for a chat reply before calling
+`mcp__robinhood-trading__place_equity_order`. Robinhood's own Trade
+Approval setting — confirmed ON by Alex via the `robinhood-trading` MCP
+tool — is now the human check for orders built through that documented,
+guardrail-vetted pipeline.
+
+**What did not change.** Every actual risk control in `robinhood_trade.py`
+is untouched: conviction sizing, tiered stop-losses, the 48h cooldown,
+the 20% cash reserve, phantom-equity detection, the no-averaging-down rule,
+and the RISK_OFF ceiling all still run exactly as before. This change
+removes one specific layer — the chat confirmation reply — and substitutes
+a different one. It does not touch the paper book, the Judge, or any
+scoring/sizing logic, and the Phase 2B record is unaffected.
+
+**The honest, accepted residual risk.** When Trade Approval was first
+investigated (2026-10-27), independent sources disagreed on whether it's a
+hard block or closer to a notification, and Robinhood's own disclosure
+language — orders "may be placed by an AI agent for execution without your
+direct input on each transaction" — reads like opt-in behavior, not a
+guarantee. Alex has confirmed the setting reports ON via the MCP tool;
+nobody has yet watched it actually pause a specific order mid-flight, with
+its timeout or fallback behavior observed firsthand. Alex has explicitly
+accepted this as the tradeoff, the same way the Phase 3 graduation-gate
+override on 2026-10-27 was an explicit acceptance of a different known gap.
+Recommended, not required: watch the first several automated orders
+closely, and treat Execution Procedure step 1 ("don't take a prior
+session's word for it") as load-bearing — Trade Approval is a toggle on
+Robinhood's side that this codebase has no way to detect changing
+mid-session.
+
+**Scope — deliberately narrower than "every order."** This only removes
+confirmation for orders that came from
+`robinhood_trade.build_buy_candidates()` through the documented procedure.
+An ad hoc real-money instruction outside that pipeline (anything not sized,
+tiered, and cooldown-checked by the guardrail code) still requires the
+original Mandatory Confirmation Protocol in full, with no exception — see
+that section in Account Guardrails above.
 
 ## Tools Available
 - **Alpaca MCP** — use for all account queries, order placement, position management,
@@ -555,9 +630,22 @@ short on 2026-09-03, extend rather than graduate.
   baseline is unchanged and not reset, and this entry exists so no future
   reader mistakes "real money is live" for "the agent proved itself." See
   `EQUITIES_CHANGELOG.md` v2.0.0 for the full entry, including why real-money
-  execution cannot run on the same unattended GitHub Actions schedule as
-  paper (the Mandatory Confirmation Protocol requires a human in the loop on
-  every order, with no exceptions).
+  execution still cannot run on the same unattended GitHub Actions schedule
+  as paper — it still requires an interactive session, even though as of
+  v3.0.0 (below) that session no longer waits for a chat reply on every
+  order.
+- **2026-10-29** — Alex overrode the Mandatory Confirmation Protocol itself
+  for Robinhood orders built through the documented execution pipeline,
+  substituting Robinhood's own Trade Approval (confirmed ON) for the chat
+  confirmation step. A second explicit, accepted-risk decision in three
+  days, same pattern as 2026-10-27: Alex named the tradeoff directly ("I
+  already have the safeguard in place on the Robinhood side... This is my
+  decision") rather than it being quietly loosened. Shipped as v3.0.0 — see
+  "Robinhood Automated Execution — v3.0.0" above for the full rationale,
+  what changed, what didn't, and the accepted residual risk (Trade
+  Approval's blocking behavior has been confirmed ON but not yet observed
+  stopping a real order in practice). `EQUITIES_CHANGELOG.md` v3.0.0 has
+  the full entry.
 
 ## Daily Schedule — SINGLE SOURCE OF TRUTH (all times ET, weekdays only)
 

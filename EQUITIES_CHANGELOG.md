@@ -41,6 +41,75 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v3.0.0] — 2026-10-29
+
+**MAJOR** — Alex: "Yes change the architecture... I want this agent to send
+orders directly to Robinhood... I already have the safeguard in place on
+the Robinhood side... This is my decision." The Mandatory Confirmation
+Protocol's chat-confirmation step is removed for Robinhood orders built
+through the documented Execution Procedure, substituting Robinhood's own
+Trade Approval (confirmed ON by Alex via the `robinhood-trading` MCP tool)
+as the human check. Any Hard Rule loosened is MAJOR per this file's own
+versioning table — **baseline does not reset**: this is an execution-
+authorization change for the real-money book only; no Judge scoring,
+sizing formula, or paper-book logic changed, and Phase 2B's record is
+unaffected.
+
+This is the second explicit, named, accepted-risk decision in three days —
+same pattern as the 2026-10-27 Phase 3 graduation-gate override: Alex
+stated the tradeoff directly rather than it being quietly loosened, and it
+is documented as a real decision, not routed around via an informal prompt
+to a terminal session (which was the original ask — see the conversation
+that led here).
+
+### Strategy / CLAUDE.md changes
+- **Mandatory Confirmation Protocol** (Account Guardrails) rewritten to
+  scope its "no exceptions" to what it's always actually meant: Alpaca
+  paper orders never had a human in the loop (always autonomous via the
+  scheduled pipeline); Robinhood orders *through the documented pipeline*
+  now rely on Trade Approval instead of a chat reply; any other, ad hoc
+  real-money instruction — not built through
+  `robinhood_trade.build_buy_candidates()` — still requires the full
+  original protocol, with no exception. This scoping was my choice in
+  drafting the proposal, not something Alex specified verbatim — an order
+  nobody's guardrail code has sized or cooldown-checked is exactly the
+  case the protocol still exists to catch.
+- **Hard Rule 1** (Account Guardrails) rewritten to match: calling
+  `mcp__robinhood-trading__place_equity_order` without a chat confirmation
+  is permitted only for pipeline-built candidates, only after Trade
+  Approval is confirmed ON that session.
+- **Robinhood Execution Procedure step 8** rewritten: `confirmation_prompt()`
+  is now logged into the day's journal entry as an audit record of what was
+  proposed and why, rather than printed and waited on. The order is placed
+  immediately after. Step 1 (verify Trade Approval ON, don't trust a prior
+  session) is unchanged and is now the load-bearing safeguard, called out
+  explicitly as such.
+- New section **"Robinhood Automated Execution — v3.0.0"**: full rationale,
+  what changed, what explicitly did not (every guardrail in
+  `robinhood_trade.py` — sizing, stop tiers, cooldown, cash reserve,
+  phantom-equity detection, no-averaging-down, RISK_OFF ceiling), and the
+  accepted residual risk in plain terms — Trade Approval has been confirmed
+  ON but its actual blocking behavior (does it pause mid-flight, is there a
+  timeout, can it silently no-op) has not yet been observed firsthand.
+  Recommends, without requiring, watching the first several automated
+  orders closely.
+- New **Decision log** entry (Experiment Timeline), same format as the
+  2026-10-27 entry, so a future reader sees this was a named decision with
+  a stated tradeoff, not a silent rule change.
+
+### Code changes
+- None. This is a procedural/documentation change only —
+  `robinhood_trade.py`'s guardrail logic, sizing, and `confirmation_prompt()`
+  itself are untouched; only how step 8 of the *procedure* uses that
+  function's output changed (logged vs. waited-on).
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Nothing about
+  scoring, sizing, or the paper book changed. This is a real-money
+  execution-authorization change only, and Phase 2B's record stands exactly
+  as it did before this entry.
+
+
 ## [v2.4.1] — 2026-10-28
 
 **PATCH** — `get_bars()` has returned stale price data since the very first
