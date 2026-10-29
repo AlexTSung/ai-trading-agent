@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v4.0.0
+> **Version:** v4.0.1
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -215,12 +215,21 @@ order this produces.
    protocol as a buy — never an automatic exit.
 6. Read today's `logs/paper/{date}-judge.json` for APPROVE rows (research
    and Judge scoring are account-agnostic and already ran automatically —
-   Hard Rule 4 in Account Guardrails). For each candidate symbol, compute a
-   Hard-Rule-2-compliant limit price (`MA20 x 0.995` pullback or
-   `ask x 0.997` value entry) from that day's research data plus a **live**
-   Robinhood quote — `robinhood_trade.py` has no way to fetch that live
-   price itself, so this step happens in the interactive session, not in
-   the module.
+   Hard Rule 4 in Account Guardrails). **This file's freshness depends
+   entirely on the equities `morning-pipeline` cron firing on schedule — the
+   Robinhood procedure runs no research of its own.** Before using it, check
+   its embedded `timestamp` against the current time: if it's older than 90
+   minutes (1.5x `GUARDRAIL G1`'s own 50-minute staleness threshold on the
+   GitHub side, to allow for this procedure's own ~30-minute check
+   cadence), treat it as stale and skip this run's buys entirely, logging
+   why, rather than sizing a trade off a Judge score that may no longer
+   reflect current conditions — same "fail closed on stale/missing data"
+   rule this file applies everywhere else. For each candidate symbol that
+   passes the freshness check, compute a Hard-Rule-2-compliant limit price
+   (`MA20 x 0.995` pullback or `ask x 0.997` value entry) from that day's
+   research data plus a **live** Robinhood quote — `robinhood_trade.py` has
+   no way to fetch that live price itself, so this step happens in the
+   interactive session, not in the module.
 7. `candidates = robinhood_trade.build_buy_candidates(judge_approvals, account, positions, state, watchlist, macro_regime, vix_size_multiplier)`.
 8. For each `BUY` candidate: log `robinhood_trade.confirmation_prompt(candidate)`
    as the day's record of what was proposed and why (append it to the

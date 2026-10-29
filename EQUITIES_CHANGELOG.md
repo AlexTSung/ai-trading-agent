@@ -41,6 +41,41 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v4.0.1] — 2026-10-29
+
+**PATCH** — Alex asked whether the new Robinhood scheduling (v4.0.0)
+accounted for the existing equities `morning-pipeline` cron-job.org
+schedule. It did implicitly — step 6 reads whatever `judge.json`
+`morning-pipeline` already produced — but nothing checked *how stale* that
+file actually was before acting on it. If that cron ever misses a beat
+(this file documents GitHub `schedule:` delays of 3.5-9 hours happening on
+this exact repo), the Robinhood job would have silently used however-old a
+Judge score it found. Restores the same fail-closed-on-stale-data
+discipline already applied everywhere else in this file — the intent was
+always this; step 6 just never said so.
+
+### Strategy / CLAUDE.md changes
+- Execution Procedure step 6: explicit 90-minute staleness check on
+  `judge.json`'s embedded `timestamp` (1.5x `GUARDRAIL G1`'s 50-minute
+  threshold, to allow for this procedure's own ~30-minute check cadence
+  layered on top). Stale → skip this run's buys entirely and log why,
+  rather than size a trade off a Judge score that may no longer reflect
+  current conditions. Also states explicitly, for clarity: midday-pipeline
+  and eod-pipeline are unrelated to this procedure — Robinhood's own
+  stop-loss/phantom checks (step 5) query live Robinhood positions
+  directly via MCP, not anything those two pipelines produce.
+
+### Code changes
+- None. Procedural clarification only, same as v3.0.0/v4.0.0 — the
+  staleness check is implemented as part of the interactive/scheduled
+  session's own step 6 logic, not a separate module.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** No
+  scoring/sizing/paper-book change; this only tightens when the real-money
+  book is willing to act.
+
+
 ## [v4.0.0] — 2026-10-29
 
 **MAJOR** — Alex: "I want this to automatically suggest trades every day
