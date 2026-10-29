@@ -203,6 +203,79 @@ class TestBuildBuyCandidates(unittest.TestCase):
         self.assertEqual(candidates[0]["action"], "BUY")
 
 
+class TestReconcileFills(unittest.TestCase):
+    """v4.1.0's other finding: a BUY placed without chat confirmation can
+    fill on a tick after the one that placed it. Without reconciliation,
+    record_entry() (cooldown/min-hold tracking) silently never runs for it."""
+
+    def setUp(self):
+        self.state = {}
+
+    def test_record_pending_order_stores_judge_score_and_qty(self):
+        rt.record_pending_order(self.state, "AAPL", judge_score=9.0, qty=10,
+                                 order_id="order-1")
+        self.assertIn("AAPL", self.state["pending"])
+        self.assertEqual(self.state["pending"]["AAPL"]["judge_score"], 9.0)
+        self.assertEqual(self.state["pending"]["AAPL"]["qty"], 10)
+        self.assertEqual(self.state["pending"]["AAPL"]["order_id"], "order-1")
+
+    def test_filled_pending_order_promotes_to_entries(self):
+        rt.record_pending_order(self.state, "AAPL", judge_score=9.0, qty=10,
+                                 order_id="order-1")
+        positions = [{"symbol": "AAPL", "qty": 10, "avg_entry_price": 150.25,
+                      "current_price": 151.0, "unrealized_plpc": 0.005}]
+        result = rt.reconcile_fills(positions, open_orders=[], state=self.state)
+
+        self.assertEqual(len(result["filled"]), 1)
+        self.assertEqual(result["filled"][0]["symbol"], "AAPL")
+        self.assertEqual(result["filled"][0]["filled_price"], 150.25)
+        self.assertEqual(result["filled"][0]["judge_score"], 9.0)
+        self.assertNotIn("AAPL", self.state["pending"])
+        self.assertIn("AAPL", self.state["entries"])
+        self.assertEqual(self.state["entries"]["AAPL"]["judge_score"], 9.0)
+
+    def test_still_open_order_is_left_pending(self):
+        rt.record_pending_order(self.state, "AAPL", judge_score=9.0, qty=10,
+                                 order_id="order-1")
+        open_orders = [{"symbol": "AAPL", "side": "buy", "status": "pending_new"}]
+        result = rt.reconcile_fills([], open_orders=open_orders, state=self.state)
+
+        self.assertEqual(result["filled"], [])
+        self.assertEqual(result["expired"], [])
+        self.assertIn("AAPL", self.state["pending"])
+        self.assertNotIn("AAPL", self.state.get("entries", {}))
+
+    def test_order_resolved_without_filling_is_dropped_not_entered(self):
+        rt.record_pending_order(self.state, "AAPL", judge_score=9.0, qty=10,
+                                 order_id="order-1")
+        result = rt.reconcile_fills([], open_orders=[], state=self.state)
+
+        self.assertEqual(result["filled"], [])
+        self.assertEqual(len(result["expired"]), 1)
+        self.assertEqual(result["expired"][0]["symbol"], "AAPL")
+        self.assertNotIn("AAPL", self.state["pending"])
+        self.assertNotIn("AAPL", self.state.get("entries", {}))
+
+    def test_no_pending_orders_is_a_safe_no_op(self):
+        result = rt.reconcile_fills([], open_orders=[], state=self.state)
+        self.assertEqual(result, {"filled": [], "expired": []})
+
+    def test_multiple_pending_orders_resolve_independently(self):
+        rt.record_pending_order(self.state, "AAPL", judge_score=9.0, qty=10,
+                                 order_id="order-1")
+        rt.record_pending_order(self.state, "MSFT", judge_score=8.0, qty=5,
+                                 order_id="order-2")
+        positions = [{"symbol": "AAPL", "qty": 10, "avg_entry_price": 150.0,
+                      "current_price": 151.0, "unrealized_plpc": 0.006}]
+        result = rt.reconcile_fills(positions, open_orders=[], state=self.state)
+
+        self.assertEqual([f["symbol"] for f in result["filled"]], ["AAPL"])
+        self.assertEqual([e["symbol"] for e in result["expired"]], ["MSFT"])
+        self.assertIn("AAPL", self.state["entries"])
+        self.assertNotIn("AAPL", self.state["pending"])
+        self.assertNotIn("MSFT", self.state["pending"])
+
+
 class TestConfirmationPrompt(unittest.TestCase):
     def test_contains_exact_mandatory_phrase(self):
         candidate = {"action": "BUY", "symbol": "AAPL", "qty": 10, "limit_price": 150.0,

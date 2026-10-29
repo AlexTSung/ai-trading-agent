@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v4.1.0
+> **Version:** v4.1.1
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -216,6 +216,28 @@ order this produces.
    `unrealized_plpc`; each open order needs `symbol`, `side`, `status`.
    **Open orders are not optional as of v4.0.1** — see step 7.
 4. `state = robinhood_trade.load_real_state(logs_dir)`.
+4a. **Reconcile pending orders from a previous tick, before anything else
+   touches state.** `reconciled = robinhood_trade.reconcile_fills(positions, open_orders, state)`.
+   Step 8 below no longer assumes an order it just placed has filled by the
+   time this procedure's turn ends — under v3.0.0 (no chat confirmation),
+   Trade Approval can resolve a tick or more after the order was placed, so
+   the placing tick cannot know the real fill price or even whether it
+   filled at all. Instead, step 8 only ever records a **pending** order
+   (`robinhood_trade.record_pending_order`), and this step is what promotes
+   it once the position actually shows up: it diffs `state["pending"]`
+   against `positions`/`open_orders` and returns
+   `{"filled": [...], "expired": [...]}`. For each `filled` entry,
+   `robinhood_trade.append_fill(logs_dir, fill)` and include it in today's
+   journal's Trades Executed section — using the **real** fill price/qty
+   from the position, not the originally-requested limit/qty, since a
+   partial fill or price improvement would otherwise go unrecorded. For
+   each `expired` entry (never filled — cancelled, rejected, or expired,
+   including Trade Approval itself declining it), log why in the journal;
+   it is not a trade and must not be journaled as one. Without this step,
+   `record_entry()`'s cooldown/min-hold tracking silently never ran for an
+   asynchronously-approved fill — a real correctness bug, confirmed in
+   `EQUITIES_CHANGELOG.md` v4.1.0 and covered by
+   `tests/test_robinhood_trade.py`'s `TestReconcileFills`.
 5. Run stop/phantom checks **before** considering any new buy, same order
    as `trade.py`'s session: `robinhood_trade.check_stops(positions, state)`
    and `robinhood_trade.phantom_audit(positions, state)`. Any flag here
@@ -258,13 +280,20 @@ order this produces.
    step 1, is the human check for this pipeline as of v3.0.0 (see
    "Robinhood Automated Execution — v3.0.0" below). Never call
    `mcp__alpaca__place_stock_order` in the same turn (Hard Rule 2, Account
-   Guardrails).
-9. On a real fill: `robinhood_trade.record_entry(state, symbol, judge_score, qty)`,
-   `robinhood_trade.append_fill(logs_dir, fill)`,
-   `robinhood_trade.save_real_state(logs_dir, state)`, write the day's
-   journal entry in the private repo using `journal-template.md` (including
-   step 8's logged confirmation-prompt text for each order placed), then
-   commit and push the private repo.
+   Guardrails). Immediately after a successful placement call
+   `robinhood_trade.record_pending_order(state, symbol, judge_score, qty, order_id)`
+   using the order id the MCP tool returns — **do not** call `record_entry`
+   here. This step places an order; it does not know yet whether Trade
+   Approval will let it fill, so it must not assume a fill. Step 4a on a
+   later tick (possibly the next one, possibly tomorrow's first tick) is
+   what confirms the fill and does the real bookkeeping.
+9. `robinhood_trade.save_real_state(logs_dir, state)` (this persists both
+   step 4a's reconciliation and step 8's new pending entries), then write
+   the day's journal entry in the private repo using `journal-template.md`
+   — covering step 4a's reconciled fills and expirations, today's
+   stop-losses, today's still-pending orders (placed today, not yet
+   confirmed), and step 8's logged confirmation-prompt text for each order
+   placed today — then commit and push the private repo.
 10. A `SKIP` candidate is never shown to the user as something to confirm —
     `confirmation_prompt()` raises if it's handed one, on purpose.
 

@@ -107,6 +107,79 @@ def record_stop_out(state: dict, symbol: str) -> None:
     state.setdefault("stop_outs", {})[symbol] = datetime.now().isoformat()
 
 
+def record_pending_order(state: dict, symbol: str, judge_score, qty: float,
+                          order_id: str = None) -> None:
+    """
+    Call this at order-placement time (step 8), not fill time. Under
+    v3.0.0 (no chat confirmation) + v4.0.0 (scheduled, ~30-min ticks), a
+    placed order can sit awaiting Trade Approval across several ticks, or
+    fill in a tick that isn't the one that placed it. Without this record,
+    the judge_score and intended qty that justified the order are gone by
+    the time a later tick notices the fill -- record_entry() would either
+    never run (silent cooldown/min-hold gap) or run with no judge_score
+    (defeating Hard Rule 5's min-hold, which treats a missing judge_score
+    as "no min-hold applies").
+    """
+    state.setdefault("pending", {})[symbol] = {
+        "judge_score": judge_score,
+        "qty": qty,
+        "order_id": order_id,
+        "placed_at": datetime.now().isoformat(),
+    }
+
+
+def reconcile_fills(positions: list, open_orders: list, state: dict) -> dict:
+    """
+    Run this at the start of every tick, before building new buy
+    candidates (step 7). For every symbol `record_pending_order()` is
+    still tracking:
+
+    - It now appears in `positions` -> filled since it was placed. Call
+      the equivalent of record_entry() using the *saved* judge_score (the
+      one that actually justified the trade) and the position's real
+      qty/avg_entry_price (more accurate than the originally-requested
+      qty, in case of a partial fill), then drop it from `pending`.
+    - It's in neither `positions` nor `open_orders` -> resolved without
+      filling (cancelled, rejected, expired). Drop it from `pending` so it
+      doesn't grow unboundedly; nothing to journal.
+    - It's still in `open_orders` -> still awaiting Trade Approval or
+      still working. Leave it alone.
+
+    Returns {"filled": [...], "expired": [...]} for the caller to journal
+    and log. Mutates `state` in place (same contract as record_entry).
+    """
+    pending = state.get("pending", {})
+    if not pending:
+        return {"filled": [], "expired": []}
+
+    positions_by_symbol = {p["symbol"]: p for p in positions}
+    open_order_syms = {o.get("symbol") for o in open_orders}
+
+    filled, expired = [], []
+    for symbol in list(pending.keys()):
+        info = pending[symbol]
+        pos = positions_by_symbol.get(symbol)
+
+        if pos is not None:
+            record_entry(state, symbol, info.get("judge_score"), pos["qty"])
+            filled.append({
+                "symbol": symbol,
+                "side": "buy",
+                "qty": pos["qty"],
+                "filled_price": pos["avg_entry_price"],
+                "order_id": info.get("order_id"),
+                "judge_score": info.get("judge_score"),
+                "status": "filled",
+            })
+            del pending[symbol]
+        elif symbol not in open_order_syms:
+            expired.append({"symbol": symbol, "order_id": info.get("order_id")})
+            del pending[symbol]
+        # else: still open, leave pending as-is
+
+    return {"filled": filled, "expired": expired}
+
+
 # ── sizing — same formulas as trade.py, state always explicit ────────────────
 
 def honest_equity(account: dict, positions: list, state: dict) -> float:

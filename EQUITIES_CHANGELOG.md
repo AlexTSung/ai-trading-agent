@@ -41,6 +41,60 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v4.1.1] — 2026-10-29
+
+**PATCH** — Finding 4 from the first scheduler rehearsal report: nothing
+reconciled a fill that resolved after the tick that placed the order.
+
+Step 8 of the Execution Procedure places an order and, under v3.0.0, does
+not wait for a chat confirmation — but it never waited for Trade Approval
+to resolve either. `record_entry()` was called immediately after the
+placement call, as if the order had already filled. Under v4.0.0's ~30-minute
+re-run cadence, Trade Approval can resolve on a later tick than the one that
+placed the order (that delay is exactly what the open-orders check added in
+v4.0.1 depends on existing). When that happens, the fill that eventually
+lands was never run through `record_entry()` at all — the judge_score and
+qty that justified the trade were already out of scope by the time anything
+noticed the position appear, so this book's own cooldown (Hard Rule 4) and
+min-hold (Hard Rule 5) tracking silently never started for it. This is the
+same "a broad silent skip looks like nothing happened" class of bug this
+file has hit repeatedly (discovery tickers, stale judge data) — not
+speculative, a direct read of what step 8's code actually did.
+
+### Strategy / CLAUDE.md changes
+- New step 4a in the Robinhood Execution Procedure: reconcile any orders
+  still pending from a previous tick, before anything else touches state.
+- Step 8 no longer calls `record_entry()` after placing an order — it
+  records the order as *pending* instead, since placement is not fill.
+- Step 9 updated to reflect that today's journal may cover fills that were
+  actually placed on an earlier tick (or an earlier day), not only trades
+  placed today.
+
+### Code changes
+- `robinhood_trade.py`: new `record_pending_order(state, symbol, judge_score, qty, order_id)`,
+  called at placement time instead of `record_entry()`. New
+  `reconcile_fills(positions, open_orders, state)`, called at the start of
+  every tick: promotes a pending order to a real entry (via `record_entry()`,
+  using the position's actual qty/avg_entry_price rather than the originally
+  requested ones, so a partial fill or price improvement isn't lost) once it
+  shows up in `positions`; drops it from `state["pending"]` without entering
+  it if it resolves without ever filling (cancelled/rejected/expired,
+  including Trade Approval declining it); leaves it alone while still open.
+- `tests/test_robinhood_trade.py`: new `TestReconcileFills` (6 tests) —
+  pending-order recording, promotion on fill (using real position data, not
+  the requested qty/price), still-open orders left untouched, orders
+  resolved without filling dropped (not journaled as trades), a no-op on no
+  pending orders, and multiple pending orders resolving independently.
+  Mutation-tested: removing the pending-cleanup on an unfilled/expired order
+  fails 2 of the 6.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** This book has
+  not placed a single real trade yet — the bug was caught in rehearsal,
+  before any live order, and fixes a bookkeeping gap rather than a
+  scoring/sizing rule.
+
+
 ## [v4.1.0] — 2026-10-29
 
 **MINOR** — Two real findings surfaced while actually building the v4.0.0
