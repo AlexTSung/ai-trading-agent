@@ -1,18 +1,18 @@
 {
   "agent_version": "2.4.1",
-  "timestamp": "2026-10-29T10:02:19.708808-04:00",
+  "timestamp": "2026-10-29T11:02:27.707263-04:00",
   "trades": [
     {
-      "symbol": "MSFT",
+      "symbol": "AS",
       "action": "BUY",
-      "qty": 14,
-      "limit_price": 527.35,
+      "qty": 264,
+      "limit_price": 28.51,
       "order": {
-        "id": "4a051a10-a9e6-45db-8354-69387c7046d8",
-        "client_order_id": "agent-buy-MSFT-20261029140221",
-        "created_at": "2026-10-29T14:02:21.162983008Z",
-        "updated_at": "2026-10-29T14:02:21.165439353Z",
-        "submitted_at": "2026-10-29T14:02:21.162983008Z",
+        "id": "81a1343e-0d1c-4330-9724-d3bd3084fee0",
+        "client_order_id": "agent-buy-AS-20261029150229",
+        "created_at": "2026-10-29T15:02:29.352867347Z",
+        "updated_at": "2026-10-29T15:02:29.370623081Z",
+        "submitted_at": "2026-10-29T15:02:29.352867347Z",
         "filled_at": null,
         "expired_at": null,
         "canceled_at": null,
@@ -20,11 +20,11 @@
         "replaced_at": null,
         "replaced_by": null,
         "replaces": null,
-        "asset_id": "b6d1aa75-5c9c-4353-a305-9e2caa1925ab",
-        "symbol": "MSFT",
+        "asset_id": "ecfbbf22-07e0-4f7a-866f-752179ba9894",
+        "symbol": "AS",
         "asset_class": "us_equity",
         "notional": null,
-        "qty": "14",
+        "qty": "264",
         "filled_qty": "0",
         "filled_avg_price": null,
         "order_class": "",
@@ -33,7 +33,7 @@
         "side": "buy",
         "position_intent": "buy_to_open",
         "time_in_force": "gtc",
-        "limit_price": "527.35",
+        "limit_price": "28.51",
         "stop_price": null,
         "status": "pending_new",
         "extended_hours": false,
@@ -45,13 +45,13 @@
         "source": null,
         "expires_at": "2027-01-27T21:00:00Z",
         "_ok": true,
-        "_agent_reason": "Signal: WEAK_BUY | MA20-target $528.10 | Limit: $527.35 | Budget (8% cap): $7528.41 \u2192 14 shares @ $527.35 | Tier TIER1 stop -20% | TIF gtc",
-        "_limit_price_used": 527.35
+        "_agent_reason": "Signal: STRONG_BUY | MA20-target $28.51 | Limit: $28.51 | Budget (8% cap): $7530.77 \u2192 264 shares @ $28.51 | Tier TIER3 stop -10% | TIF gtc",
+        "_limit_price_used": 28.51
       },
       "exits": "deferred_until_fill",
       "tif": "gtc",
-      "note": "Signal: WEAK_BUY | MA20-target $528.10 | Limit: $527.35 | Budget (8% cap): $7528.41 \u2192 14 shares @ $527.35 | Tier TIER1 stop -20% | TIF gtc",
-      "judge_score": 9.02
+      "note": "Signal: STRONG_BUY | MA20-target $28.51 | Limit: $28.51 | Budget (8% cap): $7530.77 \u2192 264 shares @ $28.51 | Tier TIER3 stop -10% | TIF gtc",
+      "judge_score": 9.27
     }
   ],
   "skipped": [
@@ -61,9 +61,9 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "AAPL",
-      "signal": "STRONG_BUY",
-      "reason": "Already has a resting buy order \u2014 not stacking a second one (see GUARDRAIL: open_buy_order_syms, trade.py)"
+      "symbol": "MSFT",
+      "signal": "WEAK_BUY",
+      "reason": "HOLD or no qualifying signal"
     },
     {
       "symbol": "GOOGL",
@@ -171,12 +171,12 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "BFLY",
-      "signal": "STRONG_SELL",
+      "symbol": "HIMS",
+      "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "PATH",
+      "symbol": "RDW",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -186,13 +186,23 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
+      "symbol": "CAT",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
       "symbol": "PURR",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "TDOC",
-      "signal": "HOLD",
+      "symbol": "RKT",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "F",
+      "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
@@ -206,28 +216,33 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "IOVA",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "GOOG",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
       "symbol": "MRVL",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "INLF",
+      "symbol": "TDOC",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "IWM",
       "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "CVNA",
+      "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
       "symbol": "BURU",
       "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "INLF",
+      "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
@@ -241,22 +256,27 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
+      "symbol": "ADT",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "NVD",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "GOOG",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
       "symbol": "SOXL",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "NUR",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "SHFS",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "DVLT",
+      "symbol": "IOVA",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -266,12 +286,12 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "ADT",
-      "signal": "HOLD",
+      "symbol": "SHFS",
+      "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "RCT",
+      "symbol": "SPDN",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -281,12 +301,12 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "SNXX",
+      "symbol": "SPCX",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "F",
+      "symbol": "NUR",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -296,33 +316,48 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "AG",
+      "symbol": "INTC",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "BAC",
+      "symbol": "NFLX",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "TYGO",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "TENX",
+      "symbol": "NKE",
       "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "EYPT",
+      "symbol": "BYD",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "YSS",
+      "symbol": "ECG",
       "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "CMC",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SAN",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "GE",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "VYM",
+      "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
@@ -331,7 +366,7 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "ING",
+      "symbol": "FTNT",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     }
@@ -347,13 +382,22 @@
       "rationale": "No Judge data"
     },
     {
+      "symbol": "AAPL",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "EARNINGS VETO: AAPL flagged by the morning earnings watch \u2014 no entry within 3 trading days of a report"
+    },
+    {
       "symbol": "TSLA",
       "signal": "STRONG_BUY",
       "judge_recommendation": "VETO",
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: price $403.18 is 6.3% above MA20 $379.24 (limit 3%) \u2014 do not chase"
+      "rationale": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "DDOG",
@@ -407,7 +451,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "NCLH",
@@ -419,22 +463,13 @@
       "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NCLH \u2014 auto-veto per Hard Rule 9"
     },
     {
-      "symbol": "MA",
-      "signal": "STRONG_BUY",
-      "judge_recommendation": "VETO",
-      "judge_score": 0.0,
-      "approval_gate": 7.0,
-      "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 75 is above 60 \u2014 overbought, wait for a pullback"
-    },
-    {
       "symbol": "LITE",
       "signal": "WEAK_BUY",
       "judge_recommendation": "HOLD",
       "judge_score": 7.77,
       "approval_gate": 8.5,
       "is_discovery": true,
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $934.82 > MA50 $923.93, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $771.15 > MA50 $767.61 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 55%. Volatility: VIX 16.9 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $84B; Zero analyst buy coverage on a discovery stock. Source: discovery | Gate: 8.5."
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $934.81 > MA50 $923.93, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $771.16 > MA50 $767.62 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 47%. Volatility: VIX 16.9 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $84B; Zero analyst buy coverage on a discovery stock. Source: discovery | Gate: 8.5."
     },
     {
       "symbol": "NCPL",
@@ -443,16 +478,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "Quality veto: MICRO_CAP VETO: $0.01B market cap \u2014 too small for discovery buys"
-    },
-    {
-      "symbol": "ENSG",
-      "signal": "STRONG_BUY",
-      "judge_recommendation": "VETO",
-      "judge_score": 0.0,
-      "approval_gate": 7.0,
-      "is_discovery": false,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for ENSG \u2014 auto-veto per Hard Rule 9"
+      "rationale": "CHASE VETO: price $1.64 is 6.8% above MA20 $1.53 (limit 3%) \u2014 do not chase"
     }
   ],
   "stop_losses": [],
@@ -477,13 +503,6 @@
       "reason": "still valid \u2014 bid rests"
     },
     {
-      "symbol": "AAPL",
-      "action": "CANCELLED",
-      "order_id": "32e172b0-bb92-4564-86f5-7f21cf1c549e",
-      "reason": "earnings blackout (Hard Rule 9) \u2014 would fill into the print",
-      "status_code": 204
-    },
-    {
       "symbol": "KDP",
       "action": "KEPT",
       "order_id": "44b04856-181f-449b-a8f0-d6d6a21d6514",
@@ -492,16 +511,16 @@
   ],
   "exits_attached": [
     {
-      "symbol": "DT",
-      "qty": 45,
-      "entry": 61.345778,
+      "symbol": "MSFT",
+      "qty": 14,
+      "entry": 527.35,
       "exits": [
         {
-          "id": "25785449-ec67-4c98-bf73-e9b8121fc97e",
-          "client_order_id": "t1-oco-20261029140220-DT",
-          "created_at": "2026-10-29T14:02:20.39136277Z",
-          "updated_at": "2026-10-29T14:02:20.392088769Z",
-          "submitted_at": "2026-10-29T14:02:20.39136277Z",
+          "id": "a8da23e3-aa1a-4b9b-a8ff-3b06af83595e",
+          "client_order_id": "t1-oco-20261029150228-MSFT",
+          "created_at": "2026-10-29T15:02:28.387264761Z",
+          "updated_at": "2026-10-29T15:02:28.387948877Z",
+          "submitted_at": "2026-10-29T15:02:28.387264761Z",
           "filled_at": null,
           "expired_at": null,
           "canceled_at": null,
@@ -509,11 +528,11 @@
           "replaced_at": null,
           "replaced_by": null,
           "replaces": null,
-          "asset_id": "ec758e9f-503a-469e-a8b0-a3f27fe99316",
-          "symbol": "DT",
+          "asset_id": "b6d1aa75-5c9c-4353-a305-9e2caa1925ab",
+          "symbol": "MSFT",
           "asset_class": "us_equity",
           "notional": null,
-          "qty": "18",
+          "qty": "5",
           "filled_qty": "0",
           "filled_avg_price": null,
           "order_class": "oco",
@@ -522,17 +541,17 @@
           "side": "sell",
           "position_intent": "sell_to_close",
           "time_in_force": "gtc",
-          "limit_price": "76.09",
+          "limit_price": "738.29",
           "stop_price": null,
           "status": "pending_new",
           "extended_hours": false,
           "legs": [
             {
-              "id": "a04214f5-4003-4aca-bae6-0f688576d77d",
-              "client_order_id": "ba7375e1-1f4b-43d7-bf25-28c42361fc1d",
-              "created_at": "2026-10-29T14:02:20.39136277Z",
-              "updated_at": "2026-10-29T14:02:20.392052063Z",
-              "submitted_at": "2026-10-29T14:02:20.39136277Z",
+              "id": "f9664867-4180-4556-ab4d-77d3170ab106",
+              "client_order_id": "b58f5b40-d419-404b-b921-31861722a7e5",
+              "created_at": "2026-10-29T15:02:28.387264761Z",
+              "updated_at": "2026-10-29T15:02:28.387920585Z",
+              "submitted_at": "2026-10-29T15:02:28.387264761Z",
               "filled_at": null,
               "expired_at": null,
               "canceled_at": null,
@@ -540,11 +559,11 @@
               "replaced_at": null,
               "replaced_by": null,
               "replaces": null,
-              "asset_id": "ec758e9f-503a-469e-a8b0-a3f27fe99316",
-              "symbol": "DT",
+              "asset_id": "b6d1aa75-5c9c-4353-a305-9e2caa1925ab",
+              "symbol": "MSFT",
               "asset_class": "us_equity",
               "notional": null,
-              "qty": "18",
+              "qty": "5",
               "filled_qty": "0",
               "filled_avg_price": null,
               "order_class": "oco",
@@ -554,14 +573,14 @@
               "position_intent": "sell_to_close",
               "time_in_force": "gtc",
               "limit_price": null,
-              "stop_price": "53.98",
+              "stop_price": "421.88",
               "status": "held",
               "extended_hours": false,
               "legs": null,
               "trail_percent": null,
               "trail_price": null,
               "hwm": null,
-              "group_id": "8ce4c1f9-d5ab-42b6-a3f9-9946c8e89e75",
+              "group_id": "9842a377-c160-4e35-831f-6ff25b11af73",
               "group_role": "stop_loss",
               "subtag": null,
               "source": null,
@@ -571,23 +590,23 @@
           "trail_percent": null,
           "trail_price": null,
           "hwm": null,
-          "group_id": "8ce4c1f9-d5ab-42b6-a3f9-9946c8e89e75",
+          "group_id": "9842a377-c160-4e35-831f-6ff25b11af73",
           "group_role": "take_profit",
           "subtag": null,
           "source": null,
           "expires_at": "2027-01-27T21:00:00Z",
           "_ok": true,
           "_label": "t1",
-          "_target_price": 76.09,
-          "_stop_price": 53.98,
-          "_tier": "TIER2"
+          "_target_price": 738.29,
+          "_stop_price": 421.88,
+          "_tier": "TIER1"
         },
         {
-          "id": "f835c8f0-df73-427b-87d7-f58e0ade001c",
-          "client_order_id": "t2-oco-20261029140220-DT",
-          "created_at": "2026-10-29T14:02:20.521903774Z",
-          "updated_at": "2026-10-29T14:02:20.522565126Z",
-          "submitted_at": "2026-10-29T14:02:20.521903774Z",
+          "id": "5d9feadb-bbc3-4bd5-ae19-8612c2c6654e",
+          "client_order_id": "t2-oco-20261029150228-MSFT",
+          "created_at": "2026-10-29T15:02:28.586425597Z",
+          "updated_at": "2026-10-29T15:02:28.588523364Z",
+          "submitted_at": "2026-10-29T15:02:28.586425597Z",
           "filled_at": null,
           "expired_at": null,
           "canceled_at": null,
@@ -595,11 +614,11 @@
           "replaced_at": null,
           "replaced_by": null,
           "replaces": null,
-          "asset_id": "ec758e9f-503a-469e-a8b0-a3f27fe99316",
-          "symbol": "DT",
+          "asset_id": "b6d1aa75-5c9c-4353-a305-9e2caa1925ab",
+          "symbol": "MSFT",
           "asset_class": "us_equity",
           "notional": null,
-          "qty": "18",
+          "qty": "5",
           "filled_qty": "0",
           "filled_avg_price": null,
           "order_class": "oco",
@@ -608,17 +627,17 @@
           "side": "sell",
           "position_intent": "sell_to_close",
           "time_in_force": "gtc",
-          "limit_price": "83.46",
+          "limit_price": "843.76",
           "stop_price": null,
           "status": "pending_new",
           "extended_hours": false,
           "legs": [
             {
-              "id": "4c662e41-23f2-46de-b6a7-36522e491cb9",
-              "client_order_id": "994fdc1d-8049-4871-9ce0-7bb0b0b79596",
-              "created_at": "2026-10-29T14:02:20.521903774Z",
-              "updated_at": "2026-10-29T14:02:20.522533489Z",
-              "submitted_at": "2026-10-29T14:02:20.521903774Z",
+              "id": "20200ad2-17e6-4492-b2bc-369528eeb966",
+              "client_order_id": "64c929ab-eab7-4aa5-bf95-bebc419d0d52",
+              "created_at": "2026-10-29T15:02:28.586425597Z",
+              "updated_at": "2026-10-29T15:02:28.58849418Z",
+              "submitted_at": "2026-10-29T15:02:28.586425597Z",
               "filled_at": null,
               "expired_at": null,
               "canceled_at": null,
@@ -626,11 +645,11 @@
               "replaced_at": null,
               "replaced_by": null,
               "replaces": null,
-              "asset_id": "ec758e9f-503a-469e-a8b0-a3f27fe99316",
-              "symbol": "DT",
+              "asset_id": "b6d1aa75-5c9c-4353-a305-9e2caa1925ab",
+              "symbol": "MSFT",
               "asset_class": "us_equity",
               "notional": null,
-              "qty": "18",
+              "qty": "5",
               "filled_qty": "0",
               "filled_avg_price": null,
               "order_class": "oco",
@@ -640,14 +659,14 @@
               "position_intent": "sell_to_close",
               "time_in_force": "gtc",
               "limit_price": null,
-              "stop_price": "53.98",
+              "stop_price": "421.88",
               "status": "held",
               "extended_hours": false,
               "legs": null,
               "trail_percent": null,
               "trail_price": null,
               "hwm": null,
-              "group_id": "85ec9fe8-412d-4387-bb7e-4e4e99c91413",
+              "group_id": "dbc88060-c1e5-4cab-a34e-338688bf4df2",
               "group_role": "stop_loss",
               "subtag": null,
               "source": null,
@@ -657,16 +676,16 @@
           "trail_percent": null,
           "trail_price": null,
           "hwm": null,
-          "group_id": "85ec9fe8-412d-4387-bb7e-4e4e99c91413",
+          "group_id": "dbc88060-c1e5-4cab-a34e-338688bf4df2",
           "group_role": "take_profit",
           "subtag": null,
           "source": null,
           "expires_at": "2027-01-27T21:00:00Z",
           "_ok": true,
           "_label": "t2",
-          "_target_price": 83.46,
-          "_stop_price": 53.98,
-          "_tier": "TIER2"
+          "_target_price": 843.76,
+          "_stop_price": 421.88,
+          "_tier": "TIER1"
         }
       ]
     }
@@ -676,7 +695,7 @@
       "symbol": "NVDA",
       "action": "SELL_BLOCKED",
       "signal": "STRONG_SELL",
-      "reason": "Tier 1 compounder: STRONG_SELL on price alone is not a sell trigger. MA20 $222.92 still >= MA50 $222.00 \u2014 no confirmed thesis break."
+      "reason": "Tier 1 compounder: STRONG_SELL on price alone is not a sell trigger. MA20 $222.98 still >= MA50 $222.02 \u2014 no confirmed thesis break."
     }
   ],
   "phantom_equity": [
@@ -684,15 +703,15 @@
       "symbol": "LBGJ",
       "qty": 154903.0,
       "avg_entry_price": 0.0288,
-      "current_price": 1.54,
-      "price_ratio": 53.47,
-      "unrealized_plpc": 52.47222,
-      "reported_market_value": 238550.62,
+      "current_price": 1.55,
+      "price_ratio": 53.82,
+      "unrealized_plpc": 52.81944,
+      "reported_market_value": 240099.65,
       "cost_basis": 4461.21,
-      "phantom_amount": 234089.41,
+      "phantom_amount": 235638.44,
       "reasons": [
-        "price $1.5400 is 53x its cost basis $0.0288",
-        "unrealized P&L 5,247% exceeds the 1,000% plausibility ceiling",
+        "price $1.5500 is 54x its cost basis $0.0288",
+        "unrealized P&L 5,282% exceeds the 1,000% plausibility ceiling",
         "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
       ],
       "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
