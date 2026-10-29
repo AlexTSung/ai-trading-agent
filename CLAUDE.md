@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v4.1.1
+> **Version:** v5.0.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -117,27 +117,36 @@ full rationale; summary:
   scheduled pipeline (`trade.py`) — there was never a human in the loop to
   confirm with, so nothing changes here.
 - **Robinhood (real money) orders built through the documented Robinhood
-  Execution Procedure, via `robinhood_trade.build_buy_candidates()`** no
-  longer require a chat confirmation. Alex made this decision explicitly on
-  2026-10-29, with Robinhood's own Trade Approval (confirmed ON) substituted
-  as the human check for this specific, guardrail-vetted order flow.
-- **Any other order — an ad hoc instruction outside that documented
-  pipeline, on either broker** — still requires the original protocol in
+  Execution Procedure, via `robinhood_trade.build_buy_candidates()` or
+  `robinhood_trade.build_sell_candidates()`** no longer require a chat
+  confirmation. Alex made this decision explicitly for buys on 2026-10-29,
+  and extended it to the mechanical sells `build_sell_candidates()` detects
+  (tiered stop-losses, inverse-ETF max-hold, Hard Rule 7 profit-taking) the
+  same day, with Robinhood's own Trade Approval (confirmed ON) substituted
+  as the human check for this specific, guardrail-vetted order flow in both
+  directions. See "Robinhood Automated Execution — Mechanical Sells" below
+  for the sell-side extension's own rationale and scope.
+- **Any other order — an ad hoc instruction outside those documented
+  pipelines, on either broker** — still requires the original protocol in
   full: state out loud (in chat) "This is a [PAPER / REAL MONEY] trade on
   [Alpaca / Robinhood]. Confirm?" and wait for explicit confirmation. No
   exceptions for this category. An order nobody's guardrail code has sized,
   tiered, or cooldown-checked is exactly the case this protocol still exists
-  to catch.
+  to catch. In particular, a Judge re-evaluating open positions to pick the
+  "best" order type for maximizing profit is explicitly **not** covered by
+  either `build_*_candidates()` function and still requires full
+  confirmation (see "Robinhood Automated Execution — Mechanical Sells").
 
 ### Hard Rules to Prevent Account Confusion
 1. **`mcp__robinhood-trading__place_equity_order` may be called without a chat
    confirmation only when the order came from
-   `robinhood_trade.build_buy_candidates()` via the documented Robinhood
+   `robinhood_trade.build_buy_candidates()` or
+   `robinhood_trade.build_sell_candidates()` via the documented Robinhood
    Execution Procedure, and only after Trade Approval has been confirmed ON
    this session (Execution Procedure step 1).** Any other real-money order —
-   anything not built through that pipeline — still requires explicit "real
-   money" confirmation from the user in the same conversation turn, with no
-   exception.
+   anything not built through one of those two pipelines — still requires
+   explicit "real money" confirmation from the user in the same conversation
+   turn, with no exception.
 2. **Never call `mcp__alpaca__place_stock_order` and `mcp__robinhood-trading__place_equity_order` in the same turn.**
 3. **If the user says "place the order" without specifying which account, ASK before acting.**
 4. **Research and signals are account-agnostic — only execution tools are account-specific.**
@@ -237,12 +246,37 @@ order this produces.
    `record_entry()`'s cooldown/min-hold tracking silently never ran for an
    asynchronously-approved fill — a real correctness bug, confirmed in
    `EQUITIES_CHANGELOG.md` v4.1.0 and covered by
-   `tests/test_robinhood_trade.py`'s `TestReconcileFills`.
-5. Run stop/phantom checks **before** considering any new buy, same order
-   as `trade.py`'s session: `robinhood_trade.check_stops(positions, state)`
-   and `robinhood_trade.phantom_audit(positions, state)`. Any flag here
-   means a confirmed SELL to propose, following the same confirmation
-   protocol as a buy — never an automatic exit.
+   `tests/test_robinhood_trade.py`'s `TestReconcileFills`. Do the same for
+   any sell placed on a previous tick:
+   `reconciled_sells = robinhood_trade.reconcile_sell_fills(positions, open_orders, state)`
+   — identical reasoning, mirrored for the sell side (see step 5 below).
+5. **Build sell candidates before considering any new buy**, same order as
+   `trade.py`'s session:
+   `sell_candidates = robinhood_trade.build_sell_candidates(positions, state, open_orders=open_orders)`.
+   This composes every *mechanical* (rule-based, no judgment call) sell
+   signal this book knows how to detect: Hard Rule 3's tiered stop-losses
+   and the Bearish Playbook's inverse-ETF max-hold (both full exits), and
+   Hard Rule 7's T1/T2 partial profit-taking — into `SELL_FULL`/`SELL_PARTIAL`
+   candidates, or a `SKIP` with a reason (a Hard-Rule-11 phantom-equity
+   position always SKIPs here, never sells — "blocked from all trading,
+   excluded from exit placement"). For each `SELL_FULL`/`SELL_PARTIAL`
+   candidate: log `robinhood_trade.confirmation_prompt(candidate)` as an
+   audit record (same as step 8 below does for buys — not a prompt waiting
+   on a reply), call `mcp__robinhood-trading__place_equity_order` directly,
+   then `robinhood_trade.record_pending_sell(state, symbol, action, qty, order_id, target=..., qty_before_order=<the position's qty right now, before this order>)`
+   — **do not** call `record_full_exit`/`record_partial_exit` here; placing
+   an order is not a fill, exactly as step 8 already established for buys.
+   Step 4a on a later tick is what confirms the fill via
+   `reconcile_sell_fills()` and does the real bookkeeping (starts the 48h
+   cooldown on a full exit via `record_full_exit`, or marks the target taken
+   on a partial exit via `record_partial_exit` — the latter is also what
+   makes `check_stops()` switch that position's effective stop to breakeven
+   on the remainder, per Hard Rule 7). **No chat confirmation step** for
+   this exact flow — see "Robinhood Automated Execution — Mechanical Sells"
+   below for why this is safe to extend the same way v3.0.0 extended buys,
+   and what it deliberately does not cover. Never call
+   `mcp__alpaca__place_stock_order` in the same turn (Hard Rule 2, Account
+   Guardrails).
 6. Read today's `logs/paper/{date}-judge.json` for APPROVE rows (research
    and Judge scoring are account-agnostic and already ran automatically —
    Hard Rule 4 in Account Guardrails). **This file's freshness depends
@@ -287,15 +321,17 @@ order this produces.
    Approval will let it fill, so it must not assume a fill. Step 4a on a
    later tick (possibly the next one, possibly tomorrow's first tick) is
    what confirms the fill and does the real bookkeeping.
-9. `robinhood_trade.save_real_state(logs_dir, state)` (this persists both
-   step 4a's reconciliation and step 8's new pending entries), then write
-   the day's journal entry in the private repo using `journal-template.md`
-   — covering step 4a's reconciled fills and expirations, today's
-   stop-losses, today's still-pending orders (placed today, not yet
-   confirmed), and step 8's logged confirmation-prompt text for each order
-   placed today — then commit and push the private repo.
-10. A `SKIP` candidate is never shown to the user as something to confirm —
-    `confirmation_prompt()` raises if it's handed one, on purpose.
+9. `robinhood_trade.save_real_state(logs_dir, state)` (this persists step
+   4a's buy and sell reconciliation and steps 5/8's new pending entries),
+   then write the day's journal entry in the private repo using
+   `journal-template.md` — covering step 4a's reconciled buy and sell fills
+   and expirations, today's still-pending buy and sell orders (placed
+   today, not yet confirmed), and the confirmation-prompt audit text logged
+   by step 5 (sells) and step 8 (buys) for each order placed today — then
+   commit and push the private repo.
+10. A `SKIP` candidate — from either `build_buy_candidates()` or
+    `build_sell_candidates()` — is never shown to the user as something to
+    confirm. `confirmation_prompt()` raises if it's handed one, on purpose.
 
 ## Robinhood Automated Execution — v3.0.0
 
@@ -343,7 +379,69 @@ confirmation for orders that came from
 An ad hoc real-money instruction outside that pipeline (anything not sized,
 tiered, and cooldown-checked by the guardrail code) still requires the
 original Mandatory Confirmation Protocol in full, with no exception — see
-that section in Account Guardrails above.
+that section in Account Guardrails above. (This scope was extended to cover
+a second, sell-side pipeline the same day — see "Robinhood Automated
+Execution — Mechanical Sells" below.)
+
+## Robinhood Automated Execution — Mechanical Sells
+
+**Alex's decision, 2026-10-29, in response to my own proposal: "Focus on
+building this."** I had split the sell-side automation question into two
+pieces and proposed only the first — mechanical, rule-based sells (Hard
+Rule 3 tiered stops, the Bearish Playbook's inverse-ETF max-hold, Hard Rule
+7's T1/T2 partial profit-taking), wired the same no-chat-confirmation way
+v3.0.0 wired buys — while recommending the second piece (a Judge
+re-evaluating the whole portfolio to pick the "best" exit order type) be
+proven on the paper book first, since it has no track record anywhere in
+this codebase. Alex authorized the first piece as described and did not
+ask for the second.
+
+**Self-correction on versioning, made before implementing, not after.**
+When I first described this to Alex I called it "a small, well-bounded
+change... a MINOR version bump." That was wrong by this file's own table:
+removing the Mandatory Confirmation Protocol's chat-confirmation step for a
+new category of real-money order is the same shape of change v3.0.0 made
+for buys, and v3.0.0 was correctly classified MAJOR ("any Hard Rule
+loosened") for exactly that reason. This ships as MAJOR, matching v3.0.0's
+precedent, not the MINOR I originally told Alex to expect.
+
+**What changed.** `robinhood_trade.py` gained `build_sell_candidates()`
+(composes stop-loss, inverse-ETF max-hold, and T1/T2 profit-target
+detection into `SELL_FULL`/`SELL_PARTIAL`/`SKIP` candidates, excluding
+Hard-Rule-11 phantom positions entirely), `check_profit_targets()` (Hard
+Rule 7's T1/T2 math, reusing `trade.py`'s `TAKE_PROFIT_R1`/`R2` and
+`T1_SELL_FRACTION`), a breakeven override inside `check_stops()` (once T1
+fires, the effective stop becomes breakeven on the remainder, per Hard Rule
+7's "move stop to breakeven" — tighter than the tier's normal stop_pct),
+and the pending/reconcile pair for sells (`record_pending_sell()`,
+`reconcile_sell_fills()`, `record_full_exit()`, `record_partial_exit()`)
+mirroring v4.1.1's buy-side fix for the exact same async-fill problem, so
+this capability doesn't ship with the bug v4.1.1 just closed on the other
+side. Execution Procedure steps 4a/5/9 were rewritten accordingly (see
+above).
+
+**What did not change.** Hard Rule 3's stop percentages, Hard Rule 7's
+40/40/20 split and 2x/3x R/R targets, and Hard Rule 11's phantom-equity
+block are exactly as documented — this automates their *execution*, not
+their *thresholds*. A phantom-flagged position still never sells, full
+stop, regardless of how profitable or how far underwater its (fake) price
+makes it look.
+
+**Deliberately out of scope.** A Judge deciding, per position, which order
+type (limit sell / stop / stop-limit) best "maximizes profit" right now —
+the other half of Alex's original request — is not built here and is not
+authorized by this entry. It is a new, untested capability (even the paper
+book's sells are a static bracket set once at entry via
+`trade.place_oco_exits`, never re-evaluated), and belongs on the paper book
+first, with its own experiment phase and calibration record, before any
+version of it touches real money. Any such order remains subject to the
+full Mandatory Confirmation Protocol until that happens.
+
+**Comparability.** No scoring, sizing, or paper-book change — this
+automates execution of rules already in this file (Hard Rules 3, 7, 11),
+it does not alter any threshold. The Phase 2B paper baseline is unaffected
+and does not reset. `EQUITIES_CHANGELOG.md`'s entry for this version has
+the full test list and mutation-testing record.
 
 ## Robinhood Scheduled Execution — v4.0.0
 
@@ -816,6 +914,18 @@ short on 2026-09-03, extend rather than graduate.
   the still-open question this surfaces about whether Trade Approval
   requires Alex's presence to tap-approve or not. `EQUITIES_CHANGELOG.md`
   v4.0.0 has the full entry.
+- **2026-10-29 (same day)** — Alex authorized extending v3.0.0's
+  no-chat-confirmation treatment from buys to mechanical sells (tiered
+  stop-losses, inverse-ETF max-hold, Hard Rule 7 T1/T2 profit-taking),
+  responding "Focus on building this" to a proposal that explicitly split
+  mechanical sells (automate now) from Judge-driven profit-maximization
+  (prove on paper first, not authorized). I had initially told Alex to
+  expect a MINOR bump for this; on review against this file's own
+  versioning table it is the same shape of Hard Rule loosening v3.0.0 made
+  for buys, so it shipped as a fourth MAJOR version this same day instead —
+  see "Robinhood Automated Execution — Mechanical Sells" above for the full
+  rationale, the self-correction, and what stayed explicitly out of scope.
+  `EQUITIES_CHANGELOG.md` has the full entry.
 
 ## Daily Schedule — SINGLE SOURCE OF TRUTH (all times ET, weekdays only)
 

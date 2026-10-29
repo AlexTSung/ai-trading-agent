@@ -92,13 +92,22 @@ def save_real_state(logs_dir: str, state: dict) -> None:
         json.dump(state, f, indent=2, sort_keys=True)
 
 
-def record_entry(state: dict, symbol: str, judge_score, qty: float) -> None:
+def record_entry(state: dict, symbol: str, judge_score, qty: float,
+                  entry_price: float = None) -> None:
     """Mirrors trade.py's post-fill bookkeeping, for this book's own
-    cooldown/min-hold tracking. Never touches trade.py's state."""
+    cooldown/min-hold tracking. Never touches trade.py's state.
+
+    entry_price is optional (existing callers and existing state files
+    predate it) but required for check_profit_targets() to compute Hard
+    Rule 7's T1/T2 -- a position recorded without it simply never produces
+    a profit-target candidate, which is the correct "fail closed on missing
+    data" behaviour rather than guessing an entry price.
+    """
     state.setdefault("entries", {})[symbol] = {
         "date": datetime.now().isoformat(),
         "judge_score": judge_score,
         "qty": qty,
+        "entry_price": entry_price,
     }
 
 
@@ -161,7 +170,8 @@ def reconcile_fills(positions: list, open_orders: list, state: dict) -> dict:
         pos = positions_by_symbol.get(symbol)
 
         if pos is not None:
-            record_entry(state, symbol, info.get("judge_score"), pos["qty"])
+            record_entry(state, symbol, info.get("judge_score"), pos["qty"],
+                         entry_price=pos.get("avg_entry_price"))
             filled.append({
                 "symbol": symbol,
                 "side": "buy",
@@ -178,6 +188,257 @@ def reconcile_fills(positions: list, open_orders: list, state: dict) -> dict:
         # else: still open, leave pending as-is
 
     return {"filled": filled, "expired": expired}
+
+
+def record_full_exit(state: dict, symbol: str) -> None:
+    """Call after a confirmed full-exit SELL fill (stop-loss or inverse-ETF
+    max-hold). Starts the 48h re-entry cooldown (Hard Rule 4) -- same
+    record_stop_out() the paper book's equivalent event uses -- and clears
+    the position's entry record, since there is nothing left to compute a
+    T1/T2 target against."""
+    record_stop_out(state, symbol)
+    state.get("entries", {}).pop(symbol, None)
+
+
+def record_partial_exit(state: dict, symbol: str, target: str) -> None:
+    """Call after a confirmed partial-exit SELL fill (Hard Rule 7's T1/T2).
+    Marks the target taken so check_profit_targets() doesn't re-propose it
+    on the next tick, and -- for T1 specifically -- is what makes
+    check_stops() switch that position's effective stop to breakeven on the
+    remainder, per "move stop to breakeven on remainder" in Hard Rule 7."""
+    entry = state.setdefault("entries", {}).setdefault(symbol, {})
+    if target == "T1":
+        entry["t1_taken"] = True
+    elif target == "T2":
+        entry["t2_taken"] = True
+
+
+def record_pending_sell(state: dict, symbol: str, action: str, qty: float,
+                         order_id: str = None, target: str = None,
+                         qty_before_order: float = None) -> None:
+    """
+    Sell-side counterpart to record_pending_order() -- call at sell
+    order-placement time, not fill time, for the same reason: under v3.0.0
+    (no chat confirmation), a sell can resolve on a later tick than the one
+    that placed it.
+
+    action: "SELL_FULL" or "SELL_PARTIAL" (matches build_sell_candidates()'s
+    candidate shape). qty_before_order (the position's held qty at the
+    moment this order was placed) is required for SELL_PARTIAL --
+    reconcile_sell_fills() has no other signal that a partial sell filled,
+    since the symbol stays in `positions` either way; a full exit's fill
+    signal (the symbol disappearing from positions entirely) doesn't need it.
+    """
+    state.setdefault("pending_sells", {})[symbol] = {
+        "action": action,
+        "qty": qty,
+        "order_id": order_id,
+        "target": target,
+        "qty_before_order": qty_before_order,
+        "placed_at": datetime.now().isoformat(),
+    }
+
+
+def reconcile_sell_fills(positions: list, open_orders: list, state: dict) -> dict:
+    """
+    Sell-side counterpart to reconcile_fills() -- same problem (an order
+    placed without chat confirmation can fill on a later tick), different
+    fill signal. A fill is detected by a *position-state change*, not by
+    order status, because open_orders may not retain a resolved order at
+    all (the same assumption reconcile_fills() already makes for buys):
+
+    - SELL_FULL fills when the symbol disappears from `positions` entirely.
+    - SELL_PARTIAL fills when the held qty drops below qty_before_order.
+    - Either one is left pending while still resting in `open_orders`, and
+      dropped as expired (never filled -- cancelled, rejected, or Trade
+      Approval declined it) once it's gone from `open_orders` without
+      either fill signal having fired.
+
+    Run this alongside reconcile_fills() at the start of every tick, before
+    building new sell candidates (CLAUDE.md step 4a).
+    """
+    pending = state.get("pending_sells", {})
+    if not pending:
+        return {"filled": [], "expired": []}
+
+    positions_by_symbol = {p["symbol"]: p for p in positions}
+    open_order_syms = {o.get("symbol") for o in open_orders}
+
+    filled, expired = [], []
+    for symbol in list(pending.keys()):
+        info = pending[symbol]
+        pos = positions_by_symbol.get(symbol)
+        action = info["action"]
+
+        if action == "SELL_FULL":
+            if pos is None:
+                record_full_exit(state, symbol)
+                filled.append({"symbol": symbol, "side": "sell", "action": "SELL_FULL",
+                               "qty": info.get("qty"), "order_id": info.get("order_id")})
+                del pending[symbol]
+            elif symbol not in open_order_syms:
+                expired.append({"symbol": symbol, "order_id": info.get("order_id")})
+                del pending[symbol]
+            # else: still resting, leave pending as-is
+
+        else:  # SELL_PARTIAL
+            before = info.get("qty_before_order")
+            current_qty = float(pos["qty"]) if pos is not None else 0.0
+            if pos is not None and before is not None and current_qty < float(before):
+                record_partial_exit(state, symbol, info.get("target"))
+                filled.append({"symbol": symbol, "side": "sell", "action": "SELL_PARTIAL",
+                               "target": info.get("target"), "qty": info.get("qty"),
+                               "order_id": info.get("order_id")})
+                del pending[symbol]
+            elif symbol not in open_order_syms:
+                expired.append({"symbol": symbol, "order_id": info.get("order_id")})
+                del pending[symbol]
+            # else: still resting, leave pending as-is
+
+    return {"filled": filled, "expired": expired}
+
+
+def check_profit_targets(positions: list, state: dict) -> list:
+    """
+    Hard Rule 7: sell 40% at T1 (entry + 2x stop distance), another 40% at
+    T2 (entry + 3x stop distance), let the final 20% run. Reuses
+    trade.py's TAKE_PROFIT_R1/R2 and T1_SELL_FRACTION rather than
+    duplicating the ratios.
+
+    Needs this book's own entry_price on record (set by record_entry()) --
+    a position with no tracked entry (opened before this tracking existed,
+    or outside this pipeline entirely) cannot have a target computed and is
+    silently skipped here, same "fail closed on missing data" rule this
+    file applies everywhere else, rather than guessing an entry price.
+
+    Each target fires at most once per position: state["entries"][symbol]
+    records t1_taken/t2_taken (set by record_partial_exit() once the sell
+    actually fills) so a re-run inside the same ~30-minute tick window
+    doesn't re-propose a target it already executed.
+    """
+    entries = state.get("entries", {})
+    targets = []
+    for pos in positions:
+        sym = pos["symbol"]
+        entry_record = entries.get(sym)
+        if not entry_record or not entry_record.get("entry_price"):
+            continue
+
+        entry_price = float(entry_record["entry_price"])
+        current_price = float(pos.get("current_price", 0))
+        original_qty = entry_record.get("qty")
+        held_qty = float(pos.get("qty", 0))
+        if entry_price <= 0 or current_price <= 0 or not original_qty or held_qty <= 0:
+            continue
+
+        stop_distance = entry_price * abs(trade.stop_pct_for(sym))
+        t1_price = entry_price + trade.TAKE_PROFIT_R1 * stop_distance
+        t2_price = entry_price + trade.TAKE_PROFIT_R2 * stop_distance
+        sell_qty = int(min(math.floor(original_qty * trade.T1_SELL_FRACTION), held_qty))
+        if sell_qty <= 0:
+            continue
+
+        if not entry_record.get("t1_taken") and current_price >= t1_price:
+            targets.append({
+                "symbol": sym, "target": "T1", "qty": sell_qty,
+                "current_price": current_price, "target_price": round(t1_price, 2),
+                "reason": (f"Hard Rule 7: T1 (${t1_price:.2f}) reached -- sell "
+                           f"{trade.T1_SELL_FRACTION:.0%} ({sell_qty} sh), move "
+                           f"stop to breakeven on the remainder"),
+            })
+        elif (entry_record.get("t1_taken") and not entry_record.get("t2_taken")
+                and current_price >= t2_price):
+            targets.append({
+                "symbol": sym, "target": "T2", "qty": sell_qty,
+                "current_price": current_price, "target_price": round(t2_price, 2),
+                "reason": (f"Hard Rule 7: T2 (${t2_price:.2f}) reached -- sell "
+                           f"another {trade.T1_SELL_FRACTION:.0%} ({sell_qty} sh), "
+                           f"let the remainder run"),
+            })
+    return targets
+
+
+def build_sell_candidates(positions: list, state: dict, open_orders: list = None) -> list:
+    """
+    Composes every mechanical (rule-based, no judgment call) sell signal
+    this book can detect into SELL candidates -- same audit discipline as
+    build_buy_candidates(): a SKIP is never shown as something to confirm,
+    a SELL is built fully-sized and fully-reasoned before the interactive
+    session ever calls place_equity_order.
+
+    Covers: Hard Rule 3 tiered stop-losses and the Bearish Playbook's
+    inverse-ETF max-hold (both full exits, via check_stops()), and Hard
+    Rule 7's T1/T2 partial profit-taking (via check_profit_targets()).
+    Hard Rule 11 phantom-equity positions are excluded from every path here
+    -- "blocked from all trading, excluded from exit placement" -- they
+    SKIP with a reason, never a SELL.
+
+    Deliberately does NOT cover a Judge re-evaluating open positions for
+    "best opportunity to maximize profit" with a live choice of order type.
+    That decision has no track record anywhere in this codebase -- even the
+    paper book's own sells are a static bracket set once at entry
+    (trade.place_oco_exits), never re-evaluated -- so it stays out of this
+    function until it has a paper-book track record of its own.
+    """
+    open_orders = open_orders or []
+    pending_sell_syms = {
+        o.get("symbol") for o in open_orders
+        if str(o.get("side", "")).lower() == "sell"
+        and str(o.get("status", "")).lower() in OPEN_ORDER_STATUSES
+    }
+    phantom_syms = {f["symbol"] for f in phantom_audit(positions, state)}
+    positions_by_symbol = {p["symbol"]: p for p in positions}
+
+    stop_results = check_stops(positions, state)
+    profit_targets = check_profit_targets(positions, state)
+
+    candidates = []
+    seen_full_exit_syms = set()
+
+    for trigger in stop_results["stop_losses"] + stop_results["inverse_etf_max_hold"]:
+        sym = trigger["symbol"]
+        if sym in seen_full_exit_syms:
+            continue
+        seen_full_exit_syms.add(sym)
+        if sym in phantom_syms:
+            candidates.append({"symbol": sym, "action": "SKIP", "reasons": [
+                f"{sym} is phantom equity (Hard Rule 11) -- blocked from all "
+                f"trading, including this exit, pending manual reconciliation"]})
+            continue
+        if sym in pending_sell_syms:
+            candidates.append({"symbol": sym, "action": "SKIP", "reasons": [
+                f"{sym} already has a pending sell order -- not stacking a second one"]})
+            continue
+        pos = positions_by_symbol.get(sym)
+        if not pos:
+            continue
+        current_price = float(pos.get("current_price", 0))
+        limit_price = round(current_price * (1 - trade.URGENT_EXIT_SLIPPAGE), 2)
+        candidates.append({
+            "symbol": sym, "action": "SELL_FULL", "qty": pos["qty"],
+            "limit_price": limit_price, "tier": trigger.get("tier") or trade.tier_for(sym),
+            "reason": trigger["reason"],
+        })
+
+    for target in profit_targets:
+        sym = target["symbol"]
+        if sym in phantom_syms:
+            candidates.append({"symbol": sym, "action": "SKIP", "reasons": [
+                f"{sym} is phantom equity (Hard Rule 11) -- blocked from all "
+                f"trading, including this exit, pending manual reconciliation"]})
+            continue
+        if sym in pending_sell_syms:
+            candidates.append({"symbol": sym, "action": "SKIP", "reasons": [
+                f"{sym} already has a pending sell order -- not stacking a second one"]})
+            continue
+        limit_price = round(target["current_price"] * (1 - trade.LIMIT_SLIPPAGE), 2)
+        candidates.append({
+            "symbol": sym, "action": "SELL_PARTIAL", "qty": target["qty"],
+            "limit_price": limit_price, "target": target["target"],
+            "reason": target["reason"],
+        })
+
+    return candidates
 
 
 # ── sizing — same formulas as trade.py, state always explicit ────────────────
@@ -325,9 +586,48 @@ def build_buy_candidates(judge_approvals: list, account: dict, positions: list,
 def check_stops(positions: list, state: dict) -> dict:
     """Thin wrapper over trade.py's stop-loss and inverse-ETF-hold checks,
     always with this book's own state. Returns candidates to SELL, not an
-    executed action -- still goes through the confirmation protocol."""
+    executed action -- still goes through the confirmation protocol.
+
+    Once Hard Rule 7's T1 partial exit has fired for a position (tracked in
+    state["entries"][symbol]["t1_taken"] by record_partial_exit()), the
+    effective stop becomes breakeven -- current_price <= entry_price --
+    replacing the tier's normal stop_pct, per "move stop to breakeven on
+    remainder." trade.check_stop_loss() has no notion of this book's T1
+    tracking, so the override is applied here rather than there: the paper
+    book expresses the same rule via a literal broker-side trailing stop set
+    at OCO placement time (trade.place_oco_exits), an order type this book
+    cannot assume Robinhood's MCP tools support, so it re-derives the same
+    intent from state instead. Breakeven is strictly tighter than any tier
+    stop for a profitable entry, so a T1-taken position is checked against
+    breakeven only, never double-counted against the (looser) tier stop.
+    """
+    entries = state.get("entries", {})
+    breakeven_syms = set()
+    breakeven_triggers = []
+    for pos in positions:
+        sym = pos["symbol"]
+        entry_record = entries.get(sym, {})
+        if not entry_record.get("t1_taken") or not entry_record.get("entry_price"):
+            continue
+        breakeven_syms.add(sym)
+        entry_price = float(entry_record["entry_price"])
+        current_price = float(pos.get("current_price", 0))
+        if entry_price > 0 and current_price <= entry_price:
+            breakeven_triggers.append({
+                "symbol": sym, "qty": pos["qty"],
+                "avg_entry": pos.get("avg_entry_price"),
+                "current_price": current_price,
+                "unrealized_plpc": float(pos.get("unrealized_plpc", 0)),
+                "tier": trade.tier_for(sym), "stop_pct": None,
+                "reason": (f"STOP-LOSS (breakeven after T1): {sym} at or below "
+                           f"entry ${entry_price:.2f}"),
+            })
+
+    tier_triggers = [t for t in trade.check_stop_loss(positions, state)
+                      if t["symbol"] not in breakeven_syms]
+
     return {
-        "stop_losses": trade.check_stop_loss(positions, state),
+        "stop_losses": tier_triggers + breakeven_triggers,
         "inverse_etf_max_hold": trade.check_inverse_etf_max_hold(positions, state),
     }
 
@@ -342,16 +642,29 @@ def confirmation_prompt(candidate: dict) -> str:
     """
     The exact line the Mandatory Confirmation Protocol requires, built in one
     place so it is never phrased differently from one session to the next.
-    Only valid for action == "BUY"; a SKIP candidate is never shown to the
-    user as something to confirm.
+    Valid for action in {"BUY", "SELL_FULL", "SELL_PARTIAL"}; a SKIP
+    candidate is never shown to the user as something to confirm.
+
+    As of the Robinhood sell-side automation, this is logged as an audit
+    record, not a prompt waiting on a reply, for the same reason step 8's
+    buys are: Trade Approval substitutes for chat confirmation on every
+    order built through a documented, guardrail-vetted pipeline.
     """
-    if candidate.get("action") != "BUY":
-        raise ValueError("confirmation_prompt() is only for BUY candidates")
+    action = candidate.get("action")
+    if action not in ("BUY", "SELL_FULL", "SELL_PARTIAL"):
+        raise ValueError(
+            "confirmation_prompt() is only for BUY/SELL_FULL/SELL_PARTIAL candidates")
     c = candidate
+    if action == "BUY":
+        return (
+            "This is a REAL MONEY trade on Robinhood. Confirm?\n"
+            f"  BUY {c['qty']} {c['symbol']} @ ${c['limit_price']:.2f} limit "
+            f"(Judge {c.get('judge_score')}, {c['tier']}, stop ${c['stop_price']:.2f})"
+        )
+    verb = "SELL (full exit)" if action == "SELL_FULL" else f"SELL (partial, {c.get('target')})"
     return (
         "This is a REAL MONEY trade on Robinhood. Confirm?\n"
-        f"  BUY {c['qty']} {c['symbol']} @ ${c['limit_price']:.2f} limit "
-        f"(Judge {c.get('judge_score')}, {c['tier']}, stop ${c['stop_price']:.2f})"
+        f"  {verb} {c['qty']} {c['symbol']} @ ${c['limit_price']:.2f} limit -- {c['reason']}"
     )
 
 

@@ -41,6 +41,111 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v5.0.0] — 2026-10-29
+
+**MAJOR** — Alex: "Focus on building this," in response to a proposal
+splitting sell-side automation into mechanical sells (automate now) and
+Judge-driven profit-maximization (prove on paper first, not authorized).
+
+**A self-correction, made before implementing.** The proposal itself
+described this as "a small, well-bounded change... a MINOR version bump."
+That was wrong against this file's own versioning table: removing the
+Mandatory Confirmation Protocol's chat-confirmation step for a new category
+of real-money order (sells) is the identical shape of change v3.0.0 made
+for buys, and v3.0.0 was correctly classified MAJOR ("any Hard Rule
+loosened") for exactly that reason. Caught and corrected before writing any
+code, not after.
+
+**What this adds.** Three mechanical (fully rule-based, no judgment call)
+sell signals, previously detected but never executed, now place real
+orders the same way v3.0.0 lets buys: Hard Rule 3's tiered stop-losses, the
+Bearish Playbook's inverse-ETF max-hold, and Hard Rule 7's T1/T2 partial
+profit-taking (sell 40% at entry+2x stop distance, another 40% at +3x, move
+the stop to breakeven on the remainder). None of these thresholds changed —
+this automates their execution, not their values.
+
+**Explicitly not built.** A Judge re-evaluating open positions to choose
+the "best" exit order type for maximizing profit, the other half of the
+original request. No track record anywhere in this codebase (even the
+paper book's sells are a static bracket set once at entry, never
+re-evaluated) — stays out until it has one, on paper, first.
+
+### Strategy / CLAUDE.md changes
+- Mandatory Confirmation Protocol and Hard Rule 1 (Account Guardrails):
+  scope extended from `build_buy_candidates()` alone to also cover
+  `build_sell_candidates()`. An ad hoc sell outside that pipeline, or any
+  Judge-driven profit-maximization order, is still not covered and still
+  requires full chat confirmation.
+- Execution Procedure: step 4a now also calls `reconcile_sell_fills()`;
+  step 5 rewritten to build sell candidates, log the audit record, place
+  the order, and record it pending (mirrors step 8's buy flow exactly,
+  including the "placing is not filling" discipline v4.1.1 just fixed for
+  buys); step 9 updated to journal sell fills/expirations/pending orders
+  alongside buys.
+- New section "Robinhood Automated Execution — Mechanical Sells": full
+  rationale, the versioning self-correction, what changed/didn't, and the
+  explicit out-of-scope boundary around Judge-driven profit-maximization.
+- New Experiment Timeline decision log entry.
+
+### Code changes
+- `robinhood_trade.py`:
+  - `record_entry()` gains an optional `entry_price` parameter (needed for
+    T1/T2 math); `reconcile_fills()` now passes the position's real
+    `avg_entry_price` into it.
+  - `check_profit_targets(positions, state)` — Hard Rule 7's T1/T2
+    detection, reusing `trade.TAKE_PROFIT_R1`/`R2`/`T1_SELL_FRACTION`
+    rather than duplicating the ratios. Fails closed (skips, doesn't guess)
+    on a position with no tracked `entry_price`. Each target fires at most
+    once, tracked via `t1_taken`/`t2_taken` on the entry record.
+  - `check_stops()` gains a breakeven override: once `t1_taken` is set, a
+    position's effective stop becomes breakeven (`current_price <=
+    entry_price`) rather than its tier's normal `stop_pct`, per Hard Rule
+    7's "move stop to breakeven on remainder" — strictly tighter than any
+    tier stop for a profitable entry, so never double-checked against both.
+  - `build_sell_candidates(positions, state, open_orders=None)` — composes
+    stop-loss/inverse-ETF-max-hold/profit-target detection into
+    `SELL_FULL`/`SELL_PARTIAL`/`SKIP` candidates. A Hard-Rule-11
+    phantom-equity symbol always `SKIP`s with a reason, never sells,
+    regardless of how the (fake) price makes the position look. A symbol
+    with an existing pending sell order also `SKIP`s, mirroring the
+    buy-side `pending_buy_syms` guard from v4.1.0 for the same async-fill
+    reason.
+  - `record_pending_sell()`, `reconcile_sell_fills()`, `record_full_exit()`,
+    `record_partial_exit()` — the sell-side counterpart to v4.1.1's buy-side
+    fix for the exact same bug class (an order placed without chat
+    confirmation can fill on a later tick than the one that placed it). A
+    `SELL_FULL` fill is detected by the symbol disappearing from
+    `positions`; a `SELL_PARTIAL` fill is detected by the held qty dropping
+    below the qty recorded at placement time (`qty_before_order`) — order
+    status in `open_orders` isn't relied on for either, since a resolved
+    order may not persist there at all (same assumption the buy-side fix
+    already makes).
+  - `confirmation_prompt()` extended to accept `SELL_FULL`/`SELL_PARTIAL`
+    alongside `BUY`; still raises on a `SKIP` candidate.
+- `tests/test_robinhood_trade.py`: 26 new tests —
+  `TestCheckProfitTargets` (7: no-entry-price skip, below/at/above T1,
+  T1-already-taken not re-proposed, T2 after T1, T2-already-taken not
+  re-proposed, sell qty clamped to held qty),
+  `TestCheckStopsBreakeven` (4: above/at-or-below breakeven after T1, tier
+  stop still applies/still fires without T1), `TestBuildSellCandidates` (5:
+  stop-loss to SELL_FULL, profit target to SELL_PARTIAL, phantom position
+  SKIPs, pending sell blocks a second one, no triggers produces no
+  candidates), `TestReconcileSellFills` (6: full exit fills/still-open/
+  expires, partial exit fills/expires, no-op on no pending sells), plus 2
+  new `TestConfirmationPrompt` cases for `SELL_FULL`/`SELL_PARTIAL`.
+  Mutation-tested: removing the phantom/pending-sell skip in
+  `build_sell_candidates()`, the breakeven override in `check_stops()`, and
+  the expired-cleanup in `reconcile_sell_fills()` each fail at least one
+  test.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** No scoring or
+  sizing threshold changed — this automates execution of rules already
+  documented in this file (Hard Rules 3, 7, 11). The Phase 2B paper
+  baseline is unaffected and does not reset. Zero real sells have been
+  placed through this pipeline as of this entry.
+
+
 ## [v4.1.1] — 2026-10-29
 
 **PATCH** — Finding 4 from the first scheduler rehearsal report: nothing
