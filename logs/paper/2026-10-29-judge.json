@@ -1,13 +1,12 @@
 {
   "agent_version": "2.4.1",
-  "timestamp": "2026-10-29T06:01:58.755419-04:00",
+  "timestamp": "2026-10-29T07:01:49.416082-04:00",
   "date": "2026-10-29",
   "approved": [
     "AAPL",
     "MSFT",
     "PYPL",
-    "DT",
-    "MRVL"
+    "DT"
   ],
   "held": [
     "QQQ"
@@ -22,9 +21,12 @@
     "PFE",
     "KDP",
     "IOVA",
+    "BB",
+    "AMD",
     "NOW",
     "EQT",
-    "KMI"
+    "KMI",
+    "RPC"
   ],
   "scores": {
     "QQQ": {
@@ -438,78 +440,36 @@
       },
       "_gate_used": 7.0
     },
-    "NOW": {
-      "symbol": "NOW",
+    "BB": {
+      "symbol": "BB",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NOW \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BB \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
       "_gate_used": 7.0
     },
-    "MRVL": {
-      "symbol": "MRVL",
-      "recommendation": "APPROVE",
-      "score": 9.27,
-      "approval_gate": 8.5,
-      "size_multiplier": 1.0,
-      "macro_regime": "RISK_ON",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 17.52,
-      "is_discovery": true,
-      "is_speculative": true,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "1.5/2.0",
-        "news": "1.27/1.5",
-        "macro": "1.0/1.0",
-        "portfolio": "2.0/2.0",
-        "volatility": "1.0/1.0",
-        "quality": "2.5/2.5"
-      },
+    "AMD": {
+      "symbol": "AMD",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for AMD \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "technical": {
-          "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $254.29 > MA50 $244.07, price between MAs"
-        },
-        "news": {
-          "score": 1.27,
-          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
-        },
-        "macro": {
-          "score": 1.0,
-          "note": "RISK-ON \u2014 SPY MA20 $770.90 > MA50 $767.61 [capped 1.5\u21921.0 at weight 1.0]"
-        },
-        "portfolio": {
-          "score": 2.0,
-          "note": "Strong cash reserve 58%"
-        },
-        "volatility": {
-          "score": 1.0,
-          "note": "VIX 17.5 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
-        },
-        "quality": {
-          "score": 2.5,
-          "note": "Mega-cap $226B; Profitable; 34 analyst buy ratings \u2014 strong institutional coverage"
-        }
+        "earnings_veto": true
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $254.29 > MA50 $244.07, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $770.90 > MA50 $767.61 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Strong cash reserve 58%. Volatility: VIX 17.5 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $226B; Profitable; 34 analyst buy ratings \u2014 strong institutional coverage. Source: discovery | Gate: 8.5.",
-      "_gate_used": 8.5
+      "_gate_used": 7.0
+    },
+    "NOW": {
+      "symbol": "NOW",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
     },
     "EQT": {
       "symbol": "EQT",
@@ -529,6 +489,16 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "RPC": {
+      "symbol": "RPC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for RPC \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "_gate_used": 7.0
     }
