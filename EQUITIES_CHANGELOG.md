@@ -41,6 +41,84 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v4.1.0] — 2026-10-29
+
+**MINOR** — Two real findings surfaced while actually building the v4.0.0
+local scheduler, both caught before a single real order had been placed.
+
+**Finding 1 — a genuine double-buy risk from v3.0.0+v4.0.0's interaction.**
+`build_buy_candidates()` only ever checked `positions` (filled holdings).
+Under v3.0.0, a BUY can sit in Robinhood's Trade Approval queue, placed but
+unfilled, for longer than v4.0.0's own ~30-minute re-run cadence. It isn't
+a position yet, so the next tick wouldn't see it as held and would build a
+second candidate for the same symbol — a real double fill if both ever got
+tapped approved. Same bug class the v1.5.1 `open_buy_order_syms` fix closed
+on the Alpaca side. Alex: "I don't need to use the Alpaca MCP that was for
+fake money... I need to use Robinhood MCP" — which also resolved Finding 2.
+
+**Finding 2 — step 1a's market-open check depended on the wrong broker.**
+Alpaca's `get_clock` was used because it already existed and worked, not
+because Robinhood trading has anything to do with Alpaca's credential
+health. When Alpaca MCP returned 401 (unrelated local credential problem),
+step 1a could never pass, blocking every Robinhood tick all day with no
+trade ever attempted. Alex's framing was exactly right: the real-money
+pipeline shouldn't depend on the fake-money broker's connection for
+anything, including a fact as broker-agnostic as "is NYSE open."
+
+### Strategy / CLAUDE.md changes
+- Step 1a rewritten: uses `market_time.is_nyse_session_open()` instead of
+  Alpaca's `get_clock`, with the incident stated directly so nobody
+  reintroduces the Alpaca dependency later believing it's harmless.
+- Step 3: open orders are now a required fetch alongside account/positions,
+  not optional.
+- Step 7: `build_buy_candidates()` call updated to pass `open_orders`,
+  marked required (not optional) given v3.0.0+v4.0.0 are both in effect.
+- New addendum to "Robinhood Scheduled Execution — v4.0.0" documenting
+  concrete setup findings from actually building the scheduler: permission
+  configuration lives in the local CLI's own settings (not something a chat
+  session grants); the working headless-invocation flags
+  (`-p --permission-mode dontAsk --allowedTools ... --disallowedTools ...`,
+  no blanket skip-permissions flag needed); running preflight checks from a
+  neutral directory to avoid paying ~$0.07-0.18/call to load this file
+  every ~30 minutes; `logs_dir` is the private repo's `logs/` subdirectory;
+  launchd does not fire while the machine sleeps, and a missed tick is not
+  queued or caught up.
+
+### Code changes
+- `robinhood_trade.py`: `build_buy_candidates()` gains an `open_orders`
+  parameter (default `None`, safe) and a new `OPEN_ORDER_STATUSES` set.
+  Skips any symbol with an existing non-terminal buy order. No
+  `client_order_id` prefix matching needed, unlike the Alpaca-side fix --
+  the Robinhood MCP account is dedicated solely to this agent (confirmed:
+  the only tradable account is the "MCP" account), so every order on it is
+  already this pipeline's own.
+- `market_time.py`: new `is_nyse_session_open()`, `NYSE_HOLIDAYS`, and
+  `NYSE_EARLY_CLOSE` (2026-2027 populated; 2027 H2 early-closes need
+  checking against NYSE's actual calendar before relying on them). Fully
+  self-contained — ET clock plus a hardcoded calendar, no broker API call,
+  so it can never 401. An unlisted year degrades to a plain weekday+hours
+  check rather than refusing to run, since the failure mode of a missing
+  holiday (a harmless rejected order on an actual holiday) is far less
+  severe than a missing early-close (trading attempted 2-3 hours into an
+  already-closed session) -- both are handled for 2026, only the holiday
+  list extends cleanly past it.
+- `tests/test_robinhood_trade.py`: 5 new tests for the `open_orders` check
+  (pending buy blocks, filled/cancelled/rejected/expired don't, pending
+  sell doesn't, different-symbol pending buy doesn't, missing `open_orders`
+  defaults safely). Mutation-tested: removing the check fails
+  `test_pending_buy_order_blocks_a_second_one`.
+- `tests/test_guardrails.py`: 11 new tests for `is_nyse_session_open()`
+  (regular hours, both boundaries, weekend, 2026 Thanksgiving/Christmas,
+  both 2026 early-close days including the specific case of the v4.0.0
+  afternoon window overlapping one). Mutation-tested: removing the holiday
+  check fails 2 of the 11.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** No
+  scoring/sizing/paper-book change. Both fixes close gaps in a book that
+  has not yet placed a single real trade.
+
+
 ## [v4.0.1] — 2026-10-29
 
 **PATCH** — Alex asked whether the new Robinhood scheduling (v4.0.0)

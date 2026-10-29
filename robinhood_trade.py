@@ -144,8 +144,15 @@ def max_shares_for(account: dict, positions: list, state: dict,
 
 # ── candidate building ─────────────────────────────────────────────────────────
 
+OPEN_ORDER_STATUSES = {
+    "queued", "new", "accepted", "pending_new", "open", "pending",
+    "partially_filled", "confirmed", "unconfirmed",
+}
+
+
 def build_buy_candidates(judge_approvals: list, account: dict, positions: list,
-                          state: dict, watchlist: dict, macro_regime: str = "NEUTRAL",
+                          state: dict, watchlist: dict, open_orders: list = None,
+                          macro_regime: str = "NEUTRAL",
                           vix_size_multiplier: float = 1.0) -> list:
     """
     Turn today's Judge APPROVE rows into sized, guardrail-checked candidates.
@@ -156,11 +163,29 @@ def build_buy_candidates(judge_approvals: list, account: dict, positions: list,
     interactive agent's job, not this function's, since it needs a live quote
     this module has no way to fetch.
 
+    `open_orders` must be passed on every call once Trade Approval removes
+    chat confirmation (v3.0.0) and scheduling removes human presence
+    (v4.0.0): a BUY order sitting unapproved in Robinhood's Trade Approval
+    queue is not yet a position, so `positions` alone misses it, and a
+    re-run ~30 minutes later (v4.0.0's own cadence) would queue a second
+    order for the same symbol -- a double fill if both ever get tapped
+    approved. This is the same bug class v1.5.1 fixed on the Alpaca side
+    (`open_buy_order_syms`); unlike that fix, no client_order_id prefix
+    match is needed here, because the Robinhood MCP account is dedicated
+    solely to this agent (confirmed: the only tradable account is the "MCP"
+    account) -- every order on it is this pipeline's own.
+
     Returns a list of dicts. Places no orders, calls no MCP tool -- every
     entry is either {"action": "SKIP", "reasons": [...]} or a sized
     {"action": "BUY", ...} ready to be shown via confirmation_prompt().
     """
     open_syms = {p["symbol"] for p in positions}
+    open_orders = open_orders or []
+    pending_buy_syms = {
+        o.get("symbol") for o in open_orders
+        if o.get("side") == "buy"
+        and str(o.get("status", "")).lower() in OPEN_ORDER_STATUSES
+    }
     candidates = []
 
     for row in judge_approvals:
@@ -173,6 +198,11 @@ def build_buy_candidates(judge_approvals: list, account: dict, positions: list,
 
         if sym in open_syms:
             reasons_skip.append(f"{sym} already held -- no averaging down in this book yet")
+
+        if sym in pending_buy_syms:
+            reasons_skip.append(
+                f"{sym} already has a pending buy order (placed, awaiting Trade "
+                f"Approval or fill) -- not stacking a second one")
 
         cooldown = trade.cooldown_remaining_hours(sym, state)
         if cooldown > 0:

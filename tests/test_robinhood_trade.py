@@ -159,6 +159,49 @@ class TestBuildBuyCandidates(unittest.TestCase):
             [_judge_row(symbol="VIXY", limit_price=20.0)], account, [], self.state, watchlist)
         self.assertEqual(candidates[0]["action"], "SKIP")
 
+    def test_pending_buy_order_blocks_a_second_one(self):
+        """The v4.0.0 scheduling gap: a BUY order awaiting Trade Approval
+        isn't a position yet, so a re-run 30 minutes later must not queue
+        a second order for the same symbol."""
+        account = _account()
+        open_orders = [{"symbol": "AAPL", "side": "buy", "status": "pending_new"}]
+        candidates = rt.build_buy_candidates(
+            [_judge_row()], account, [], self.state, self.watchlist, open_orders=open_orders)
+        self.assertEqual(candidates[0]["action"], "SKIP")
+        self.assertTrue(any("pending buy order" in r for r in candidates[0]["reasons"]))
+
+    def test_filled_or_cancelled_order_does_not_block(self):
+        account = _account()
+        for status in ("filled", "cancelled", "rejected", "expired"):
+            with self.subTest(status=status):
+                open_orders = [{"symbol": "AAPL", "side": "buy", "status": status}]
+                candidates = rt.build_buy_candidates(
+                    [_judge_row()], account, [], self.state, self.watchlist,
+                    open_orders=open_orders)
+                self.assertEqual(candidates[0]["action"], "BUY")
+
+    def test_pending_sell_order_does_not_block_a_buy(self):
+        account = _account()
+        open_orders = [{"symbol": "AAPL", "side": "sell", "status": "pending_new"}]
+        candidates = rt.build_buy_candidates(
+            [_judge_row()], account, [], self.state, self.watchlist, open_orders=open_orders)
+        self.assertEqual(candidates[0]["action"], "BUY")
+
+    def test_pending_buy_on_a_different_symbol_does_not_block(self):
+        account = _account()
+        open_orders = [{"symbol": "MSFT", "side": "buy", "status": "pending_new"}]
+        candidates = rt.build_buy_candidates(
+            [_judge_row(symbol="AAPL")], account, [], self.state, self.watchlist,
+            open_orders=open_orders)
+        self.assertEqual(candidates[0]["action"], "BUY")
+
+    def test_no_open_orders_passed_defaults_safely(self):
+        """open_orders must default to safe (no false blocks), not crash."""
+        account = _account()
+        candidates = rt.build_buy_candidates(
+            [_judge_row()], account, [], self.state, self.watchlist)
+        self.assertEqual(candidates[0]["action"], "BUY")
+
 
 class TestConfirmationPrompt(unittest.TestCase):
     def test_contains_exact_mandatory_phrase(self):

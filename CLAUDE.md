@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v4.0.1
+> **Version:** v4.1.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -195,18 +195,26 @@ order this produces.
    confirmed this run. Don't take a prior run's word for it — a scheduled
    run has no human present to notice if this was switched off since the
    last one.
-1a. **Verify the market is genuinely open** via the Alpaca MCP's `get_clock`
-   (account-agnostic, Hard Rule 4) — not just "the cron fired inside the
-   scheduled window." A scheduled window can span a market holiday; `is_open`
-   is the real check, same as Hard Rule 1 requires for every other book.
+1a. **Verify the market is genuinely open** via `market_time.is_nyse_session_open()`
+   — not just "the cron fired inside the scheduled window." A scheduled
+   window can span a market holiday; this is the real check, same as Hard
+   Rule 1 requires for every other book. **Do not use Alpaca's `get_clock`
+   for this** — that broker's credential health has nothing to do with
+   whether Robinhood should trade, and depending on it means an unrelated
+   system's outage can silently block every real-money tick (confirmed
+   live, 2026-10-29: Alpaca MCP returned 401 and step 1a never passed, all
+   day). `is_nyse_session_open()` is self-contained (ET clock + a hardcoded
+   NYSE holiday/early-close calendar, `market_time.py`) and can never 401.
    Exit cleanly, logging why, if the market is closed.
 2. Clone/pull both repos: this one (code, read-only for this procedure) and
    `ai-trading-agent-real-logs` (data — `logs_dir` below is a checkout of
    this one, never a path inside the public repo).
-3. Fetch the real account and positions via the Robinhood MCP tools. Map
-   them into the plain dict shapes `robinhood_trade.py` expects: account
-   needs `cash`, `buying_power`, `portfolio_value`; each position needs
-   `symbol`, `qty`, `avg_entry_price`, `current_price`, `unrealized_plpc`.
+3. Fetch the real account, positions, **and open orders** via the Robinhood
+   MCP tools. Map them into the plain dict shapes `robinhood_trade.py`
+   expects: account needs `cash`, `buying_power`, `portfolio_value`; each
+   position needs `symbol`, `qty`, `avg_entry_price`, `current_price`,
+   `unrealized_plpc`; each open order needs `symbol`, `side`, `status`.
+   **Open orders are not optional as of v4.0.1** — see step 7.
 4. `state = robinhood_trade.load_real_state(logs_dir)`.
 5. Run stop/phantom checks **before** considering any new buy, same order
    as `trade.py`'s session: `robinhood_trade.check_stops(positions, state)`
@@ -230,7 +238,17 @@ order this produces.
    research data plus a **live** Robinhood quote — `robinhood_trade.py` has
    no way to fetch that live price itself, so this step happens in the
    interactive session, not in the module.
-7. `candidates = robinhood_trade.build_buy_candidates(judge_approvals, account, positions, state, watchlist, macro_regime, vix_size_multiplier)`.
+7. `candidates = robinhood_trade.build_buy_candidates(judge_approvals, account, positions, state, watchlist, open_orders=open_orders, macro_regime=macro_regime, vix_size_multiplier=vix_size_multiplier)`.
+   **Passing `open_orders` is required, not optional, once v3.0.0 and
+   v4.0.0 are both in effect.** Without chat confirmation, a BUY order can
+   sit awaiting Trade Approval for longer than this procedure's own
+   ~30-minute re-run cadence — it's placed, but not yet a position, so
+   `positions` alone misses it and a later run would queue a second order
+   for the same symbol. `build_buy_candidates()` skips any symbol with an
+   existing open buy order for exactly this reason (confirmed live finding,
+   2026-10-29, before any real order had been placed through this
+   pipeline — see `EQUITIES_CHANGELOG.md` v4.1.0 and
+   `tests/test_robinhood_trade.py`'s `test_pending_buy_order_blocks_a_second_one`).
 8. For each `BUY` candidate: log `robinhood_trade.confirmation_prompt(candidate)`
    as the day's record of what was proposed and why (append it to the
    journal entry being built for step 9 — this is now an audit record, not
@@ -364,6 +382,32 @@ practice. This has not been observed either way as of this entry. The
 first several scheduled runs are the actual test of which one is true, and
 should be watched for exactly that reason even though nothing in the
 mechanism requires it.
+
+**Setup findings from building the actual local scheduler (2026-10-29),
+kept here so the next person doesn't have to rediscover them:**
+- **Permissions are configured in the local CLI's own settings, not
+  something a chat session grants.** `claude mcp add`, launchd/cron
+  installation, and writing the wrapper script all go through that
+  client's own tool-permission allowlist (project or user
+  `.claude/settings.json`), approved interactively or pre-configured by
+  Alex. The narrowest working grant found: `-p --permission-mode dontAsk
+  --allowedTools <specific tools> --disallowedTools <everything else>` —
+  `dontAsk` auto-denies anything not explicitly allowed, so no blanket
+  skip-permissions flag is needed. `Bash(python3 *)` is the loosest
+  unavoidable grant, since the procedure's Python calls can't be narrowed
+  to a single module.
+- **Run the headless preflight from a neutral working directory, not this
+  repo.** `-p` loads this entire file (~31k tokens) on every invocation if
+  run from inside it — about $0.07–0.18 per call. A wrapper script that
+  cd's elsewhere for cheap checks (market open? Trade Approval still on?)
+  before invoking the real procedure avoids paying that repeatedly every
+  ~30 minutes.
+- **`logs_dir` is the private repo's `logs/` subdirectory** — e.g.
+  `<checkout of ai-trading-agent-real-logs>/logs` — matching the path
+  shape `robinhood_trade.py`'s functions already write relative to.
+- **launchd does not fire while the machine is asleep.** A missed tick is
+  silently skipped, not queued or caught up — worth knowing before
+  assuming every scheduled window actually ran.
 
 ## Tools Available
 - **Alpaca MCP** — use for all account queries, order placement, position management,

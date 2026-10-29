@@ -2942,6 +2942,58 @@ class TestNoDuplicateRestingBuyOrders(unittest.TestCase):
         mock_buy.assert_called_once()
 
 
+class TestNyseSessionOpen(unittest.TestCase):
+    """
+    is_nyse_session_open() replaces a dependency on Alpaca's get_clock in the
+    Robinhood Execution Procedure's step 1a -- that broker's credentials have
+    nothing to do with whether Robinhood should trade, and a 401 there
+    silently blocked every Robinhood tick. This must be self-contained.
+    """
+
+    def _et(self, year, month, day, hour, minute):
+        return datetime(year, month, day, hour, minute, tzinfo=market_time.EASTERN)
+
+    def test_regular_tuesday_during_hours_is_open(self):
+        self.assertTrue(market_time.is_nyse_session_open(self._et(2026, 10, 27, 10, 0)))
+
+    def test_regular_day_before_open_is_closed(self):
+        self.assertFalse(market_time.is_nyse_session_open(self._et(2026, 10, 27, 9, 0)))
+
+    def test_regular_day_after_close_is_closed(self):
+        self.assertFalse(market_time.is_nyse_session_open(self._et(2026, 10, 27, 16, 1)))
+
+    def test_exactly_at_open_and_close_boundaries_is_open(self):
+        self.assertTrue(market_time.is_nyse_session_open(self._et(2026, 10, 27, 9, 30)))
+        self.assertTrue(market_time.is_nyse_session_open(self._et(2026, 10, 27, 16, 0)))
+
+    def test_saturday_is_closed(self):
+        self.assertFalse(market_time.is_nyse_session_open(self._et(2026, 10, 31, 10, 0)))
+
+    def test_sunday_is_closed(self):
+        self.assertFalse(market_time.is_nyse_session_open(self._et(2026, 11, 1, 10, 0)))
+
+    def test_thanksgiving_2026_is_closed(self):
+        self.assertFalse(market_time.is_nyse_session_open(self._et(2026, 11, 26, 10, 0)))
+
+    def test_christmas_2026_is_closed(self):
+        self.assertFalse(market_time.is_nyse_session_open(self._et(2026, 12, 25, 10, 0)))
+
+    def test_day_after_thanksgiving_2026_closes_early_at_1pm(self):
+        self.assertTrue(market_time.is_nyse_session_open(self._et(2026, 11, 27, 12, 59)))
+        self.assertFalse(market_time.is_nyse_session_open(self._et(2026, 11, 27, 13, 1)))
+
+    def test_christmas_eve_2026_closes_early_at_1pm(self):
+        self.assertTrue(market_time.is_nyse_session_open(self._et(2026, 12, 24, 12, 59)))
+        self.assertFalse(market_time.is_nyse_session_open(self._et(2026, 12, 24, 13, 1)))
+
+    def test_robinhood_afternoon_window_overlaps_an_early_close_day_correctly(self):
+        """The v4.0.0 schedule's 1:00-3:00 PM CT window is 2:00-4:00 PM ET --
+        on an early-close day the market is already shut for that entire
+        window, which this check must catch (Alpaca's get_clock, which this
+        replaces, would have caught it too; this must not regress that)."""
+        self.assertFalse(market_time.is_nyse_session_open(self._et(2026, 11, 27, 14, 30)))
+
+
 class TestGetBarsReturnsLatestNotOldest(unittest.TestCase):
     """
     Live incident, 2026-10-28: get_bars() requested sort="asc" over a
