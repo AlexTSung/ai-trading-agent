@@ -1,6 +1,6 @@
 {
   "agent_version": "2.4.1",
-  "timestamp": "2026-10-28T20:01:45.601564-04:00",
+  "timestamp": "2026-10-28T21:01:47.983787-04:00",
   "date": "2026-10-28",
   "approved": [
     "AAPL",
@@ -25,7 +25,8 @@
     "NOW",
     "EQT",
     "KMI",
-    "MD"
+    "III",
+    "AMT"
   ],
   "scores": {
     "QQQ": {
@@ -427,13 +428,25 @@
       },
       "_gate_used": 7.0
     },
-    "MD": {
-      "symbol": "MD",
+    "III": {
+      "symbol": "III",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for MD \u2014 auto-veto per Hard Rule 9",
+      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "earnings_veto": true
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "AMT": {
+      "symbol": "AMT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     }
