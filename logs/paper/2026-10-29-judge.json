@@ -1,6 +1,6 @@
 {
   "agent_version": "5.0.0",
-  "timestamp": "2026-10-29T18:02:03.008640-04:00",
+  "timestamp": "2026-10-29T18:56:35.541925-04:00",
   "date": "2026-10-29",
   "approved": [],
   "held": [
@@ -19,12 +19,14 @@
     "PFE",
     "KDP",
     "CSX",
+    "BB",
+    "AMD",
     "RWM",
     "NCLH",
     "NI",
     "KMI",
     "KO",
-    "IT",
+    "III",
     "FTNT"
   ],
   "scores": {
@@ -265,7 +267,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding DT \u2014 only 1.4% below entry (need \u22653%)"
+          "note": "Already holding DT \u2014 only 0.6% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 1.0,
@@ -276,7 +278,7 @@
           "note": "Large-cap $18B; Profitable; 21 analyst buy ratings \u2014 strong institutional coverage"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $62.61 > MA50 $57.41, price between MAs. News: POSITIVE \u2014 9 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $771.17 > MA50 $767.62 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Already holding DT \u2014 only 1.4% below entry (need \u22653%). Volatility: VIX 16.9 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $18B; Profitable; 21 analyst buy ratings \u2014 strong institutional coverage. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $62.61 > MA50 $57.41, price between MAs. News: POSITIVE \u2014 9 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-ON \u2014 SPY MA20 $771.17 > MA50 $767.62 [capped 1.5\u21921.0 at weight 1.0]. Portfolio: Already holding DT \u2014 only 0.6% below entry (need \u22653%). Volatility: VIX 16.9 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $18B; Profitable; 21 analyst buy ratings \u2014 strong institutional coverage. Source: watchlist | Gate: 8.0.",
       "_gate_used": 8.0
     },
     "IBM": {
@@ -320,6 +322,26 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 78 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "BB": {
+      "symbol": "BB",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BB \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "AMD": {
+      "symbol": "AMD",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for AMD \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "_gate_used": 7.0
     },
@@ -401,14 +423,14 @@
       },
       "_gate_used": 7.0
     },
-    "IT": {
-      "symbol": "IT",
+    "III": {
+      "symbol": "III",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
