@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v3.0.0
+> **Version:** v4.0.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -183,13 +183,23 @@ full rationale; summary:
 
 ### Robinhood Execution Procedure
 
-Run only from an interactive session with both Robinhood MCP tools
-available *and* this exact confirmation protocol in effect — never from an
-unattended workflow (see above for why that's structural, not a preference).
+**As of v4.0.0 (2026-10-29), this may run unattended, on a local schedule —
+see "Robinhood Scheduled Execution — v4.0.0" below.** It still requires an
+environment where the `robinhood-trading` MCP tools are available
+(currently: Alex's local machine only, via Claude Code CLI headless
+invocation), and Trade Approval is still the sole human check for every
+order this produces.
 
 1. **Verify Trade Approval is ON** in the Robinhood app's Agent Settings
    before doing anything else in this procedure, if it hasn't been
-   confirmed this session. Don't take a prior session's word for it.
+   confirmed this run. Don't take a prior run's word for it — a scheduled
+   run has no human present to notice if this was switched off since the
+   last one.
+1a. **Verify the market is genuinely open** via the Alpaca MCP's `get_clock`
+   (account-agnostic, Hard Rule 4) — not just "the cron fired inside the
+   scheduled window." A scheduled window can span a market holiday; `is_open`
+   is the real check, same as Hard Rule 1 requires for every other book.
+   Exit cleanly, logging why, if the market is closed.
 2. Clone/pull both repos: this one (code, read-only for this procedure) and
    `ai-trading-agent-real-logs` (data — `logs_dir` below is a checkout of
    this one, never a path inside the public repo).
@@ -278,6 +288,73 @@ An ad hoc real-money instruction outside that pipeline (anything not sized,
 tiered, and cooldown-checked by the guardrail code) still requires the
 original Mandatory Confirmation Protocol in full, with no exception — see
 that section in Account Guardrails above.
+
+## Robinhood Scheduled Execution — v4.0.0
+
+**Alex's explicit decision, 2026-10-29: run the Execution Procedure
+unattended, on a local schedule, twice a day.** This reverses a second,
+separate safeguard — the Execution Procedure's own "never from an
+unattended workflow... structural, not a preference" line, written
+specifically to keep a human physically present for every run. Removing it
+is a distinct decision from v3.0.0's chat-confirmation removal, made the
+same day, and documented the same way: named, versioned, risk stated in
+writing rather than assumed away. I recommended against this — doing one
+watched manual trade first, before removing the last human presence from a
+pipeline that has placed zero real trades so far — and Alex chose to
+proceed anyway. That's accepted, not resolved.
+
+**Windows (Central Time — this is the one place in this file that isn't
+ET; label it CT everywhere, the same discipline that's kept ET/UTC
+mix-ups from recurring elsewhere in this codebase):**
+- **Morning: 8:30–11:30 AM CT**
+- **Afternoon: 1:00–3:00 PM CT**
+- Both fall entirely inside the market's 9:30 AM–4:00 PM ET session
+  (8:30 AM CT = 9:30 AM ET; 3:00 PM CT = 4:00 PM ET), so no window
+  reaches past market hours on its own — but 1a above still has to check
+  the real clock, because a window can span a holiday a calendar can't.
+- Weekdays only; skip weekends the same way every other runner here does.
+
+**Cadence within each window: re-run periodically, not once.** Every
+~30 minutes inside each window, pulling fresh `master` each time, mirrors
+this repo's own established reasoning for the equities hourly cadence —
+research/Judge approvals refresh throughout the morning, and a single fixed
+instant would discard that freshness for free. This is safe to repeat:
+`robinhood_trade.build_buy_candidates()` already skips any symbol already
+held (`sym in open_syms`), the same no-duplicate protection
+`trade.py`'s own buy path relies on — a re-run inside the same window
+cannot re-buy a symbol the previous run in that window already filled.
+
+**Mechanism — necessarily local, not GitHub Actions.** The `robinhood-trading`
+MCP connection lives only in Alex's local Claude Code CLI config
+(`~/.claude.json`), authenticated via OAuth tied to that specific client —
+it is not a claude.ai account-level connector and cannot run on GitHub's
+hosted runners. This has to be a local cron or launchd job on Alex's own
+machine, invoking Claude Code's non-interactive/headless mode with the
+Execution Procedure prompt. That also means it only runs if that machine
+is on, awake, and network-reachable at the scheduled times — the same
+"laptop happened to be on" fragility this file's Options section describes
+as the reason options moved to GitHub Actions. It was not possible to move
+Robinhood the same way, because the MCP credential itself can't leave the
+local machine.
+
+**Failure must be loud, not silent.** A scheduled run with nobody watching
+is exactly the shape of bug this file's Lessons Learned section keeps
+finding — "a broad `except Exception: return []` is exactly where a real
+bug goes to hide." Every scheduled invocation must log its full output to a
+timestamped file, and anything that isn't a clean "market closed" or
+"nothing to do" exit should be surfaced somewhere Alex will actually see it
+the same day, not just written to a log he'd have to think to check.
+
+**The honest, still-unresolved question this surfaces.** If Trade Approval
+is a push-notification-and-tap control, "fully unattended" and "a human
+taps approve on their phone" are in tension — either Alex is effectively
+present at every one of these windows anyway to approve, or the control
+passes through without requiring presence, which would mean the sole
+safeguard this whole v3.0.0/v4.0.0 chain rests on isn't gating anything in
+practice. This has not been observed either way as of this entry. The
+first several scheduled runs are the actual test of which one is true, and
+should be watched for exactly that reason even though nothing in the
+mechanism requires it.
 
 ## Tools Available
 - **Alpaca MCP** — use for all account queries, order placement, position management,
@@ -629,11 +706,10 @@ short on 2026-09-03, extend rather than graduate.
   one-sided unlock by owner decision, not a graduation: the Phase 2B paper
   baseline is unchanged and not reset, and this entry exists so no future
   reader mistakes "real money is live" for "the agent proved itself." See
-  `EQUITIES_CHANGELOG.md` v2.0.0 for the full entry, including why real-money
-  execution still cannot run on the same unattended GitHub Actions schedule
-  as paper — it still requires an interactive session, even though as of
-  v3.0.0 (below) that session no longer waits for a chat reply on every
-  order.
+  `EQUITIES_CHANGELOG.md` v2.0.0 for the full entry. (Why real-money
+  execution couldn't run on GitHub Actions like paper is unchanged — the
+  `robinhood-trading` MCP credential is local-only — but as of v4.0.0 below
+  it no longer needs a human present either, on Alex's local machine.)
 - **2026-10-29** — Alex overrode the Mandatory Confirmation Protocol itself
   for Robinhood orders built through the documented execution pipeline,
   substituting Robinhood's own Trade Approval (confirmed ON) for the chat
@@ -646,6 +722,18 @@ short on 2026-09-03, extend rather than graduate.
   Approval's blocking behavior has been confirmed ON but not yet observed
   stopping a real order in practice). `EQUITIES_CHANGELOG.md` v3.0.0 has
   the full entry.
+- **2026-10-29 (same day)** — Alex additionally overrode the Execution
+  Procedure's "never from an unattended workflow" line, asking for the
+  pipeline to run on a local schedule (8:30–11:30 AM and 1:00–3:00 PM CT,
+  weekdays) with nobody present. I recommended one manual, watched trade
+  first, since zero real Robinhood trades had been placed through this
+  pipeline at all up to this point — Alex chose full scheduled automation
+  instead. Shipped as v4.0.0 — see "Robinhood Scheduled Execution — v4.0.0"
+  above for the schedule, the mechanism (necessarily local cron/launchd,
+  not GitHub Actions — the MCP credential can't leave Alex's machine), and
+  the still-open question this surfaces about whether Trade Approval
+  requires Alex's presence to tap-approve or not. `EQUITIES_CHANGELOG.md`
+  v4.0.0 has the full entry.
 
 ## Daily Schedule — SINGLE SOURCE OF TRUTH (all times ET, weekdays only)
 

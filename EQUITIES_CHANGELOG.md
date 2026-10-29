@@ -41,6 +41,61 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v4.0.0] — 2026-10-29
+
+**MAJOR** — Alex: "I want this to automatically suggest trades every day
+that the stock market is open from 8:30AM to 11:30AM CST for morning
+session trades and 1:00-3:00pm CST for afternoon trades." This overrides
+the Robinhood Execution Procedure's own "never from an unattended
+workflow... structural, not a preference" line — a second, separate
+structural loosening on the same day as v3.0.0, not a continuation of it.
+I recommended against this specifically: one manual, watched trade first,
+given the pipeline had placed exactly zero real Robinhood trades up to
+this point. Alex chose full scheduled automation instead. Baseline does
+not reset — this is an execution-authorization change for the real-money
+book only.
+
+### Strategy / CLAUDE.md changes
+- **Robinhood Execution Procedure** intro rewritten: no longer requires an
+  interactive session; may run unattended on a local schedule. New step 1a
+  added — verify the market is genuinely open via Alpaca's `get_clock`
+  (account-agnostic, Hard Rule 4), not just "the cron fired inside the
+  window," since a scheduled window can span a market holiday a calendar
+  can't know about on its own.
+- New section **"Robinhood Scheduled Execution — v4.0.0"**: the two
+  windows in Central Time (explicitly labeled CT throughout — the one
+  place in this file that isn't ET, called out the same way every other
+  zone-labeling discipline here has been, after two prior incidents in
+  this exact codebase from an unlabeled or mislabeled clock); the decision
+  to re-run every ~30 minutes within each window rather than once (mirrors
+  the existing equities hourly-cadence reasoning, and is safe because
+  `build_buy_candidates()` already skips symbols already held); why this
+  has to be a local cron/launchd job and categorically cannot run on
+  GitHub Actions (the `robinhood-trading` MCP credential lives only in
+  Alex's local `~/.claude.json`, authenticated to that specific client);
+  the requirement that failures be logged loudly, not silently, given
+  nobody is watching in real time; and the still-open question this
+  surfaces — if Trade Approval is a push-notification-and-tap control,
+  "unattended" and "a human taps approve" are in tension, and this has not
+  been observed to resolve either way yet.
+- New **Decision log** entry (Experiment Timeline), same format as the
+  prior two, explicit that this is a second, distinct override from
+  v3.0.0's same-day entry, with my recommendation against it stated
+  alongside Alex's choice to proceed.
+
+### Code changes
+- None. Same as v3.0.0 — this is a procedural/scheduling change. The
+  actual cron/launchd job and headless Claude Code CLI invocation are
+  being set up on Alex's local machine, outside this repo, by a session
+  with the filesystem and `robinhood-trading` MCP access to do that
+  correctly and verify it.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Nothing about
+  scoring, sizing, or the paper book changed. Phase 2B's record stands
+  exactly as it did before this entry.
+
+
 ## [v3.0.0] — 2026-10-29
 
 **MAJOR** — Alex: "Yes change the architecture... I want this agent to send
