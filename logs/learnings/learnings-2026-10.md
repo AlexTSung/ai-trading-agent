@@ -1,11 +1,11 @@
-# Learning Agent Report — 2026-10-28
+# Learning Agent Report — 2026-10-29
 
 ## Performance Summary
 | Metric | Value |
 |--------|-------|
-| Total closed trades | 36 |
-| Win rate | 30.6% |
-| Wins | 11 |
+| Total closed trades | 37 |
+| Win rate | 32.4% |
+| Wins | 12 |
 | Losses | 5 |
 | Graduation threshold | ❌ NOT MET (need ≥55%) |
 
@@ -19,8 +19,8 @@ Judge score ≥8.0 but outcome POOR_TRADE (2x: AAPL, AAPL). Judge may be overwei
 Judge consistently scores -4.4 pts above reviewer (9 trades). Judge is overconfident. Recommend reducing news component weight by 10%.
 **Recommended action**: `reduce_news_weight`
 
-### 3. win_rate_summary (seen 36x)
-Overall win rate: 31% (11W / 5L / 20N of 36 trades). Below 55% graduation threshold ❌ — not ready for real money.
+### 3. win_rate_summary (seen 37x)
+Overall win rate: 32% (12W / 5L / 20N of 37 trades). Below 55% graduation threshold ❌ — not ready for real money.
 **Recommended action**: `graduation_check`
 
 ## Judge Weight Hints (auto-tuned)
@@ -28,8 +28,8 @@ Overall win rate: 31% (11W / 5L / 20N of 36 trades). Below 55% graduation thresh
 {
   "approve_threshold": 8.0,
   "news_weight_adj": 0.6,
-  "last_updated": "2026-10-28",
-  "total_trades": 36,
+  "last_updated": "2026-10-29",
+  "total_trades": 37,
   "scope": "alpaca_equities",
   "round_trips": 34,
   "wins": 8
