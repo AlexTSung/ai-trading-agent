@@ -41,6 +41,72 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v6.0.0] — unreleased
+
+**MAJOR** — Real-money book: Hard Rule 2 limit-price formula replaced by realistic_entry_limit() (near-ask, ATR-scaled, 0.1-0.5%); do-not-chase made explicit
+
+**Why.** On 2026-10-30 Alex found that the real-money limit orders the
+pipeline produced for KMI (3 @ $32.79) and AS (2 @ $28.51) never triggered —
+Hard Rule 2's pullback price (`MA20 x 0.995`) sat about 2.8% under the market
+for stocks trading above their MA20, so the orders simply rested. He replaced
+them by hand at $33.60 (ask $33.73) and $29.20 (ask $29.34), about 0.4–0.5%
+under the ask, and asked that future limits be realistic enough to fill while
+still buying at the lowest price that realistically fills.
+
+**Classified MAJOR, by this file's own table.** A documented Hard Rule's
+price formula changed, and the new price is closer to the ask than the old
+one on the same candidates — looser, so "loosening is always MAJOR" applies.
+It also tightens in two ways (it stops placing orders that cannot fill, and
+the chase ceiling that the old far-off limit enforced only implicitly is now
+an explicit check), but the table does not net those off. This is the owner's
+explicit decision in the same pattern as v3.0.0 / v4.0.0 / v5.0.0; overrule
+the classification in review if you disagree.
+
+### Strategy / CLAUDE.md changes
+- Hard Rule 2: for the **real-money book only**, the limit-price formula is
+  replaced by `robinhood_trade.realistic_entry_limit()`; the paper book keeps
+  the original formula and `research.py`'s `limit_price` is untouched.
+- Execution Procedure step 6: limit from a live quote via the new helper;
+  `ok=False` means place nothing for that symbol this tick; keep GFD so an
+  unfilled order does not sit at a stale price.
+- Decision log entry added.
+
+### Code changes
+- `robinhood_trade.py`: new `realistic_entry_limit(bid, ask, atr, ma20)` and
+  its constants. Discount = 25% of one ATR, clamped to 0.1%–0.5% of the ask
+  (0.3% if ATR unknown), rounded down to the cent, never above the ask. Ask
+  more than 3% above MA20, or MA20 unknown, returns `ok=False` (Entry
+  Checklist #1, now explicit; fail closed on missing data). Reproduces Alex's
+  manual KMI limit exactly ($33.60 at ATR $0.50) and lands within a cent of AS.
+- `tests/test_robinhood_trade.py`: 11 new tests in `TestRealisticEntryLimit`.
+  Writing them caught a real float bug (103/100−1 is 0.03000000000000003, so
+  "exactly 3% above" was rejected); fixed by rounding before the compare.
+  Mutation-tested four ways — 5% cap (13 fail), chase guard removed (1),
+  round-up instead of down (2), MA20 no longer fails closed (4); file restored
+  after each.
+
+### Not covered / honest limits
+- **The parameters are not measured.** 0.25 ATR and 0.1–0.5% were chosen to
+  match two manual orders. There is no fill-rate data for this book yet;
+  revisit once there are real fills. A tighter discount fills more often but
+  buys higher; this is a judgment call, not an optimum.
+- **The paper book still has the same problem.** Its limits come from
+  `research.py` (`MA20 x 0.995`, `min(ask, research_limit_price)` in
+  `trade.py`) and likely rest unfilled the same way. Changing that would move
+  the Phase 2B record, so it is deliberately a separate decision for Alex.
+- Alex's manual KMI/AS orders were placed outside the pipeline, so they have
+  no `pending` record in `agent-state.json` (no judge_score, no entry_price).
+  If they fill, stops still work but profit targets and min-hold will not
+  until a record is added.
+
+### Comparability
+- Does this invalidate the prior performance record? **No baseline reset.**
+  The paper book, the Judge, `research.py` and every score/threshold are
+  untouched, so Phase 2B is unaffected. The real-money book has zero fills,
+  so there is no real-money record this could make incomparable. Anything
+  the real book fills from here on is under v6.0.0's pricing.
+
+
 ## [v5.3.2] — 2026-10-30
 
 **PATCH** — Robinhood pending Trade Approvals now count as open orders (reconcile and duplicate checks were blind to them)

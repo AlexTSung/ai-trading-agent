@@ -607,6 +607,76 @@ class TestPendingTradeApprovals(unittest.TestCase):
         self.assertIn("WAB", self.state["pending_sells"])
 
 
+class TestRealisticEntryLimit(unittest.TestCase):
+    """2026-10-30: pullback limits (MA20 x 0.995, 2-3% under market) never
+    triggered on KMI/AS; Alex replaced them by hand ~0.4-0.5% under the ask."""
+
+    def test_reproduces_alexs_manual_kmi_limit(self):
+        r = rt.realistic_entry_limit(bid=33.72, ask=33.73, atr=0.50, ma20=33.0)
+        self.assertTrue(r["ok"])
+        self.assertEqual(r["limit_price"], 33.60)      # Alex placed $33.60
+
+    def test_discount_is_capped_so_the_order_stays_reachable(self):
+        r = rt.realistic_entry_limit(bid=29.32, ask=29.34, atr=3.0, ma20=29.0)  # huge ATR
+        self.assertEqual(r["limit_price"], 29.19)      # 0.5% cap, not 0.25*ATR
+        self.assertLessEqual(r["discount_pct"], 0.52)
+
+    def test_discount_has_a_floor_for_tiny_atr(self):
+        r = rt.realistic_entry_limit(bid=99.99, ask=100.00, atr=0.01, ma20=99.0)
+        self.assertEqual(r["limit_price"], 99.90)      # 0.1% minimum
+
+    def test_unknown_atr_falls_back_to_the_old_three_tenths_percent(self):
+        for atr in (None, 0, -1, "x"):
+            with self.subTest(atr=atr):
+                r = rt.realistic_entry_limit(bid=99.99, ask=100.00, atr=atr, ma20=99.0)
+                self.assertTrue(r["ok"])
+                self.assertEqual(r["limit_price"], 99.70)
+
+    def test_never_above_ask_and_never_far_below_it(self):
+        for ask in (5.01, 29.34, 33.73, 237.62, 521.5, 1424.88):
+            for atr_pct in (0.0, 0.2, 1.0, 2.0, 4.0, 9.0):
+                with self.subTest(ask=ask, atr_pct=atr_pct):
+                    r = rt.realistic_entry_limit(bid=ask - 0.01, ask=ask,
+                                                  atr=ask * atr_pct / 100, ma20=ask)
+                    self.assertLessEqual(r["limit_price"], ask)
+                    self.assertGreaterEqual(r["limit_price"], round(ask * 0.995, 2) - 0.01)
+
+    def test_chasing_more_than_three_percent_above_ma20_places_nothing(self):
+        r = rt.realistic_entry_limit(bid=103.5, ask=103.51, atr=2.0, ma20=100.0)
+        self.assertFalse(r["ok"])
+        self.assertIsNone(r["limit_price"])
+        self.assertIn("do not chase", r["reason"])
+
+    def test_exactly_three_percent_above_ma20_is_still_allowed(self):
+        r = rt.realistic_entry_limit(bid=102.99, ask=103.0, atr=2.0, ma20=100.0)
+        self.assertTrue(r["ok"])
+
+    def test_below_ma20_is_a_normal_value_entry(self):
+        r = rt.realistic_entry_limit(bid=237.0, ask=237.1, atr=7.7, ma20=254.0)
+        self.assertTrue(r["ok"])
+
+    def test_missing_ma20_fails_closed(self):
+        for ma20 in (None, 0, -5, "n/a"):
+            with self.subTest(ma20=ma20):
+                self.assertFalse(rt.realistic_entry_limit(
+                    bid=10.0, ask=10.01, atr=0.2, ma20=ma20)["ok"])
+
+    def test_unusable_quotes_are_refused(self):
+        for bid, ask in ((0, 10.0), (10.0, 0), (10.05, 10.0), (None, 10.0), (10.0, "x")):
+            with self.subTest(bid=bid, ask=ask):
+                self.assertFalse(rt.realistic_entry_limit(
+                    bid=bid, ask=ask, atr=0.2, ma20=10.0)["ok"])
+
+    def test_result_feeds_build_buy_candidates(self):
+        r = rt.realistic_entry_limit(bid=237.0, ask=237.1, atr=7.7, ma20=254.0)
+        wl = {"watchlist": [{"symbol": "AMZN", "max_allocation_pct": 8}]}
+        c = rt.build_buy_candidates(
+            [_judge_row(symbol="AMZN", limit_price=r["limit_price"])],
+            _account(), [], {}, wl)
+        self.assertEqual(c[0]["action"], "BUY")
+        self.assertEqual(c[0]["limit_price"], r["limit_price"])
+
+
 class TestPortfolioReview(unittest.TestCase):
     """Real-money counterpart to trade.py's TestPortfolioReview -- same
     logic, this book's own state, advisory only (never executes)."""

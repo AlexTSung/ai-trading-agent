@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v5.3.2
+> **Version:** v6.0.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -315,11 +315,17 @@ order this produces.
    why, rather than sizing a trade off a Judge score that may no longer
    reflect current conditions — same "fail closed on stale/missing data"
    rule this file applies everywhere else. For each candidate symbol that
-   passes the freshness check, compute a Hard-Rule-2-compliant limit price
-   (`MA20 x 0.995` pullback or `ask x 0.997` value entry) from that day's
-   research data plus a **live** Robinhood quote — `robinhood_trade.py` has
-   no way to fetch that live price itself, so this step happens in the
-   interactive session, not in the module.
+   passes the freshness check, get a **live** Robinhood quote
+   (`get_equity_quotes`) and compute the limit with
+   `robinhood_trade.realistic_entry_limit(bid, ask, atr, ma20)` (v6.0.0 —
+   atr and ma20 from that day's research technicals; this replaces the old
+   `MA20 x 0.995` / `ask x 0.997` pair for this book, see Hard Rule 2).
+   `ok=False` means place no order for that symbol this tick (chasing, or
+   MA20 unknown) — journal the `reason` as a non-trade; it is not an error.
+   `robinhood_trade.py` has no way to fetch the live quote itself, so this
+   step happens in the interactive session, not in the module. Keep
+   `time_in_force=gfd`: an unfilled order then dies at the close instead of
+   sitting at a stale price, and the next tick re-prices it fresh.
 6a. **Portfolio review** (v5.3.0 — advisory only: never an order, never a
    sell trigger). `flags = robinhood_trade.portfolio_review(positions, state, research)`,
    using the research file step 6 **already loaded and freshness-checked** —
@@ -1080,6 +1086,22 @@ short on 2026-09-03, extend rather than graduate.
   only has to wire it to live data and `notify.py`, not write and test
   business logic blind. New capability, nothing executes — MINOR.
   `EQUITIES_CHANGELOG.md` v5.2.0 has the full entry.
+- **2026-10-30 (same day)** — Alex, after the pipeline's pullback limits
+  (MA20 × 0.995, 2–3% under the market) never triggered on KMI and AS and he
+  replaced them by hand ~0.4–0.5% under the ask: "make sure future limit
+  orders are realistic... likely trigger but also purchase at the lowest
+  price point that will actually trigger." Implemented for the real-money
+  book only as `robinhood_trade.realistic_entry_limit()`, replacing Hard
+  Rule 2's price formula there while keeping its do-not-chase intent as an
+  explicit check. **Classified MAJOR (v6.0.0)** by this file's own table —
+  a Hard Rule's documented formula changed, and paying up to 0.5% closer to
+  the ask is looser than `ask × 0.997`/`MA20 × 0.995` on the same candidates
+  — even though it also tightens (no more orders that cannot fill; a chase
+  ceiling that was previously implicit). **Baseline does not reset:** the
+  paper book and `research.py` are untouched, and zero real fills exist to
+  be made incomparable. The 0.25-ATR / 0.1–0.5% parameters are calibrated to
+  Alex's two manual orders, not to a fill-rate measurement — revisit once
+  the real book has fills. `EQUITIES_CHANGELOG.md` v6.0.0 has the full entry.
 
 ## Daily Schedule — SINGLE SOURCE OF TRUTH (all times ET, weekdays only)
 
@@ -1383,6 +1405,7 @@ regenerate** — and run the guardrail checks before pushing.
 ## Hard Rules (Never Break These)
 1. **Check market status first.** Never place orders when `is_open` is false.
 2. **No market orders. Buy pullbacks, not breakouts.** Entry limit orders must target MA20 support levels or RSI < 45 conditions — not just ask − 0.3%. A cosmetic 0.3% discount on a stock at a 20-day high is still a bad entry. Wait for the stock to pull back to a natural support level before entering. Formula when entering: `limit = MA20 × 0.995` (0.5% below MA20 support) for pullback entries, or `ask × 0.997` only when the stock is already below MA20 (value entry).
+   **Real-money (Robinhood) book only, as of v6.0.0 — price formula replaced, intent kept.** Alex, 2026-10-30: pullback limits sitting 2–3% under the market never triggered (KMI, AS), so limits must be realistic enough to fill, at the lowest price that realistically fills. `robinhood_trade.realistic_entry_limit(bid, ask, atr, ma20)` now sets the price from a **live** quote: a quarter of one ATR under the ask, clamped to 0.1%–0.5% (0.3% if ATR is unknown), rounded down to the cent — never above the ask. The "do not chase" half of this rule is now checked explicitly instead of by accident: ask more than 3% above MA20 (or MA20 unknown) → place nothing and wait for the pullback. **The paper book is unchanged** and still uses the formula above; `research.py`'s `limit_price` is untouched.
 3. **Stop-loss — tiered by stock quality:**
    - **Tier 1 — blue-chip compounders** (AAPL, MSFT, GOOGL, AMZN, NVDA): 20% stop OR thesis-based sell — whichever comes first. Price dips alone are NOT a sell trigger. Only exit if MA20 crosses below MA50 AND confirmed by a negative fundamental catalyst (earnings miss, guidance cut, leadership change).
    - **Tier 2 — growth/mid-cap** (DDOG, TSLA, QCOM): 12% stop. These are higher-beta names where 8–10% swings are normal.

@@ -535,6 +535,82 @@ def portfolio_review(positions: list, state: dict, research: dict) -> list:
     return flags
 
 
+# ── entry limit price — real-money book only ──────────────────────────────────
+
+# Alex, 2026-10-30: the pullback limits (MA20 x 0.995, sitting 2-3% under the
+# market for a stock above its MA20) never triggered on KMI or AS, so he
+# replaced them by hand with limits ~0.4-0.5% under the ask. The limit should
+# be realistic enough to fill, at the lowest price that realistically fills.
+# These numbers are calibrated to those two manual orders, not to a fill-rate
+# backtest -- revisit once the real book has fills to measure against.
+REALISTIC_LIMIT_ATR_FRACTION = 0.25    # discount = 25% of one ATR ...
+REALISTIC_LIMIT_MIN_DISCOUNT = 0.001   # ... but at least 0.1% under the ask
+REALISTIC_LIMIT_MAX_DISCOUNT = 0.005   # ... and never more than 0.5%: past that it stops filling
+REALISTIC_LIMIT_FALLBACK_DISCOUNT = 0.003   # ATR unknown: Hard Rule 2's old ask x 0.997
+CHASE_CEILING_ABOVE_MA20 = 0.03        # Entry Checklist #1: >3% above MA20 -> wait, do not chase
+
+
+def realistic_entry_limit(bid, ask, atr=None, ma20=None) -> dict:
+    """
+    Limit price for a Judge-approved BUY on the real-money book, from a LIVE
+    quote. Never above the ask, never more than 0.5% under it.
+
+    Replaces Hard Rule 2's price formula for this book only (v6.0.0). It does
+    not replace Hard Rule 2's intent -- do not chase -- which the old formula
+    enforced only by accident: a limit far under the market simply never
+    filled. With realistic prices that protection is gone, so it is checked
+    explicitly: ask more than 3% above MA20 -> ok=False, place nothing and
+    wait for the pullback (Entry Checklist #1). A missing MA20 fails closed
+    for the same reason.
+
+    The discount is a quarter of one ATR (a pullback well inside a normal
+    day's range), clamped to 0.1%-0.5% of the ask, and rounded DOWN to the
+    cent so it can only be cheaper than computed. No ATR -> the old 0.3%.
+
+    Returns {"ok", "limit_price", "discount_pct", "basis", "reason"}. Places
+    nothing and calls no MCP tool; the caller passes ok rows into
+    build_buy_candidates() and journals the not-ok ones.
+    """
+    def no(reason):
+        return {"ok": False, "limit_price": None, "discount_pct": None,
+                "basis": None, "reason": reason}
+
+    try:
+        bid, ask = float(bid), float(ask)
+    except (TypeError, ValueError):
+        return no(f"unusable quote bid={bid!r} ask={ask!r}")
+    if bid <= 0 or ask <= 0 or ask < bid:
+        return no(f"unusable quote bid={bid} ask={ask}")
+
+    try:
+        ma20 = float(ma20)
+    except (TypeError, ValueError):
+        ma20 = 0.0
+    if ma20 <= 0:
+        return no("MA20 unknown -- cannot verify this is not a chase (fail closed)")
+    above = round(ask / ma20 - 1, 9)    # 103/100-1 is 0.03000000000000003 in floats
+    if above > CHASE_CEILING_ABOVE_MA20:
+        return no(f"ask ${ask:.2f} is {above:.1%} above MA20 ${ma20:.2f} "
+                  f"(> {CHASE_CEILING_ABOVE_MA20:.0%}): wait for a pullback, do not chase")
+
+    try:
+        atr = float(atr)
+    except (TypeError, ValueError):
+        atr = 0.0
+    if atr > 0:
+        raw = REALISTIC_LIMIT_ATR_FRACTION * atr / ask
+        discount = min(max(raw, REALISTIC_LIMIT_MIN_DISCOUNT), REALISTIC_LIMIT_MAX_DISCOUNT)
+        basis = f"{REALISTIC_LIMIT_ATR_FRACTION:.0%} of ATR ${atr:.2f}, clamped"
+    else:
+        discount = REALISTIC_LIMIT_FALLBACK_DISCOUNT
+        basis = "ATR unknown, fallback ask x 0.997"
+
+    limit = math.floor(round(ask * (1 - discount) * 100, 6)) / 100
+    return {"ok": True, "limit_price": limit,
+            "discount_pct": round((ask - limit) / ask * 100, 3),
+            "basis": basis, "reason": ""}
+
+
 # ── sizing — same formulas as trade.py, state always explicit ────────────────
 
 def honest_equity(account: dict, positions: list, state: dict) -> float:
