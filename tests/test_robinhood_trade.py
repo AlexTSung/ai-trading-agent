@@ -513,6 +513,100 @@ class TestReconcileSellFills(unittest.TestCase):
         self.assertEqual(result, {"filled": [], "expired": []})
 
 
+def _approval(symbol="AMZN", side="buy", state="APPROVAL_STATE_PENDING",
+              asset_class="ASSET_CLASS_EQUITY", approval_id="01a18de1-e007-75ee-849a-7fc6ff71f5b2"):
+    """Shape copied from the live `get_trade_approvals` response, 2026-10-30."""
+    return {
+        "approval_id": approval_id, "account_number": "517003521",
+        "asset_class": asset_class, "state": state, "is_edited": False,
+        "proposed_order": {
+            "asset_class": asset_class, "side": side, "order_type": "limit",
+            "time_in_force": "gfd", "market_hours": "regular_hours",
+            "trigger": "immediate", "quantity": "1",
+            "limit_price": {"amount": "237.62", "currency_code": "USD"},
+            "symbol": symbol,
+            "estimated_cost": {"amount": "237.62", "currency_code": "USD"},
+        },
+        "expires_at": "2026-10-30T20:00:00Z", "created_at": "2026-10-30T17:35:52Z",
+    }
+
+
+class TestPendingTradeApprovals(unittest.TestCase):
+    """Confirmed live, 2026-10-30: with Trade Approval ON, place_equity_order
+    creates no order -- only a pending approval. get_equity_orders stays empty
+    until the human taps, so a pending approval is neither a position nor an
+    open order, and every open-order check here was blind to it."""
+
+    def setUp(self):
+        self.state = {}
+        self.watchlist = {"watchlist": [{"symbol": "AMZN", "max_allocation_pct": 8},
+                                         {"symbol": "WAB", "max_allocation_pct": 8}]}
+
+    def test_pending_approval_maps_to_an_open_order(self):
+        orders = rt.approvals_to_open_orders([_approval()])
+        self.assertEqual(len(orders), 1)
+        self.assertEqual(orders[0]["symbol"], "AMZN")
+        self.assertEqual(orders[0]["side"], "buy")
+        self.assertEqual(orders[0]["status"], "pending_approval")
+        self.assertIn(orders[0]["status"], rt.OPEN_ORDER_STATUSES)
+
+    def test_resolved_or_non_equity_approvals_do_not_map(self):
+        for state in ("APPROVAL_STATE_DECLINED", "APPROVAL_STATE_EXPIRED",
+                      "APPROVAL_STATE_APPROVED"):
+            with self.subTest(state=state):
+                self.assertEqual(rt.approvals_to_open_orders([_approval(state=state)]), [])
+        self.assertEqual(rt.approvals_to_open_orders(
+            [_approval(asset_class="ASSET_CLASS_CRYPTO")]), [])
+
+    def test_empty_list_is_nothing_pending_but_none_raises(self):
+        self.assertEqual(rt.approvals_to_open_orders([]), [])
+        with self.assertRaises(ValueError):
+            rt.approvals_to_open_orders(None)
+
+    def test_pending_buy_approval_is_not_expired_by_reconcile_fills(self):
+        """The exact live failure: no position, empty get_equity_orders."""
+        rt.record_pending_order(self.state, "AMZN", judge_score=None, qty=1,
+                                 order_id="01a18de1-e007-75ee-849a-7fc6ff71f5b2")
+        open_orders = [] + rt.approvals_to_open_orders([_approval()])
+        result = rt.reconcile_fills([], open_orders=open_orders, state=self.state)
+        self.assertEqual(result, {"filled": [], "expired": []})
+        self.assertIn("AMZN", self.state["pending"])
+
+    def test_declined_approval_still_resolves_as_expired(self):
+        rt.record_pending_order(self.state, "AMZN", judge_score=None, qty=1,
+                                 order_id="01a18de1-e007-75ee-849a-7fc6ff71f5b2")
+        open_orders = rt.approvals_to_open_orders([_approval(state="APPROVAL_STATE_DECLINED")])
+        result = rt.reconcile_fills([], open_orders=open_orders, state=self.state)
+        self.assertEqual([e["symbol"] for e in result["expired"]], ["AMZN"])
+        self.assertNotIn("AMZN", self.state["pending"])
+
+    def test_pending_buy_approval_blocks_a_second_buy(self):
+        open_orders = rt.approvals_to_open_orders([_approval()])
+        candidates = rt.build_buy_candidates(
+            [_judge_row(symbol="AMZN", limit_price=237.62)], _account(), [], self.state,
+            self.watchlist, open_orders=open_orders)
+        self.assertEqual(candidates[0]["action"], "SKIP")
+        self.assertTrue(any("pending buy order" in r for r in candidates[0]["reasons"]))
+
+    def test_pending_sell_approval_blocks_a_second_sell(self):
+        rt.record_entry(self.state, "WAB", 7.0, 15, entry_price=289.07)
+        positions = [_position("WAB", qty=15, avg_entry_price=289.07,
+                                current_price=250.0, unrealized_plpc=-0.135)]
+        open_orders = rt.approvals_to_open_orders([_approval(symbol="WAB", side="sell")])
+        candidates = rt.build_sell_candidates(positions, self.state, open_orders=open_orders)
+        self.assertEqual(candidates[0]["action"], "SKIP")
+        self.assertTrue(any("pending sell order" in r for r in candidates[0]["reasons"]))
+
+    def test_pending_sell_approval_is_not_expired_by_reconcile_sell_fills(self):
+        rt.record_entry(self.state, "WAB", 7.0, 15, entry_price=289.07)
+        rt.record_pending_sell(self.state, "WAB", "SELL_FULL", qty=15, order_id="a1")
+        positions = [_position("WAB", qty=15, avg_entry_price=289.07, current_price=250.0)]
+        open_orders = rt.approvals_to_open_orders([_approval(symbol="WAB", side="sell")])
+        result = rt.reconcile_sell_fills(positions, open_orders, self.state)
+        self.assertEqual(result, {"filled": [], "expired": []})
+        self.assertIn("WAB", self.state["pending_sells"])
+
+
 class TestPortfolioReview(unittest.TestCase):
     """Real-money counterpart to trade.py's TestPortfolioReview -- same
     logic, this book's own state, advisory only (never executes)."""

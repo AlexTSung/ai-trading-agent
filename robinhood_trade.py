@@ -171,7 +171,9 @@ def reconcile_fills(positions: list, open_orders: list, state: dict) -> dict:
       filling (cancelled, rejected, expired). Drop it from `pending` so it
       doesn't grow unboundedly; nothing to journal.
     - It's still in `open_orders` -> still awaiting Trade Approval or
-      still working. Leave it alone.
+      still working. Leave it alone. `open_orders` must already include
+      pending approvals (`approvals_to_open_orders()`), since an order
+      awaiting the human's tap does not exist in `get_equity_orders` yet.
 
     Returns {"filled": [...], "expired": [...]} for the caller to journal
     and log. Mutates `state` in place (same contract as record_entry).
@@ -572,8 +574,60 @@ def max_shares_for(account: dict, positions: list, state: dict,
 
 OPEN_ORDER_STATUSES = {
     "queued", "new", "accepted", "pending_new", "open", "pending",
-    "partially_filled", "confirmed", "unconfirmed",
+    "partially_filled", "confirmed", "unconfirmed", "pending_approval",
 }
+
+PENDING_APPROVAL_STATE = "APPROVAL_STATE_PENDING"
+
+
+def approvals_to_open_orders(approvals) -> list:
+    """
+    Map `get_trade_approvals` items into the open-order shape every function
+    here already consumes, so an order still waiting on the human's tap counts
+    as open.
+
+    Confirmed live, 2026-10-30: `place_equity_order` on an account with Trade
+    Approval ON creates no order at all -- it returns an approval
+    (APPROVAL_STATE_PENDING), and `get_equity_orders` stays empty until the
+    human approves. A pending approval is therefore neither a position nor an
+    open order, so without this mapping `reconcile_fills()` /
+    `reconcile_sell_fills()` classify it `expired` and drop its pending record
+    (losing judge_score and the cooldown/min-hold bookkeeping before the fill
+    ever lands), and the duplicate checks in `build_buy_candidates()` /
+    `build_sell_candidates()` can't see it, so a later tick could queue a
+    second order for the same symbol.
+
+    Only pending equity approvals map. Declined and expired ones must NOT --
+    they are resolved, and reconcile correctly drops those as `expired`. An
+    approved one has become a real order and shows up in `get_equity_orders`.
+
+    Pass the result of the MCP call even when it is empty ([] is "nothing
+    pending"). `None` raises: a failed fetch passed through as "no approvals"
+    would silently reintroduce this bug, so the caller must skip the tick's
+    reconcile and order placement instead (fail closed).
+    """
+    if approvals is None:
+        raise ValueError(
+            "approvals is None -- the get_trade_approvals fetch failed or was "
+            "skipped. Pass [] only when it succeeded with nothing pending; "
+            "otherwise skip this tick's reconcile and order placement.")
+    out = []
+    for a in approvals:
+        if a.get("state") != PENDING_APPROVAL_STATE:
+            continue
+        order = a.get("proposed_order") or {}
+        if order.get("asset_class", "ASSET_CLASS_EQUITY") != "ASSET_CLASS_EQUITY":
+            continue
+        if not order.get("symbol"):
+            continue
+        out.append({
+            "symbol": order["symbol"],
+            "side": str(order.get("side", "")).lower(),
+            "status": "pending_approval",
+            "order_id": a.get("approval_id"),
+            "source": "trade_approval",
+        })
+    return out
 
 
 def build_buy_candidates(judge_approvals: list, account: dict, positions: list,

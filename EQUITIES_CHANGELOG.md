@@ -41,6 +41,62 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v5.3.2] — 2026-10-30
+
+**PATCH** — Robinhood pending Trade Approvals now count as open orders (reconcile and duplicate checks were blind to them)
+
+**Found live, 2026-10-30**, by the first supervised real-money order (a
+1-share AMZN mechanics test, declined by Alex in the app). With Trade
+Approval ON, `place_equity_order` creates **no order** — it returns an
+approval (`APPROVAL_STATE_PENDING`) and `get_equity_orders` stays empty until
+the human taps. A pending approval is therefore neither a position nor an
+open order, and everything that reasoned about "open orders" was blind to it:
+- `reconcile_fills()` / `reconcile_sell_fills()` saw no position and no open
+  order and classified the still-waiting order `expired`, deleting its
+  pending record. A scheduled tick between placement and the tap would lose
+  the judge_score and the cooldown/min-hold bookkeeping, and the eventual
+  fill would never be journaled or push-notified. Reproduced on a copy of
+  the real state against the live MCP view before fixing.
+- `build_buy_candidates()` / `build_sell_candidates()` duplicate checks could
+  not see it, so a later tick could queue a second order for the same symbol
+  (a double fill if both were ever tapped).
+
+This is the approval-stage twin of v4.1.0 (pending order awaiting fill) and
+v5.3.1 (ghost position rows): a state the broker reports differently from
+what the module assumed. Intent was always "an order the human hasn't
+resolved yet is still open"; the code simply couldn't see it.
+
+### Strategy / CLAUDE.md changes
+- Execution Procedure step 3 now also calls `get_trade_approvals` and merges
+  `approvals_to_open_orders(approvals)` into `open_orders` before steps 4a, 5
+  and 7, and states the fail-closed rule: a failed approvals fetch skips the
+  tick's reconcile and order placement. No Hard Rule or threshold changed.
+
+### Code changes
+- `robinhood_trade.py`: new `approvals_to_open_orders()` (maps *pending
+  equity* approvals into the open-order dict shape; declined/expired/approved
+  and non-equity approvals deliberately do not map; `None` raises instead of
+  silently meaning "none pending"), `PENDING_APPROVAL_STATE`, and
+  `"pending_approval"` added to `OPEN_ORDER_STATUSES`.
+- `tests/test_robinhood_trade.py`: 8 new tests in `TestPendingTradeApprovals`
+  using the live payload shape. Mutation-tested four ways — dropping the new
+  status (3 fail), ignoring the state filter (4 fail), returning nothing
+  (5 fail), letting `None` through (1 fails); the file was restored after each.
+
+### Not covered / still unproven
+- The **fill-confirmed push** has still never fired against a real fill (the
+  mechanics test was declined). Needs one supervised trade that is approved.
+- The window between "approved" and the order appearing in `get_equity_orders`
+  is unobserved; if there is a gap with neither visible, one tick could still
+  see nothing. Observe it on the supervised approved trade.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Zero real trades
+  have filled through this pipeline; the mechanics test was declined and is
+  tagged `manual_mechanics_tests` in the private state so it never counts. No
+  scoring, sizing or threshold changed.
+
+
 ## [v5.3.1] — 2026-10-30
 
 **PATCH** — The local terminal session's v5.3.0 rehearsal found that

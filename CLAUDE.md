@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v5.3.1
+> **Version:** v5.3.2
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -224,6 +224,19 @@ order this produces.
    position needs `symbol`, `qty`, `avg_entry_price`, `current_price`,
    `unrealized_plpc`; each open order needs `symbol`, `side`, `status`.
    **Open orders are not optional as of v4.0.1** — see step 7.
+   **Pending Trade Approvals count as open orders as of v5.3.2.** With Trade
+   Approval ON, `place_equity_order` creates no order — only a pending
+   approval — so `get_equity_orders` is empty until the human taps (observed
+   live, 2026-10-30). Also call `get_trade_approvals` (pending only, default)
+   and set
+   `open_orders = open_orders + robinhood_trade.approvals_to_open_orders(approvals)`
+   before steps 4a, 5 and 7. Without it a placed-but-untapped order is
+   neither a position nor an open order, so step 4a drops its pending record
+   as expired and steps 5/7 can queue a duplicate. **Fail closed:** if the
+   `get_trade_approvals` call fails, do not pass `[]` (the helper raises on
+   `None` on purpose) — skip this tick's reconcile and order placement and
+   log why. A `declined`/`expired` approval is correctly *not* an open
+   order; step 4a then journals it as expired.
 4. `state = robinhood_trade.load_real_state(logs_dir)`.
 4a. **Reconcile pending orders from a previous tick, before anything else
    touches state.** `reconciled = robinhood_trade.reconcile_fills(positions, open_orders, state)`.
