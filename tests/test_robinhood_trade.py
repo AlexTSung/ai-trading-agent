@@ -470,6 +470,66 @@ class TestReconcileSellFills(unittest.TestCase):
         self.assertEqual(result, {"filled": [], "expired": []})
 
 
+class TestPortfolioReview(unittest.TestCase):
+    """Real-money counterpart to trade.py's TestPortfolioReview -- same
+    logic, this book's own state, advisory only (never executes)."""
+
+    def test_clean_position_produces_no_flags(self):
+        state = {}
+        rt.record_entry(state, "AAPL", 9.0, 100, entry_price=200.0)
+        positions = [_position("AAPL", avg_entry_price=200.0, current_price=210.0,
+                                unrealized_plpc=0.05)]
+        self.assertEqual(rt.portfolio_review(positions, state, {}), [])
+
+    def test_near_tier1_stop_produces_early_warning(self):
+        state = {}
+        rt.record_entry(state, "AAPL", 9.0, 100, entry_price=200.0)
+        positions = [_position("AAPL", avg_entry_price=200.0, unrealized_plpc=-0.18)]
+        flags = rt.portfolio_review(positions, state, {})
+        self.assertEqual(len(flags), 1)
+        self.assertTrue(any("stop" in r for r in flags[0]["reasons"]))
+
+    def test_tier1_thesis_break_with_negative_news_is_flagged(self):
+        state = {}
+        rt.record_entry(state, "AAPL", 9.0, 100, entry_price=200.0)
+        positions = [_position("AAPL", avg_entry_price=200.0, unrealized_plpc=0.02)]
+        research = {"symbols": {"AAPL": {
+            "technicals": {"ma20": 195.0, "ma50": 205.0},
+            "news": [{"headline": "AAPL downgrade on miss and lawsuit", "summary": ""}],
+        }}}
+        flags = rt.portfolio_review(positions, state, research)
+        self.assertEqual(len(flags), 1)
+        self.assertTrue(any("thesis-break exception may apply" in r
+                             for r in flags[0]["reasons"]))
+
+    def test_tier1_technical_break_without_negative_news_is_not_a_sell_trigger(self):
+        state = {}
+        rt.record_entry(state, "AAPL", 9.0, 100, entry_price=200.0)
+        positions = [_position("AAPL", avg_entry_price=200.0, unrealized_plpc=0.02)]
+        research = {"symbols": {"AAPL": {
+            "technicals": {"ma20": 195.0, "ma50": 205.0}, "news": [],
+        }}}
+        flags = rt.portfolio_review(positions, state, research)
+        self.assertEqual(len(flags), 1)
+        self.assertTrue(any("not a sell trigger" in r for r in flags[0]["reasons"]))
+
+    def test_tier2_symbol_is_never_checked_for_thesis_break(self):
+        state = {}
+        rt.record_entry(state, "DDOG", 9.0, 50, entry_price=100.0)
+        positions = [_position("DDOG", avg_entry_price=100.0, unrealized_plpc=0.02)]
+        research = {"symbols": {"DDOG": {
+            "technicals": {"ma20": 95.0, "ma50": 105.0},
+            "news": [{"headline": "DDOG downgrade on miss", "summary": ""}],
+        }}}
+        self.assertEqual(rt.portfolio_review(positions, state, research), [])
+
+    def test_missing_entry_record_leaves_days_held_none(self):
+        state = {}
+        positions = [_position("AAPL", avg_entry_price=200.0, unrealized_plpc=-0.18)]
+        flags = rt.portfolio_review(positions, state, {})
+        self.assertIsNone(flags[0]["days_held"])
+
+
 class TestConfirmationPrompt(unittest.TestCase):
     def test_contains_exact_mandatory_phrase(self):
         candidate = {"action": "BUY", "symbol": "AAPL", "qty": 10, "limit_price": 150.0,

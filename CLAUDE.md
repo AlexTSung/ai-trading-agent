@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v5.1.0
+> **Version:** v5.2.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -544,17 +544,23 @@ situation had changed since it was first entered — the only way to know
 was to go read a journal file. Alex asked for push notifications on both:
 a new Judge APPROVE, and anything worth a second look in an open position.
 
-**Scope — equities (paper) only, built here; Robinhood (real) is a
-separate, local-only extension.** `notify.py` is pure Python (one HTTPS
-POST to ntfy.sh, no MCP, no SDK), so it runs inside GitHub Actions exactly
-like `trade.py`'s own REST calls to Alpaca — no local machine required.
-The Robinhood side has no equivalent yet: `robinhood_trade.py` stays "pure
-logic only," and the Execution Procedure runs exclusively on Alex's local
-machine via the `robinhood-trading` MCP connection, which a cloud session
-cannot reach. Wiring the same `notify.py` calls into `build_buy_candidates()`/
-`build_sell_candidates()`'s call sites in the Execution Procedure (steps 5
-and 8) is the natural next step, but it has to be done from a session with
-that local MCP connection, not from here.
+**Scope — equities (paper) wired end-to-end; Robinhood (real) has the
+pure-logic half built, wiring is local-only.** `notify.py` is pure Python
+(one HTTPS POST to ntfy.sh, no MCP, no SDK), so it runs inside GitHub
+Actions exactly like `trade.py`'s own REST calls to Alpaca — no local
+machine required. `robinhood_trade.py` gained its own `portfolio_review()`
+(v5.2.0) — identical logic to `trade.py`'s, this book's own state, still
+"pure logic only, places no orders itself" — because that half needed no
+MCP connection to build or test. **What still has to come from a session
+with the local `robinhood-trading` MCP connection**: actually calling
+`robinhood_trade.portfolio_review()` with live positions/state and calling
+`notify.notify_portfolio_review()` with the result (a new Execution
+Procedure step), and wiring `notify.py` calls into the `build_buy_candidates()`/
+`build_sell_candidates()` call sites (steps 5 and 8) so a real order firing
+notifies the same way a paper approval does. Both `robinhood_trade.py` and
+`notify.py` are already in this repo by the time the local session's step 2
+pulls it — nothing new needs to be built there, only wired in and given
+live data.
 
 **What notifies, and how often:**
 - **New Judge approvals.** `judge.py`'s `run_judge_session()` diffs this
@@ -993,6 +999,12 @@ short on 2026-09-03, extend rather than graduate.
   Approval Notifications" above for the full scope and what was
   deliberately left out (T1/T2 proximity — already automatic via the OCO
   bracket). `EQUITIES_CHANGELOG.md` has the full entry.
+- **2026-10-30 (same day)** — Ported the pure-logic half of the Robinhood
+  equivalent of `trade.portfolio_review()` into `robinhood_trade.py`
+  (identical logic, this book's own state) so the local terminal session
+  only has to wire it to live data and `notify.py`, not write and test
+  business logic blind. New capability, nothing executes — MINOR.
+  `EQUITIES_CHANGELOG.md` v5.2.0 has the full entry.
 
 ## Daily Schedule — SINGLE SOURCE OF TRUTH (all times ET, weekdays only)
 

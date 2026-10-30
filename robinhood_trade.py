@@ -46,7 +46,9 @@ import trade  # reused: tier_for, stop_pct_for, position_pct_for,
               # regime_adjusted_position_pct, is_buyable, allocation_cap_for,
               # check_stop_loss, check_inverse_etf_max_hold, detect_phantom_equity,
               # cooldown_remaining_hours
-from market_time import et_timestamp
+import judge  # reused: score_news() -- same keyword classifier as the paper
+              # book's own portfolio_review(), not a second copy of the word lists
+from market_time import et_timestamp, et_today
 
 CASH_RESERVE_PCT = trade.CASH_RESERVE_PCT   # Hard Rule 8's 20% floor, same number
 MIN_TRADE_PRICE  = trade.MIN_TRADE_PRICE
@@ -439,6 +441,79 @@ def build_sell_candidates(positions: list, state: dict, open_orders: list = None
         })
 
     return candidates
+
+
+NEAR_STOP_WARNING_PCT = 0.03  # same threshold as trade.py's own portfolio_review()
+
+
+def portfolio_review(positions: list, state: dict, research: dict) -> list:
+    """
+    Advisory only -- never executes or proposes an order. Real-money
+    counterpart to trade.py's portfolio_review(), same logic, same
+    threshold, this book's own state (entry_price is already tracked here
+    since v5.0.0's reconcile_fills(), so no extra plumbing was needed):
+
+    - An early warning when unrealized P&L is closing in on the tier stop
+      (check_stops()'s breakeven-after-T1 override already runs separately
+      in build_sell_candidates() and will fire the actual exit -- this is
+      advance notice, not a replacement).
+    - Hard Rule 3's own Tier-1 thesis-break exception: "MA20 crosses below
+      MA50 AND confirmed by a negative fundamental catalyst." Nothing
+      currently checks this combination automatically for this book either.
+
+    research is the equities-side research.json (account-agnostic per Hard
+    Rule 4, Account Guardrails) -- this module has no way to fetch bars or
+    news itself, so the interactive session passes in whatever the equities
+    pipeline already produced for the day.
+    """
+    symbols_data = research.get("symbols", {}) if research else {}
+    entries = state.get("entries", {})
+    flags = []
+
+    for pos in positions:
+        sym = pos["symbol"]
+        plpc = float(pos.get("unrealized_plpc", 0))
+        tier = trade.tier_for(sym)
+        stop_pct = trade.stop_pct_for(sym)
+        sym_data = symbols_data.get(sym, {})
+        technicals = sym_data.get("technicals", {})
+        news_items = sym_data.get("news", [])
+
+        entry_record = entries.get(sym, {})
+        days_held = None
+        entry_date_str = entry_record.get("date")
+        if entry_date_str:
+            try:
+                days_held = (et_today() - datetime.fromisoformat(entry_date_str).date()).days
+            except ValueError:
+                days_held = None
+
+        reasons = []
+
+        distance_to_stop = plpc - stop_pct
+        if 0 <= distance_to_stop <= NEAR_STOP_WARNING_PCT:
+            reasons.append(f"within {distance_to_stop*100:.1f} pts of its {tier} stop "
+                            f"({stop_pct:.0%}) -- currently {plpc*100:+.1f}%")
+
+        if tier == "TIER1":
+            ma20, ma50 = technicals.get("ma20"), technicals.get("ma50")
+            technical_break = ma20 is not None and ma50 is not None and ma20 < ma50
+            _, news_note = judge.score_news(news_items, sym_data)
+            has_negative_catalyst = news_note.startswith("NEGATIVE")
+            if technical_break and has_negative_catalyst:
+                reasons.append("MA20 < MA50 AND a negative news catalyst -- Hard Rule 3's "
+                                "thesis-break exception may apply")
+            elif technical_break:
+                reasons.append("MA20 < MA50, but no confirmed negative catalyst -- Hard "
+                                "Rule 3 says a price dip alone is not a sell trigger")
+
+        if reasons:
+            flags.append({
+                "symbol": sym, "tier": tier, "unrealized_plpc": plpc,
+                "days_held": days_held, "reasons": reasons,
+            })
+
+    return flags
 
 
 # ── sizing — same formulas as trade.py, state always explicit ────────────────

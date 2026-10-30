@@ -41,6 +41,41 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v5.2.0] — 2026-10-30
+
+**MINOR** — Preparing the Robinhood-side half of v5.1.0's notification work.
+Alex asked for a prompt to hand to the local terminal session for the
+remaining Robinhood-side wiring; rather than ask that session to write and
+test business logic blind (no MCP connection needed for this part, only
+for the live data it consumes), the pure-logic half was built and tested
+here, matching every other `robinhood_trade.py` function's own discipline.
+
+### Strategy / CLAUDE.md changes
+- "Position & Approval Notifications" section updated: scope line now
+  distinguishes the equities side (wired end-to-end) from Robinhood (the
+  pure-logic half now built, wiring to live data and `notify.py` still
+  local-only).
+- New Experiment Timeline decision log entry.
+
+### Code changes
+- `robinhood_trade.py`: new `portfolio_review(positions, state, research)`
+  — identical logic to `trade.portfolio_review()` (near-stop early warning,
+  Hard Rule 3's Tier-1 thesis-break exception reusing `judge.score_news()`),
+  this book's own state. No new plumbing needed for `entry_price` -- v5.0.0's
+  `reconcile_fills()` already tracks it. New imports: `judge` (score_news
+  reuse) and `market_time.et_today` (days-held calc).
+- `tests/test_robinhood_trade.py`: new `TestPortfolioReview` (6 tests) --
+  clean position no flags, near-stop warning, Tier-1 thesis-break with/
+  without negative news, Tier-2 symbols never checked for thesis-break,
+  missing entry record leaves days-held `None`. Mutation-tested: removing
+  the Tier-1-only guard fails `test_tier2_symbol_is_never_checked_for_thesis_break`.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Pure addition,
+  advisory-only, not called from anywhere yet (the live wiring is the local
+  session's remaining task) -- nothing scores, sizes, or executes a trade.
+
+
 ## [v5.1.0] — 2026-10-30
 
 **MINOR** — Alex: "I would like to be notified with a trade opportunity
