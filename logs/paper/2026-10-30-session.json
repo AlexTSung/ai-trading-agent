@@ -1,0 +1,516 @@
+{
+  "agent_version": "5.0.0",
+  "timestamp": "2026-10-30T10:01:50.219816-04:00",
+  "trades": [
+    {
+      "symbol": "NVDA",
+      "action": "SELL",
+      "result": {
+        "id": "44986152-1728-4c1b-ad16-d9d66ecd537c",
+        "client_order_id": "agent-sell-NVDA-20261030140151",
+        "created_at": "2026-10-30T14:01:51.092123218Z",
+        "updated_at": "2026-10-30T14:01:51.109319914Z",
+        "submitted_at": "2026-10-30T14:01:51.092123218Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "4ce9353c-66d1-46c2-898f-fce867ab0247",
+        "symbol": "NVDA",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "34",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "day",
+        "limit_price": "207.55",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2026-10-30T20:00:00Z",
+        "_ok": true,
+        "_agent_reason": "Sell signal: STRONG_SELL",
+        "_limit_price_used": 207.55,
+        "_urgent_exit": false,
+        "_released_orders": [
+          {
+            "order_id": "543ebc23-2cb8-4f37-9fbb-d85b49bf3180",
+            "client_order_id": "t2-oco-20261020170208-NVDA",
+            "status_code": 204
+          },
+          {
+            "order_id": "2403c976-ab97-40ad-b9b4-bc67df72e937",
+            "client_order_id": "t1-oco-20261020170208-NVDA",
+            "status_code": 204
+          }
+        ]
+      }
+    }
+  ],
+  "skipped": [
+    {
+      "symbol": "SPY",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "QQQ",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "MSFT",
+      "signal": "WEAK_BUY",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "GOOGL",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "AMZN",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "NOK",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "PYPL",
+      "signal": "STRONG_BUY",
+      "reason": "Already has a resting buy order \u2014 not stacking a second one (see GUARDRAIL: open_buy_order_syms, trade.py)"
+    },
+    {
+      "symbol": "DDOG",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SQQQ",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SPXS",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SOXS",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "CEG",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "VST",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "GEV",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "MRK",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ARGX",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "DTM",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "TGT",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "VIXY",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "KDP",
+      "signal": "STRONG_BUY",
+      "reason": "Already has a resting buy order \u2014 not stacking a second one (see GUARDRAIL: open_buy_order_syms, trade.py)"
+    },
+    {
+      "symbol": "VZ",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "LRCX",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ADBE",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "CMCSA",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "IBIT",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "TTWO",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "TGTX",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SNDK",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "REGN",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "RKT",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "AMD",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "INTC",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "RIVN",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "IOVA",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "BURU",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "HUBC",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SLGB",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SOXL",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "FNGR",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SNXX",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "INTW",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "TQQQ",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ABOS",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SPCX",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "KORU",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "MSTZ",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SHFS",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ONEG",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "HPQ",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "PT",
+      "reason": "object of type 'NoneType' has no len()"
+    },
+    {
+      "symbol": "TROO",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ACM",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "RMNI",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ASUR",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    }
+  ],
+  "vetoed_by_judge": [
+    {
+      "symbol": "AAPL",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "EARNINGS VETO: AAPL flagged by the morning earnings watch \u2014 no entry within 3 trading days of a report"
+    },
+    {
+      "symbol": "TSLA",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: price $396.98 is 4.3% above MA20 $380.57 (limit 3%) \u2014 do not chase"
+    },
+    {
+      "symbol": "LLY",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LLY \u2014 auto-veto per Hard Rule 9"
+    },
+    {
+      "symbol": "COP",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 79 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "DT",
+      "signal": "WEAK_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 7.52,
+      "rationale": "Avg-down requires score \u2265 8.0, got 7.52. Technical: WEAK_BUY \u2014 MA20 $62.60 > MA50 $57.61, price between MAs. News: POSITIVE \u2014 8 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $770.73 >= MA50 $767.59. Portfolio: AVG_DOWN candidate: DT is 3.9% below entry (entry $61.35 \u2192 now $58.98), position 2.8% of portfolio (max 8%). Volatility: VIX 17.2 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $17B; Profitable; 21 analyst buy ratings \u2014 strong institutional coverage. Source: watchlist | Gate: 8.0."
+    },
+    {
+      "symbol": "IBM",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 81 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "PFE",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "CSX",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "AUPH",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "HOLD",
+      "judge_score": 7.67,
+      "approval_gate": 8.5,
+      "is_discovery": true,
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $16.65 > MA50 $16.49, price $16.72 above both [capped 3.0\u21922.0 at weight 2.0]. News: POSITIVE \u2014 4 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $770.73 >= MA50 $767.59. Portfolio: Strong cash reserve 47%. Volatility: VIX 17.2 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mid-cap $2.2B; Profitable; 5 analyst buy ratings. Source: discovery | Gate: 8.5."
+    },
+    {
+      "symbol": "CVX",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 78 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "TNMG",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: price $4.11 is 16.0% above MA20 $3.54 (limit 3%) \u2014 do not chase"
+    },
+    {
+      "symbol": "BP",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BP \u2014 auto-veto per Hard Rule 9"
+    },
+    {
+      "symbol": "PMI",
+      "signal": "WEAK_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "Quality veto: MICRO_CAP VETO: $0.02B market cap \u2014 too small for discovery buys"
+    },
+    {
+      "symbol": "SHEL",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for SHEL \u2014 auto-veto per Hard Rule 9"
+    }
+  ],
+  "stop_losses": [],
+  "orphan_cancels": [],
+  "resting_entries": [
+    {
+      "symbol": "OKTA",
+      "action": "KEPT",
+      "order_id": "255da9e7-e203-429a-b9be-cda68d56124b",
+      "reason": "still valid \u2014 bid rests"
+    },
+    {
+      "symbol": "AS",
+      "action": "KEPT",
+      "order_id": "81a1343e-0d1c-4330-9724-d3bd3084fee0",
+      "reason": "still valid \u2014 bid rests"
+    },
+    {
+      "symbol": "KMI",
+      "action": "KEPT",
+      "order_id": "2aabc9a9-be3f-497b-8a43-51985cf7db73",
+      "reason": "still valid \u2014 bid rests"
+    },
+    {
+      "symbol": "PYPL",
+      "action": "KEPT",
+      "order_id": "2c52e83c-45ea-435f-8753-9713223656b4",
+      "reason": "still valid \u2014 bid rests"
+    },
+    {
+      "symbol": "KDP",
+      "action": "KEPT",
+      "order_id": "44b04856-181f-449b-a8f0-d6d6a21d6514",
+      "reason": "still valid \u2014 bid rests"
+    }
+  ],
+  "exits_attached": [],
+  "blocked_by_rules": [],
+  "phantom_equity": [
+    {
+      "symbol": "LBGJ",
+      "qty": 154903.0,
+      "avg_entry_price": 0.0288,
+      "current_price": 1.6507,
+      "price_ratio": 57.32,
+      "unrealized_plpc": 56.31597,
+      "reported_market_value": 255698.38,
+      "cost_basis": 4461.21,
+      "phantom_amount": 251237.18,
+      "reasons": [
+        "price $1.6507 is 57x its cost basis $0.0288",
+        "unrealized P&L 5,632% exceeds the 1,000% plausibility ceiling",
+        "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
+      ],
+      "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
+    }
+  ]
+}
