@@ -29,7 +29,10 @@ except ImportError:
     pass  # python-dotenv is optional; env vars may be supplied by the shell
 
 from version import get_version
-from market_time import et_today_iso, et_now
+from market_time import et_today_iso, et_now, et_today
+import judge    # reused: score_news() -- same keyword classifier, not a
+                # second copy of the positive/negative word lists
+import notify
 
 # ── Auth ─────────────────────────────────────────────────────────────────────
 ALPACA_KEY    = os.getenv("APCA_API_KEY_ID")
@@ -1389,6 +1392,103 @@ def check_stops():
     save_state(state)
     return results
 
+
+NEAR_STOP_WARNING_PCT = 0.03  # flag a position within 3 percentage points of its tier stop
+
+
+def portfolio_review(positions: list, state: dict, research: dict) -> list:
+    """
+    Advisory only — never executes or proposes an order. For each open
+    position, flags what's worth a second look since it was first opened:
+
+    - An early warning when unrealized P&L is getting close to the tier
+      stop (place_oco_exits()'s bracket order will still fire the actual
+      exit when it's actually hit -- this is advance notice, not a
+      replacement for it).
+    - Hard Rule 3's own thesis-break exception for Tier 1 compounders:
+      "Only exit if MA20 crosses below MA50 AND confirmed by a negative
+      fundamental catalyst." Nothing currently checks this combination
+      automatically -- it's manual judgment every time -- so this surfaces
+      it rather than requiring Alex to notice it unprompted.
+    - Fresh negative news on a held position, independent of price action,
+      reusing judge.score_news()'s own keyword classifier rather than a
+      second copy of the word lists.
+
+    Deliberately does NOT flag T1/T2 proximity: place_oco_exits() already
+    places a live bracket order for that at entry time, so by the time
+    price reaches it the exit already executes automatically. Flagging it
+    here would be noisy duplication of something already handled, not new
+    information.
+    """
+    symbols_data = research.get("symbols", {}) if research else {}
+    entries = state.get("entries", {})
+    flags = []
+
+    for pos in positions:
+        sym = pos["symbol"]
+        plpc = float(pos.get("unrealized_plpc", 0))
+        tier = tier_for(sym)
+        stop_pct = stop_pct_for(sym)
+        sym_data = symbols_data.get(sym, {})
+        technicals = sym_data.get("technicals", {})
+        news_items = sym_data.get("news", [])
+
+        entry_record = entries.get(sym, {})
+        days_held = None
+        entry_date_str = entry_record.get("date")
+        if entry_date_str:
+            try:
+                days_held = (et_today() - datetime.fromisoformat(entry_date_str).date()).days
+            except ValueError:
+                days_held = None
+
+        reasons = []
+
+        # Early warning: close to (but not yet past) the tier stop.
+        distance_to_stop = plpc - stop_pct  # e.g. -0.15 - (-0.20) = 0.05
+        if 0 <= distance_to_stop <= NEAR_STOP_WARNING_PCT:
+            reasons.append(f"within {distance_to_stop*100:.1f} pts of its {tier} stop "
+                            f"({stop_pct:.0%}) -- currently {plpc*100:+.1f}%")
+
+        # Hard Rule 3's thesis-break exception, Tier 1 only.
+        if tier == "TIER1":
+            ma20, ma50 = technicals.get("ma20"), technicals.get("ma50")
+            technical_break = ma20 is not None and ma50 is not None and ma20 < ma50
+            _, news_note = judge.score_news(news_items, sym_data)
+            has_negative_catalyst = news_note.startswith("NEGATIVE")
+            if technical_break and has_negative_catalyst:
+                reasons.append("MA20 < MA50 AND a negative news catalyst -- Hard Rule 3's "
+                                "thesis-break exception may apply")
+            elif technical_break:
+                reasons.append("MA20 < MA50, but no confirmed negative catalyst -- Hard "
+                                "Rule 3 says a price dip alone is not a sell trigger")
+
+        if reasons:
+            flags.append({
+                "symbol": sym, "tier": tier, "unrealized_plpc": plpc,
+                "days_held": days_held, "reasons": reasons,
+            })
+
+    return flags
+
+
+def run_portfolio_review():
+    """Standalone entry point — fetches live positions/state/research and
+    notifies on anything portfolio_review() flags. Safe to run any time;
+    a clean review sends no notification."""
+    positions = get_positions()
+    state = load_state()
+    today = et_today_iso()
+    research_path = os.path.join(LOGS_DIR, f"{today}.json")
+    research = {}
+    if os.path.exists(research_path):
+        with open(research_path) as f:
+            research = json.load(f)
+
+    flags = portfolio_review(positions, state, research)
+    notify.notify_portfolio_review(flags)
+    return {"checked": len(positions), "flags": flags}
+
 # ── CLI Entry Point ───────────────────────────────────────────────────────────
 if __name__ == "__main__":
     _check_auth()
@@ -1411,6 +1511,9 @@ if __name__ == "__main__":
             "verdict": "SUSPECT — reconcile with the broker" if _flags else "clean",
         }, indent=2))
         sys.exit(2 if _flags else 0)
+
+    elif action == "portfolio-review":
+        print(json.dumps(run_portfolio_review(), indent=2))
 
     elif action == "order":
         # python scripts/trade.py order AAPL 5 buy 195.50

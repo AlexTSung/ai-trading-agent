@@ -41,6 +41,78 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v5.1.0] — 2026-10-30
+
+**MINOR** — Alex: "I would like to be notified with a trade opportunity
+every time agent... find a suitable stock trade," and asked for the
+portfolio to be reviewed for positions worth closing based on how they've
+performed since entry. Triggered by checking in on why no Robinhood
+recommendation had come through that day — the equities Judge had
+genuinely found zero approvals (SPY in RISK_OFF, learned hints had raised
+the gate to 8.0-8.5), not a pipeline failure, which the diagnosis surfaced
+directly from `2026-10-30-judge.json`.
+
+**Scope — equities (paper) pipeline only.** This cloud session has no
+`robinhood-trading` MCP access and no access to the private
+`ai-trading-agent-real-logs` repo, confirmed again this session (no
+Robinhood or even Alpaca MCP tools surfaced via tool search). A Robinhood-side
+notification, and a true live portfolio review against real positions, has
+to be built from Alex's local terminal Claude Code session instead — this
+entry only covers what's reachable from here.
+
+### Strategy / CLAUDE.md changes
+- New "Position & Approval Notifications" section: what notifies, when,
+  the idempotency rule for Judge approvals, what portfolio-review flags and
+  deliberately does not flag (T1/T2 proximity -- already automatic via the
+  OCO bracket), and `NTFY_TOPIC` setup (pick a long random topic -- ntfy.sh
+  topics are unauthenticated by default).
+- Daily Schedule's midday row gains a 4th step, `trade.py portfolio-review`.
+- New Tools Available entry for `notify.py`.
+- New Experiment Timeline decision log entry.
+
+### Code changes
+- `notify.py` (new): `send()` (one HTTPS POST to ntfy.sh, no MCP/SDK;
+  never raises -- a notification failure must not affect trading),
+  `notify_new_approvals()`, `notify_portfolio_review()`. A no-op, logged
+  once, whenever `NTFY_TOPIC` is unset.
+- `judge.py`: `run_judge_session()` now diffs this run's `approved` list
+  against the previous run's *for the same day* before overwriting the
+  judge.json file, and calls `notify.notify_new_approvals()` with only the
+  symbols not already seen approved today. Without this diff, the hourly
+  morning pipeline would re-notify on the same still-approved symbol every
+  single run.
+- `trade.py`: new `portfolio_review(positions, state, research)` (pure,
+  advisory-only — never executes or proposes an order) and
+  `run_portfolio_review()` (fetches live positions/state/research, calls
+  `notify.notify_portfolio_review()`), plus a new `portfolio-review` CLI
+  action. Flags an early warning within 3 points of a position's tier stop,
+  and Hard Rule 3's own Tier-1 thesis-break exception (MA20 < MA50 AND a
+  negative news catalyst, reusing `judge.score_news()`'s keyword classifier
+  rather than a second copy of the word lists) — nothing previously checked
+  that combination automatically.
+- `run_midday_github.sh` / `midday-pipeline.yml`: new step 4,
+  `trade.py portfolio-review`, failure tolerated (advisory only).
+  `morning-pipeline.yml` and `midday-pipeline.yml` both gain an `NTFY_TOPIC`
+  secret passthrough.
+- `tests/test_guardrails.py`: 17 new tests —
+  `TestJudgeNotifiesOnlyNewApprovals` (4: first-run notifies all, same-day
+  rerun doesn't renotify, a later new approval notifies only the new
+  symbol, zero approvals never calls notify), `TestPortfolioReview` (8:
+  clean position no flags, near-stop warning fires/doesn't, Tier-1
+  thesis-break with/without negative news, Tier-2 symbols never checked for
+  thesis-break, days-held computed/missing), `TestNotify` (5: no-op without
+  a topic, posts when configured, a send failure never raises, both
+  notify_* functions no-op on an empty list/flags). Mutation-tested:
+  removing the approval-diff in `judge.py` fails 2 of the 4
+  `TestJudgeNotifiesOnlyNewApprovals` tests.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Nothing here
+  scores, sizes, or executes a trade — notifications are read-only relative
+  to every existing decision path. The Phase 2B paper baseline and the
+  Robinhood book are both unaffected.
+
+
 ## [v5.0.0] — 2026-10-29
 
 **MAJOR** — Alex: "Focus on building this," in response to a proposal

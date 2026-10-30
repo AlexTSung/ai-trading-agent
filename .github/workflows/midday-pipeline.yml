@@ -56,6 +56,10 @@ jobs:
           APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
           APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
           TEST_MODE: ${{ github.event.inputs.test_mode == 'true' && '1' || '0' }}
+          # Absent is a no-op inside notify.py, not a failure -- see that
+          # file's module docstring for why a missing notification channel
+          # must never block or fail a trading pipeline run.
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
           chmod +x run_midday_github.sh
           bash run_midday_github.sh

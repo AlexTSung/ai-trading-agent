@@ -19,6 +19,7 @@ from statistics import mean
 
 from version import get_version
 from market_time import et_today, et_today_iso, et_now
+import notify
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 ROOT         = os.path.dirname(os.path.abspath(__file__))
@@ -1345,11 +1346,27 @@ def run_judge_session() -> dict:
         scored["_gate_used"] = scored.get("approval_gate",
             SCORE_GATE_DISCOVERY if scored.get("is_discovery") else SCORE_GATE_WATCHLIST)
 
-    # Save judge output
+    # Save judge output. Diff against any earlier run's approvals *today*
+    # before overwriting, so a re-run (this pipeline fires hourly) notifies
+    # only about symbols that weren't already approved earlier today --
+    # never a re-notification for the same still-approved symbol, and never
+    # silent on a symbol that newly cleared the bar on a later run.
     out_path = os.path.join(JOURNAL_DIR, f"{today}-judge.json")
+    previously_approved = set()
+    if os.path.exists(out_path):
+        try:
+            with open(out_path) as f:
+                previously_approved = set(json.load(f).get("approved", []))
+        except (ValueError, OSError):
+            previously_approved = set()
+    newly_approved = [s for s in results["approved"] if s not in previously_approved]
+
     os.makedirs(JOURNAL_DIR, exist_ok=True)
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
+
+    if newly_approved:
+        notify.notify_new_approvals(newly_approved, results)
 
     # Write human-readable markdown report
     md_lines = [f"# Judge Report — {today}\n",

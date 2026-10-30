@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v5.0.0
+> **Version:** v5.1.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -536,6 +536,59 @@ kept here so the next person doesn't have to rediscover them:**
   silently skipped, not queued or caught up — worth knowing before
   assuming every scheduled window actually ran.
 
+## Position & Approval Notifications
+
+**Why this exists.** Through v5.0.0, nothing in either pipeline told Alex
+when the Judge found a trade worth taking, or when an open position's
+situation had changed since it was first entered — the only way to know
+was to go read a journal file. Alex asked for push notifications on both:
+a new Judge APPROVE, and anything worth a second look in an open position.
+
+**Scope — equities (paper) only, built here; Robinhood (real) is a
+separate, local-only extension.** `notify.py` is pure Python (one HTTPS
+POST to ntfy.sh, no MCP, no SDK), so it runs inside GitHub Actions exactly
+like `trade.py`'s own REST calls to Alpaca — no local machine required.
+The Robinhood side has no equivalent yet: `robinhood_trade.py` stays "pure
+logic only," and the Execution Procedure runs exclusively on Alex's local
+machine via the `robinhood-trading` MCP connection, which a cloud session
+cannot reach. Wiring the same `notify.py` calls into `build_buy_candidates()`/
+`build_sell_candidates()`'s call sites in the Execution Procedure (steps 5
+and 8) is the natural next step, but it has to be done from a session with
+that local MCP connection, not from here.
+
+**What notifies, and how often:**
+- **New Judge approvals.** `judge.py`'s `run_judge_session()` diffs this
+  run's `approved` list against the *previous* run's — same file, same day
+  — before overwriting it, and notifies only on symbols not already seen
+  approved today. The morning pipeline runs hourly, so without this diff a
+  still-approved symbol would renotify every single hour; with it, a
+  symbol notifies once, the first run it clears the bar, and a *second*
+  symbol approved three hours later on a fresh pullback still notifies on
+  its own.
+- **Portfolio review.** `trade.py portfolio-review` (wired into the midday
+  pipeline alongside `check-stops`/`check-phantom`) flags, per open
+  position: an early warning when unrealized P&L is closing in on the
+  tier's stop (the OCO bracket still fires the actual exit; this is
+  advance notice, not a replacement), and Hard Rule 3's own Tier-1
+  thesis-break exception — "MA20 crosses below MA50 AND a negative
+  fundamental catalyst" — which nothing previously checked automatically.
+  A clean review sends no notification at all.
+- **Deliberately not flagged**: T1/T2 proximity. `trade.place_oco_exits()`
+  already places a live bracket order for that at entry time, so by the
+  time price reaches it the exit already executes automatically — flagging
+  it here would be noisy duplication of something already handled, not new
+  information. This mirrors the same reasoning behind the Robinhood
+  sell-side automation's scope boundary in v5.0.0.
+
+**Setup.** `notify.py` reads a single env var, `NTFY_TOPIC`, from a GitHub
+secret of the same name. **Pick a long, random topic string, not something
+guessable like `alex-trades`** — ntfy.sh topics are unauthenticated by
+default, so anyone who learns the topic name can read every message sent
+to it. Install the ntfy app (or subscribe via web push) to that topic to
+receive the notifications. An unset `NTFY_TOPIC` is a logged no-op
+everywhere this is called, never a pipeline failure — a missing
+notification channel is a degraded nice-to-have, not a Hard Rule.
+
 ## Tools Available
 - **Alpaca MCP** — use for all account queries, order placement, position management,
   market data, and news. Never shell out to Python for API calls.
@@ -549,6 +602,7 @@ kept here so the next person doesn't have to rediscover them:**
 - **learning_agent.py** — judge weight hints (auto-applied, tighten-only, clamped) + Lessons Learned
 - **self_review.py** — turns patterns with no automatic handler into approvable proposals (see "Recursive Self-Improvement")
 - **robinhood_trade.py** — guardrails, sizing, and journaling for the real-money book (see "Robinhood Execution Procedure"). Pure logic only; places no orders itself.
+- **notify.py** — advisory push notifications via ntfy.sh (see "Position & Approval Notifications"). A failure here never blocks or fails a pipeline run; it is not a Hard Rule.
 
 ## Agent Stack (Judge-Executor Model)
 ```
@@ -926,6 +980,19 @@ short on 2026-09-03, extend rather than graduate.
   see "Robinhood Automated Execution — Mechanical Sells" above for the full
   rationale, the self-correction, and what stayed explicitly out of scope.
   `EQUITIES_CHANGELOG.md` has the full entry.
+- **2026-10-30** — Alex asked to be notified whenever the Judge finds a
+  suitable trade, and to have the portfolio reviewed for positions worth
+  closing based on how they've performed since entry. Built as advisory
+  push notifications (`notify.py`, ntfy.sh) wired into the equities
+  pipeline only — new capability, nothing executes, no Hard Rule touched,
+  so this shipped as MINOR, not MAJOR. The Robinhood side has no live
+  equivalent: this cloud session has no access to the `robinhood-trading`
+  MCP connection or the private logs repo, so a Robinhood notification
+  (and a true live portfolio review against real positions) has to be
+  built from Alex's local terminal session instead. See "Position &
+  Approval Notifications" above for the full scope and what was
+  deliberately left out (T1/T2 proximity — already automatic via the OCO
+  bracket). `EQUITIES_CHANGELOG.md` has the full entry.
 
 ## Daily Schedule — SINGLE SOURCE OF TRUTH (all times ET, weekdays only)
 
@@ -1057,7 +1124,7 @@ storage on a third party happens inside this repo or this session.
 |---|---|---|---|
 | **Hourly, all day, every day** (external trigger) — `schedule:` fallback crons: 9:52 AM + 5 backups to 2:37 PM ET | `morning-pipeline.yml`<br>`run_github.sh` | `52 13`, `22 14`, `52 14`, `22 15`, `7 17`, `37 18 * * 1-5` | 1. `intelligence.py morning` — VIX, fear/greed, macro, global, earnings watch, insider buys<br>2. `reddit_screener.py scan` — StockTwits trending<br>3. `screener.py scan` — S&P 500 + Nasdaq 100 + news firehose<br>4. `research.py full` — bars, news, MAs, RSI on watchlist + discovered tickers<br>5. `judge.py session` — score with intelligence context, APPROVE/HOLD/VETO<br>6. `trade.py session` — execute approved trades only, and only while the market is actually open |
 | **9:40 AM** (+4 backups to 2:35 PM) | `options-pipeline.yml`<br>`run_options_github.sh` | `40 13`, `10 14`, `10 15`, `5 17`, `35 18 * * 1-5` | `run_options.py` — manage existing positions, then screen the options watchlist for new defined-risk trades. Same 9:35 AM–4:00 PM ET window as equities morning. IV rank and the chain are freshest right after open, and widening this window trades some of that freshness for reliability — see run_options_github.sh's GUARDRAIL G2 comment. Existed only as a local `run_options*.sh` tied to one machine before this. Already off the :00/:15/:30/:45 grid, so left unchanged in the 2026-09-18 retiming. |
-| **10:37 AM, 12:07 PM, 2:07 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `37 14`, `7 16`, `7 18 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals |
+| **10:37 AM, 12:07 PM, 2:07 PM** | `midday-pipeline.yml`<br>`run_midday_github.sh` | `37 14`, `7 16`, `7 18 * * 1-5` | 1. `trade.py check-phantom` — corporate-action audit (Hard Rule 11)<br>2. `trade.py check-stops` — tiered stops + inverse ETF max-hold<br>3. `research.py midday` — signal reversals<br>4. `trade.py portfolio-review` — advisory notification only, see "Position & Approval Notifications" |
 | **5:22 PM** (+1 backup at 6:07 PM) | `eod-pipeline.yml`<br>`run_eod_github.sh` | `22 21`, `7 22 * * 1-5` | 1. `reviewer.py eod` — post-trade scoring + calibration log<br>2. `journal.py eod` — synthesize the daily journal<br>*(1hr post-close buffer so closing prints settle)* |
 | **Sep 3, 5:30 PM** | `graduation-decision.yml` | `30 21 3 9 *` | `reviewer.py graduation` — Phase 2B verdict. Advisory only; manual approval still required. |
 

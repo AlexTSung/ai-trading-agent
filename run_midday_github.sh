@@ -63,9 +63,16 @@ echo "--- [2/3] Stop-loss + inverse ETF max-hold check ---"
 python3 trade.py check-stops | tee "$LOG_DIR/$DATE-midday-stops.json"
 
 echo ""
-echo "--- [3/3] Midday research (signal reversals) ---"
+echo "--- [3/4] Midday research (signal reversals) ---"
 python3 research.py midday > "$LOG_DIR/$DATE-midday.json" \
   || echo "WARN: research.py midday failed — stop checks above still applied"
+
+echo ""
+echo "--- [4/4] Portfolio review (advisory notification, no execution) ---"
+# NTFY_TOPIC absent is a no-op inside notify.py, not a failure here — a
+# missing notification channel must never fail a trading pipeline run.
+python3 trade.py portfolio-review | tee "$LOG_DIR/$DATE-portfolio-review.json" \
+  || echo "WARN: portfolio-review failed — advisory only, nothing executed"
 
 echo ""
 echo "=== Midday check complete: $(TZ="America/New_York" date +%H:%M:%S) ET ==="

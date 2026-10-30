@@ -38,6 +38,7 @@ import research      # noqa: E402
 import version       # noqa: E402
 import trade          # noqa: E402
 import market_time    # noqa: E402
+import notify         # noqa: E402
 import run_options    # noqa: E402
 import journal        # noqa: E402
 import screener       # noqa: E402
@@ -3059,3 +3060,189 @@ class TestGetBarsReturnsLatestNotOldest(unittest.TestCase):
             mock_requests.get.return_value = self._mock_response([])
             result = research.get_bars("AAPL", limit=60)
         self.assertEqual(result["bars"], [])
+
+
+class TestJudgeNotifiesOnlyNewApprovals(unittest.TestCase):
+    """judge.run_judge_session() fires hourly; a symbol approved on an
+    earlier run today must not re-notify on every later re-run, and a
+    symbol that newly clears the bar later in the day must still notify."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+
+    @staticmethod
+    def _research(symbols):
+        return {"symbols": {s: {"technicals": {"signal": "STRONG_BUY"}, "news": []}
+                             for s in symbols}}
+
+    @staticmethod
+    def _approve(sym, research):
+        return {"symbol": sym, "recommendation": "APPROVE", "score": 9.0,
+                "rationale": "test"}
+
+    def test_first_run_notifies_all_approvals(self):
+        with mock.patch.object(judge, "JOURNAL_DIR", self.tmp), \
+             mock.patch.object(judge, "load_today_research",
+                                return_value=self._research(["AAA", "BBB"])), \
+             mock.patch.object(judge, "score_symbol", side_effect=self._approve), \
+             mock.patch.object(notify, "notify_new_approvals") as mock_notify:
+            judge.run_judge_session()
+
+        mock_notify.assert_called_once()
+        self.assertEqual(set(mock_notify.call_args[0][0]), {"AAA", "BBB"})
+
+    def test_rerun_same_day_does_not_renotify(self):
+        with mock.patch.object(judge, "JOURNAL_DIR", self.tmp), \
+             mock.patch.object(judge, "load_today_research",
+                                return_value=self._research(["AAA"])), \
+             mock.patch.object(judge, "score_symbol", side_effect=self._approve), \
+             mock.patch.object(notify, "notify_new_approvals") as mock_notify:
+            judge.run_judge_session()
+            judge.run_judge_session()
+
+        self.assertEqual(mock_notify.call_count, 1)
+
+    def test_new_approval_on_a_later_run_notifies_only_the_new_symbol(self):
+        with mock.patch.object(judge, "JOURNAL_DIR", self.tmp), \
+             mock.patch.object(notify, "notify_new_approvals") as mock_notify:
+            with mock.patch.object(judge, "load_today_research",
+                                    return_value=self._research(["AAA"])), \
+                 mock.patch.object(judge, "score_symbol", side_effect=self._approve):
+                judge.run_judge_session()
+            with mock.patch.object(judge, "load_today_research",
+                                    return_value=self._research(["AAA", "BBB"])), \
+                 mock.patch.object(judge, "score_symbol", side_effect=self._approve):
+                judge.run_judge_session()
+
+        self.assertEqual(mock_notify.call_count, 2)
+        self.assertEqual(mock_notify.call_args_list[1][0][0], ["BBB"])
+
+    def test_no_approvals_never_calls_notify(self):
+        def _hold(sym, research):
+            return {"symbol": sym, "recommendation": "HOLD", "score": 5.0, "rationale": "x"}
+
+        with mock.patch.object(judge, "JOURNAL_DIR", self.tmp), \
+             mock.patch.object(judge, "load_today_research",
+                                return_value=self._research(["AAA"])), \
+             mock.patch.object(judge, "score_symbol", side_effect=_hold), \
+             mock.patch.object(notify, "notify_new_approvals") as mock_notify:
+            judge.run_judge_session()
+
+        mock_notify.assert_not_called()
+
+
+class TestPortfolioReview(unittest.TestCase):
+    """trade.portfolio_review() is advisory-only -- it must never execute or
+    propose an order, only flag positions worth a second look."""
+
+    def _position(self, symbol="AAPL", qty=10, avg_entry_price=200.0,
+                  current_price=200.0, unrealized_plpc=0.0):
+        return {"symbol": symbol, "qty": qty, "avg_entry_price": avg_entry_price,
+                "current_price": current_price, "unrealized_plpc": unrealized_plpc}
+
+    def test_clean_position_produces_no_flags(self):
+        positions = [self._position(unrealized_plpc=0.05)]
+        flags = trade.portfolio_review(positions, {"entries": {}}, {})
+        self.assertEqual(flags, [])
+
+    def test_near_tier1_stop_produces_early_warning(self):
+        # TIER1 stop is -20%; -18% is within the 3-point warning band.
+        positions = [self._position("AAPL", unrealized_plpc=-0.18)]
+        flags = trade.portfolio_review(positions, {"entries": {}}, {})
+        self.assertEqual(len(flags), 1)
+        self.assertTrue(any("stop" in r for r in flags[0]["reasons"]))
+
+    def test_far_from_stop_produces_no_warning(self):
+        positions = [self._position("AAPL", unrealized_plpc=-0.05)]
+        flags = trade.portfolio_review(positions, {"entries": {}}, {})
+        self.assertEqual(flags, [])
+
+    def test_tier1_thesis_break_with_negative_news_is_flagged(self):
+        positions = [self._position("AAPL", unrealized_plpc=0.02)]
+        research = {"symbols": {"AAPL": {
+            "technicals": {"ma20": 95.0, "ma50": 100.0},
+            "news": [{"headline": "AAPL downgrade on miss and lawsuit", "summary": ""}],
+        }}}
+        flags = trade.portfolio_review(positions, {"entries": {}}, research)
+        self.assertEqual(len(flags), 1)
+        self.assertTrue(any("thesis-break exception may apply" in r
+                             for r in flags[0]["reasons"]))
+
+    def test_tier1_technical_break_without_negative_news_is_not_a_sell_trigger(self):
+        positions = [self._position("AAPL", unrealized_plpc=0.02)]
+        research = {"symbols": {"AAPL": {
+            "technicals": {"ma20": 95.0, "ma50": 100.0},
+            "news": [],
+        }}}
+        flags = trade.portfolio_review(positions, {"entries": {}}, research)
+        self.assertEqual(len(flags), 1)
+        self.assertTrue(any("not a sell trigger" in r for r in flags[0]["reasons"]))
+
+    def test_tier2_symbol_is_never_checked_for_thesis_break(self):
+        # DDOG is TIER2 -- Hard Rule 3's thesis-break exception is Tier 1 only.
+        positions = [self._position("DDOG", unrealized_plpc=0.02)]
+        research = {"symbols": {"DDOG": {
+            "technicals": {"ma20": 50.0, "ma50": 60.0},
+            "news": [{"headline": "DDOG downgrade on miss", "summary": ""}],
+        }}}
+        flags = trade.portfolio_review(positions, {"entries": {}}, research)
+        self.assertEqual(flags, [])
+
+    def test_days_held_computed_from_entry_record(self):
+        positions = [self._position("AAPL", unrealized_plpc=-0.18)]
+        entry_date = (market_time.et_today() - timedelta(days=10)).isoformat()
+        state = {"entries": {"AAPL": {"date": entry_date}}}
+        flags = trade.portfolio_review(positions, state, {})
+        self.assertEqual(flags[0]["days_held"], 10)
+
+    def test_missing_entry_record_leaves_days_held_none(self):
+        positions = [self._position("AAPL", unrealized_plpc=-0.18)]
+        flags = trade.portfolio_review(positions, {"entries": {}}, {})
+        self.assertIsNone(flags[0]["days_held"])
+
+
+class TestNotify(unittest.TestCase):
+    def setUp(self):
+        self._orig_topic = notify.NTFY_TOPIC
+
+    def tearDown(self):
+        notify.NTFY_TOPIC = self._orig_topic
+
+    def test_send_is_a_noop_without_a_topic(self):
+        notify.NTFY_TOPIC = None
+        with mock.patch.object(notify, "requests") as mock_requests:
+            result = notify.send("title", "message")
+        self.assertFalse(result)
+        mock_requests.post.assert_not_called()
+
+    def test_send_posts_to_the_configured_topic(self):
+        notify.NTFY_TOPIC = "test-topic-xyz"
+        mock_response = mock.Mock(status_code=200)
+        with mock.patch.object(notify, "requests") as mock_requests:
+            mock_requests.post.return_value = mock_response
+            result = notify.send("title", "message")
+        self.assertTrue(result)
+        args, kwargs = mock_requests.post.call_args
+        self.assertIn("test-topic-xyz", args[0])
+
+    def test_send_failure_never_raises(self):
+        notify.NTFY_TOPIC = "test-topic-xyz"
+        with mock.patch.object(notify, "requests") as mock_requests:
+            mock_requests.post.side_effect = Exception("network down")
+            mock_requests.RequestException = Exception
+            result = notify.send("title", "message")
+        self.assertFalse(result)
+
+    def test_notify_new_approvals_empty_list_is_a_noop(self):
+        notify.NTFY_TOPIC = "test-topic-xyz"
+        with mock.patch.object(notify, "send") as mock_send:
+            result = notify.notify_new_approvals([], {})
+        self.assertFalse(result)
+        mock_send.assert_not_called()
+
+    def test_notify_portfolio_review_empty_flags_is_a_noop(self):
+        notify.NTFY_TOPIC = "test-topic-xyz"
+        with mock.patch.object(notify, "send") as mock_send:
+            result = notify.notify_portfolio_review([])
+        self.assertFalse(result)
+        mock_send.assert_not_called()
