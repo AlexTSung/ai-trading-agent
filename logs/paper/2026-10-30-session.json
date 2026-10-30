@@ -1,59 +1,7 @@
 {
   "agent_version": "5.2.0",
-  "timestamp": "2026-10-30T12:02:46.843917-04:00",
-  "trades": [
-    {
-      "symbol": "AAPL",
-      "action": "BUY",
-      "qty": 6,
-      "limit_price": 340.49,
-      "order": {
-        "id": "ca571f5f-5b53-462c-88cf-091570cff5f9",
-        "client_order_id": "agent-buy-AAPL-20261030160247",
-        "created_at": "2026-10-30T16:02:48.157178317Z",
-        "updated_at": "2026-10-30T16:02:48.158603435Z",
-        "submitted_at": "2026-10-30T16:02:48.157178317Z",
-        "filled_at": null,
-        "expired_at": null,
-        "canceled_at": null,
-        "failed_at": null,
-        "replaced_at": null,
-        "replaced_by": null,
-        "replaces": null,
-        "asset_id": "b0b6dd9d-8b9b-48a9-ba46-b9d54906e415",
-        "symbol": "AAPL",
-        "asset_class": "us_equity",
-        "notional": null,
-        "qty": "6",
-        "filled_qty": "0",
-        "filled_avg_price": null,
-        "order_class": "",
-        "order_type": "limit",
-        "type": "limit",
-        "side": "buy",
-        "position_intent": "buy_to_open",
-        "time_in_force": "gtc",
-        "limit_price": "340.49",
-        "stop_price": null,
-        "status": "pending_new",
-        "extended_hours": false,
-        "legs": null,
-        "trail_percent": null,
-        "trail_price": null,
-        "hwm": null,
-        "subtag": null,
-        "source": null,
-        "expires_at": "2027-01-28T21:00:00Z",
-        "_ok": true,
-        "_agent_reason": "Signal: STRONG_BUY | MA20-target $340.49 | Limit: $340.49 | Budget (2% cap): $2336.20 \u2192 6 shares @ $340.49 | Tier TIER1 stop -20% | RISK-OFF ceiling 2.5% (was 5.0%) | TIF gtc",
-        "_limit_price_used": 340.49
-      },
-      "exits": "deferred_until_fill",
-      "tif": "gtc",
-      "note": "Signal: STRONG_BUY | MA20-target $340.49 | Limit: $340.49 | Budget (2% cap): $2336.20 \u2192 6 shares @ $340.49 | Tier TIER1 stop -20% | RISK-OFF ceiling 2.5% (was 5.0%) | TIF gtc",
-      "judge_score": 8.1
-    }
-  ],
+  "timestamp": "2026-10-30T13:02:45.791268-04:00",
+  "trades": [],
   "skipped": [
     {
       "symbol": "SPY",
@@ -69,6 +17,11 @@
       "symbol": "NVDA",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "AAPL",
+      "signal": "STRONG_BUY",
+      "reason": "Already has a resting buy order \u2014 not stacking a second one (see GUARDRAIL: open_buy_order_syms, trade.py)"
     },
     {
       "symbol": "MSFT",
@@ -142,7 +95,7 @@
     },
     {
       "symbol": "DTM",
-      "signal": "HOLD",
+      "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
@@ -181,7 +134,17 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "IBIT",
+      "symbol": "CELH",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "JMIA",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SOXX",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -191,27 +154,12 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "IOVA",
+      "symbol": "SLV",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "SOXL",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "SMH",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "RIVN",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "COIN",
+      "symbol": "JEPQ",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -221,18 +169,33 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "GOOG",
+      "symbol": "AMD",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "INTC",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "SOXL",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "UVXY",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ALAB",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
       "symbol": "BURU",
       "signal": "HOLD",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "INTC",
-      "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
@@ -246,13 +209,18 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
+      "symbol": "NVD",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
       "symbol": "ONEG",
       "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "NVD",
-      "signal": "HOLD",
+      "symbol": "IBIT",
+      "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
@@ -281,17 +249,7 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "FNGR",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
       "symbol": "HPQ",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "CMG",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -301,7 +259,12 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "NOW",
+      "symbol": "CMG",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "F",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -311,13 +274,18 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
+      "symbol": "NOW",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
       "symbol": "FCX",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "HOOD",
-      "signal": "STRONG_SELL",
+      "symbol": "FIS",
+      "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
@@ -331,7 +299,7 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "F",
+      "symbol": "HOOD",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -341,52 +309,32 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "WY",
+      "symbol": "ORCL",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "AMD",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "CNA",
+      "symbol": "GATX",
       "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "GLP",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "TIGR",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "UP",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "TENX",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "LEA",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "NVT",
+      "symbol": "CRI",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
       "symbol": "RDDT",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ILMN",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "TWLO",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     }
@@ -399,7 +347,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: price $399.30 is 4.9% above MA20 $380.69 (limit 3%) \u2014 do not chase"
     },
     {
       "symbol": "LLY",
@@ -408,7 +356,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LLY \u2014 auto-veto per Hard Rule 9"
+      "rationale": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "COP",
@@ -418,13 +366,6 @@
       "approval_gate": 7.0,
       "is_discovery": false,
       "rationale": "CHASE VETO: RSI(14) 79 is above 60 \u2014 overbought, wait for a pullback"
-    },
-    {
-      "symbol": "DT",
-      "signal": "WEAK_BUY",
-      "judge_recommendation": "VETO",
-      "judge_score": 7.52,
-      "rationale": "Avg-down requires score \u2265 8.0, got 7.52. Technical: WEAK_BUY \u2014 MA20 $62.55 > MA50 $57.59, price between MAs. News: POSITIVE \u2014 8 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $770.56 >= MA50 $767.52. Portfolio: AVG_DOWN candidate: DT is 5.5% below entry (entry $61.35 \u2192 now $57.95), position 2.8% of portfolio (max 8%). Volatility: VIX 17.2 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $17B; Profitable; 21 analyst buy ratings \u2014 strong institutional coverage. Source: watchlist | Gate: 8.0."
     },
     {
       "symbol": "IBM",
@@ -451,16 +392,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
-    },
-    {
-      "symbol": "AUPH",
-      "signal": "STRONG_BUY",
-      "judge_recommendation": "HOLD",
-      "judge_score": 7.67,
-      "approval_gate": 8.5,
-      "is_discovery": true,
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $16.65 > MA50 $16.49, price $16.73 above both [capped 3.0\u21922.0 at weight 2.0]. News: POSITIVE \u2014 4 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $770.56 >= MA50 $767.52. Portfolio: Strong cash reserve 47%. Volatility: VIX 17.2 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mid-cap $2.2B; Profitable; 5 analyst buy ratings. Source: discovery | Gate: 8.5."
+      "rationale": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "RWM",
@@ -472,22 +404,22 @@
       "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Market cap unavailable \u2014 capped at 0 for discovery stock; Zero analyst buy coverage on a discovery stock"
     },
     {
-      "symbol": "TNMG",
-      "signal": "WEAK_BUY",
-      "judge_recommendation": "VETO",
-      "judge_score": 0.0,
-      "approval_gate": 7.0,
-      "is_discovery": false,
-      "rationale": "Quality veto: MICRO_CAP VETO: $0.00B market cap \u2014 too small for discovery buys"
-    },
-    {
       "symbol": "CHOW",
       "signal": "STRONG_BUY",
       "judge_recommendation": "VETO",
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 90 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 89 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "TNMG",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: price $4.43 is 24.5% above MA20 $3.56 (limit 3%) \u2014 do not chase"
     },
     {
       "symbol": "KVUE",
@@ -496,7 +428,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "NCLH",
@@ -508,15 +440,6 @@
       "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NCLH \u2014 auto-veto per Hard Rule 9"
     },
     {
-      "symbol": "KO",
-      "signal": "STRONG_BUY",
-      "judge_recommendation": "VETO",
-      "judge_score": 0.0,
-      "approval_gate": 7.0,
-      "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
-    },
-    {
       "symbol": "MDLZ",
       "signal": "STRONG_BUY",
       "judge_recommendation": "VETO",
@@ -526,16 +449,7 @@
       "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for MDLZ \u2014 auto-veto per Hard Rule 9"
     },
     {
-      "symbol": "EXC",
-      "signal": "STRONG_BUY",
-      "judge_recommendation": "VETO",
-      "judge_score": 0.0,
-      "approval_gate": 7.0,
-      "is_discovery": false,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for EXC \u2014 auto-veto per Hard Rule 9"
-    },
-    {
-      "symbol": "PG",
+      "symbol": "KO",
       "signal": "STRONG_BUY",
       "judge_recommendation": "VETO",
       "judge_score": 0.0,
@@ -544,18 +458,42 @@
       "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
-      "symbol": "IDA",
+      "symbol": "WMT",
       "signal": "STRONG_BUY",
       "judge_recommendation": "VETO",
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for IDA \u2014 auto-veto per Hard Rule 9"
+      "rationale": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback"
+    },
+    {
+      "symbol": "IR",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for IR \u2014 auto-veto per Hard Rule 9"
+    },
+    {
+      "symbol": "VLTO",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for VLTO \u2014 auto-veto per Hard Rule 9"
     }
   ],
   "stop_losses": [],
   "orphan_cancels": [],
   "resting_entries": [
+    {
+      "symbol": "AAPL",
+      "action": "KEPT",
+      "order_id": "ca571f5f-5b53-462c-88cf-091570cff5f9",
+      "reason": "still valid \u2014 bid rests"
+    },
     {
       "symbol": "AS",
       "action": "KEPT",
@@ -582,21 +520,28 @@
     }
   ],
   "exits_attached": [],
-  "blocked_by_rules": [],
+  "blocked_by_rules": [
+    {
+      "symbol": "DT",
+      "action": "SELL_BLOCKED",
+      "signal": "STRONG_SELL",
+      "reason": "Minimum hold: 28 of 30 days remaining on a high-conviction position and no thesis break."
+    }
+  ],
   "phantom_equity": [
     {
       "symbol": "LBGJ",
       "qty": 154903.0,
       "avg_entry_price": 0.0288,
-      "current_price": 1.63,
-      "price_ratio": 56.6,
-      "unrealized_plpc": 55.59722,
-      "reported_market_value": 252491.89,
+      "current_price": 1.66,
+      "price_ratio": 57.64,
+      "unrealized_plpc": 56.63889,
+      "reported_market_value": 257138.98,
       "cost_basis": 4461.21,
-      "phantom_amount": 248030.68,
+      "phantom_amount": 252677.77,
       "reasons": [
-        "price $1.6300 is 57x its cost basis $0.0288",
-        "unrealized P&L 5,560% exceeds the 1,000% plausibility ceiling",
+        "price $1.6600 is 58x its cost basis $0.0288",
+        "unrealized P&L 5,664% exceeds the 1,000% plausibility ceiling",
         "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
       ],
       "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
