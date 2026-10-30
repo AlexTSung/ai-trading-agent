@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v5.2.0
+> **Version:** v5.3.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -250,6 +250,14 @@ order this produces.
    any sell placed on a previous tick:
    `reconciled_sells = robinhood_trade.reconcile_sell_fills(positions, open_orders, state)`
    — identical reasoning, mirrored for the sell side (see step 5 below).
+   **Notify on confirmed fills** (v5.3.0): once both reconcile calls have
+   run and `save_real_state()` has persisted their result, push **one**
+   summary notification covering everything in the two `filled` lists
+   combined — the "money actually moved" signal, and the most important
+   of the three Robinhood pushes, since Trade Approval can resolve a tick
+   or more after the order was placed. Nothing in `filled` → nothing is
+   sent. `expired` entries get **no** push: they are journal-only, exactly
+   as above. See "Position & Approval Notifications".
 5. **Build sell candidates before considering any new buy**, same order as
    `trade.py`'s session:
    `sell_candidates = robinhood_trade.build_sell_candidates(positions, state, open_orders=open_orders)`.
@@ -266,6 +274,11 @@ order this produces.
    then `robinhood_trade.record_pending_sell(state, symbol, action, qty, order_id, target=..., qty_before_order=<the position's qty right now, before this order>)`
    — **do not** call `record_full_exit`/`record_partial_exit` here; placing
    an order is not a fill, exactly as step 8 already established for buys.
+   **Notify on placement** (v5.3.0): in that same bookkeeping call, *after*
+   `record_pending_sell()` and `save_real_state()`, push the order detail
+   (symbol, action, qty, limit price, reason) to the real-money channel. A
+   `SKIP` candidate never notifies — same discipline `confirmation_prompt()`
+   enforces by raising on one.
    Step 4a on a later tick is what confirms the fill via
    `reconcile_sell_fills()` and does the real bookkeeping (starts the 48h
    cooldown on a full exit via `record_full_exit`, or marks the target taken
@@ -294,6 +307,16 @@ order this produces.
    research data plus a **live** Robinhood quote — `robinhood_trade.py` has
    no way to fetch that live price itself, so this step happens in the
    interactive session, not in the module.
+6a. **Portfolio review** (v5.3.0 — advisory only: never an order, never a
+   sell trigger). `flags = robinhood_trade.portfolio_review(positions, state, research)`,
+   using the research file step 6 **already loaded and freshness-checked** —
+   do not fetch it a second time. If step 6 found it stale or missing, pass
+   `{}`: the near-stop half still runs from live positions, the Tier-1
+   thesis-break half needs research and is skipped (log that it was).
+   Then push `notify.notify_portfolio_review(flags)`; a clean review
+   (`[]`) sends nothing. Flags go into the journal and do not change what
+   steps 5 and 8 place — the actual exits remain the mechanical ones in
+   step 5.
 7. `candidates = robinhood_trade.build_buy_candidates(judge_approvals, account, positions, state, watchlist, open_orders=open_orders, macro_regime=macro_regime, vix_size_multiplier=vix_size_multiplier)`.
    **Passing `open_orders` is required, not optional, once v3.0.0 and
    v4.0.0 are both in effect.** Without chat confirmation, a BUY order can
@@ -321,6 +344,11 @@ order this produces.
    Approval will let it fill, so it must not assume a fill. Step 4a on a
    later tick (possibly the next one, possibly tomorrow's first tick) is
    what confirms the fill and does the real bookkeeping.
+   **Notify on placement** (v5.3.0): in the same call, after
+   `record_pending_order()` and `save_real_state()`, push the order detail
+   to the real-money channel. A `SKIP` candidate never notifies. The push
+   says the order is *placed and awaiting Trade Approval* — it is not a
+   fill, and the message must not read like one.
 9. `robinhood_trade.save_real_state(logs_dir, state)` (this persists step
    4a's buy and sell reconciliation and steps 5/8's new pending entries),
    then write the day's journal entry in the private repo using
@@ -544,23 +572,53 @@ situation had changed since it was first entered — the only way to know
 was to go read a journal file. Alex asked for push notifications on both:
 a new Judge APPROVE, and anything worth a second look in an open position.
 
-**Scope — equities (paper) wired end-to-end; Robinhood (real) has the
-pure-logic half built, wiring is local-only.** `notify.py` is pure Python
-(one HTTPS POST to ntfy.sh, no MCP, no SDK), so it runs inside GitHub
-Actions exactly like `trade.py`'s own REST calls to Alpaca — no local
-machine required. `robinhood_trade.py` gained its own `portfolio_review()`
-(v5.2.0) — identical logic to `trade.py`'s, this book's own state, still
-"pure logic only, places no orders itself" — because that half needed no
-MCP connection to build or test. **What still has to come from a session
-with the local `robinhood-trading` MCP connection**: actually calling
-`robinhood_trade.portfolio_review()` with live positions/state and calling
-`notify.notify_portfolio_review()` with the result (a new Execution
-Procedure step), and wiring `notify.py` calls into the `build_buy_candidates()`/
-`build_sell_candidates()` call sites (steps 5 and 8) so a real order firing
-notifies the same way a paper approval does. Both `robinhood_trade.py` and
-`notify.py` are already in this repo by the time the local session's step 2
-pulls it — nothing new needs to be built there, only wired in and given
-live data.
+**Scope — both books are wired end-to-end as of v5.3.0.** `notify.py` is pure
+Python (one HTTPS POST to ntfy.sh, no MCP, no SDK), so the equities (paper)
+side runs inside GitHub Actions exactly like `trade.py`'s own REST calls to
+Alpaca. The Robinhood (real) side needed the local `robinhood-trading` MCP
+connection to be given live data, so it is wired in the local Execution
+Procedure instead: `robinhood_trade.portfolio_review()` (pure logic,
+v5.2.0) is called with live positions in step 6a, and `notify.py` is called
+at steps 4a, 5, 6a and 8. Nothing in `notify.py`, `build_buy_candidates()`,
+`build_sell_candidates()`, `check_stops()` or `portfolio_review()` changed —
+v5.3.0 only calls them and notifies on the result. Visibility only: it
+places no order, loosens no Hard Rule, and changes no score, size or
+threshold, so the Phase 2B record is unaffected.
+
+**Robinhood: what notifies (v5.3.0).**
+- **Order placed — buy or sell** (steps 8 and 5). Sent after the order was
+  accepted *and* `record_pending_order()` / `record_pending_sell()` plus
+  `save_real_state()` have run, so a dead channel can never sit between an
+  order and its record. Reads "placed, awaiting Trade Approval" — never
+  "filled". `SKIP` candidates never notify.
+- **Fill confirmed** (step 4a). One summary per tick for everything in
+  `reconcile_fills()` + `reconcile_sell_fills()` `filled`, with the real
+  fill price. Silent when nothing filled. `expired` entries do not notify
+  (journal-only).
+- **Portfolio-review flag** (step 6a). `notify.notify_portfolio_review(flags)`;
+  silent on a clean review. Reuses step 6's already-loaded research rather
+  than fetching it twice.
+
+**Separate real-money channel — `NTFY_TOPIC_REAL`.** A second, distinct
+ntfy.sh topic from the paper `NTFY_TOPIC`, so a real-money alert is never
+visually or mentally confusable with a paper one ("Three Books. Never Mix
+Them."). It is **local only**: it lives in a mode-0600 file next to the
+local scheduler, never in this repo, a plist, or a GitHub secret, and the
+scheduler passes *only* that variable to the headless session — the paper
+`NTFY_TOPIC` is deliberately never inherited. A thin local wrapper (outside
+this repo, so not tracked by `EQUITIES_VERSION`) points `notify.NTFY_TOPIC`
+at it, prefixes every title "REAL MONEY:", and **never falls back to the
+paper topic**: an unset `NTFY_TOPIC_REAL` means send nothing.
+
+**A notification failure never blocks a trade.** Unset topic, ntfy.sh
+down, HTTP error, malformed input: all log and continue, matching
+`notify.py`'s own design. Notify *last* in whichever call did the
+bookkeeping. This is a degraded nice-to-have, not a Hard Rule.
+
+**Accepted residual risk.** ntfy.sh topics are unauthenticated, so anyone
+who learns `NTFY_TOPIC_REAL` can read these messages: symbol, quantity,
+limit price and reason for each real order. Messages deliberately carry no
+account number and no balance. The topic must be long and random.
 
 **What notifies, and how often:**
 - **New Judge approvals.** `judge.py`'s `run_judge_session()` diffs this
@@ -594,6 +652,10 @@ to it. Install the ntfy app (or subscribe via web push) to that topic to
 receive the notifications. An unset `NTFY_TOPIC` is a logged no-op
 everywhere this is called, never a pipeline failure — a missing
 notification channel is a degraded nice-to-have, not a Hard Rule.
+
+For the real-money book, `NTFY_TOPIC_REAL` follows the same rules (long,
+random, subscribed to in the ntfy app) but is a **different** string and is
+configured on Alex's machine only — see "Separate real-money channel" above.
 
 ## Tools Available
 - **Alpaca MCP** — use for all account queries, order placement, position management,

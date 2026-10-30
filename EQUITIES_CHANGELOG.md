@@ -41,6 +41,60 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v5.3.0] — 2026-10-30
+
+**MINOR** — Robinhood push notifications + live portfolio review wired into the Execution Procedure (visibility only)
+
+Completes the Robinhood half of v5.1.0/v5.2.0's notification work. Those
+versions built and shipped the pure-logic pieces (`notify.py`,
+`robinhood_trade.portfolio_review()`); neither could reach the real-money book
+because the cloud session that built them has no `robinhood-trading` MCP
+connection. This version is the wiring, done from the local machine that has
+it: calling both with live positions/state at the right points in the
+procedure, and documenting where.
+
+### Strategy / CLAUDE.md changes
+- Execution Procedure: **step 4a** pushes one summary per tick for confirmed
+  fills (`reconcile_fills()` + `reconcile_sell_fills()` `filled`; `expired`
+  stays journal-only); **step 5** and **step 8** push the order detail right
+  after the order is placed and its pending record is saved (SKIP never
+  notifies; message says "awaiting Trade Approval", not "filled"); new
+  **step 6a** runs `portfolio_review()` on live positions and pushes any flags,
+  reusing step 6's already-loaded, freshness-checked research (stale research
+  -> `{}`, near-stop half still runs; clean review sends nothing).
+- "Position & Approval Notifications": scope rewritten (both books now wired
+  end-to-end), Robinhood notification list added, the separate
+  **`NTFY_TOPIC_REAL`** channel documented (local-only, never inherits the
+  paper `NTFY_TOPIC`, never falls back to it), the never-blocks-a-trade rule,
+  and the accepted residual risk (unauthenticated topic; messages carry
+  symbol/qty/price/reason, no account number or balance).
+
+### Code changes
+- **None in this repo.** `notify.py`, `build_buy_candidates()`,
+  `build_sell_candidates()`, `check_stops()` and `portfolio_review()` are
+  untouched. The wiring is the local scheduler's (outside this repo, so not
+  tracked by `EQUITIES_VERSION`): a thin wrapper that binds `notify.py` to
+  `NTFY_TOPIC_REAL` (fail-closed, "REAL MONEY:" title prefix, swallows every
+  exception), and the headless run's prompt, rebased on this version's
+  procedure text.
+- Verified locally rather than in `tests/`: a synthetic dry run (real
+  `robinhood_trade` functions, mocked HTTP, 16 tests) asserting which
+  notification fires at which step, mutation-tested five ways (fall back to
+  the paper topic, drop the SKIP guard, notify on an empty fills list, let
+  exceptions escape, drop the title prefix -- each caught); plus a live
+  rehearsal with `place_equity_order` hard-denied, in which the model's own
+  subprocess sent a real `channel_test` push, zero permission denials, and
+  the private logs repo was left untouched.
+- **Not live-verified**: an order-placed or fill push from a real order. No
+  real order has been placed through this wiring yet; those two paths are
+  covered by the synthetic tests only.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Visibility only:
+  nothing here places an order, loosens a Hard Rule, or changes a score, size
+  or threshold. Phase 2B baseline unaffected, no reset.
+
+
 ## [v5.2.0] — 2026-10-30
 
 **MINOR** — Preparing the Robinhood-side half of v5.1.0's notification work.
