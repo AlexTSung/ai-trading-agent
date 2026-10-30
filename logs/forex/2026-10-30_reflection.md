@@ -1,9 +1,9 @@
 # Daily Trading Reflection — 2026-10-30
 
 ## P&L
-- Realized today: $+0.00
-- Trades closed: 0
-- Wins: 0  Losses: 0
+- Realized today: $-393.78
+- Trades closed: 1
+- Wins: 0  Losses: 1
 
 ## Did I follow the strategy exactly?
 - [ ] Only took trades with judge score ≥ 7.0
@@ -16,17 +16,21 @@
 ## What happened vs. what I expected?
 _(Review each trade: was the outcome different from what you anticipated? Why?)_
 
+- **USD_JPY** LONG → stop_loss → $-393.78
+  - Expected: ___  Actual: ___  Lesson: ___
+
 ## Lessons logged today
+- [risk] Stop-loss respected on USD_JPY — loss of $-393.78 accepted. Strategy followed.
 
 ## One improvement for tomorrow
 _(Even a tiny improvement compounds over time — what ONE thing will you do better?)_
 
 > ___
 
-## Overall performance — 48 trades lifetime
-- Win rate: 56.2%  (target ≥55%)
-- Profit factor: 0.49  (target ≥1.3)
-- Max drawdown: 1710.6%  (max 8%)
+## Overall performance — 49 trades lifetime
+- Win rate: 55.1%  (target ≥55%)
+- Profit factor: 0.48  (target ≥1.3)
+- Max drawdown: 1763.0%  (max 8%)
 
 ---
 _Remember: Individual trade results don't matter. Focus on process, not P&L._
