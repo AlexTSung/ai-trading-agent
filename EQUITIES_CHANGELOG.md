@@ -41,6 +41,59 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v5.3.1] — 2026-10-30
+
+**PATCH** — The local terminal session's v5.3.0 rehearsal found that
+`get_equity_positions` (the Robinhood MCP tool) can return a residual row
+for a fully-closed position with `qty: 0`, instead of omitting it, and
+worked around it locally by filtering before calling `reconcile_fills()`.
+That fix lived only in the local wrapper, not in this repo — anyone else
+calling `robinhood_trade.py`'s functions directly with raw broker data
+(including a future session) would reintroduce the exact same bug. This
+patches it at the source instead: "positions" was always meant to mean
+*currently held* positions, so a qty-0 row violating that invariant is a
+correctness bug to close, not a convention every caller must remember.
+
+**Confirmed real, not hypothetical**, and worse in more places than the
+one case it was first caught in:
+- `reconcile_fills()`: a still-pending BUY order would be falsely recorded
+  as filled, since the symbol is technically "present in positions" (the
+  bug as originally found).
+- `reconcile_sell_fills()`: the mirror-image bug on the sell side, not
+  previously caught — a real `SELL_FULL` fill would be misclassified as
+  *expired* instead of filled, since the symbol never truly disappears
+  from `positions`. `record_full_exit()` (and the 48h re-entry cooldown it
+  starts, Hard Rule 4) would silently never run.
+- `build_buy_candidates()`: a closed position's ghost row would count as
+  "already held," silently skipping a legitimate new buy candidate for
+  that symbol.
+- `check_profit_targets()`, `check_stops()`, `build_sell_candidates()`,
+  `portfolio_review()`: each iterates `positions` directly and would
+  compute stop/profit-target/thesis-break logic against a nonexistent
+  zero-qty row.
+
+### Strategy / CLAUDE.md changes
+- None. This is a correctness fix inside `robinhood_trade.py`'s existing
+  contract, not a procedure or Hard Rule change.
+
+### Code changes
+- `robinhood_trade.py`: new `_open_positions(positions)` helper (filters to
+  `qty > 0`), applied at the entry point of `reconcile_fills()`,
+  `reconcile_sell_fills()`, `check_profit_targets()`, `build_sell_candidates()`,
+  `check_stops()`, `portfolio_review()`, and `build_buy_candidates()`'s
+  `open_syms` computation.
+- `tests/test_robinhood_trade.py`: 3 new regression tests, one per
+  previously-undetected failure mode — a ghost row no longer falsely marks
+  a pending buy filled, no longer misclassifies a real full-exit fill as
+  expired, and no longer blocks a legitimate new buy as "already held".
+  Mutation-tested: disabling `_open_positions()`'s filter fails all 3.
+
+### Comparability
+- Does this invalidate the prior performance record? **No.** Zero real
+  trades have been placed through this pipeline as of this entry — this
+  closes a bug before it could ever manifest against real money, not after.
+
+
 ## [v5.3.0] — 2026-10-30
 
 **MINOR** — Robinhood push notifications + live portfolio review wired into the Execution Procedure (visibility only)

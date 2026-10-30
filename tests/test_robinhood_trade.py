@@ -114,6 +114,17 @@ class TestBuildBuyCandidates(unittest.TestCase):
         self.assertEqual(candidates[0]["action"], "SKIP")
         self.assertTrue(any("already held" in r for r in candidates[0]["reasons"]))
 
+    def test_zero_qty_ghost_position_does_not_block_a_fresh_buy(self):
+        """Confirmed live, 2026-10-30: a residual qty-0 row for a closed
+        position must not count as "already held" and silently skip a
+        legitimate new buy candidate."""
+        account = _account()
+        positions = [{"symbol": "AAPL", "qty": 0, "avg_entry_price": 0.0,
+                      "current_price": 150.0, "unrealized_plpc": 0.0}]
+        candidates = rt.build_buy_candidates(
+            [_judge_row()], account, positions, self.state, self.watchlist)
+        self.assertEqual(candidates[0]["action"], "BUY")
+
     def test_cooldown_blocks_reentry(self):
         rt.record_stop_out(self.state, "AAPL")
         account = _account()
@@ -243,6 +254,22 @@ class TestReconcileFills(unittest.TestCase):
         self.assertEqual(result["filled"], [])
         self.assertEqual(result["expired"], [])
         self.assertIn("AAPL", self.state["pending"])
+
+    def test_zero_qty_ghost_position_does_not_falsely_mark_a_pending_buy_filled(self):
+        """Confirmed live, 2026-10-30: the Robinhood MCP tool's position list
+        can return a residual qty-0 row for a symbol whose buy order hasn't
+        actually filled yet. Without filtering, "symbol present in positions"
+        would falsely promote a still-pending order to a recorded entry."""
+        rt.record_pending_order(self.state, "AS", judge_score=8.0, qty=5,
+                                 order_id="order-ghost")
+        positions = [{"symbol": "AS", "qty": 0, "avg_entry_price": 0.0,
+                      "current_price": 12.0, "unrealized_plpc": 0.0}]
+        open_orders = [{"symbol": "AS", "side": "buy", "status": "pending_new"}]
+        result = rt.reconcile_fills(positions, open_orders=open_orders, state=self.state)
+
+        self.assertEqual(result["filled"], [])
+        self.assertIn("AS", self.state["pending"])
+        self.assertNotIn("AS", self.state.get("entries", {}))
         self.assertNotIn("AAPL", self.state.get("entries", {}))
 
     def test_order_resolved_without_filling_is_dropped_not_entered(self):
@@ -427,6 +454,22 @@ class TestReconcileSellFills(unittest.TestCase):
         self.assertNotIn("WAB", self.state["entries"])        # cleared
         self.assertIn("WAB", self.state["stop_outs"])          # cooldown started
         self.assertNotIn("WAB", self.state["pending_sells"])
+
+    def test_full_exit_fills_even_if_broker_leaves_a_zero_qty_ghost_row(self):
+        """Confirmed live, 2026-10-30: without filtering, a residual qty-0
+        row would make "symbol present in positions" stay true forever after
+        a real full exit, so the fill would be misclassified as "expired"
+        instead of filled -- record_full_exit() (and the 48h cooldown it
+        starts) would never run."""
+        rt.record_entry(self.state, "WAB", 7.0, 15, entry_price=289.07)
+        rt.record_pending_sell(self.state, "WAB", "SELL_FULL", qty=15, order_id="o1")
+        positions = [{"symbol": "WAB", "qty": 0, "avg_entry_price": 289.07,
+                      "current_price": 250.0, "unrealized_plpc": -0.135}]
+        result = rt.reconcile_sell_fills(positions, open_orders=[], state=self.state)
+        self.assertEqual(len(result["filled"]), 1)
+        self.assertEqual(result["expired"], [])
+        self.assertNotIn("WAB", self.state["entries"])
+        self.assertIn("WAB", self.state["stop_outs"])
 
     def test_full_exit_still_open_is_left_pending(self):
         rt.record_entry(self.state, "WAB", 7.0, 15, entry_price=289.07)

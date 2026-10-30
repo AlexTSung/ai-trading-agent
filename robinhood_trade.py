@@ -56,6 +56,23 @@ MIN_TRADE_PRICE  = trade.MIN_TRADE_PRICE
 TRADE_LOG_HEADER = ["date", "symbol", "side", "qty", "filled_price", "order_id", "status"]
 
 
+def _open_positions(positions: list) -> list:
+    """
+    Filter out zero/negative-qty rows before anything below treats
+    "present in positions" as meaningful. Confirmed live, 2026-10-30: the
+    Robinhood MCP tool's position list can return a residual row for a
+    fully-closed position (qty 0) instead of omitting it, which breaks fill
+    detection in both directions if left unfiltered -- reconcile_fills()
+    would mark a still-pending BUY as already filled (the symbol is
+    technically "present"), and reconcile_sell_fills() would mark an
+    actually-filled SELL_FULL as "expired" instead of filled (the symbol
+    never truly disappears), silently skipping record_full_exit() and the
+    48h cooldown it starts. Applied once here rather than relying on every
+    caller to pre-filter live broker data.
+    """
+    return [p for p in positions if float(p.get("qty", 0) or 0) > 0]
+
+
 class RealLogsDirNotSet(RuntimeError):
     """Raised instead of silently defaulting anywhere inside the public repo."""
 
@@ -163,7 +180,7 @@ def reconcile_fills(positions: list, open_orders: list, state: dict) -> dict:
     if not pending:
         return {"filled": [], "expired": []}
 
-    positions_by_symbol = {p["symbol"]: p for p in positions}
+    positions_by_symbol = {p["symbol"]: p for p in _open_positions(positions)}
     open_order_syms = {o.get("symbol") for o in open_orders}
 
     filled, expired = [], []
@@ -263,7 +280,7 @@ def reconcile_sell_fills(positions: list, open_orders: list, state: dict) -> dic
     if not pending:
         return {"filled": [], "expired": []}
 
-    positions_by_symbol = {p["symbol"]: p for p in positions}
+    positions_by_symbol = {p["symbol"]: p for p in _open_positions(positions)}
     open_order_syms = {o.get("symbol") for o in open_orders}
 
     filled, expired = [], []
@@ -320,7 +337,7 @@ def check_profit_targets(positions: list, state: dict) -> list:
     """
     entries = state.get("entries", {})
     targets = []
-    for pos in positions:
+    for pos in _open_positions(positions):
         sym = pos["symbol"]
         entry_record = entries.get(sym)
         if not entry_record or not entry_record.get("entry_price"):
@@ -389,7 +406,7 @@ def build_sell_candidates(positions: list, state: dict, open_orders: list = None
         and str(o.get("status", "")).lower() in OPEN_ORDER_STATUSES
     }
     phantom_syms = {f["symbol"] for f in phantom_audit(positions, state)}
-    positions_by_symbol = {p["symbol"]: p for p in positions}
+    positions_by_symbol = {p["symbol"]: p for p in _open_positions(positions)}
 
     stop_results = check_stops(positions, state)
     profit_targets = check_profit_targets(positions, state)
@@ -470,7 +487,7 @@ def portfolio_review(positions: list, state: dict, research: dict) -> list:
     entries = state.get("entries", {})
     flags = []
 
-    for pos in positions:
+    for pos in _open_positions(positions):
         sym = pos["symbol"]
         plpc = float(pos.get("unrealized_plpc", 0))
         tier = trade.tier_for(sym)
@@ -588,7 +605,7 @@ def build_buy_candidates(judge_approvals: list, account: dict, positions: list,
     entry is either {"action": "SKIP", "reasons": [...]} or a sized
     {"action": "BUY", ...} ready to be shown via confirmation_prompt().
     """
-    open_syms = {p["symbol"] for p in positions}
+    open_syms = {p["symbol"] for p in _open_positions(positions)}
     open_orders = open_orders or []
     pending_buy_syms = {
         o.get("symbol") for o in open_orders
@@ -676,6 +693,7 @@ def check_stops(positions: list, state: dict) -> dict:
     stop for a profitable entry, so a T1-taken position is checked against
     breakeven only, never double-counted against the (looser) tier stop.
     """
+    positions = _open_positions(positions)
     entries = state.get("entries", {})
     breakeven_syms = set()
     breakeven_triggers = []
