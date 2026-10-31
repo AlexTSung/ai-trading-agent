@@ -1,6 +1,6 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-10-30T20:01:15.552326-04:00",
+  "timestamp": "2026-10-30T21:01:42.825597-04:00",
   "date": "2026-10-30",
   "approved": [],
   "held": [
@@ -8,8 +8,7 @@
     "MSFT",
     "PYPL",
     "OKTA",
-    "AUPH",
-    "DKS"
+    "AUPH"
   ],
   "vetoed": [
     "TSLA",
@@ -550,69 +549,6 @@
         "note": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
-    },
-    "DKS": {
-      "symbol": "DKS",
-      "recommendation": "HOLD",
-      "score": 7.67,
-      "approval_gate": 8.5,
-      "size_multiplier": 1.0,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 17.2,
-      "is_discovery": true,
-      "is_speculative": true,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "2.0/2.0",
-        "news": "1.27/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "2.0/2.0",
-        "volatility": "1.0/1.0",
-        "quality": "1.4/2.5"
-      },
-      "criteria": {
-        "technical": {
-          "score": 2.0,
-          "note": "STRONG_BUY \u2014 MA20 $140.10 > MA50 $137.18, price $143.81 above both [capped 3.0\u21922.0 at weight 2.0]"
-        },
-        "news": {
-          "score": 1.27,
-          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $770.48 >= MA50 $767.48"
-        },
-        "portfolio": {
-          "score": 2.0,
-          "note": "Strong cash reserve 47%"
-        },
-        "volatility": {
-          "score": 1.0,
-          "note": "VIX 17.2 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
-        },
-        "quality": {
-          "score": 1.4,
-          "note": "Large-cap $14B; Profitable; 9 analyst buy ratings; Short float 20.22% \u2014 heavily shorted, risk of squeeze or continued decline"
-        }
-      },
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $140.10 > MA50 $137.18, price $143.81 above both [capped 3.0\u21922.0 at weight 2.0]. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $770.48 >= MA50 $767.48. Portfolio: Strong cash reserve 47%. Volatility: VIX 17.2 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $14B; Profitable; 9 analyst buy ratings; Short float 20.22% \u2014 heavily shorted, risk of squeeze or continued decline. Source: discovery | Gate: 8.5.",
-      "_gate_used": 8.5
     },
     "RDDT": {
       "symbol": "RDDT",
