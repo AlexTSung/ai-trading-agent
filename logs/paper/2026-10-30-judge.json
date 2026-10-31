@@ -1,6 +1,6 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-10-30T21:01:42.825597-04:00",
+  "timestamp": "2026-10-30T22:01:11.932373-04:00",
   "date": "2026-10-30",
   "approved": [],
   "held": [
@@ -24,7 +24,8 @@
     "NCLH",
     "EXC",
     "MDLZ",
-    "BETR",
+    "ENSG",
+    "EG",
     "RDDT",
     "ILMN",
     "TWLO"
@@ -539,14 +540,25 @@
       },
       "_gate_used": 7.0
     },
-    "BETR": {
-      "symbol": "BETR",
+    "ENSG": {
+      "symbol": "ENSG",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: price $181.44 is 3.4% above MA20 $175.50 (limit 3%) \u2014 do not chase",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: price $181.44 is 3.4% above MA20 $175.50 (limit 3%) \u2014 do not chase"
+      },
+      "_gate_used": 7.0
+    },
+    "EG": {
+      "symbol": "EG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
