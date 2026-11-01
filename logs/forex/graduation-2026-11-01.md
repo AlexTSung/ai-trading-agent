@@ -32,19 +32,19 @@
 ## Per-Pair Stats
 | Pair | Wins | Losses | Total P&L | Total Pips | Status |
 |------|------|--------|-----------|------------|--------|
-| NZD_JPY | 512 | 0 | $+178022.40 | +115.2 | ✅ Active |
-| GBP_USD | 256 | 0 | $+163516.16 | +16448.0 | ✅ Active |
-| EUR_JPY | 385 | 114 | $+72810.03 | +183.8 | ⛔ Deprioritized |
-| AUD_USD | 129 | 128 | $+3113.35 | +2052.0 | ✅ Active |
-| CAD_JPY | 487 | 128 | $-26703.01 | +94.9 | ⛔ Deprioritized |
-| USD_CHF | 128 | 331 | $-38143.03 | +3159.2 | ⛔ Deprioritized |
-| NZD_USD | 256 | 128 | $-65803.52 | +1113.6 | ✅ Active |
-| EUR_USD | 128 | 128 | $-180892.16 | -2265.6 | ✅ Active |
-| GBP_JPY | 256 | 512 | $-211484.16 | +128.0 | ⛔ Deprioritized |
-| AUD_JPY | 256 | 256 | $-252401.92 | -38.4 | ✅ Active |
-| EUR_GBP | 128 | 128 | $-323796.48 | -4710.4 | ⛔ Deprioritized |
-| USD_CAD | 128 | 256 | $-396373.76 | -8563.2 | ⛔ Deprioritized |
-| USD_JPY | 386 | 309 | $-457604.00 | +119.8 | ⛔ Deprioritized |
+| NZD_JPY | 516 | 0 | $+179413.20 | +116.1 | ✅ Active |
+| GBP_USD | 258 | 0 | $+164793.63 | +16576.5 | ✅ Active |
+| EUR_JPY | 388 | 115 | $+73334.96 | +184.6 | ⛔ Deprioritized |
+| AUD_USD | 130 | 129 | $+3125.80 | +2067.7 | ✅ Active |
+| CAD_JPY | 491 | 129 | $-26885.68 | +95.7 | ⛔ Deprioritized |
+| USD_CHF | 129 | 334 | $-38667.71 | +3161.7 | ⛔ Deprioritized |
+| NZD_USD | 258 | 129 | $-66317.61 | +1122.3 | ✅ Active |
+| EUR_USD | 129 | 129 | $-182305.38 | -2283.3 | ✅ Active |
+| GBP_JPY | 258 | 516 | $-213136.38 | +129.0 | ⛔ Deprioritized |
+| AUD_JPY | 258 | 258 | $-254373.81 | -38.7 | ✅ Active |
+| EUR_GBP | 129 | 129 | $-326326.14 | -4747.2 | ⛔ Deprioritized |
+| USD_CAD | 129 | 258 | $-399470.43 | -8630.1 | ⛔ Deprioritized |
+| USD_JPY | 389 | 312 | $-461428.50 | +119.5 | ⛔ Deprioritized |
 
 ## What the Agent Learned (0 adjustments)
 - No weight changes this run (need more data or no strong signal)
