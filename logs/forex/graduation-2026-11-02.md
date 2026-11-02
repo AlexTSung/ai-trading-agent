@@ -5,46 +5,46 @@
 ## Graduation Criteria
 | Criterion | Required | Current | Status |
 |-----------|----------|---------|--------|
-| 📊 Closed trades | 15 | 8 | ❌ |
-| 🎯 Win rate | 55% | 62% | ✅ |
-| 💰 Profit factor | 1.50 | 4.46 | ✅ |
-| 📈 Expectancy/trade | >$0 | $408.24 | ✅ |
-| 🏦 Net return | 3.0% | 3.27% | ✅ |
+| 📊 Closed trades | 15 | 9 | ❌ |
+| 🎯 Win rate | 55% | 67% | ✅ |
+| 💰 Profit factor | 1.50 | 4.50 | ✅ |
+| 📈 Expectancy/trade | >$0 | $367.66 | ✅ |
+| 🏦 Net return | 3.0% | 3.31% | ✅ |
 
 ## Performance Detail
 | | |
 |---|---|
-| Total closed trades | 8 |
-| Wins / Losses | 5W / 3L |
-| Win rate | 62% |
-| Gross wins | $4,210.07 |
+| Total closed trades | 9 |
+| Wins / Losses | 6W / 3L |
+| Win rate | 67% |
+| Gross wins | $4,253.08 |
 | Gross losses | $944.12 |
-| Profit factor | 4.46 |
-| Avg win | $842.01 |
+| Profit factor | 4.50 |
+| Avg win | $708.85 |
 | Avg loss | $314.71 |
-| Expectancy/trade | $408.24 |
-| Total realized P&L | $+3,265.95 |
-| Net return | 3.27% |
+| Expectancy/trade | $367.66 |
+| Total realized P&L | $+3,308.96 |
+| Net return | 3.31% |
 
 ## Blockers to Graduation
-- Need **7 more closed trades** (have 8, need 15)
+- Need **6 more closed trades** (have 9, need 15)
 
 ## Per-Pair Stats
 | Pair | Wins | Losses | Total P&L | Total Pips | Status |
 |------|------|--------|-----------|------------|--------|
-| NZD_JPY | 576 | 0 | $+200275.20 | +129.6 | ✅ Active |
-| GBP_USD | 288 | 0 | $+183955.68 | +18504.0 | ✅ Active |
-| EUR_JPY | 433 | 130 | $+81208.91 | +196.6 | ⛔ Deprioritized |
-| AUD_USD | 145 | 144 | $+3312.55 | +2303.2 | ✅ Active |
-| CAD_JPY | 551 | 144 | $-29625.73 | +107.7 | ⛔ Deprioritized |
-| USD_CHF | 144 | 379 | $-46537.91 | +3199.2 | ⛔ Deprioritized |
-| NZD_USD | 288 | 144 | $-74028.96 | +1252.8 | ✅ Active |
-| EUR_USD | 144 | 144 | $-203503.68 | -2548.8 | ✅ Active |
-| GBP_JPY | 288 | 576 | $-237919.68 | +144.0 | ⛔ Deprioritized |
-| AUD_JPY | 288 | 288 | $-283952.16 | -43.2 | ✅ Active |
-| EUR_GBP | 144 | 144 | $-364271.04 | -5299.2 | ⛔ Deprioritized |
-| USD_CAD | 144 | 288 | $-445920.48 | -9633.6 | ⛔ Deprioritized |
-| USD_JPY | 434 | 357 | $-518796.00 | +115.0 | ⛔ Deprioritized |
+| NZD_JPY | 588 | 0 | $+204447.60 | +132.3 | ✅ Active |
+| GBP_USD | 294 | 0 | $+187788.09 | +18889.5 | ✅ Active |
+| EUR_JPY | 442 | 133 | $+82783.70 | +199.0 | ⛔ Deprioritized |
+| AUD_USD | 148 | 147 | $+3349.90 | +2350.3 | ✅ Active |
+| CAD_JPY | 563 | 147 | $-30173.74 | +110.1 | ⛔ Deprioritized |
+| USD_CHF | 147 | 388 | $-48111.95 | +3206.7 | ⛔ Deprioritized |
+| NZD_USD | 294 | 147 | $-75571.23 | +1278.9 | ✅ Active |
+| EUR_USD | 147 | 147 | $-207743.34 | -2601.9 | ✅ Active |
+| GBP_JPY | 294 | 588 | $-242876.34 | +147.0 | ⛔ Deprioritized |
+| AUD_JPY | 294 | 294 | $-289867.83 | -44.1 | ✅ Active |
+| EUR_GBP | 147 | 147 | $-371860.02 | -5409.6 | ⛔ Deprioritized |
+| USD_CAD | 147 | 294 | $-455210.49 | -9834.3 | ⛔ Deprioritized |
+| USD_JPY | 443 | 366 | $-530269.50 | +114.1 | ⛔ Deprioritized |
 
 ## What the Agent Learned (0 adjustments)
 - No weight changes this run (need more data or no strong signal)
@@ -67,6 +67,6 @@
 ```
 
 ## Estimated Path to Graduation
-- Trades needed: **7** more  (~5 weeks at 1-2/week)
+- Trades needed: **6** more  (~4 weeks at 1-2/week)
 - Return needed: **+0.00%** more  (done ✅)
 - Manual approval required before any real money is deployed.
