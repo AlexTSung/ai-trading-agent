@@ -1,27 +1,95 @@
 {
   "checked": 10,
-  "triggers": [],
+  "triggers": [
+    {
+      "symbol": "OKTA",
+      "qty": "3",
+      "avg_entry": "212.16",
+      "current_price": "189.5",
+      "unrealized_plpc": -0.10681,
+      "tier": "TIER3",
+      "stop_pct": -0.1,
+      "reason": "STOP-LOSS TIER3 (-10%): down -10.7%"
+    }
+  ],
   "inverse_max_hold": [],
   "phantom_equity": [
     {
       "symbol": "LBGJ",
       "qty": 154903.0,
       "avg_entry_price": 0.0288,
-      "current_price": 1.62,
-      "price_ratio": 56.25,
-      "unrealized_plpc": 55.25,
-      "reported_market_value": 250942.86,
+      "current_price": 1.58,
+      "price_ratio": 54.86,
+      "unrealized_plpc": 53.86111,
+      "reported_market_value": 244746.74,
       "cost_basis": 4461.21,
-      "phantom_amount": 246481.65,
+      "phantom_amount": 240285.53,
       "reasons": [
-        "price $1.6200 is 56x its cost basis $0.0288",
-        "unrealized P&L 5,525% exceeds the 1,000% plausibility ceiling",
+        "price $1.5800 is 55x its cost basis $0.0288",
+        "unrealized P&L 5,386% exceeds the 1,000% plausibility ceiling",
         "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
       ],
       "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
     }
   ],
-  "closed": [],
+  "closed": [
+    {
+      "symbol": "OKTA",
+      "result": {
+        "id": "fc0af7d8-d092-4ac8-b57f-cf47aa4b9a48",
+        "client_order_id": "agent-sell-OKTA-20261102200018",
+        "created_at": "2026-11-02T20:00:18.652744073Z",
+        "updated_at": "2026-11-02T20:00:18.65340827Z",
+        "submitted_at": "2026-11-02T20:00:18.652744073Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "e20a4d5c-1e69-4bf2-9849-ca749343a03e",
+        "symbol": "OKTA",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "3",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "sell",
+        "position_intent": "sell_to_close",
+        "time_in_force": "gtc",
+        "limit_price": "187.6",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2027-01-29T21:00:00Z",
+        "_ok": true,
+        "_agent_reason": "STOP-LOSS TIER3 (-10%): down -10.7%",
+        "_limit_price_used": 187.6,
+        "_urgent_exit": true,
+        "_released_orders": []
+      },
+      "trigger": {
+        "symbol": "OKTA",
+        "qty": "3",
+        "avg_entry": "212.16",
+        "current_price": "189.5",
+        "unrealized_plpc": -0.10681,
+        "tier": "TIER3",
+        "stop_pct": -0.1,
+        "reason": "STOP-LOSS TIER3 (-10%): down -10.7%"
+      }
+    }
+  ],
   "failed": [],
   "skipped_suspect": []
 }
