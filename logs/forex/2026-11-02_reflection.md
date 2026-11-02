@@ -1,9 +1,9 @@
 # Daily Trading Reflection — 2026-11-02
 
 ## P&L
-- Realized today: $+43.01
-- Trades closed: 1
-- Wins: 1  Losses: 0
+- Realized today: $+239.41
+- Trades closed: 2
+- Wins: 2  Losses: 0
 
 ## Did I follow the strategy exactly?
 - [ ] Only took trades with judge score ≥ 7.0
@@ -19,17 +19,20 @@ _(Review each trade: was the outcome different from what you anticipated? Why?)_
 - **NZD_JPY** LONG → manual → $+43.01
   - Expected: ___  Actual: ___  Lesson: ___
 
+- **GBP_JPY** LONG → stop_loss → $+196.40
+  - Expected: ___  Actual: ___  Lesson: ___
+
 ## Lessons logged today
-- [growth] Milestone: 50 closed trades completed. Experience accumulates — each trade builds pattern recognition.
+- [psychology] Daily win limit reached (2W today) — stopped trading to protect profits.
 
 ## One improvement for tomorrow
 _(Even a tiny improvement compounds over time — what ONE thing will you do better?)_
 
 > ___
 
-## Overall performance — 50 trades lifetime
-- Win rate: 56.0%  (target ≥55%)
-- Profit factor: 0.48  (target ≥1.3)
+## Overall performance — 51 trades lifetime
+- Win rate: 56.9%  (target ≥55%)
+- Profit factor: 0.49  (target ≥1.3)
 - Max drawdown: 1763.0%  (max 8%)
 
 ---
