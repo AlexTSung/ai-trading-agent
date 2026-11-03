@@ -1,11 +1,10 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-03T16:02:22.945763-05:00",
+  "timestamp": "2026-11-03T17:02:06.467678-05:00",
   "date": "2026-11-03",
   "approved": [],
   "held": [
-    "KMI",
-    "PG"
+    "KMI"
   ],
   "vetoed": [
     "AAPL",
@@ -20,15 +19,15 @@
     "PFE",
     "KDP",
     "CSX",
-    "ADMA",
-    "ACB",
     "NVD",
     "PARA",
     "KVUE",
     "NCLH",
     "NKE",
     "KO",
-    "MPC"
+    "MZTI",
+    "LIND",
+    "YUM"
   ],
   "scores": {
     "AAPL": {
@@ -157,28 +156,6 @@
       },
       "_gate_used": 7.0
     },
-    "ADMA": {
-      "symbol": "ADMA",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
-    "ACB": {
-      "symbol": "ACB",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
     "NVD": {
       "symbol": "NVD",
       "recommendation": "VETO",
@@ -283,7 +260,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding KMI \u2014 at max size (8.1% of portfolio, cap 8%)"
+          "note": "Already holding KMI \u2014 at max size (8.0% of portfolio, cap 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -294,7 +271,7 @@
           "note": "Large-cap $73B; Profitable; 11 analyst buy ratings"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $33.37 > MA50 $32.13, price between MAs. News: POSITIVE \u2014 3 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $768.09 >= MA50 $767.03. Portfolio: Already holding KMI \u2014 at max size (8.1% of portfolio, cap 8%). Volatility: VIX 21.1 \u2014 moderate volatility (NORMAL). Quality: Large-cap $73B; Profitable; 11 analyst buy ratings. Source: discovery | Gate: 8.5.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $33.37 > MA50 $32.13, price between MAs. News: POSITIVE \u2014 3 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $768.09 >= MA50 $767.03. Portfolio: Already holding KMI \u2014 at max size (8.0% of portfolio, cap 8%). Volatility: VIX 21.1 \u2014 moderate volatility (NORMAL). Quality: Large-cap $73B; Profitable; 11 analyst buy ratings. Source: discovery | Gate: 8.5.",
       "_gate_used": 8.5
     },
     "KO": {
@@ -308,74 +285,31 @@
       },
       "_gate_used": 7.0
     },
-    "PG": {
-      "symbol": "PG",
-      "recommendation": "HOLD",
-      "score": 6.9,
-      "approval_gate": 8.5,
-      "size_multiplier": 1.0,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 21.15,
-      "is_discovery": true,
-      "is_speculative": true,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "2.0/2.0",
-        "news": "0.0/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "2.0/2.0",
-        "volatility": "0.75/1.0",
-        "quality": "2.15/2.5"
-      },
-      "criteria": {
-        "technical": {
-          "score": 2.0,
-          "note": "STRONG_BUY \u2014 MA20 $157.74 > MA50 $150.68, price $162.06 above both [capped 3.0\u21922.0 at weight 2.0]"
-        },
-        "news": {
-          "score": 0.0,
-          "note": "NEGATIVE \u2014 2 bearish signals in recent headlines"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $768.09 >= MA50 $767.03"
-        },
-        "portfolio": {
-          "score": 2.0,
-          "note": "Strong cash reserve 46%"
-        },
-        "volatility": {
-          "score": 0.75,
-          "note": "VIX 21.1 \u2014 moderate volatility (NORMAL)"
-        },
-        "quality": {
-          "score": 2.15,
-          "note": "Mega-cap $376B; Profitable; 9 analyst buy ratings"
-        }
-      },
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $157.74 > MA50 $150.68, price $162.06 above both [capped 3.0\u21922.0 at weight 2.0]. News: NEGATIVE \u2014 2 bearish signals in recent headlines. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $768.09 >= MA50 $767.03. Portfolio: Strong cash reserve 46%. Volatility: VIX 21.1 \u2014 moderate volatility (NORMAL). Quality: Mega-cap $376B; Profitable; 9 analyst buy ratings. Source: discovery | Gate: 8.5.",
-      "_gate_used": 8.5
-    },
-    "MPC": {
-      "symbol": "MPC",
+    "MZTI": {
+      "symbol": "MZTI",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for MPC \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for MZTI \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "LIND": {
+      "symbol": "LIND",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LIND \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "YUM": {
+      "symbol": "YUM",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for YUM \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
