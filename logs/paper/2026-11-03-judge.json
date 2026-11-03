@@ -1,6 +1,6 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-03T12:02:18.730646-05:00",
+  "timestamp": "2026-11-03T13:02:26.111524-05:00",
   "date": "2026-11-03",
   "approved": [],
   "held": [],
@@ -17,44 +17,24 @@
     "PFE",
     "KDP",
     "CSX",
-    "EBS",
     "ACB",
-    "PARA",
     "NVD",
+    "PARA",
     "KVUE",
-    "NCLH"
+    "NCLH",
+    "NKE",
+    "KO",
+    "WMB",
+    "IA"
   ],
   "scores": {
     "AAPL": {
       "symbol": "AAPL",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "Sell signal present \u2014 not a buy candidate",
+      "rationale": "EARNINGS VETO: AAPL flagged by the morning earnings watch \u2014 no entry within 3 trading days of a report",
       "criteria": {
-        "technical": {
-          "score": 0.0,
-          "note": "STRONG_SELL \u2014 price $331.24 below MA50 $334.07"
-        },
-        "news": {
-          "score": 1.27,
-          "note": "POSITIVE \u2014 3 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $768.14 >= MA50 $767.05"
-        },
-        "portfolio": {
-          "score": 0.0,
-          "note": "Already holding AAPL \u2014 only 2.8% below entry (need \u22653%)"
-        },
-        "volatility": {
-          "score": 0.75,
-          "note": "VIX 21.1 \u2014 moderate volatility (NORMAL)"
-        },
-        "quality": {
-          "score": 2.35,
-          "note": "Mega-cap $4831B; Profitable; 18 analyst buy ratings"
-        }
+        "earnings_veto": true
       },
       "_gate_used": 7.0
     },
@@ -72,10 +52,9 @@
       "symbol": "TSLA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: TSLA flagged by the morning earnings watch \u2014 no entry within 3 trading days of a report",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "_gate_used": 7.0
     },
@@ -105,10 +84,10 @@
       "symbol": "SOXS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $52.45 is 18.2% above MA20 $44.38 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: price $52.85 is 19.0% above MA20 $44.40 (limit 3%) \u2014 do not chase",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $52.45 is 18.2% above MA20 $44.38 (limit 3%) \u2014 do not chase"
+        "note": "CHASE VETO: price $52.85 is 19.0% above MA20 $44.40 (limit 3%) \u2014 do not chase"
       },
       "_gate_used": 7.0
     },
@@ -137,10 +116,10 @@
       "symbol": "IBM",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 73 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 73 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
@@ -175,35 +154,14 @@
       },
       "_gate_used": 7.0
     },
-    "EBS": {
-      "symbol": "EBS",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for EBS \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
-      },
-      "_gate_used": 7.0
-    },
     "ACB": {
       "symbol": "ACB",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
-    "PARA": {
-      "symbol": "PARA",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
@@ -211,10 +169,21 @@
       "symbol": "NVD",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $4.25 is 7.5% above MA20 $3.95 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: price $4.26 is 7.7% above MA20 $3.95 (limit 3%) \u2014 do not chase",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $4.25 is 7.5% above MA20 $3.95 (limit 3%) \u2014 do not chase"
+        "note": "CHASE VETO: price $4.26 is 7.7% above MA20 $3.95 (limit 3%) \u2014 do not chase"
+      },
+      "_gate_used": 7.0
+    },
+    "PARA": {
+      "symbol": "PARA",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
@@ -237,6 +206,49 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "NKE": {
+      "symbol": "NKE",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "KO": {
+      "symbol": "KO",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "WMB": {
+      "symbol": "WMB",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for WMB \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "IA": {
+      "symbol": "IA",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     }
