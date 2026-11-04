@@ -1,8 +1,10 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-04T07:02:04.672304-05:00",
+  "timestamp": "2026-11-04T08:01:21.565901-05:00",
   "date": "2026-11-04",
-  "approved": [],
+  "approved": [
+    "PFE"
+  ],
   "held": [
     "OSCR",
     "KMI"
@@ -17,7 +19,6 @@
     "LLY",
     "COP",
     "IBM",
-    "PFE",
     "KDP",
     "CSX",
     "NVD",
@@ -26,8 +27,8 @@
     "NCLH",
     "NKE",
     "KO",
-    "IHI",
-    "EG"
+    "LNG",
+    "CME"
   ],
   "scores": {
     "AAPL": {
@@ -128,13 +129,66 @@
     },
     "PFE": {
       "symbol": "PFE",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for PFE \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
+      "recommendation": "APPROVE",
+      "score": 8.17,
+      "approval_gate": 8.0,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
+          "Win rate 95% CI on 34 trips: 12%\u201340%",
+          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 34,
+        "band": 0.15
       },
-      "_gate_used": 7.0
+      "vix": 21.15,
+      "is_discovery": false,
+      "is_speculative": false,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "2.0/2.0",
+        "news": "1.27/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "2.0/2.0",
+        "volatility": "0.75/1.0",
+        "quality": "2.15/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $29.46 > MA50 $28.64, price $29.98 above both [capped 3.0\u21922.0 at weight 2.0]"
+        },
+        "news": {
+          "score": 1.27,
+          "note": "POSITIVE \u2014 3 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $768.09 >= MA50 $767.03"
+        },
+        "portfolio": {
+          "score": 2.0,
+          "note": "Strong cash reserve 46%"
+        },
+        "volatility": {
+          "score": 0.75,
+          "note": "VIX 21.1 \u2014 moderate volatility (NORMAL)"
+        },
+        "quality": {
+          "score": 2.15,
+          "note": "Mega-cap $171B; Profitable; 8 analyst buy ratings"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $29.46 > MA50 $28.64, price $29.98 above both [capped 3.0\u21922.0 at weight 2.0]. News: POSITIVE \u2014 3 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $768.09 >= MA50 $767.03. Portfolio: Strong cash reserve 46%. Volatility: VIX 21.1 \u2014 moderate volatility (NORMAL). Quality: Mega-cap $171B; Profitable; 8 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "_gate_used": 8.0
     },
     "KDP": {
       "symbol": "KDP",
@@ -349,25 +403,25 @@
       },
       "_gate_used": 7.0
     },
-    "IHI": {
-      "symbol": "IHI",
+    "LNG": {
+      "symbol": "LNG",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
-    "EG": {
-      "symbol": "EG",
+    "CME": {
+      "symbol": "CME",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     }
