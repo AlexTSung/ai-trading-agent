@@ -1,6 +1,6 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-04T04:02:07.133879-05:00",
+  "timestamp": "2026-11-04T05:02:13.132703-05:00",
   "date": "2026-11-04",
   "approved": [],
   "held": [
@@ -19,15 +19,16 @@
     "PFE",
     "KDP",
     "CSX",
+    "REGN",
     "NVD",
     "PARA",
     "KVUE",
     "NCLH",
     "NKE",
     "KO",
-    "APAC",
-    "EG",
-    "UPS"
+    "WTM",
+    "EXPO",
+    "IA"
   ],
   "scores": {
     "AAPL": {
@@ -153,6 +154,17 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "REGN": {
+      "symbol": "REGN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 87 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 87 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
@@ -285,36 +297,34 @@
       },
       "_gate_used": 7.0
     },
-    "APAC": {
-      "symbol": "APAC",
+    "WTM": {
+      "symbol": "WTM",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for WTM \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "_gate_used": 7.0
     },
-    "EG": {
-      "symbol": "EG",
+    "EXPO": {
+      "symbol": "EXPO",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for EXPO \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "_gate_used": 7.0
     },
-    "UPS": {
-      "symbol": "UPS",
+    "IA": {
+      "symbol": "IA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 85 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 85 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     }
