@@ -1,6 +1,6 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-04T02:01:28.433775-05:00",
+  "timestamp": "2026-11-04T03:01:57.251418-05:00",
   "date": "2026-11-04",
   "approved": [],
   "held": [
@@ -19,15 +19,14 @@
     "PFE",
     "KDP",
     "CSX",
+    "SCHD",
     "NVD",
     "PARA",
     "KVUE",
     "NCLH",
     "NKE",
     "KO",
-    "CVR",
-    "NCPL",
-    "IGF"
+    "UPS"
   ],
   "scores": {
     "AAPL": {
@@ -153,6 +152,17 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "SCHD": {
+      "symbol": "SCHD",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
@@ -285,39 +295,14 @@
       },
       "_gate_used": 7.0
     },
-    "CVR": {
-      "symbol": "CVR",
+    "UPS": {
+      "symbol": "UPS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 85 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
-    "NCPL": {
-      "symbol": "NCPL",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "Quality veto: MICRO_CAP VETO: $0.01B market cap \u2014 too small for discovery buys",
-      "criteria": {
-        "quality": {
-          "score": 0.0,
-          "note": "MICRO_CAP VETO: $0.01B market cap \u2014 too small for discovery buys",
-          "veto": true
-        }
-      },
-      "_gate_used": 7.0
-    },
-    "IGF": {
-      "symbol": "IGF",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 85 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     }
