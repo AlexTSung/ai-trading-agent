@@ -1,6 +1,6 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-04T18:02:20.077424-05:00",
+  "timestamp": "2026-11-04T18:54:29.424899-05:00",
   "date": "2026-11-04",
   "approved": [
     "TSLA"
@@ -19,6 +19,8 @@
     "PFE",
     "KDP",
     "CSX",
+    "ROOT",
+    "NCLH",
     "ADMA",
     "ELF",
     "SNAP",
@@ -26,11 +28,9 @@
     "KVUE",
     "NEE",
     "NKE",
-    "NCLH",
     "KO",
     "PPL",
     "SO",
-    "SG",
     "FIS",
     "TRMB"
   ],
@@ -228,6 +228,27 @@
       },
       "_gate_used": 7.0
     },
+    "ROOT": {
+      "symbol": "ROOT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for ROOT \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "NCLH": {
+      "symbol": "NCLH",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
     "ADMA": {
       "symbol": "ADMA",
       "recommendation": "VETO",
@@ -302,17 +323,6 @@
       },
       "_gate_used": 7.0
     },
-    "NCLH": {
-      "symbol": "NCLH",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
     "KO": {
       "symbol": "KO",
       "recommendation": "VETO",
@@ -337,17 +347,6 @@
     },
     "SO": {
       "symbol": "SO",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
-    "SG": {
-      "symbol": "SG",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
@@ -425,7 +424,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding TRMB \u2014 only 0.5% below entry (need \u22653%)"
+          "note": "Already holding TRMB \u2014 only 0.7% below entry (need \u22653%)"
         },
         "falling_knife": {
           "penalty": 0.0,
