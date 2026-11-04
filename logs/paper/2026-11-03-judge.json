@@ -1,6 +1,6 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-03T20:01:13.831775-05:00",
+  "timestamp": "2026-11-03T21:01:40.993468-05:00",
   "date": "2026-11-03",
   "approved": [],
   "held": [
@@ -26,12 +26,11 @@
     "NCLH",
     "NKE",
     "KO",
-    "AMC",
-    "SGRY",
-    "RRC",
-    "BWIN",
-    "LFCR",
-    "PCRX"
+    "ADT",
+    "CART",
+    "SYNA",
+    "SSTI",
+    "CBNK"
   ],
   "scores": {
     "AAPL": {
@@ -300,93 +299,57 @@
       },
       "_gate_used": 7.0
     },
-    "AMC": {
-      "symbol": "AMC",
+    "ADT": {
+      "symbol": "ADT",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for AMC \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for ADT \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
       "_gate_used": 7.0
     },
-    "SGRY": {
-      "symbol": "SGRY",
+    "CART": {
+      "symbol": "CART",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 92 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 92 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
-    "RRC": {
-      "symbol": "RRC",
+    "SYNA": {
+      "symbol": "SYNA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for SYNA \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "SSTI": {
+      "symbol": "SSTI",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
-    "BWIN": {
-      "symbol": "BWIN",
+    "CBNK": {
+      "symbol": "CBNK",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BWIN \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for CBNK \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
       "_gate_used": 7.0
-    },
-    "LFCR": {
-      "symbol": "LFCR",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LFCR \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
-      },
-      "_gate_used": 7.0
-    },
-    "PCRX": {
-      "symbol": "PCRX",
-      "recommendation": "VETO",
-      "score": 5.5,
-      "approval_gate": 8.5,
-      "is_discovery": true,
-      "rationale": "Discovery quality veto: scored 0.25/2.5 on quality (minimum 0.5). Small-cap $1.4B \u2014 limited institutional support; Profitable; Zero analyst buy coverage on a discovery stock; Short float 15.33% \u2014 elevated short interest",
-      "criteria": {
-        "technical": {
-          "score": 2.0,
-          "note": "STRONG_BUY \u2014 MA20 $35.82 > MA50 $29.53, price $36.39 above both [capped 3.0\u21922.0 at weight 2.0]"
-        },
-        "news": {
-          "score": 0.5,
-          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $768.09 >= MA50 $767.03"
-        },
-        "portfolio": {
-          "score": 2.0,
-          "note": "Strong cash reserve 46%"
-        },
-        "volatility": {
-          "score": 0.75,
-          "note": "VIX 21.1 \u2014 moderate volatility (NORMAL)"
-        },
-        "quality": {
-          "score": 0.25,
-          "note": "Small-cap $1.4B \u2014 limited institutional support; Profitable; Zero analyst buy coverage on a discovery stock; Short float 15.33% \u2014 elevated short interest",
-          "veto": true
-        }
-      },
-      "_gate_used": 8.5
     }
   }
 }
