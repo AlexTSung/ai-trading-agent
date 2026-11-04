@@ -1,16 +1,18 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-04T13:02:51.241820-05:00",
+  "timestamp": "2026-11-04T14:02:50.549658-05:00",
   "trades": [
     {
       "symbol": "FIS",
-      "action": "SELL",
-      "result": {
-        "id": "8700e622-41fb-4060-bc0c-7856baaf5f95",
-        "client_order_id": "agent-sell-FIS-20261104180253",
-        "created_at": "2026-11-04T18:02:53.537692148Z",
-        "updated_at": "2026-11-04T18:02:53.543366229Z",
-        "submitted_at": "2026-11-04T18:02:53.537692148Z",
+      "action": "DIP_BUY",
+      "qty": 253,
+      "limit_price": 29.83,
+      "order": {
+        "id": "d6ca21ab-8e63-4349-8098-4585d54255cc",
+        "client_order_id": "agent-buy-FIS-20261104190251",
+        "created_at": "2026-11-04T19:02:52.151190969Z",
+        "updated_at": "2026-11-04T19:02:52.177335827Z",
+        "submitted_at": "2026-11-04T19:02:52.151190969Z",
         "filled_at": null,
         "expired_at": null,
         "canceled_at": null,
@@ -22,16 +24,16 @@
         "symbol": "FIS",
         "asset_class": "us_equity",
         "notional": null,
-        "qty": "256",
+        "qty": "253",
         "filled_qty": "0",
         "filled_avg_price": null,
         "order_class": "",
         "order_type": "limit",
         "type": "limit",
-        "side": "sell",
-        "position_intent": "sell_to_close",
-        "time_in_force": "day",
-        "limit_price": "29.5",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "gtc",
+        "limit_price": "29.83",
         "stop_price": null,
         "status": "pending_new",
         "extended_hours": false,
@@ -41,24 +43,68 @@
         "hwm": null,
         "subtag": null,
         "source": null,
-        "expires_at": "2026-11-04T21:00:00Z",
+        "expires_at": "2027-02-02T21:00:00Z",
         "_ok": true,
-        "_agent_reason": "Sell signal: STRONG_SELL",
-        "_limit_price_used": 29.5,
-        "_urgent_exit": false,
-        "_released_orders": [
-          {
-            "order_id": "de275adc-ee43-4c8b-a199-223b640b43dd",
-            "client_order_id": "t2-oco-20261104180252-FIS",
-            "status_code": 204
-          },
-          {
-            "order_id": "38160475-0eef-4659-bcfd-6e4e0e8c2f18",
-            "client_order_id": "t1-oco-20261104180252-FIS",
-            "status_code": 204
-          }
-        ]
-      }
+        "_agent_reason": "Signal: DIP_BUY_23pct | DIP ask $29.83 | Limit: $29.83 | Budget (8% cap): $7550.99 \u2192 253 shares @ $29.83 | Tier TIER3 stop -10% | TIF gtc",
+        "_limit_price_used": 29.83
+      },
+      "exits": "deferred_until_fill",
+      "tif": "gtc",
+      "note": "Signal: DIP_BUY_23pct | DIP ask $29.83 | Limit: $29.83 | Budget (8% cap): $7550.99 \u2192 253 shares @ $29.83 | Tier TIER3 stop -10% | TIF gtc",
+      "judge_score": 8.5,
+      "dip_pct_drop": 23.33
+    },
+    {
+      "symbol": "TRMB",
+      "action": "DIP_BUY",
+      "qty": 130,
+      "limit_price": 57.87,
+      "order": {
+        "id": "7f23f41e-4135-485c-a01f-016e1e403cfd",
+        "client_order_id": "agent-buy-TRMB-20261104190252",
+        "created_at": "2026-11-04T19:02:53.087852101Z",
+        "updated_at": "2026-11-04T19:02:53.095070788Z",
+        "submitted_at": "2026-11-04T19:02:53.087852101Z",
+        "filled_at": null,
+        "expired_at": null,
+        "canceled_at": null,
+        "failed_at": null,
+        "replaced_at": null,
+        "replaced_by": null,
+        "replaces": null,
+        "asset_id": "c71569f2-3812-4dff-8fca-779357edda8f",
+        "symbol": "TRMB",
+        "asset_class": "us_equity",
+        "notional": null,
+        "qty": "130",
+        "filled_qty": "0",
+        "filled_avg_price": null,
+        "order_class": "",
+        "order_type": "limit",
+        "type": "limit",
+        "side": "buy",
+        "position_intent": "buy_to_open",
+        "time_in_force": "gtc",
+        "limit_price": "57.87",
+        "stop_price": null,
+        "status": "pending_new",
+        "extended_hours": false,
+        "legs": null,
+        "trail_percent": null,
+        "trail_price": null,
+        "hwm": null,
+        "subtag": null,
+        "source": null,
+        "expires_at": "2027-02-02T21:00:00Z",
+        "_ok": true,
+        "_agent_reason": "Signal: DIP_BUY_16pct | DIP ask $57.87 | Limit: $57.87 | Budget (8% cap): $7551.12 \u2192 130 shares @ $57.87 | Tier TIER3 stop -10% | TIF gtc",
+        "_limit_price_used": 57.87
+      },
+      "exits": "deferred_until_fill",
+      "tif": "gtc",
+      "note": "Signal: DIP_BUY_16pct | DIP ask $57.87 | Limit: $57.87 | Budget (8% cap): $7551.12 \u2192 130 shares @ $57.87 | Tier TIER3 stop -10% | TIF gtc",
+      "judge_score": 8.0,
+      "dip_pct_drop": 16.43
     }
   ],
   "skipped": [
@@ -86,11 +132,6 @@
       "symbol": "GOOGL",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "TSLA",
-      "signal": "STRONG_BUY",
-      "reason": "Already has a resting buy order \u2014 not stacking a second one (see GUARDRAIL: open_buy_order_syms, trade.py)"
     },
     {
       "symbol": "NOK",
@@ -188,17 +229,7 @@
       "reason": "Already has a resting buy order \u2014 not stacking a second one (see GUARDRAIL: open_buy_order_syms, trade.py)"
     },
     {
-      "symbol": "RKT",
-      "signal": "HOLD",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "BB",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "INTC",
+      "symbol": "NVTS",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -208,42 +239,37 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "FSLR",
+      "symbol": "RKT",
       "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "MU",
+      "symbol": "RIOT",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "CAR",
+      "symbol": "OUST",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "VRT",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "CVS",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "DUOL",
       "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "TTD",
-      "signal": "HOLD",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "AMD",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "IREN",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "XLE",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "CAT",
+      "symbol": "ARM",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -253,13 +279,18 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
+      "symbol": "CRIS",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
       "symbol": "NWGL",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "CRIS",
-      "signal": "HOLD",
+      "symbol": "INTC",
+      "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
@@ -268,12 +299,7 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "FTCI",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "SNXX",
+      "symbol": "SPCX",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -283,7 +309,12 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "SPCX",
+      "symbol": "SNXX",
+      "signal": "STRONG_SELL",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "FTCI",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -299,11 +330,6 @@
     },
     {
       "symbol": "CIFR",
-      "signal": "STRONG_SELL",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "RIOT",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -324,11 +350,6 @@
     },
     {
       "symbol": "F",
-      "signal": "HOLD",
-      "reason": "HOLD or no qualifying signal"
-    },
-    {
-      "symbol": "CVS",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
@@ -343,6 +364,11 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
+      "symbol": "VICI",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
       "symbol": "WMB",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
@@ -353,13 +379,13 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "VICI",
+      "symbol": "UBER",
       "signal": "HOLD",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "UBER",
-      "signal": "HOLD",
+      "symbol": "SLB",
+      "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
@@ -383,28 +409,30 @@
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "MDA",
+      "symbol": "AT",
+      "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "USD",
       "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     },
     {
-      "symbol": "AUTO",
-      "reason": "object of type 'NoneType' has no len()"
-    },
-    {
-      "symbol": "GIG",
-      "reason": "object of type 'NoneType' has no len()"
-    },
-    {
-      "symbol": "AIMG",
+      "symbol": "BRKR",
       "signal": "HOLD",
+      "reason": "HOLD or no qualifying signal"
+    },
+    {
+      "symbol": "ADNT",
+      "signal": "STRONG_SELL",
       "reason": "HOLD or no qualifying signal"
     }
   ],
   "vetoed_by_judge": [
     {
       "symbol": "SPY",
-      "signal": "STRONG_BUY",
+      "signal": "WEAK_BUY",
       "judge_recommendation": "HOLD",
       "judge_score": 0,
       "approval_gate": 7.0,
@@ -418,7 +446,16 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: price $269.08 is 5.8% above MA20 $254.31 (limit 3%) \u2014 do not chase"
+      "rationale": "CHASE VETO: price $268.10 is 5.4% above MA20 $254.26 (limit 3%) \u2014 do not chase"
+    },
+    {
+      "symbol": "TSLA",
+      "signal": "STRONG_BUY",
+      "judge_recommendation": "VETO",
+      "judge_score": 0.0,
+      "approval_gate": 7.0,
+      "is_discovery": false,
+      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "PYPL",
@@ -427,7 +464,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "SQQQ",
@@ -436,7 +473,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "SOXS",
@@ -445,7 +482,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "LLY",
@@ -454,7 +491,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 78 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "IBM",
@@ -472,16 +509,16 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
-      "symbol": "CCL",
-      "signal": "STRONG_BUY",
+      "symbol": "BB",
+      "signal": "WEAK_BUY",
       "judge_recommendation": "VETO",
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BB \u2014 auto-veto per Hard Rule 9"
     },
     {
       "symbol": "NVD",
@@ -517,7 +554,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "NCLH",
@@ -535,7 +572,7 @@
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+      "rationale": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
       "symbol": "FISV",
@@ -547,43 +584,27 @@
       "rationale": "CHASE VETO: RSI(14) 84 is above 60 \u2014 overbought, wait for a pullback"
     },
     {
-      "symbol": "MDU",
+      "symbol": "EMR",
       "signal": "STRONG_BUY",
       "judge_recommendation": "VETO",
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for MDU \u2014 auto-veto per Hard Rule 9"
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for EMR \u2014 auto-veto per Hard Rule 9"
     },
     {
-      "symbol": "PCOR",
+      "symbol": "CDW",
       "signal": "STRONG_BUY",
       "judge_recommendation": "VETO",
       "judge_score": 0.0,
       "approval_gate": 7.0,
       "is_discovery": false,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for PCOR \u2014 auto-veto per Hard Rule 9"
-    },
-    {
-      "symbol": "JKHY",
-      "signal": "STRONG_BUY",
-      "judge_recommendation": "VETO",
-      "judge_score": 0.0,
-      "approval_gate": 7.0,
-      "is_discovery": false,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for JKHY \u2014 auto-veto per Hard Rule 9"
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for CDW \u2014 auto-veto per Hard Rule 9"
     }
   ],
   "stop_losses": [],
   "orphan_cancels": [],
   "resting_entries": [
-    {
-      "symbol": "TSLA",
-      "action": "CANCELLED",
-      "order_id": "30952cf6-62d7-461c-b099-341a9169d09d",
-      "reason": "earnings blackout (Hard Rule 9) \u2014 would fill into the print",
-      "status_code": 204
-    },
     {
       "symbol": "CSX",
       "action": "KEPT",
@@ -597,209 +618,22 @@
       "reason": "still valid \u2014 bid rests"
     }
   ],
-  "exits_attached": [
-    {
-      "symbol": "FIS",
-      "qty": 256,
-      "entry": 29.38,
-      "exits": [
-        {
-          "id": "38160475-0eef-4659-bcfd-6e4e0e8c2f18",
-          "client_order_id": "t1-oco-20261104180252-FIS",
-          "created_at": "2026-11-04T18:02:52.280243677Z",
-          "updated_at": "2026-11-04T18:02:52.281017828Z",
-          "submitted_at": "2026-11-04T18:02:52.280243677Z",
-          "filled_at": null,
-          "expired_at": null,
-          "canceled_at": null,
-          "failed_at": null,
-          "replaced_at": null,
-          "replaced_by": null,
-          "replaces": null,
-          "asset_id": "e961359b-17b7-4d9e-a246-a6fa732a07e6",
-          "symbol": "FIS",
-          "asset_class": "us_equity",
-          "notional": null,
-          "qty": "102",
-          "filled_qty": "0",
-          "filled_avg_price": null,
-          "order_class": "oco",
-          "order_type": "limit",
-          "type": "limit",
-          "side": "sell",
-          "position_intent": "sell_to_close",
-          "time_in_force": "gtc",
-          "limit_price": "35.26",
-          "stop_price": null,
-          "status": "pending_new",
-          "extended_hours": false,
-          "legs": [
-            {
-              "id": "57dfd2e8-47d1-4967-be60-7dfc3d55db0e",
-              "client_order_id": "2808a3a1-688a-484a-92db-bdebacac7b47",
-              "created_at": "2026-11-04T18:02:52.280243677Z",
-              "updated_at": "2026-11-04T18:02:52.280975685Z",
-              "submitted_at": "2026-11-04T18:02:52.280243677Z",
-              "filled_at": null,
-              "expired_at": null,
-              "canceled_at": null,
-              "failed_at": null,
-              "replaced_at": null,
-              "replaced_by": null,
-              "replaces": null,
-              "asset_id": "e961359b-17b7-4d9e-a246-a6fa732a07e6",
-              "symbol": "FIS",
-              "asset_class": "us_equity",
-              "notional": null,
-              "qty": "102",
-              "filled_qty": "0",
-              "filled_avg_price": null,
-              "order_class": "oco",
-              "order_type": "stop",
-              "type": "stop",
-              "side": "sell",
-              "position_intent": "sell_to_close",
-              "time_in_force": "gtc",
-              "limit_price": null,
-              "stop_price": "26.44",
-              "status": "held",
-              "extended_hours": false,
-              "legs": null,
-              "trail_percent": null,
-              "trail_price": null,
-              "hwm": null,
-              "group_id": "cca6890c-2d39-469d-ac7b-8508e53b374f",
-              "group_role": "stop_loss",
-              "subtag": null,
-              "source": null,
-              "expires_at": "2027-02-02T21:00:00Z"
-            }
-          ],
-          "trail_percent": null,
-          "trail_price": null,
-          "hwm": null,
-          "group_id": "cca6890c-2d39-469d-ac7b-8508e53b374f",
-          "group_role": "take_profit",
-          "subtag": null,
-          "source": null,
-          "expires_at": "2027-02-02T21:00:00Z",
-          "_ok": true,
-          "_label": "t1",
-          "_target_price": 35.26,
-          "_stop_price": 26.44,
-          "_tier": "TIER3"
-        },
-        {
-          "id": "de275adc-ee43-4c8b-a199-223b640b43dd",
-          "client_order_id": "t2-oco-20261104180252-FIS",
-          "created_at": "2026-11-04T18:02:52.48873411Z",
-          "updated_at": "2026-11-04T18:02:52.489491346Z",
-          "submitted_at": "2026-11-04T18:02:52.48873411Z",
-          "filled_at": null,
-          "expired_at": null,
-          "canceled_at": null,
-          "failed_at": null,
-          "replaced_at": null,
-          "replaced_by": null,
-          "replaces": null,
-          "asset_id": "e961359b-17b7-4d9e-a246-a6fa732a07e6",
-          "symbol": "FIS",
-          "asset_class": "us_equity",
-          "notional": null,
-          "qty": "102",
-          "filled_qty": "0",
-          "filled_avg_price": null,
-          "order_class": "oco",
-          "order_type": "limit",
-          "type": "limit",
-          "side": "sell",
-          "position_intent": "sell_to_close",
-          "time_in_force": "gtc",
-          "limit_price": "38.2",
-          "stop_price": null,
-          "status": "pending_new",
-          "extended_hours": false,
-          "legs": [
-            {
-              "id": "32f289da-f73c-4d79-83a1-b075999486e3",
-              "client_order_id": "7fcdd04f-60e0-4f83-b410-d51f12d9efa0",
-              "created_at": "2026-11-04T18:02:52.48873411Z",
-              "updated_at": "2026-11-04T18:02:52.489442152Z",
-              "submitted_at": "2026-11-04T18:02:52.48873411Z",
-              "filled_at": null,
-              "expired_at": null,
-              "canceled_at": null,
-              "failed_at": null,
-              "replaced_at": null,
-              "replaced_by": null,
-              "replaces": null,
-              "asset_id": "e961359b-17b7-4d9e-a246-a6fa732a07e6",
-              "symbol": "FIS",
-              "asset_class": "us_equity",
-              "notional": null,
-              "qty": "102",
-              "filled_qty": "0",
-              "filled_avg_price": null,
-              "order_class": "oco",
-              "order_type": "stop",
-              "type": "stop",
-              "side": "sell",
-              "position_intent": "sell_to_close",
-              "time_in_force": "gtc",
-              "limit_price": null,
-              "stop_price": "26.44",
-              "status": "held",
-              "extended_hours": false,
-              "legs": null,
-              "trail_percent": null,
-              "trail_price": null,
-              "hwm": null,
-              "group_id": "fefb3e79-5d60-4584-ae23-6c6af092c9a1",
-              "group_role": "stop_loss",
-              "subtag": null,
-              "source": null,
-              "expires_at": "2027-02-02T21:00:00Z"
-            }
-          ],
-          "trail_percent": null,
-          "trail_price": null,
-          "hwm": null,
-          "group_id": "fefb3e79-5d60-4584-ae23-6c6af092c9a1",
-          "group_role": "take_profit",
-          "subtag": null,
-          "source": null,
-          "expires_at": "2027-02-02T21:00:00Z",
-          "_ok": true,
-          "_label": "t2",
-          "_target_price": 38.2,
-          "_stop_price": 26.44,
-          "_tier": "TIER3"
-        }
-      ]
-    }
-  ],
-  "blocked_by_rules": [
-    {
-      "symbol": "KMI",
-      "action": "SELL_BLOCKED",
-      "signal": "STRONG_SELL",
-      "reason": "Minimum hold: 24 of 30 days remaining on a high-conviction position and no thesis break."
-    }
-  ],
+  "exits_attached": [],
+  "blocked_by_rules": [],
   "phantom_equity": [
     {
       "symbol": "LBGJ",
       "qty": 154903.0,
       "avg_entry_price": 0.0288,
-      "current_price": 1.75,
-      "price_ratio": 60.76,
-      "unrealized_plpc": 59.76389,
-      "reported_market_value": 271080.25,
+      "current_price": 1.77,
+      "price_ratio": 61.46,
+      "unrealized_plpc": 60.45833,
+      "reported_market_value": 274178.31,
       "cost_basis": 4461.21,
-      "phantom_amount": 266619.04,
+      "phantom_amount": 269717.1,
       "reasons": [
-        "price $1.7500 is 61x its cost basis $0.0288",
-        "unrealized P&L 5,976% exceeds the 1,000% plausibility ceiling",
+        "price $1.7700 is 61x its cost basis $0.0288",
+        "unrealized P&L 6,046% exceeds the 1,000% plausibility ceiling",
         "entry price $0.0288 was below the $5.00 floor, where reverse splits are routine"
       ],
       "action": "TRADING_BLOCKED \u2014 verify the corporate action with the broker before buying or selling this symbol"
