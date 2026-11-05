@@ -20,6 +20,8 @@ from statistics import mean
 from version import get_version
 from market_time import et_today, et_today_iso, et_now
 import notify
+import symbol_stats
+import universe_policy
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 ROOT         = os.path.dirname(os.path.abspath(__file__))
@@ -276,12 +278,14 @@ def count_speculative_positions(research: dict) -> int:
     positions = research.get("positions", [])
     symbols_data = research.get("symbols", {})
     count = 0
+    sleeve = universe_policy.speculative_symbols()
     for pos in positions:
         sym = pos.get("symbol")
         sym_data = symbols_data.get(sym, {})
         source = sym_data.get("source", "watchlist")
         cap_b = (sym_data.get("fundamentals") or {}).get("market_cap_b")
-        is_spec = (source in DISCOVERY_SOURCES) or (cap_b is not None and cap_b < SPECULATIVE_CAP_THRESHOLD)
+        is_spec = ((source in DISCOVERY_SOURCES) or sym in sleeve
+                   or (cap_b is not None and cap_b < SPECULATIVE_CAP_THRESHOLD))
         if is_spec:
             count += 1
     return count
@@ -1101,8 +1105,8 @@ def score_symbol(symbol: str, research: dict) -> dict:
     # Speculative status drives the two gates below and the executor's stop tier.
     _funds = sym_data.get("fundamentals", {}) or {}
     _cap_b = _funds.get("market_cap_b")
-    is_speculative = is_discovery or (_cap_b is not None
-                                      and _cap_b < SPECULATIVE_CAP_THRESHOLD)
+    is_speculative = (is_discovery or symbol in universe_policy.speculative_symbols()
+                      or (_cap_b is not None and _cap_b < SPECULATIVE_CAP_THRESHOLD))
 
     # Holiday week veto for speculative names — thin liquidity, erratic moves.
     if is_speculative:
@@ -1322,6 +1326,10 @@ def run_judge_session() -> dict:
     # Load positions for avg-down eligibility checks
     positions_by_sym = {p["symbol"]: p for p in research.get("positions", [])}
 
+    universe_cfg = universe_policy.load_config()
+    track_record = symbol_stats.load_stats(JOURNAL_DIR) if universe_cfg else {}
+    universe_changes = []
+
     # Judge buy candidates (STRONG_BUY/WEAK_BUY) AND existing positions that may avg-down
     for sym, data in symbols_data.items():
         if sym == "SPY":  # SPY is macro ref, not a trade candidate
@@ -1334,7 +1342,11 @@ def run_judge_session() -> dict:
             continue
 
         scored = score_symbol(sym, research)
+        universe_policy.apply(scored, sym, track_record.get(sym), universe_cfg)
         results["scores"][sym] = scored
+        if (scored.get("universe_policy") or {}).get("would_change"):
+            universe_changes.append({"symbol": sym, "score": scored["score"],
+                                     "change": scored["universe_policy"]["would_change"]})
 
         if scored["recommendation"] == "APPROVE":
             results["approved"].append(sym)
@@ -1345,6 +1357,13 @@ def run_judge_session() -> dict:
         # Log the gate used so the markdown report is transparent
         scored["_gate_used"] = scored.get("approval_gate",
             SCORE_GATE_DISCOVERY if scored.get("is_discovery") else SCORE_GATE_WATCHLIST)
+
+    if universe_cfg:
+        results["universe"] = {
+            "status":   universe_cfg["status"],
+            "enforced": universe_cfg["enforced"],
+            "changes":  universe_changes,
+        }
 
     # Save judge output. Diff against any earlier run's approvals *today*
     # before overwriting, so a re-run (this pipeline fires hourly) notifies
@@ -1382,6 +1401,12 @@ def run_judge_session() -> dict:
                        if _h["applied"] else "none applied"))
     for _n in _h["notes"]:
         md_lines.append(f"  - {_n}")
+    if universe_cfg:
+        mode = "ENFORCED" if universe_cfg["enforced"] else "SHADOW (not enforced)"
+        md_lines.append(f"\n**Core universe — {mode}**: "
+                        f"{len(universe_changes)} approval(s) affected")
+        for c in universe_changes:
+            md_lines.append(f"  - {c['symbol']} ({c['score']}): {c['change']}")
     md_lines.append("\n---\n")
     for sym, scored in results["scores"].items():
         md_lines.append(format_judge_report(scored))

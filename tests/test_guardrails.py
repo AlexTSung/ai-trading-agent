@@ -33,6 +33,7 @@ os.environ.setdefault("APCA_API_KEY_ID", "test")
 os.environ.setdefault("APCA_API_SECRET_KEY", "test")
 
 import judge          # noqa: E402
+import universe_policy  # noqa: E402
 import reviewer       # noqa: E402
 import research      # noqa: E402
 import version       # noqa: E402
@@ -3069,6 +3070,12 @@ class TestJudgeNotifiesOnlyNewApprovals(unittest.TestCase):
 
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
+        # About notification diffing, not the core universe: the fake symbols
+        # here are outside it and would be capped at HOLD by the live config.
+        patcher = mock.patch.object(universe_policy, "CONFIG_PATH",
+                                    os.path.join(self.tmp, "no_core_universe.json"))
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     @staticmethod
     def _research(symbols):

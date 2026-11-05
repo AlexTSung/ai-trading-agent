@@ -1,0 +1,54 @@
+{
+  "status": "approved",
+  "_status_help": "proposed = SHADOW MODE: the Judge records what it would change in each judge.json under 'universe' but changes nothing. approved = ENFORCED: outside-core names are research-only, record-based gates apply, and 'speculative' core names get the speculative rules. Only Alex flips this.",
+  "approved_on": "2026-11-04",
+  "approved_by": "Alex",
+  "core": {
+    "AAPL":  {"added": "2026-11-04", "why": "Positive record (2 trades, +5.3% avg); 7 Judge approvals; mega-cap anchor"},
+    "MSFT":  {"added": "2026-11-04", "why": "Most-approved name (13); 3 trades, -2.0% avg, so it starts on the losing-record gate"},
+    "NVDA":  {"added": "2026-11-04", "why": "8 Judge approvals; most-traded name (4 trades, -0.8% avg)"},
+    "GOOGL": {"added": "2026-11-04", "why": "Mega-cap; only 1 closed trade (-8.8%), thin record"},
+    "AMZN":  {"added": "2026-11-04", "why": "Mega-cap; scored 35 times, 1 approval, never traded"},
+    "CEG":   {"added": "2026-11-04", "why": "Best record on the list (2 trades, both wins, +4.7% avg). Kept over VST, the same ai_power bet"},
+    "PYPL":  {"added": "2026-11-04", "why": "1 trade, win (+4.0%)"},
+    "COP":   {"added": "2026-11-04", "why": "5 approvals, scored 36 times, never traded. Energy diversifier"},
+    "DT":    {"added": "2026-11-04", "why": "3 approvals; kept over DDOG (0 wins in 2 trades), same industry, one bet"},
+    "TGT":   {"added": "2026-11-04", "why": "2 approvals; consumer defensive"},
+    "MRK":   {"added": "2026-11-04", "why": "Healthcare; scored 34 times, 1 approval"},
+    "LLY":   {"added": "2026-11-04", "why": "Healthcare; scored 20 times, 0 approvals so far"},
+    "PFE":   {"added": "2026-11-04", "why": "2 approvals in 7 scores; defensive mega-cap"},
+    "IBM":   {"added": "2026-11-04", "why": "1 approval in 6 scores; mega-cap value"},
+    "KDP":   {"added": "2026-11-04", "why": "1 approval in 4 scores; defensive large-cap"},
+    "GEV":   {"added": "2026-11-04", "why": "Power equipment, no commodity exposure; not the same bet as CEG; never scored yet"},
+    "NOW":   {"added": "2026-11-04", "why": "Alex: tech play. Enterprise workflow software; 2 prior Judge approvals as a discovery name"},
+    "HOOD":  {"added": "2026-11-04", "why": "Alex: tech play. Retail brokerage/crypto fintech; high beta"},
+    "TWLO":  {"added": "2026-11-04", "why": "Alex: tech play. Communications platform"},
+    "MSTR":  {"added": "2026-11-04", "speculative": true, "why": "Alex: bitcoin long-hold play. Trades as a leveraged bitcoin proxy, so far more volatile than the rest of core"},
+    "RKLB":  {"added": "2026-11-04", "speculative": true, "why": "Alex: blue-ocean, high risk / high opportunity (launch and space systems)"},
+    "ASTS":  {"added": "2026-11-04", "speculative": true, "why": "Alex: blue-ocean, high risk / high opportunity (satellite-to-phone broadband)"},
+    "BBAI":  {"added": "2026-11-04", "speculative": true, "why": "Alex: blue-ocean, high risk / high opportunity (AI analytics for defense/government)"}
+  },
+  "hedge": {
+    "SQQQ": "Bearish Playbook instrument; governed by its own max-hold rule, exempt from core gating",
+    "SPXS": "Bearish Playbook instrument; exempt",
+    "SOXS": "Bearish Playbook instrument; exempt",
+    "VIXY": "Volatility hedge; exempt"
+  },
+  "probation": {
+    "QQQ":   "3 trades, 33% wins, -4.6% avg. Overlaps NVDA/MSFT/AAPL/GOOGL/AMZN",
+    "TSLA":  "1 trade, loss; high beta",
+    "NOK":   "3 trades, 0 wins, -9.0% avg",
+    "DDOG":  "2 trades, 0 wins, -5.9% avg. Same bet as DT",
+    "VST":   "Same ai_power bet as CEG",
+    "ARGX":  "Highest-volatility name on the list, binary pipeline risk",
+    "DTM":   "Never scored",
+    "VZ":    "Never approved, bearish headlines flagged when added",
+    "LRCX":  "Deeply oversold when added, never scored",
+    "ADBE":  "Oversold when added, 2 scores",
+    "CMCSA": "Oversold when added, never scored",
+    "CSX":   "Oversold when added, 2 scores"
+  },
+  "discovery": {
+    "mode": "research_only"
+  }
+}

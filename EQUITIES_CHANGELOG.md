@@ -41,6 +41,62 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v6.1.0] — unreleased
+
+**MINOR** — Core universe (23 names, enforced), per-symbol track-record gates, speculative sleeve, and a weekly universe review
+
+### Strategy / CLAUDE.md changes
+- New CLAUDE.md section "Core Universe & Track Record" documents the rules,
+  the status switch, and the weekly review.
+- **Core universe, enforced as of 2026-11-04 (Alex approved).** 23 core names: the
+  16 proposed (AAPL, MSFT, NVDA, GOOGL, AMZN, CEG, PYPL, COP, DT, TGT, MRK, LLY,
+  PFE, IBM, KDP, GEV) plus Alex's NOW, HOOD, TWLO (tech), MSTR (bitcoin
+  long-hold) and RKLB, ASTS, BBAI (blue ocean). Any name outside core is
+  research-only: researched and scored, APPROVE capped at HOLD. Hedge instruments
+  (SQQQ/SPXS/SOXS/VIXY) are exempt.
+- **Record gate.** An approval bar that rises with the lack of a record: 8.0 with
+  no closed trades, 7.5 with 1-2, 8.0 with 3+ and a negative average P&L. Always
+  combined with the Judge's own gate via `max()`.
+- **Speculative sleeve.** MSTR, RKLB, ASTS, BBAI get the speculative rules
+  (holiday-week veto, max two speculative positions open at once) and size at 2-3%.
+  No tier was loosened: they take Tier 3's 10% stop by default.
+- **Weekly review.** `universe_review.py` runs every Monday in
+  `weekly-self-review.yml` and proposes cuts and adds. It never edits the list.
+- 7 names added to `watchlist.json` (40 total) so they are researched as
+  watchlist sources, not discovery names.
+
+### Code changes
+- `symbol_stats.py` (new): per-symbol trades, win rate, average P&L, and Judge
+  score for winners vs losers. Excludes quarantined symbols, options contracts,
+  +/-1000% data faults and the -100% calibration placeholder.
+- `universe_policy.py` (new): config validation, bucket lookup, `record_gate()`,
+  `apply()`, `speculative_symbols()`. Can only turn APPROVE into HOLD; never
+  upgrades, never lowers a gate. A malformed config raises rather than silently
+  disabling the policy. Shadow mode (`"status": "proposed"`) records without
+  changing anything.
+- `universe_review.py` (new): weekly review, plus explicit `add` / `cut` commands
+  that validate the config, restore it on failure, and log to
+  `logs/proposals/universe-changes.csv`.
+- `judge.py`: `run_judge_session()` applies the policy after scoring and before
+  bucketing, so `approved` / `held` / `vetoed` and everything downstream
+  (notifications, `trade.py`, `robinhood_trade.py`) see the final recommendation.
+  The speculative sleeve feeds `is_speculative` and `count_speculative_positions`.
+- `.github/workflows/weekly-self-review.yml`: new "Review core universe" step.
+- Tests: `tests/test_universe_policy.py` and `tests/test_universe_review.py`
+  (40 new). `TestJudgeNotifiesOnlyNewApprovals` now points the policy at a
+  nonexistent config, because its fake symbols are outside the live core.
+
+### Comparability
+- Does not invalidate the prior record: every rule here tightens or is neutral, and
+  no scoring weight, stop tier, or Hard Rule changed.
+- The 7 new names are new watchlist symbols (MINOR by this file's table).
+- Replaying the last 15 Judge days in memory against the first 16 names would have
+  cut approvals from 40 to 22; all 18 blocked were outside the core. The record
+  gate blocked none at current score levels. The replay uses today's stats for
+  every day, not point-in-time stats.
+- Known gap: MSTR was requested as a long-hold, but Tier 3's 10% stop will likely
+  exit it on volatility. Not changed here, because loosening a stop is MAJOR.
+
 ## [v6.0.0] — unreleased
 
 **MAJOR** — Real-money book: Hard Rule 2 limit-price formula replaced by realistic_entry_limit() (near-ask, ATR-scaled, 0.1-0.5%); do-not-chase made explicit

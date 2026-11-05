@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v6.0.0
+> **Version:** v6.1.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -726,6 +726,79 @@ configured on Alex's machine only — see "Separate real-money channel" above.
                    │ daily + EOD │
                    └─────────────┘
 ```
+
+## Core Universe & Track Record
+
+**Why this exists.** Through v5.2.0 the Judge scored ~86 researched symbols a
+run and approved from any source. Of 34 closed round trips, the 12 in
+off-watchlist discovery names won 8% of the time and lost $6.3K of the $8.3K
+total; the 22 in watchlist names won 32%. Nothing fed a symbol's own history
+back into its approval.
+
+**Files.** `core_universe.json` (the lists and the on/off switch),
+`universe_policy.py` (the rules), `symbol_stats.py` (the per-symbol record;
+`python3 symbol_stats.py [SYMBOL...]` prints it), `universe_review.py` (the weekly
+review and the add/cut commands).
+
+**Rules** (tighten-only: they turn APPROVE into HOLD, never the reverse, and
+never lower a gate):
+- **Core only.** Only names in `core` may be approved. Everything else —
+  `probation` watchlist names and all discovery sources — is research-only:
+  still researched and scored, APPROVE capped at HOLD. `hedge` names
+  (Bearish Playbook instruments) are exempt from both rules.
+- **Record gate.** Required score = `max(Judge's own gate, record gate)`:
+  8.0 with no closed trades, 7.5 with 1-2, 8.0 with 3+ closed trades and a
+  negative average P&L, otherwise no extra bar. The record is closed round
+  trips only; quarantined symbols, options contracts, +/-1000% data faults and
+  the -100% calibration placeholder never count.
+- **Speculative sleeve.** Core names tagged `"speculative": true` (MSTR, RKLB,
+  ASTS, BBAI as of 2026-11-04) get the Judge's speculative rules even though they
+  are not discovery names and mostly sit above the $500M small-cap line: the
+  holiday-week veto, and the cap of two speculative positions open at once
+  (`count_speculative_positions` counts them). They also size at 2-3% per
+  `watchlist.json`, and take the Tier 3 10% stop (`tier_for` defaults any
+  unlisted symbol to Tier 3). None of the 7 names added on 2026-11-04 was added
+  to Tier 1 or 2: that would loosen Hard Rule 3.
+
+**Status switch.** `"status": "proposed"` is shadow mode: the policy is computed
+and written to `judge.json` under `universe` (and per symbol under
+`universe_policy`) but changes nothing, and the speculative sleeve is inert.
+`"approved"` enforces. **Alex approved the 23-name list on 2026-11-04**, and it
+is enforced. Only Alex flips the switch. Adding or cutting a name is a one-line
+change (tightening or neutral, MINOR); never edit the status or lists to
+loosen a rule without a MAJOR bump.
+
+**Weekly review — so the list does not go stale.** `weekly-self-review.yml` runs
+`universe_review.py` every Monday (13:15 UTC) from local files only (no broker
+keys), writes `logs/proposals/universe-review-YYYY-MM-DD.{md,json}`, and sends an
+ntfy notification when it has a suggestion. It **proposes; it never edits
+`core_universe.json`.**
+- *Cut* is suggested on hard evidence alone (3+ closed trades averaging -5% or
+  worse), or on soft evidence: sell signal in 70%+ of the last 14 sessions, no
+  winning trade yet, negative analyst consensus, or no buy signal reaching the
+  Judge in 28 days. A normal name needs 2 soft flags; a speculative name needs 1.
+  A name in the core under 21 days is only flagged on hard evidence.
+- *Add* is suggested for non-core names that were approve-worthy on 2+ days in
+  the last 14, with a best score of at least 8.0, a market cap of at least $2B
+  and no losing record. At most 5 per week.
+- Each review also lists every core name's growth and risk metrics (revenue
+  growth, ATR%, distance from MA50, analyst counts, record), so growth potential
+  and risk are visible together.
+- To act: `python3 universe_review.py add SYMBOL "why" [--speculative]` or
+  `python3 universe_review.py cut SYMBOL "why"`. Both validate the config, log to
+  `logs/proposals/universe-changes.csv`, and a cut moves the name to probation
+  (still researched). `add` also puts a new name on `watchlist.json`. Cutting a
+  name stops new buys only: an open position keeps its stop and exit rules.
+
+**Known limits.**
+- A research-only name can never build a closed-trade record, because it cannot
+  trade. Promotion to core is therefore a human decision, informed by the weekly
+  review's add list rather than by a record the name has no way to earn.
+- MSTR was added as a bitcoin **long-hold**, but Tier 3 gives it a 10% stop and it
+  routinely moves that much in days, so it will not behave like a long hold
+  unless Hard Rule 3 is changed on purpose (a MAJOR change).
+- `correlation_group` tags in `watchlist.json` (space: RKLB/ASTS; crypto_beta:
+  MSTR/HOOD) are documentation only. Nothing reads them.
 
 ## Social Screener Config (StockTwits)
 - **Source**: StockTwits API — free, no API key required, purpose-built for stock mentions

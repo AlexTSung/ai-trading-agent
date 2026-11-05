@@ -1,5 +1,10 @@
 name: Weekly Self-Review Proposals
 
+# Also runs universe_review.py, the weekly review of the core universe
+# (core_universe.json): which core names look stale and should be cut, and which
+# outside names the Judge keeps wanting to approve. Like self_review.py it only
+# PROPOSES -- cutting or adding a name is an explicit command Alex runs.
+
 # Runs self_review.py's pattern scan weekly and commits logs/proposals/proposals.json.
 #
 # This workflow NEVER implements anything. It only turns patterns
@@ -48,6 +53,11 @@ jobs:
           echo "--- pending proposals ---"
           python3 self_review.py list
 
+      - name: Review core universe
+        run: python3 universe_review.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+
       - name: Commit proposals log
         if: always()
         run: |
@@ -65,5 +75,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: self-review-proposals-${{ github.run_id }}
-          path: logs/proposals/proposals.json
+          path: |
+            logs/proposals/proposals.json
+            logs/proposals/universe-review-*.md
           retention-days: 90
