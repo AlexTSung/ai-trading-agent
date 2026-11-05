@@ -7,9 +7,9 @@
 |-----------|----------|---------|--------|
 | 📊 Closed trades | 15 | 11 | ❌ |
 | 🎯 Win rate | 55% | 73% | ✅ |
-| 💰 Profit factor | 1.50 | 5.31 | ✅ |
-| 📈 Expectancy/trade | >$0 | $369.62 | ✅ |
-| 🏦 Net return | 3.0% | 4.07% | ✅ |
+| 💰 Profit factor | 1.50 | 3.50 | ✅ |
+| 📈 Expectancy/trade | >$0 | $325.32 | ✅ |
+| 🏦 Net return | 3.0% | 3.58% | ✅ |
 
 ## Performance Detail
 | | |
@@ -18,13 +18,13 @@
 | Wins / Losses | 8W / 3L |
 | Win rate | 73% |
 | Gross wins | $5,009.93 |
-| Gross losses | $944.12 |
-| Profit factor | 5.31 |
+| Gross losses | $1,431.42 |
+| Profit factor | 3.50 |
 | Avg win | $626.24 |
-| Avg loss | $314.71 |
-| Expectancy/trade | $369.62 |
-| Total realized P&L | $+4,065.82 |
-| Net return | 4.07% |
+| Avg loss | $477.14 |
+| Expectancy/trade | $325.32 |
+| Total realized P&L | $+3,578.51 |
+| Net return | 3.58% |
 
 ## Blockers to Graduation
 - Need **4 more closed trades** (have 11, need 15)
