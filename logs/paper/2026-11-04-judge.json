@@ -1,6 +1,6 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-04T18:54:29.424899-05:00",
+  "timestamp": "2026-11-04T20:01:17.838704-05:00",
   "date": "2026-11-04",
   "approved": [
     "TSLA"
@@ -31,6 +31,8 @@
     "KO",
     "PPL",
     "SO",
+    "FLOW",
+    "NUS",
     "FIS",
     "TRMB"
   ],
@@ -353,6 +355,30 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
+    "FLOW": {
+      "symbol": "FLOW",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for FLOW \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "_gate_used": 7.0
+    },
+    "NUS": {
+      "symbol": "NUS",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "Quality veto: MICRO_CAP VETO: $0.24B market cap \u2014 too small for discovery buys",
+      "criteria": {
+        "quality": {
+          "score": 0.0,
+          "note": "MICRO_CAP VETO: $0.24B market cap \u2014 too small for discovery buys",
+          "veto": true
+        }
       },
       "_gate_used": 7.0
     },
