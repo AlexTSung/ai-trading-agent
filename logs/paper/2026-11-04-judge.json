@@ -1,13 +1,13 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-04T22:02:03.023251-05:00",
+  "timestamp": "2026-11-04T23:01:47.237064-05:00",
   "date": "2026-11-04",
   "approved": [],
   "held": [
+    "AAPL",
     "TSLA"
   ],
   "vetoed": [
-    "AAPL",
     "MSFT",
     "AMZN",
     "PYPL",
@@ -31,21 +31,75 @@
     "KO",
     "PPL",
     "SO",
+    "CL",
     "CMS",
-    "BETR",
+    "CV",
     "FIS",
     "TRMB"
   ],
   "scores": {
     "AAPL": {
       "symbol": "AAPL",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: AAPL flagged by the morning earnings watch \u2014 no entry within 3 trading days of a report",
-      "criteria": {
-        "earnings_veto": true
+      "recommendation": "HOLD",
+      "score": 5.6,
+      "approval_gate": 8.0,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
+          "Win rate 95% CI on 34 trips: 12%\u201340%",
+          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 34,
+        "band": 0.15
       },
-      "_gate_used": 7.0
+      "vix": 20.83,
+      "is_discovery": false,
+      "is_speculative": false,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "2.0/2.0",
+        "news": "0.5/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "0.0/2.0",
+        "volatility": "0.75/1.0",
+        "quality": "2.35/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $342.95 > MA50 $334.88, price $349.56 above both [capped 3.0\u21922.0 at weight 2.0]"
+        },
+        "news": {
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $767.57 >= MA50 $767.05"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding AAPL \u2014 price above entry, avg-down not warranted"
+        },
+        "volatility": {
+          "score": 0.75,
+          "note": "VIX 20.8 \u2014 moderate volatility (NORMAL)"
+        },
+        "quality": {
+          "score": 2.35,
+          "note": "Mega-cap $5079B; Profitable; 18 analyst buy ratings"
+        }
+      },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $342.95 > MA50 $334.88, price $349.56 above both [capped 3.0\u21922.0 at weight 2.0]. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $767.57 >= MA50 $767.05. Portfolio: Already holding AAPL \u2014 price above entry, avg-down not warranted. Volatility: VIX 20.8 \u2014 moderate volatility (NORMAL). Quality: Mega-cap $5079B; Profitable; 18 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "_gate_used": 8.0
     },
     "MSFT": {
       "symbol": "MSFT",
@@ -358,6 +412,17 @@
       },
       "_gate_used": 7.0
     },
+    "CL": {
+      "symbol": "CL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "_gate_used": 7.0
+    },
     "CMS": {
       "symbol": "CMS",
       "recommendation": "VETO",
@@ -369,14 +434,13 @@
       },
       "_gate_used": 7.0
     },
-    "BETR": {
-      "symbol": "BETR",
+    "CV": {
+      "symbol": "CV",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 75 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for CV \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 75 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "_gate_used": 7.0
     },
