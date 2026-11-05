@@ -1,98 +1,98 @@
 {
-  "timestamp": "2026-11-05T14:00:32.139339",
+  "timestamp": "2026-11-05T15:00:25.834133",
   "run_type": "morning_intelligence",
   "fear_greed": {
     "source": "fred_vix_proxy",
-    "vix": 20.83,
-    "vix_date": "2026-11-03",
-    "score": 45,
-    "rating": "Neutral",
-    "signal": "NEUTRAL \u2014 normal market",
-    "timestamp": "2026-11-05T14:00:32.374712"
+    "vix": 16.61,
+    "vix_date": "2026-11-04",
+    "score": 65,
+    "rating": "Greed",
+    "signal": "GREED \u2014 risk-on, watch exits",
+    "timestamp": "2026-11-05T15:00:25.935223"
   },
   "vix": {
     "symbol": "VIXY",
-    "price": 16.8,
+    "price": 17.99,
     "note": "VIXY proxy for VIX"
   },
   "global_markets": {
-    "timestamp": "2026-11-05T14:00:32.702235",
+    "timestamp": "2026-11-05T15:00:26.762078",
     "source": "global_etfs",
     "markets": {
       "EWJ": {
         "description": "Japan (Nikkei proxy)",
-        "prev_close": 92.6,
-        "today": 93.87,
-        "change_pct": 1.37,
-        "signal": "UP"
+        "prev_close": 93.87,
+        "today": 91.04,
+        "change_pct": -3.01,
+        "signal": "DOWN"
       },
       "EWG": {
         "description": "Germany (DAX proxy)",
-        "prev_close": 42.06,
-        "today": 43.49,
-        "change_pct": 3.41,
-        "signal": "UP"
+        "prev_close": 43.49,
+        "today": 43.1,
+        "change_pct": -0.91,
+        "signal": "DOWN"
       },
       "FXI": {
         "description": "China (HSI/CSI proxy)",
-        "prev_close": 33.2,
-        "today": 34.59,
-        "change_pct": 4.19,
+        "prev_close": 34.59,
+        "today": 34.92,
+        "change_pct": 0.97,
         "signal": "UP"
       },
       "EWU": {
         "description": "UK (FTSE proxy)",
-        "prev_close": 47.28,
-        "today": 48.94,
-        "change_pct": 3.5,
-        "signal": "UP"
+        "prev_close": 48.94,
+        "today": 48.8,
+        "change_pct": -0.29,
+        "signal": "FLAT"
       },
       "EWZ": {
         "description": "Brazil (Ibovespa proxy)",
-        "prev_close": 31.74,
-        "today": 32.27,
-        "change_pct": 1.67,
-        "signal": "UP"
+        "prev_close": 32.27,
+        "today": 32.1,
+        "change_pct": -0.53,
+        "signal": "DOWN"
       },
       "EEM": {
         "description": "Emerging markets",
-        "prev_close": 61.11,
-        "today": 61.62,
-        "change_pct": 0.83,
-        "signal": "UP"
+        "prev_close": 61.62,
+        "today": 59.62,
+        "change_pct": -3.25,
+        "signal": "DOWN"
       },
       "GLD": {
         "description": "Gold",
-        "prev_close": 359.28,
-        "today": 372.42,
-        "change_pct": 3.66,
+        "prev_close": 372.42,
+        "today": 376.72,
+        "change_pct": 1.15,
         "signal": "UP"
       },
       "USO": {
         "description": "Oil",
-        "prev_close": 158.18,
-        "today": 145.37,
-        "change_pct": -8.1,
-        "signal": "DOWN"
+        "prev_close": 145.37,
+        "today": 147.06,
+        "change_pct": 1.17,
+        "signal": "UP"
       },
       "TLT": {
         "description": "US 20yr Treasuries (rates proxy)",
-        "prev_close": 81.08,
-        "today": 81.77,
-        "change_pct": 0.84,
-        "signal": "UP"
+        "prev_close": 81.77,
+        "today": 81.86,
+        "change_pct": 0.12,
+        "signal": "FLAT"
       },
       "UUP": {
         "description": "US Dollar index",
-        "prev_close": 29.0,
-        "today": 28.91,
-        "change_pct": -0.34,
+        "prev_close": 28.91,
+        "today": 28.93,
+        "change_pct": 0.09,
         "signal": "FLAT"
       }
     }
   },
   "macro": {
-    "timestamp": "2026-11-05T14:00:33.473775",
+    "timestamp": "2026-11-05T15:00:27.224541",
     "source": "fred_csv",
     "macro": {
       "FEDFUNDS": {
@@ -127,230 +127,230 @@
       },
       "VIXCLS": {
         "label": "VIX Closing Price",
-        "value": "20.83",
-        "date": "2026-11-03",
-        "note": "Elevated \u2014 use standard sizing"
+        "value": "16.61",
+        "date": "2026-11-04",
+        "note": "LOW VOL \u2014 risk-on, full sizing allowed"
       }
     }
   },
   "market_discovery": {
-    "timestamp": "2026-11-05T14:00:33.738605",
+    "timestamp": "2026-11-05T15:00:27.739267",
     "source": "alpaca_discovery",
     "discovery": {
       "most_active": [
         {
+          "symbol": "LABT",
+          "volume": 281136739,
+          "trade_count": 422106
+        },
+        {
           "symbol": "SOXL",
-          "volume": 247019574,
-          "trade_count": 2621230
+          "volume": 115094895,
+          "trade_count": 1332939
         },
         {
-          "symbol": "INTC",
-          "volume": 189330593,
-          "trade_count": 1323124
-        },
-        {
-          "symbol": "CRIS",
-          "volume": 163507427,
-          "trade_count": 638629
-        },
-        {
-          "symbol": "NVD",
-          "volume": 158997395,
-          "trade_count": 41178
-        },
-        {
-          "symbol": "NWGL",
-          "volume": 154620391,
-          "trade_count": 102663
-        },
-        {
-          "symbol": "NVDA",
-          "volume": 149716351,
-          "trade_count": 2306270
-        },
-        {
-          "symbol": "HPAI",
-          "volume": 143320645,
-          "trade_count": 224546
-        },
-        {
-          "symbol": "SPCX",
-          "volume": 135526176,
-          "trade_count": 1600837
-        },
-        {
-          "symbol": "SOXS",
-          "volume": 114958186,
-          "trade_count": 896889
-        },
-        {
-          "symbol": "TQQQ",
-          "volume": 112969213,
-          "trade_count": 590055
-        },
-        {
-          "symbol": "ORCL",
-          "volume": 111840007,
-          "trade_count": 763139
+          "symbol": "BDMD",
+          "volume": 96034000,
+          "trade_count": 68373
         },
         {
           "symbol": "SNXX",
-          "volume": 108739167,
-          "trade_count": 149488
+          "volume": 60929576,
+          "trade_count": 73900
         },
         {
-          "symbol": "PLUG",
-          "volume": 105272821,
-          "trade_count": 128752
+          "symbol": "ZNB",
+          "volume": 59506770,
+          "trade_count": 267321
         },
         {
-          "symbol": "CIFR",
-          "volume": 104041553,
-          "trade_count": 289785
+          "symbol": "JDZG",
+          "volume": 57348792,
+          "trade_count": 133620
         },
         {
-          "symbol": "GRAB",
-          "volume": 98860122,
-          "trade_count": 144943
+          "symbol": "PLCE",
+          "volume": 55102266,
+          "trade_count": 78687
         },
         {
-          "symbol": "FTCI",
-          "volume": 97287550,
-          "trade_count": 424013
+          "symbol": "CDT",
+          "volume": 52490204,
+          "trade_count": 30881
+        },
+        {
+          "symbol": "NVDA",
+          "volume": 45905970,
+          "trade_count": 772279
+        },
+        {
+          "symbol": "ELPW",
+          "volume": 44705994,
+          "trade_count": 419451
+        },
+        {
+          "symbol": "INTC",
+          "volume": 42420937,
+          "trade_count": 367667
+        },
+        {
+          "symbol": "SOXS",
+          "volume": 40743152,
+          "trade_count": 437080
         },
         {
           "symbol": "SHFS",
-          "volume": 94884095,
-          "trade_count": 42081
+          "volume": 38873092,
+          "trade_count": 12845
         },
         {
-          "symbol": "AMZN",
-          "volume": 93303945,
-          "trade_count": 1246535
+          "symbol": "TQQQ",
+          "volume": 37684089,
+          "trade_count": 291646
         },
         {
-          "symbol": "RWM",
-          "volume": 89863688,
-          "trade_count": 24236
+          "symbol": "KORU",
+          "volume": 36962193,
+          "trade_count": 143886
         },
         {
-          "symbol": "AAPL",
-          "volume": 89811684,
-          "trade_count": 1304266
+          "symbol": "SPCX",
+          "volume": 33049082,
+          "trade_count": 472443
+        },
+        {
+          "symbol": "DVLT",
+          "volume": 29285413,
+          "trade_count": 13028
+        },
+        {
+          "symbol": "FLYE",
+          "volume": 21356030,
+          "trade_count": 150271
+        },
+        {
+          "symbol": "TSLL",
+          "volume": 20660309,
+          "trade_count": 43119
+        },
+        {
+          "symbol": "NOK",
+          "volume": 19647950,
+          "trade_count": 30382
         }
       ],
       "top_gainers": [],
       "top_losers": [
         {
+          "symbol": "DAVEW",
+          "change_pct": -67.53,
+          "price": 0.25
+        },
+        {
+          "symbol": "CINGW",
+          "change_pct": -62.86,
+          "price": 0.0013
+        },
+        {
+          "symbol": "VCYT",
+          "change_pct": -55.46,
+          "price": 23.3899
+        },
+        {
+          "symbol": "PCTTW",
+          "change_pct": -53.49,
+          "price": 0.2
+        },
+        {
+          "symbol": "MNTN",
+          "change_pct": -53.28,
+          "price": 4.845
+        },
+        {
+          "symbol": "SNWV",
+          "change_pct": -50.96,
+          "price": 2.81
+        },
+        {
+          "symbol": "ANVS",
+          "change_pct": -46.11,
+          "price": 0.6521
+        },
+        {
+          "symbol": "HPAIW",
+          "change_pct": -44.7,
+          "price": 0.012
+        },
+        {
           "symbol": "PARA",
-          "change_pct": -88.27,
-          "price": 0.319
+          "change_pct": -41.91,
+          "price": 0.1853
         },
         {
-          "symbol": "BTBDW",
-          "change_pct": -57.5,
-          "price": 0.0051
+          "symbol": "BZFD",
+          "change_pct": -38.71,
+          "price": 0.5643
         },
         {
-          "symbol": "AMPGZ",
-          "change_pct": -54.84,
-          "price": 0.0084
+          "symbol": "PCT",
+          "change_pct": -37.46,
+          "price": 1.745
         },
         {
-          "symbol": "DJTU",
-          "change_pct": -49.67,
-          "price": 2.28
+          "symbol": "OSTX",
+          "change_pct": -36.74,
+          "price": 0.7275
         },
         {
-          "symbol": "OXBRW",
-          "change_pct": -47.58,
-          "price": 0.131
+          "symbol": "NWGL",
+          "change_pct": -34.77,
+          "price": 0.0362
         },
         {
-          "symbol": "PARAW",
-          "change_pct": -47.5,
-          "price": 0.0063
-        },
-        {
-          "symbol": "HUTG",
-          "change_pct": -45.66,
-          "price": 3.19
-        },
-        {
-          "symbol": "LUCYW",
-          "change_pct": -45.21,
-          "price": 0.0269
-        },
-        {
-          "symbol": "STLL",
-          "change_pct": -42.98,
-          "price": 3.45
-        },
-        {
-          "symbol": "PSQH.WS",
-          "change_pct": -42.71,
-          "price": 0.0114
-        },
-        {
-          "symbol": "CIFG",
-          "change_pct": -41.25,
-          "price": 0.47
+          "symbol": "TEAD",
+          "change_pct": -34.76,
+          "price": 0.1796
         },
         {
           "symbol": "PASW",
-          "change_pct": -40.93,
-          "price": 2.93
+          "change_pct": -33.79,
+          "price": 1.94
         },
         {
-          "symbol": "CENN",
-          "change_pct": -40.54,
-          "price": 0.177
+          "symbol": "RGTIW",
+          "change_pct": -33.04,
+          "price": 1.5
         },
         {
-          "symbol": "CIFU",
-          "change_pct": -40.21,
-          "price": 1.16
+          "symbol": "AXTL",
+          "change_pct": -31.75,
+          "price": 0.72
         },
         {
-          "symbol": "NRIX",
-          "change_pct": -38.23,
-          "price": 15.95
+          "symbol": "AXTU",
+          "change_pct": -31.59,
+          "price": 9.9677
         },
         {
-          "symbol": "PBMWW",
-          "change_pct": -38.02,
-          "price": 0.0119
+          "symbol": "BEG",
+          "change_pct": -31.46,
+          "price": 16
         },
         {
-          "symbol": "XRPNW",
-          "change_pct": -36.82,
-          "price": 1.63
-        },
-        {
-          "symbol": "CIFC",
-          "change_pct": -36.24,
-          "price": 0.95
-        },
-        {
-          "symbol": "RZAI",
-          "change_pct": -35.14,
-          "price": 2.51
-        },
-        {
-          "symbol": "FPSX",
-          "change_pct": -34.47,
-          "price": 1.245
+          "symbol": "PENU",
+          "change_pct": -31.44,
+          "price": 9.2346
         }
       ]
     }
   },
   "reddit": {
-    "timestamp": "2026-11-05T14:00:34.984843",
+    "timestamp": "2026-11-05T15:00:29.053029",
     "source": "reddit",
     "tickers": []
   },
   "earnings_watch": {
-    "timestamp": "2026-11-05T14:00:36.372824",
+    "timestamp": "2026-11-05T15:00:32.244939",
     "earnings_watch": [
       {
         "symbol": "DDOG",
@@ -373,7 +373,7 @@
     ]
   },
   "insider_activity": {
-    "timestamp": "2026-11-05T14:00:37.331891",
+    "timestamp": "2026-11-05T15:00:32.470280",
     "source": "sec_edgar",
     "insider_filings": [
       {
@@ -462,13 +462,13 @@
       },
       {
         "company": "",
-        "filed": "2026-11-02",
+        "filed": "2026-10-30",
         "form": "4",
         "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
       },
       {
         "company": "",
-        "filed": "2026-10-30",
+        "filed": "2026-11-02",
         "form": "4",
         "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&type=4&dateb=&owner=include&count=10"
       },
