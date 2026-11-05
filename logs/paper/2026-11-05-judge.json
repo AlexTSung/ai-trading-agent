@@ -1,6 +1,6 @@
 {
   "agent_version": "6.0.0",
-  "timestamp": "2026-11-05T04:01:53.026756-05:00",
+  "timestamp": "2026-11-05T05:02:05.194950-05:00",
   "date": "2026-11-05",
   "approved": [],
   "held": [
@@ -19,9 +19,7 @@
     "PFE",
     "KDP",
     "CSX",
-    "TDOC",
-    "IBB",
-    "MCD",
+    "RIGL",
     "NVD",
     "KVUE",
     "NEE",
@@ -37,7 +35,7 @@
     "AAPL": {
       "symbol": "AAPL",
       "recommendation": "HOLD",
-      "score": 6.37,
+      "score": 5.6,
       "approval_gate": 8.0,
       "size_multiplier": 1.0,
       "macro_regime": "RISK_OFF",
@@ -62,7 +60,7 @@
       "avg_down_candidate": false,
       "score_breakdown": {
         "technical": "2.0/2.0",
-        "news": "1.27/1.5",
+        "news": "0.5/1.5",
         "macro": "0.0/1.0",
         "portfolio": "0.0/2.0",
         "volatility": "0.75/1.0",
@@ -74,8 +72,8 @@
           "note": "STRONG_BUY \u2014 MA20 $342.95 > MA50 $334.88, price $349.56 above both [capped 3.0\u21922.0 at weight 2.0]"
         },
         "news": {
-          "score": 1.27,
-          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
+          "score": 0.5,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
         },
         "macro": {
           "score": 0.0,
@@ -94,7 +92,7 @@
           "note": "Mega-cap $5079B; Profitable; 18 analyst buy ratings"
         }
       },
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $342.95 > MA50 $334.88, price $349.56 above both [capped 3.0\u21922.0 at weight 2.0]. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $767.57 >= MA50 $767.05. Portfolio: Already holding AAPL \u2014 price above entry, avg-down not warranted. Volatility: VIX 20.8 \u2014 moderate volatility (NORMAL). Quality: Mega-cap $5079B; Profitable; 18 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $342.95 > MA50 $334.88, price $349.56 above both [capped 3.0\u21922.0 at weight 2.0]. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $767.57 >= MA50 $767.05. Portfolio: Already holding AAPL \u2014 price above entry, avg-down not warranted. Volatility: VIX 20.8 \u2014 moderate volatility (NORMAL). Quality: Mega-cap $5079B; Profitable; 18 analyst buy ratings. Source: watchlist | Gate: 8.0.",
       "_gate_used": 8.0
     },
     "MSFT": {
@@ -333,36 +331,14 @@
       },
       "_gate_used": 7.0
     },
-    "TDOC": {
-      "symbol": "TDOC",
+    "RIGL": {
+      "symbol": "RIGL",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 88 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 88 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
-    "IBB": {
-      "symbol": "IBB",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "_gate_used": 7.0
-    },
-    "MCD": {
-      "symbol": "MCD",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 84 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 84 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
       },
       "_gate_used": 7.0
     },
@@ -510,7 +486,7 @@
       "criteria": {
         "fundamentals": {
           "score": 3.0,
-          "note": "Analyst target = 46% upside; 10 analyst buy ratings; Revenue growing 11.00%"
+          "note": "Analyst target = 46% upside; 10 analyst buy ratings; Revenue growing 7.30%"
         },
         "news_catalyst": {
           "score": 1.5,
@@ -529,7 +505,7 @@
           "note": "Clean entry (no knife risk). 1 down day before drop: -0.5pt; RSI 35 (oversold/panic) offsets knife risk: +1.0pt back; Volume 3.6x avg (capitulation selling): +0.5pt back"
         }
       },
-      "rationale": "DIP BUY \u2014 stock down 17% today. Knife check: 1 down day before drop: -0.5pt; RSI 35 (oversold/panic) offsets knife risk: +1.0pt back; Volume 3.6x avg (capitulation selling): +0.5pt back. Fundamentals: Analyst target = 46% upside; 10 analyst buy ratings; Revenue growing 11.00%. News: Temporary catalyst: miss. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $767.57 >= MA50 $767.05. Raw score 4.5 \u2212 knife penalty 0.0 = 4.5/10 (gate \u22658.0). VETO.",
+      "rationale": "DIP BUY \u2014 stock down 17% today. Knife check: 1 down day before drop: -0.5pt; RSI 35 (oversold/panic) offsets knife risk: +1.0pt back; Volume 3.6x avg (capitulation selling): +0.5pt back. Fundamentals: Analyst target = 46% upside; 10 analyst buy ratings; Revenue growing 7.30%. News: Temporary catalyst: miss. Macro: RISK-OFF \u2014 SPY signal STRONG_SELL (price below MA50) despite MA20 $767.57 >= MA50 $767.05. Raw score 4.5 \u2212 knife penalty 0.0 = 4.5/10 (gate \u22658.0). VETO.",
       "_gate_used": 7.0
     }
   }
