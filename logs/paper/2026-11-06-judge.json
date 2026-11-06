@@ -1,13 +1,12 @@
 {
   "agent_version": "6.1.0",
-  "timestamp": "2026-11-06T02:02:13.240125-05:00",
+  "timestamp": "2026-11-06T03:01:47.701110-05:00",
   "date": "2026-11-06",
   "approved": [],
   "held": [
     "MSFT",
     "PFE",
-    "CSX",
-    "GME"
+    "CSX"
   ],
   "vetoed": [
     "AAPL",
@@ -22,19 +21,21 @@
     "IBM",
     "KDP",
     "LRCX",
-    "CROX",
+    "WMT",
+    "PDD",
+    "CCL",
     "NVD",
     "KVUE",
     "KMI",
-    "WMT",
     "KO",
     "HST",
     "NCLH",
-    "SUI",
-    "SNDK",
+    "FNKO",
+    "ICUI",
     "LITE",
     "WDC",
     "MU",
+    "MRVL",
     "STX",
     "P",
     "TER",
@@ -196,7 +197,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: TSLA is 5.7% below entry (entry $366.59 \u2192 now $345.66), position 2.2% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: TSLA is 5.4% below entry (entry $366.59 \u2192 now $346.90), position 2.2% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 1.0,
@@ -569,67 +570,15 @@
       },
       "_gate_used": 8.0
     },
-    "GME": {
-      "symbol": "GME",
-      "recommendation": "HOLD",
-      "score": 6.77,
-      "approval_gate": 8.5,
-      "size_multiplier": 1.0,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 16.61,
-      "is_discovery": true,
-      "is_speculative": true,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "1.5/2.0",
-        "news": "1.27/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "1.5/2.0",
-        "volatility": "1.0/1.0",
-        "quality": "1.5/2.5"
-      },
+    "WMT": {
+      "symbol": "WMT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "technical": {
-          "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $25.45 > MA50 $23.42, price between MAs"
-        },
-        "news": {
-          "score": 1.27,
-          "note": "POSITIVE \u2014 2 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $765.55 < MA50 $766.40"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "Adequate cash reserve 39%"
-        },
-        "volatility": {
-          "score": 1.0,
-          "note": "VIX 16.6 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
-        },
-        "quality": {
-          "score": 1.5,
-          "note": "Large-cap $12B; Profitable; Short float 10.32% \u2014 elevated short interest"
-        }
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $25.45 > MA50 $23.42, price between MAs. News: POSITIVE \u2014 2 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $765.55 < MA50 $766.40. Portfolio: Adequate cash reserve 39%. Volatility: VIX 16.6 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Large-cap $12B; Profitable; Short float 10.32% \u2014 elevated short interest. Source: discovery | Gate: 8.5.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -638,18 +587,39 @@
         "would_change": null,
         "record_gate": 8.0,
         "record_label": "no closed trades",
-        "required_gate": 8.5
+        "required_gate": 8.0
       },
-      "_gate_used": 8.5
+      "_gate_used": 7.0
     },
-    "CROX": {
-      "symbol": "CROX",
+    "PDD": {
+      "symbol": "PDD",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 75 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: price $84.00 is 4.4% above MA20 $80.45 (limit 3%) \u2014 do not chase",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 75 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: price $84.00 is 4.4% above MA20 $80.45 (limit 3%) \u2014 do not chase"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "CCL": {
+      "symbol": "CCL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -725,7 +695,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: KMI is 7.9% below entry (entry $32.79 \u2192 now $30.19), position 7.4% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: KMI is 8.0% below entry (entry $32.79 \u2192 now $30.18), position 7.4% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 1.0,
@@ -735,27 +705,6 @@
           "score": 2.1,
           "note": "Large-cap $67B; Profitable; 11 analyst buy ratings"
         }
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "WMT": {
-      "symbol": "WMT",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -831,14 +780,13 @@
       },
       "_gate_used": 7.0
     },
-    "SUI": {
-      "symbol": "SUI",
+    "FNKO": {
+      "symbol": "FNKO",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $122.03 is 4.8% above MA20 $116.46 (limit 3%) \u2014 do not chase",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for FNKO \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: price $122.03 is 4.8% above MA20 $116.46 (limit 3%) \u2014 do not chase"
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
@@ -852,15 +800,13 @@
       },
       "_gate_used": 7.0
     },
-    "SNDK": {
-      "symbol": "SNDK",
+    "ICUI": {
+      "symbol": "ICUI",
       "recommendation": "VETO",
       "score": 0.0,
-      "dip_buy_candidate": true,
-      "rationale": "FALLING KNIFE VETO: Stock was already below MA50 before today's drop \u2014 pre-existing downtrend, not a dip buy opportunity",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for ICUI \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "falling_knife_veto": true,
-        "knife_reason": "FALLING KNIFE VETO: Stock was already below MA50 before today's drop \u2014 pre-existing downtrend, not a dip buy opportunity"
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
@@ -920,6 +866,28 @@
     },
     "MU": {
       "symbol": "MU",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "dip_buy_candidate": true,
+      "rationale": "FALLING KNIFE VETO: Stock was already below MA50 before today's drop \u2014 pre-existing downtrend, not a dip buy opportunity",
+      "criteria": {
+        "falling_knife_veto": true,
+        "knife_reason": "FALLING KNIFE VETO: Stock was already below MA50 before today's drop \u2014 pre-existing downtrend, not a dip buy opportunity"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "MRVL": {
+      "symbol": "MRVL",
       "recommendation": "VETO",
       "score": 0.0,
       "dip_buy_candidate": true,
