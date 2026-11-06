@@ -1,6 +1,6 @@
 {
   "agent_version": "6.1.0",
-  "timestamp": "2026-11-05T22:02:04.392836-05:00",
+  "timestamp": "2026-11-05T23:02:17.043159-05:00",
   "date": "2026-11-05",
   "approved": [],
   "held": [
@@ -29,8 +29,6 @@
     "KO",
     "HST",
     "NCLH",
-    "ICE",
-    "NCPL",
     "SNDK",
     "LITE",
     "WDC",
@@ -196,7 +194,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: TSLA is 4.6% below entry (entry $366.59 \u2192 now $349.77), position 2.3% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: TSLA is 5.3% below entry (entry $366.59 \u2192 now $347.00), position 2.2% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 1.0,
@@ -651,7 +649,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: KMI is 7.4% below entry (entry $32.79 \u2192 now $30.36), position 7.5% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: KMI is 7.0% below entry (entry $32.79 \u2192 now $30.50), position 7.5% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 1.0,
@@ -744,51 +742,6 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "ICE": {
-      "symbol": "ICE",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "NCPL": {
-      "symbol": "NCPL",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "Quality veto: MICRO_CAP VETO: $0.01B market cap \u2014 too small for discovery buys",
-      "criteria": {
-        "quality": {
-          "score": 0.0,
-          "note": "MICRO_CAP VETO: $0.01B market cap \u2014 too small for discovery buys",
-          "veto": true
-        }
       },
       "universe_policy": {
         "status": "approved",
