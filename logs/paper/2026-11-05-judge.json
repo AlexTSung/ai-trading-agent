@@ -1,6 +1,6 @@
 {
   "agent_version": "6.1.0",
-  "timestamp": "2026-11-05T19:01:21.536549-05:00",
+  "timestamp": "2026-11-05T20:02:13.473065-05:00",
   "date": "2026-11-05",
   "approved": [],
   "held": [
@@ -29,6 +29,8 @@
     "KO",
     "HST",
     "NCLH",
+    "BILL",
+    "ESG",
     "SNDK",
     "LITE",
     "WDC",
@@ -194,7 +196,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: TSLA is 7.8% below entry (entry $366.59 \u2192 now $338.00), position 2.2% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: TSLA is 5.4% below entry (entry $366.59 \u2192 now $346.68), position 2.2% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 1.0,
@@ -649,7 +651,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: KMI is 7.9% below entry (entry $32.79 \u2192 now $30.19), position 7.4% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: KMI is 7.4% below entry (entry $32.79 \u2192 now $30.36), position 7.5% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 1.0,
@@ -742,6 +744,47 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "BILL": {
+      "symbol": "BILL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BILL \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "ESG": {
+      "symbol": "ESG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
