@@ -1,6 +1,6 @@
 {
   "agent_version": "6.1.0",
-  "timestamp": "2026-11-06T18:01:21.842498-05:00",
+  "timestamp": "2026-11-06T19:02:03.550560-05:00",
   "date": "2026-11-06",
   "approved": [],
   "held": [
@@ -33,7 +33,9 @@
     "WMT",
     "VTRS",
     "NCLH",
-    "RGA",
+    "AS",
+    "AEE",
+    "SKWD",
     "TEAM"
   ],
   "scores": {
@@ -298,7 +300,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding TSLA \u2014 only 2.2% below entry (need \u22653%)"
+          "note": "Already holding TSLA \u2014 only 2.1% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -1128,11 +1130,52 @@
       },
       "_gate_used": 7.0
     },
-    "RGA": {
-      "symbol": "RGA",
+    "AS": {
+      "symbol": "AS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for RGA \u2014 auto-veto per Hard Rule 9",
+      "rationale": "CHASE VETO: price $31.48 is 6.1% above MA20 $29.67 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $31.48 is 6.1% above MA20 $29.67 (limit 3%) \u2014 do not chase"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "AEE": {
+      "symbol": "AEE",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for AEE \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "SKWD": {
+      "symbol": "SKWD",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for SKWD \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
