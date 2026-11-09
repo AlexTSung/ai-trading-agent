@@ -1,6 +1,6 @@
 {
   "agent_version": "6.1.0",
-  "timestamp": "2026-11-09T04:02:13.195361-05:00",
+  "timestamp": "2026-11-09T05:01:13.662253-05:00",
   "date": "2026-11-09",
   "approved": [],
   "held": [
@@ -22,6 +22,7 @@
     "PFE",
     "KDP",
     "CSX",
+    "TGTX",
     "NVD",
     "SPDN",
     "KVUE",
@@ -30,7 +31,7 @@
     "WMT",
     "VTRS",
     "NCLH",
-    "LULU",
+    "IA",
     "TEAM"
   ],
   "scores": {
@@ -242,7 +243,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding TSLA \u2014 only 2.3% below entry (need \u22653%)"
+          "note": "Already holding TSLA \u2014 only 2.1% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -645,6 +646,27 @@
       },
       "_gate_used": 8.0
     },
+    "TGTX": {
+      "symbol": "TGTX",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
     "NVD": {
       "symbol": "NVD",
       "recommendation": "VETO",
@@ -958,14 +980,17 @@
       },
       "_gate_used": 7.0
     },
-    "LULU": {
-      "symbol": "LULU",
+    "IA": {
+      "symbol": "IA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "Quality veto: MICRO_CAP VETO: $0.35B market cap \u2014 too small for discovery buys",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+        "quality": {
+          "score": 0.0,
+          "note": "MICRO_CAP VETO: $0.35B market cap \u2014 too small for discovery buys",
+          "veto": true
+        }
       },
       "universe_policy": {
         "status": "approved",
