@@ -1,6 +1,6 @@
 {
   "agent_version": "6.1.0",
-  "timestamp": "2026-11-09T01:01:26.037413-05:00",
+  "timestamp": "2026-11-09T02:02:07.911934-05:00",
   "date": "2026-11-09",
   "approved": [],
   "held": [
@@ -22,6 +22,7 @@
     "PFE",
     "KDP",
     "CSX",
+    "IBB",
     "NVD",
     "SPDN",
     "KVUE",
@@ -30,7 +31,8 @@
     "WMT",
     "VTRS",
     "NCLH",
-    "BJ",
+    "TLS",
+    "POST",
     "TEAM"
   ],
   "scores": {
@@ -645,6 +647,27 @@
       },
       "_gate_used": 8.0
     },
+    "IBB": {
+      "symbol": "IBB",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
     "NVD": {
       "symbol": "NVD",
       "recommendation": "VETO",
@@ -958,13 +981,35 @@
       },
       "_gate_used": 7.0
     },
-    "BJ": {
-      "symbol": "BJ",
+    "TLS": {
+      "symbol": "TLS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BJ \u2014 auto-veto per Hard Rule 9",
+      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "earnings_veto": true
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "POST": {
+      "symbol": "POST",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
