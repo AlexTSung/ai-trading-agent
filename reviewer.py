@@ -135,7 +135,8 @@ def get_orders_today():
     # "Options do not share the equities graduation gate" means an options
     # fill scored here and written into calibration-log.csv would corrupt
     # that decision with a book it was never meant to measure.
-    return [o for o in r.json() if o.get("asset_class") != "us_option"]
+    return [o for o in r.json() if o.get("asset_class") != "us_option"
+            and not str(o.get("client_order_id") or "").startswith("rb-")]
 
 def get_bars_today(symbol):
     """Get today's intraday bars for post-trade movement scoring."""
@@ -372,7 +373,11 @@ def fetch_filled_orders(since: str) -> list:
                  # Same shared-account leak as get_orders_today(): options
                  # fills must not enter the equities round-trip ledger that
                  # feeds the graduation decision.
-                 and o.get("asset_class") != "us_option"]
+                 and o.get("asset_class") != "us_option"
+                 # The oversold-rebound path is a separate, paper-only strategy
+                 # (rebound_trade.py). Its fills must not enter the trend
+                 # round-trip ledger that feeds graduation and learned gates.
+                 and not str(o.get("client_order_id") or "").startswith("rb-")]
         if not page:
             break
         for o in fresh:
@@ -572,7 +577,31 @@ def current_honest_equity():
         except (KeyError, TypeError, ValueError):
             continue
         equity = equity - mkt + (qty * basis)   # restate at cost
-    return equity
+    return equity - rebound_sleeve_pnl(positions)
+
+
+def rebound_sleeve_pnl(positions, logs_dir: str = None) -> float:
+    """Net P&L of the paper-only oversold-rebound path: realized (its own trade
+    log) plus unrealized on the positions it still holds. The graduation return
+    measures the TREND strategy against the Phase 2B baseline, and the rebound
+    sleeve shares the Alpaca account, so its P&L is taken back out. A missing or
+    unreadable log contributes nothing."""
+    logs_dir = logs_dir or JOURNAL_DIR
+    total = 0.0
+    try:
+        with open(os.path.join(logs_dir, "rebound-trades.csv"), newline="") as f:
+            total += sum(float(r.get("pnl_usd") or 0) for r in csv.DictReader(f))
+    except (OSError, ValueError):
+        pass
+    try:
+        with open(os.path.join(logs_dir, "rebound-state.json")) as f:
+            held = set(json.load(f).get("open", {}))
+        for p in positions or []:
+            if p.get("symbol") in held:
+                total += float(p.get("unrealized_pl") or 0)
+    except (OSError, ValueError):
+        pass
+    return total
 
 
 def benchmark_return(since: str):

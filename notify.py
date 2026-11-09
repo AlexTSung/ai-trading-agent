@@ -18,6 +18,10 @@ notification channel is a degraded nice-to-have, not a Hard Rule.
 """
 
 import os
+import smtplib
+import sys
+from email.mime.text import MIMEText
+
 import requests
 
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC")
@@ -29,7 +33,7 @@ def send(title: str, message: str, priority: str = "default", tags: str = None) 
     or failed — never raises, since a notification failure must not affect
     trading."""
     if not NTFY_TOPIC:
-        print("[notify] NTFY_TOPIC not set -- skipping notification")
+        print("[notify] NTFY_TOPIC not set -- skipping notification", file=sys.stderr)
         return False
     try:
         headers = {"Title": title, "Priority": priority}
@@ -38,11 +42,44 @@ def send(title: str, message: str, priority: str = "default", tags: str = None) 
         r = requests.post(f"{NTFY_BASE_URL}/{NTFY_TOPIC}",
                            data=message.encode("utf-8"), headers=headers, timeout=10)
         if r.status_code != 200:
-            print(f"[notify] ntfy.sh returned {r.status_code}: {r.text[:200]}")
+            print(f"[notify] ntfy.sh returned {r.status_code}: {r.text[:200]}", file=sys.stderr)
         return r.status_code == 200
     except requests.RequestException as e:
-        print(f"[notify] failed to send: {e}")
+        print(f"[notify] failed to send: {e}", file=sys.stderr)
         return False
+
+
+def send_email(subject: str, body: str) -> bool:
+    """Best-effort email through Gmail SMTP. Needs GMAIL_USER, GMAIL_APP_PASSWORD
+    and NOTIFY_EMAIL in the environment (the same repo secrets the forex agent
+    uses). Any of them missing is a logged no-op, never a failure.
+
+    Every message goes to stderr: several pipeline steps pipe stdout straight
+    into a JSON file, and a status line on stdout corrupts it (portfolio-review
+    .json, 2026-11-06 and 2026-11-09)."""
+    user, password, to = (os.environ.get("GMAIL_USER"), os.environ.get("GMAIL_APP_PASSWORD"),
+                          os.environ.get("NOTIFY_EMAIL"))
+    if not (user and password and to):
+        print("[notify] email not configured (GMAIL_USER/GMAIL_APP_PASSWORD/NOTIFY_EMAIL) "
+              "-- skipping email", file=sys.stderr)
+        return False
+    try:
+        msg = MIMEText(body, "plain", "utf-8")
+        msg["Subject"], msg["From"], msg["To"] = subject, user, to
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as smtp:
+            smtp.login(user, password)
+            smtp.sendmail(user, [to], msg.as_string())
+        return True
+    except (smtplib.SMTPException, OSError) as e:
+        print(f"[notify] email failed: {e}", file=sys.stderr)
+        return False
+
+
+def alert(title: str, message: str, priority: str = "default", tags: str = None) -> bool:
+    """Push AND email. True if either channel delivered."""
+    pushed = send(title, message, priority=priority, tags=tags)
+    emailed = send_email(title, message)
+    return pushed or emailed
 
 
 def notify_new_approvals(symbols: list, judge_results: dict) -> bool:

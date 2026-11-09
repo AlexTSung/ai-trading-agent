@@ -41,6 +41,56 @@ Two rules that follow from the table:
 
 <!-- versions below -->
 
+## [v6.2.0] — unreleased
+
+**MINOR** — Oversold-rebound paper path with shadow ledger, recursive tighten-only learning, and real-money suggestions
+
+### Strategy / CLAUDE.md changes
+- New CLAUDE.md section "Oversold-Rebound Path (paper-only)". A separate, small,
+  paper-only strategy for the setup the trend Judge structurally cannot buy (a stock
+  below its 50-day average is labelled STRONG_SELL and never reaches the Judge).
+- **Shipped rules**, chosen by walk-forward on pre-2023 data: below the 50-day, RSI < 25,
+  >= 12% below the 50-day, above the 200-day, SPY above its 200-day and VIX < 40;
+  2x ATR stop, +8% target, 15-session time stop. Sized at 2.5% of honest equity, at most
+  4 open, core names outside the speculative sleeve only, VIX > 35 blocks entry.
+- **Backtest verdict: no edge strong enough to rely on.** S&P 500 holdout (2023+)
+  +0.21% vs SPY per trade, 95% interval -1.35% to +1.66%. It ships as an experiment.
+  Every alert and report says so.
+- **Recursive learning loop.** A shadow ledger logs every setup the wide net sees across
+  ~500 names; a resolver fills in what each would have done; `rebound_learning.py` may
+  TIGHTEN the rules (lower RSI ceiling, deeper required drop, require stabilization /
+  200-day / market filter, block a symbol, shrink size or slots). Loosening is a
+  proposal for Alex, never applied. Direction is re-enforced when the params file loads.
+- **Real-money suggestions.** Each paper entry and exit is emailed (Gmail secrets; ntfy if
+  `NTFY_TOPIC` is set) with stop/target/time stop, the setup's track record, and a
+  suggested real size: half the paper size until PROVEN (20+ resolved, 55%+ wins,
+  positive median and excess vs SPY). Information only; no real order is ever placed.
+
+### Code changes
+- `rebound_signal.py` (shared signal/exit logic), `backtest_rebound.py` (walk-forward
+  backtest, 35 parity/timing tests in `tests/test_rebound_signal.py`), `rebound.py`
+  (scan, ledger, resolver, suggestions), `rebound_trade.py` (paper-only executor,
+  `rb-` order ids, refuses any non-paper broker URL), `rebound_learning.py`.
+- `trade.py`: `ensure_exits_for_positions()` skips rebound-managed symbols.
+- `reviewer.py` / `journal.py`: rebound (`rb-`) orders are filtered out of the trend
+  round-trip ledger, so they never reach calibration, `symbol_stats`, learned Judge gates
+  or the graduation decision. `reviewer.rebound_sleeve_pnl()` is subtracted from the
+  graduation equity.
+- `notify.py`: status messages go to stderr (they were corrupting
+  `portfolio-review.json` whenever a flag fired, 2026-11-06 and 2026-11-09); new
+  `send_email()` and `alert()`.
+- `run_github.sh` (scan + executor after the trend executor), `run_eod_github.sh`
+  (resolve + learn), morning/EOD workflows (Gmail env; EOD now commits `logs/proposals/`).
+- `tests/test_rebound_live.py` (65 tests). Suite: 537.
+
+### Comparability
+- Does not invalidate the prior record: it adds a separate, paper-only path and loosens
+  nothing. No scoring weight, stop tier, Judge gate or Hard Rule changed.
+- The graduation round-trip metrics, per-symbol stats and learned gates exclude rebound
+  fills. The graduation return is computed on account equity, which the sleeve shares, so
+  the sleeve's P&L is subtracted explicitly. Sleeve size is capped at 10% of equity.
+- On 2026-11-09 the chosen rules pass zero names, so little trading is expected.
+
 ## [v6.1.0] — unreleased
 
 **MINOR** — Core universe (23 names, enforced), per-symbol track-record gates, speculative sleeve, and a weekly universe review

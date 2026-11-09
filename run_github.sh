@@ -150,5 +150,14 @@ echo "--- [6/7] Executor ---"
 python3 trade.py session
 
 echo ""
+echo "--- [6b] Oversold-rebound scan + PAPER executor ---"
+# Paper-only strategy for the setup the trend Judge structurally cannot buy.
+# Never blocks or fails the trend pipeline; rebound_trade.py refuses to run
+# against anything but the paper endpoint.
+python3 rebound.py scan || echo "WARN: rebound.py scan failed — trend pipeline unaffected"
+python3 rebound_trade.py run | tee "$LOG_DIR/$DATE-rebound-session.json" \
+  || echo "WARN: rebound_trade.py failed — trend pipeline unaffected"
+
+echo ""
 echo "--- [7/7] Done ---"
 echo "=== Morning pipeline complete: $(TZ="America/New_York" date +%H:%M:%S) ET ==="

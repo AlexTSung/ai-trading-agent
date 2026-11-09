@@ -79,7 +79,9 @@ def get_orders_today():
     today = et_today_iso()
     r = requests.get(f"{BASE_URL}/v2/orders", headers=_headers(), params={"status": "all", "after": today, "limit": 100})
     r.raise_for_status()
-    return r.json()
+    # Rebound-path orders are journalled by rebound.py, not in the trend journal.
+    return [o for o in r.json()
+            if not str(o.get("client_order_id") or "").startswith("rb-")]
 
 def load_json_if_exists(path):
     if os.path.exists(path):

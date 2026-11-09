@@ -42,6 +42,10 @@ jobs:
         env:
           APCA_API_KEY_ID: ${{ secrets.APCA_API_KEY_ID }}
           APCA_API_SECRET_KEY: ${{ secrets.APCA_API_SECRET_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
         run: |
           chmod +x run_eod_github.sh
           bash run_eod_github.sh
@@ -51,7 +55,7 @@ jobs:
         run: |
           git config user.name "Trading Agent"
           git config user.email "agent@youversion.com"
-          git add logs/paper/ logs/learnings/ CLAUDE.md
+          git add logs/paper/ logs/learnings/ logs/proposals/ CLAUDE.md
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0

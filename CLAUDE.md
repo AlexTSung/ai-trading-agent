@@ -1,5 +1,5 @@
 # Trading Agent — CLAUDE.md
-> **Version:** v6.1.0
+> **Version:** v6.2.0
 > This is the standing instruction file for the autonomous trading agent.
 > Read this file in full before every execution. It governs every decision.
 
@@ -799,6 +799,104 @@ ntfy notification when it has a suggestion. It **proposes; it never edits
   unless Hard Rule 3 is changed on purpose (a MAJOR change).
 - `correlation_group` tags in `watchlist.json` (space: RKLB/ASTS; crypto_beta:
   MSTR/HOOD) are documentation only. Nothing reads them.
+
+## Oversold-Rebound Path (paper-only)
+
+**Why this exists.** The trend Judge buys pullbacks inside uptrends. A stock that
+has sold off sits below its 50-day average, which the MA rule labels
+STRONG_SELL, so an oversold bounce can never reach the Judge — and with SPY
+below its 50-day the macro score removes up to 1.0 point on top of that. On
+2026-11-09, 48 of 80 researched names were below their 50-day average and none
+could be approved. This is a separate, small, **paper-only** strategy for exactly
+that setup, built so it can learn quickly and report its own track record before
+anyone considers putting money behind it.
+
+**It cannot touch real money.** `rebound.py`, `rebound_trade.py` and
+`rebound_learning.py` contain no Robinhood code path; `rebound_trade.py` refuses
+to run unless the broker URL is the Alpaca paper endpoint; the Robinhood
+Execution Procedure reads only the Judge's `approved` list, which this path never
+writes to. A real-money trade from this path happens only if Alex places it
+himself, which is an ad hoc order and needs the full Mandatory Confirmation
+Protocol in chat.
+
+**Flow.**
+```
+rebound.py scan  -> logs/paper/YYYY-MM-DD-rebound.{json,md}   (candidates + suggestions)
+                 -> logs/paper/rebound-ledger.csv              (every setup seen, wide net)
+rebound_trade.py -> Alpaca PAPER orders, own stop/target       (rb- order ids)
+EOD: rebound.py resolve   -> fills in what each ledger row would have done
+EOD: rebound_learning.py  -> logs/learnings/rebound_params.json (tighten-only)
+                          -> logs/proposals/rebound-proposals.json (loosening, for Alex)
+```
+Rules live in `rebound_signal.py` (shared with `backtest_rebound.py`, so live and
+backtest evaluate the same numbers). **Shipped rules** (selected by walk-forward on
+data before 2023 only, never re-tuned on the holdout): close below the 50-day
+average, RSI < 25, at least 12% below the 50-day, above the 200-day, and SPY above
+its 200-day with VIX < 40; entered the session after the signal; exits are a 2x ATR
+stop, an +8% target, and a 15-session time stop.
+
+**Backtest verdict (`logs/backtest/rebound-backtest-2026-11-09.md`, 2001-2026, net
+of costs): no edge strong enough to rely on.** On the S&P 500 holdout (2023+) the
+chosen rules returned +0.21% vs SPY per trade with a 95% interval of -1.35% to
++1.66%: indistinguishable from zero, and about the size of the survivorship drift
+(a random entry beat SPY by +0.15%). In-sample it was +1.41%, so the edge shrank
+on unseen data, as it should after searching 3,888 configurations. On the 23 core
+names the holdout was +4.48% (n=27), but that list was picked with hindsight and
+the sample is tiny. What it does do is stay out of trouble: it traded almost
+nothing in the 2008 crisis and 2022 while the current trend rule lost 3.6% and 1.6%
+per trade, its worst drawdown was -6.7% vs -55% for SPY, and it is invested only
+about 2% of the time, so it cannot compete with buy-and-hold on return. The naive
+"RSI < 30 and below the 50-day" rule, which a 4-month log study had suggested
+worked, did **not** hold up over 20+ years (it trails SPY). That is why it ships as
+a small, selective **paper experiment**, not a recommendation. On 2026-11-09 it
+passed zero names (SPY is below its 50-day; DT, NOW and GOOGL are deeply oversold
+but below their 200-day).
+
+**What trades, and how big.** Only names in the `core` list that are not in the
+speculative sleeve, never hedge/inverse ETFs, and not inside the earnings
+blackout (Hard Rule 9). Size is 2.5% of honest equity (half the trend path's
+conviction sizes), at most 4 open (10% of equity), none above VIX 35 (Hard Rule,
+same cap as the Judge), limit at the ask and never above it, skipped if the ask
+gapped more than 3% above the signal close. Every other name — speculative sleeve,
+probation, and the whole screener universe — is **logged to the shadow ledger only**.
+
+**How it learns quickly (the recursive loop).** Paper trades are rare, so the
+ledger records *every* setup the wide net sees (RSI up to 35, any depth, with or
+without stabilization), across ~500 names, with the features the rules decide on.
+The resolver later fills in what each would have done under the same exit rules
+(next-open fill, daily-bar stop/target ordering, costs). `rebound_learning.py`
+then slices that evidence and may tighten the rules by itself; its output is read
+by the next scan, whose results feed the ledger again.
+- **Tighten-only, automatic:** lower RSI ceiling, deeper required drop, require
+  stabilization / above-200-day / a healthy market, block a symbol, shrink size or
+  slots (circuit breaker). `rebound.tighten_only()` re-enforces direction on load,
+  so an edited file cannot widen anything.
+- **Loosening is a proposal, never applied** (loosening is MAJOR): it lands in
+  `logs/proposals/rebound-proposals.json` and Alex is alerted.
+- **Sample rails:** a slice needs 20 resolved rows (and 10 in the comparison group)
+  to tighten anything; 30 to be proposed for loosening. Re-derived from the full
+  ledger every run, so a slice that recovers is released again.
+- Evidence is broad (all tiers) and action is narrow (core names only).
+
+**Real-money suggestions.** Every paper entry and exit sends an alert (email
+through the repo's Gmail secrets, plus ntfy if `NTFY_TOPIC` is set) with the
+setup, stop/target/time stop, the track record so far, and a suggested real-money
+size: **half the paper size until the setup is PROVEN** (20+ resolved, 55%+ wins,
+positive median, positive excess vs SPY over 10 sessions), then the paper size.
+It is information for Alex's decision; nothing here places a real order.
+
+**Isolation from the trend record.** Rebound orders carry `rb-` ids.
+`reviewer.py` and `journal.py` filter them, so they never enter the trend
+round-trip ledger, `symbol_stats`, the Judge's learned gates, or calibration.
+`trade.ensure_exits_for_positions()` skips rebound-managed symbols, and
+`revalidate_resting_entries()` only touches `agent-buy-` orders. The graduation
+return subtracts the sleeve's realized and unrealized P&L
+(`reviewer.rebound_sleeve_pnl`), because it shares the Alpaca account.
+
+**Known limits.** Paper fills on IEX bars; entry assumed at the next open while
+live orders go in after the morning pipeline run; time stop checks run on pipeline
+ticks, not at the close; scan-universe evidence leans on today's S&P 500 members,
+which flatters any buy-the-dip rule (see the backtest's survivorship note).
 
 ## Social Screener Config (StockTwits)
 - **Source**: StockTwits API — free, no API key required, purpose-built for stock mentions

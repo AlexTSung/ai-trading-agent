@@ -79,4 +79,12 @@ python3 learning_analytics.py \
   || echo "WARN: learning_analytics.py failed — non-critical"
 
 echo ""
+echo "--- Rebound path: resolve shadow ledger, then learn ---"
+# resolve fills in what every logged setup would have done; learn may TIGHTEN
+# the rebound rules (never loosen) and writes proposals for Alex to approve.
+python3 rebound.py resolve || echo "WARN: rebound resolve failed — non-critical"
+python3 rebound_learning.py learn | tee "$LOG_DIR/$DATE-rebound-learnings.json" \
+  || echo "WARN: rebound_learning.py failed — non-critical"
+
+echo ""
 echo "=== EOD complete: $(TZ="America/New_York" date +%H:%M:%S) ET ==="

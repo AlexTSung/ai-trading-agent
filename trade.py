@@ -559,6 +559,15 @@ def ensure_exits_for_positions(positions, open_orders, state=None):
     """
     state       = state if state is not None else load_state()
     covered     = {o["symbol"] for o in open_orders if o["side"] == "sell"}
+    # The oversold-rebound path (rebound_trade.py) places its own stop/target.
+    # Attaching tiered exits first would double-sell the position. A failure to
+    # read its state falls back to the old behaviour: protect the position.
+    try:
+        with open(os.path.join(LOGS_DIR, "rebound-state.json")) as f:
+            _rb = json.load(f)
+        covered |= set(_rb.get("pending", {})) | set(_rb.get("open", {}))
+    except (OSError, ValueError):
+        pass
     # Never anchor exits to a price we do not trust.
     suspect     = {f["symbol"] for f in detect_phantom_equity(positions, state)}
     attached    = []
