@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-09T18:02:14.884293-05:00",
+  "timestamp": "2026-11-09T19:02:20.779704-05:00",
   "date": "2026-11-09",
   "approved": [],
   "held": [
@@ -30,8 +30,8 @@
     "WMT",
     "NCLH",
     "KMI",
-    "NCPL",
-    "BETR"
+    "AS",
+    "AMG"
   ],
   "scores": {
     "AAPL": {
@@ -913,7 +913,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: KMI is 6.7% below entry (entry $32.79 \u2192 now $30.58), position 7.4% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: KMI is 6.8% below entry (entry $32.79 \u2192 now $30.57), position 7.4% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
@@ -1009,14 +1009,14 @@
       },
       "_gate_used": 8.5
     },
-    "NCPL": {
-      "symbol": "NCPL",
+    "AS": {
+      "symbol": "AS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $1.82 is 14.1% above MA20 $1.59 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $1.82 is 14.1% above MA20 $1.59 (limit 3%) \u2014 do not chase"
+        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1030,11 +1030,11 @@
       },
       "_gate_used": 7.0
     },
-    "BETR": {
-      "symbol": "BETR",
+    "AMG": {
+      "symbol": "AMG",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BETR \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for AMG \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
