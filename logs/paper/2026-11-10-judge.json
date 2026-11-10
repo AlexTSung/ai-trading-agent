@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-10T05:01:27.603489-05:00",
+  "timestamp": "2026-11-10T06:01:18.711092-05:00",
   "date": "2026-11-10",
   "approved": [],
   "held": [
@@ -22,12 +22,14 @@
     "PFE",
     "KDP",
     "CSX",
-    "XERS",
+    "ZETA",
     "NVD",
     "KVUE",
     "WMT",
     "NCLH",
-    "KMI"
+    "KMI",
+    "ICE",
+    "BJ"
   ],
   "scores": {
     "AAPL": {
@@ -671,14 +673,13 @@
       },
       "_gate_used": 8.0
     },
-    "XERS": {
-      "symbol": "XERS",
+    "ZETA": {
+      "symbol": "ZETA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for ZETA \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
@@ -964,6 +965,47 @@
         "required_gate": 8.5
       },
       "_gate_used": 8.5
+    },
+    "ICE": {
+      "symbol": "ICE",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for ICE \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "BJ": {
+      "symbol": "BJ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
     }
   },
   "universe": {
