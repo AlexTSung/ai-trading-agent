@@ -1,13 +1,12 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-10T17:01:26.241830-05:00",
+  "timestamp": "2026-11-10T18:01:17.516955-05:00",
   "date": "2026-11-10",
   "approved": [],
   "held": [
     "PYPL",
     "VIXY",
     "IBM",
-    "PFE",
     "CSX",
     "PCG"
   ],
@@ -20,7 +19,10 @@
     "SPXS",
     "SOXS",
     "LLY",
+    "PFE",
     "KDP",
+    "WEN",
+    "JNJ",
     "COST",
     "NVD",
     "JHX",
@@ -32,8 +34,8 @@
     "FISV",
     "PPL",
     "KO",
-    "JBS",
-    "FOUR"
+    "IA",
+    "KMPR"
   ],
   "scores": {
     "AAPL": {
@@ -457,8 +459,8 @@
     },
     "PFE": {
       "symbol": "PFE",
-      "recommendation": "HOLD",
-      "score": 5.15,
+      "recommendation": "VETO",
+      "score": 4.65,
       "approval_gate": 8.0,
       "size_multiplier": 1.0,
       "macro_regime": "RISK_OFF",
@@ -483,7 +485,7 @@
       "avg_down_candidate": false,
       "score_breakdown": {
         "technical": "1.5/2.0",
-        "news": "0.5/1.5",
+        "news": "0.0/1.5",
         "macro": "0.0/1.0",
         "portfolio": "0.0/2.0",
         "volatility": "1.0/1.0",
@@ -495,8 +497,8 @@
           "note": "WEAK_BUY \u2014 MA20 $29.85 > MA50 $28.79, price between MAs"
         },
         "news": {
-          "score": 0.5,
-          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+          "score": 0.0,
+          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present | PUMP FLAG PENALTY -0.50: EXTREME_SENTIMENT: 87% bullish is suspiciously uniform \u2014 organic sentiment rarel"
         },
         "macro": {
           "score": 0.0,
@@ -515,7 +517,7 @@
           "note": "Mega-cap $167B; Profitable; 8 analyst buy ratings"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $29.85 > MA50 $28.79, price between MAs. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $760.72 < MA50 $765.01. Portfolio: Already holding PFE \u2014 price above entry, avg-down not warranted. Volatility: VIX 19.9 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $167B; Profitable; 8 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $29.85 > MA50 $28.79, price between MAs. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present | PUMP FLAG PENALTY -0.50: EXTREME_SENTIMENT: 87% bullish is suspiciously uniform \u2014 organic sentiment rarel. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $760.72 < MA50 $765.01. Portfolio: Already holding PFE \u2014 price above entry, avg-down not warranted. Volatility: VIX 19.9 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $167B; Profitable; 8 analyst buy ratings. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -621,6 +623,48 @@
         "required_gate": 8.0
       },
       "_gate_used": 8.0
+    },
+    "WEN": {
+      "symbol": "WEN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 85 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 85 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "JNJ": {
+      "symbol": "JNJ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
     },
     "COST": {
       "symbol": "COST",
@@ -973,13 +1017,14 @@
       },
       "_gate_used": 7.0
     },
-    "JBS": {
-      "symbol": "JBS",
+    "IA": {
+      "symbol": "IA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for JBS \u2014 auto-veto per Hard Rule 9",
+      "rationale": "CHASE VETO: price $21.50 is 6.9% above MA20 $20.11 (limit 3%) \u2014 do not chase",
       "criteria": {
-        "earnings_veto": true
+        "chase_veto": true,
+        "note": "CHASE VETO: price $21.50 is 6.9% above MA20 $20.11 (limit 3%) \u2014 do not chase"
       },
       "universe_policy": {
         "status": "approved",
@@ -993,11 +1038,11 @@
       },
       "_gate_used": 7.0
     },
-    "FOUR": {
-      "symbol": "FOUR",
+    "KMPR": {
+      "symbol": "KMPR",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for FOUR \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for KMPR \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
