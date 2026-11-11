@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-10T19:01:44.311805-05:00",
+  "timestamp": "2026-11-10T20:01:30.658091-05:00",
   "date": "2026-11-10",
   "approved": [],
   "held": [
@@ -8,8 +8,7 @@
     "VIXY",
     "IBM",
     "CSX",
-    "PCG",
-    "RTX"
+    "PCG"
   ],
   "vetoed": [
     "AAPL",
@@ -35,7 +34,8 @@
     "FISV",
     "PPL",
     "KO",
-    "TNL"
+    "EVER",
+    "BYD"
   ],
   "scores": {
     "AAPL": {
@@ -910,7 +910,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: KMI is 4.9% below entry (entry $32.79 \u2192 now $31.19), position 7.5% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: KMI is 4.9% below entry (entry $32.79 \u2192 now $31.18), position 7.5% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 1.0,
@@ -1017,67 +1017,15 @@
       },
       "_gate_used": 7.0
     },
-    "RTX": {
-      "symbol": "RTX",
-      "recommendation": "HOLD",
-      "score": 8.12,
-      "approval_gate": 8.5,
-      "size_multiplier": 1.0,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 19.92,
-      "is_discovery": true,
-      "is_speculative": true,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "2.0/2.0",
-        "news": "1.27/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "1.5/2.0",
-        "volatility": "1.0/1.0",
-        "quality": "2.35/2.5"
-      },
+    "EVER": {
+      "symbol": "EVER",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "technical": {
-          "score": 2.0,
-          "note": "STRONG_BUY \u2014 MA20 $195.03 > MA50 $193.00, price $200.20 above both [capped 3.0\u21922.0 at weight 2.0]"
-        },
-        "news": {
-          "score": 1.27,
-          "note": "POSITIVE \u2014 2 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $760.72 < MA50 $765.01"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "Adequate cash reserve 28%"
-        },
-        "volatility": {
-          "score": 1.0,
-          "note": "VIX 19.9 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
-        },
-        "quality": {
-          "score": 2.35,
-          "note": "Mega-cap $270B; Profitable; 10 analyst buy ratings"
-        }
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
       },
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $195.03 > MA50 $193.00, price $200.20 above both [capped 3.0\u21922.0 at weight 2.0]. News: POSITIVE \u2014 2 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $760.72 < MA50 $765.01. Portfolio: Adequate cash reserve 28%. Volatility: VIX 19.9 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $270B; Profitable; 10 analyst buy ratings. Source: discovery | Gate: 8.5.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -1086,17 +1034,18 @@
         "would_change": null,
         "record_gate": 8.0,
         "record_label": "no closed trades",
-        "required_gate": 8.5
+        "required_gate": 8.0
       },
-      "_gate_used": 8.5
+      "_gate_used": 7.0
     },
-    "TNL": {
-      "symbol": "TNL",
+    "BYD": {
+      "symbol": "BYD",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for TNL \u2014 auto-veto per Hard Rule 9",
+      "rationale": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "earnings_veto": true
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
