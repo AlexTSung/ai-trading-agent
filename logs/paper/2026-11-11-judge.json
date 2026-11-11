@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-11T05:02:16.941851-05:00",
+  "timestamp": "2026-11-11T06:01:44.113525-05:00",
   "date": "2026-11-11",
   "approved": [],
   "held": [
@@ -21,6 +21,7 @@
     "SOXS",
     "LLY",
     "KDP",
+    "TGTX",
     "NVD",
     "JHX",
     "SPDN",
@@ -30,8 +31,7 @@
     "NEE",
     "FISV",
     "PPL",
-    "KO",
-    "GXO"
+    "KO"
   ],
   "scores": {
     "AAPL": {
@@ -620,6 +620,26 @@
       },
       "_gate_used": 8.0
     },
+    "TGTX": {
+      "symbol": "TGTX",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for TGTX \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
     "NVD": {
       "symbol": "NVD",
       "recommendation": "VETO",
@@ -937,27 +957,6 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "GXO": {
-      "symbol": "GXO",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
