@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-10T22:02:06.674392-05:00",
+  "timestamp": "2026-11-10T23:01:22.784228-05:00",
   "date": "2026-11-10",
   "approved": [],
   "held": [
@@ -35,8 +35,8 @@
     "FISV",
     "PPL",
     "KO",
-    "API",
-    "BYD"
+    "SNES",
+    "USIO"
   ],
   "scores": {
     "AAPL": {
@@ -1018,30 +1018,6 @@
       },
       "_gate_used": 7.0
     },
-    "API": {
-      "symbol": "API",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "Quality veto: MICRO_CAP VETO: $0.36B market cap \u2014 too small for discovery buys",
-      "criteria": {
-        "quality": {
-          "score": 0.0,
-          "note": "MICRO_CAP VETO: $0.36B market cap \u2014 too small for discovery buys",
-          "veto": true
-        }
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
     "CE": {
       "symbol": "CE",
       "recommendation": "HOLD",
@@ -1115,14 +1091,34 @@
       },
       "_gate_used": 8.5
     },
-    "BYD": {
-      "symbol": "BYD",
+    "SNES": {
+      "symbol": "SNES",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 76 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "USIO": {
+      "symbol": "USIO",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for USIO \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
