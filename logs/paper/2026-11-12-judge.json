@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-12T16:53:35.323871-05:00",
+  "timestamp": "2026-11-12T18:01:58.706099-05:00",
   "date": "2026-11-12",
   "approved": [
     "MRK"
@@ -26,17 +26,17 @@
     "PFE",
     "CMCSA",
     "CSX",
-    "NCLH",
+    "BRK.B",
     "GP",
     "NVD",
     "POAS",
     "XEL",
+    "NCLH",
     "VICI",
     "FISV",
     "KO",
     "NEE",
-    "STAG",
-    "BN"
+    "EPC"
   ],
   "scores": {
     "AAPL": {
@@ -949,14 +949,14 @@
       },
       "_gate_used": 7.0
     },
-    "NCLH": {
-      "symbol": "NCLH",
+    "BRK.B": {
+      "symbol": "BRK.B",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1127,6 +1127,27 @@
       },
       "_gate_used": 8.5
     },
+    "NCLH": {
+      "symbol": "NCLH",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
     "KHC": {
       "symbol": "KHC",
       "recommendation": "HOLD",
@@ -1284,34 +1305,13 @@
       },
       "_gate_used": 7.0
     },
-    "STAG": {
-      "symbol": "STAG",
+    "EPC": {
+      "symbol": "EPC",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for STAG \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for EPC \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "BN": {
-      "symbol": "BN",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
