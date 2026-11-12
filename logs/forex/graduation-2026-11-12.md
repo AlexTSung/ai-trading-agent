@@ -5,30 +5,30 @@
 ## Graduation Criteria
 | Criterion | Required | Current | Status |
 |-----------|----------|---------|--------|
-| 📊 Closed trades | 15 | 11 | ❌ |
-| 🎯 Win rate | 55% | 64% | ✅ |
-| 💰 Profit factor | 1.50 | 1.81 | ✅ |
-| 📈 Expectancy/trade | >$0 | $106.56 | ✅ |
-| 🏦 Net return | 3.0% | 1.17% | ❌ |
+| 📊 Closed trades | 15 | 12 | ❌ |
+| 🎯 Win rate | 55% | 58% | ✅ |
+| 💰 Profit factor | 1.50 | 1.67 | ✅ |
+| 📈 Expectancy/trade | >$0 | $87.59 | ✅ |
+| 🏦 Net return | 3.0% | 1.05% | ❌ |
 
 ## Performance Detail
 | | |
 |---|---|
-| Total closed trades | 11 |
-| Wins / Losses | 7W / 4L |
-| Win rate | 64% |
+| Total closed trades | 12 |
+| Wins / Losses | 7W / 5L |
+| Win rate | 58% |
 | Gross wins | $2,616.47 |
-| Gross losses | $1,444.35 |
-| Profit factor | 1.81 |
+| Gross losses | $1,565.39 |
+| Profit factor | 1.67 |
 | Avg win | $373.78 |
-| Avg loss | $361.09 |
-| Expectancy/trade | $106.56 |
-| Total realized P&L | $+1,172.12 |
-| Net return | 1.17% |
+| Avg loss | $313.08 |
+| Expectancy/trade | $87.59 |
+| Total realized P&L | $+1,051.08 |
+| Net return | 1.05% |
 
 ## Blockers to Graduation
-- Need **4 more closed trades** (have 11, need 15)
-- Need **+1.83% more return** (have 1.17%, need 3.0%)
+- Need **3 more closed trades** (have 12, need 15)
+- Need **+1.95% more return** (have 1.05%, need 3.0%)
 
 ## Per-Pair Stats
 | Pair | Wins | Losses | Total P&L | Total Pips | Status |
@@ -68,6 +68,6 @@
 ```
 
 ## Estimated Path to Graduation
-- Trades needed: **4** more  (~3 weeks at 1-2/week)
-- Return needed: **+1.83%** more  (~$1,828 more profit needed)
+- Trades needed: **3** more  (~2 weeks at 1-2/week)
+- Return needed: **+1.95%** more  (~$1,949 more profit needed)
 - Manual approval required before any real money is deployed.
