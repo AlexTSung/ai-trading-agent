@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-12T06:02:19.510193-05:00",
+  "timestamp": "2026-11-12T07:02:16.902055-05:00",
   "date": "2026-11-12",
   "approved": [],
   "held": [
@@ -13,7 +13,8 @@
     "PFE",
     "CSX",
     "NKE",
-    "PCG"
+    "PCG",
+    "PD"
   ],
   "vetoed": [
     "AAPL",
@@ -1046,6 +1047,79 @@
         "required_gate": 8.0
       },
       "_gate_used": 7.0
+    },
+    "PD": {
+      "symbol": "PD",
+      "recommendation": "HOLD",
+      "score": 5.77,
+      "approval_gate": 8.5,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
+          "Win rate 95% CI on 34 trips: 12%\u201340%",
+          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 34,
+        "band": 0.15
+      },
+      "vix": 19.46,
+      "is_discovery": true,
+      "is_speculative": true,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "1.5/2.0",
+        "news": "1.27/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "1.5/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "0.5/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $16.78 > MA50 $15.61, price between MAs"
+        },
+        "news": {
+          "score": 1.27,
+          "note": "POSITIVE \u2014 5 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $760.23 < MA50 $764.98"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Adequate cash reserve 28%"
+        },
+        "volatility": {
+          "score": 1.0,
+          "note": "VIX 19.5 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
+        },
+        "quality": {
+          "score": 0.5,
+          "note": "Small-cap $1.2B \u2014 limited institutional support; Profitable; Short float 11.70% \u2014 elevated short interest"
+        }
+      },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $16.78 > MA50 $15.61, price between MAs. News: POSITIVE \u2014 5 bullish signals in recent headlines [capped 2.0\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $760.23 < MA50 $764.98. Portfolio: Adequate cash reserve 28%. Volatility: VIX 19.5 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Small-cap $1.2B \u2014 limited institutional support; Profitable; Short float 11.70% \u2014 elevated short interest. Source: discovery | Gate: 8.5.",
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.5
+      },
+      "_gate_used": 8.5
     },
     "SDY": {
       "symbol": "SDY",
