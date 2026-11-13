@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-12T20:02:20.525015-05:00",
+  "timestamp": "2026-11-12T21:02:17.871930-05:00",
   "date": "2026-11-12",
   "approved": [
     "MRK"
@@ -36,8 +36,8 @@
     "FISV",
     "KO",
     "NEE",
-    "GCT",
-    "PSA"
+    "REIT",
+    "BY"
   ],
   "scores": {
     "AAPL": {
@@ -1306,13 +1306,14 @@
       },
       "_gate_used": 7.0
     },
-    "GCT": {
-      "symbol": "GCT",
+    "REIT": {
+      "symbol": "REIT",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for GCT \u2014 auto-veto per Hard Rule 9",
+      "rationale": "CHASE VETO: RSI(14) 78 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "earnings_veto": true
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 78 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1326,14 +1327,13 @@
       },
       "_gate_used": 7.0
     },
-    "PSA": {
-      "symbol": "PSA",
+    "BY": {
+      "symbol": "BY",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BY \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
