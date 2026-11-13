@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-13T01:01:46.808207-05:00",
+  "timestamp": "2026-11-13T02:01:44.581597-05:00",
   "date": "2026-11-13",
   "approved": [
     "MRK"
@@ -26,7 +26,9 @@
     "PFE",
     "CMCSA",
     "CSX",
-    "XYZ",
+    "COST",
+    "DAL",
+    "DIS",
     "GP",
     "NVD",
     "POAS",
@@ -36,7 +38,7 @@
     "FISV",
     "KO",
     "NEE",
-    "EG"
+    "CTSO"
   ],
   "scores": {
     "AAPL": {
@@ -949,14 +951,56 @@
       },
       "_gate_used": 7.0
     },
-    "XYZ": {
-      "symbol": "XYZ",
+    "COST": {
+      "symbol": "COST",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $82.30 is 3.0% above MA20 $79.87 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $82.30 is 3.0% above MA20 $79.87 (limit 3%) \u2014 do not chase"
+        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "DAL": {
+      "symbol": "DAL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "DIS": {
+      "symbol": "DIS",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1305,14 +1349,14 @@
       },
       "_gate_used": 7.0
     },
-    "EG": {
-      "symbol": "EG",
+    "CTSO": {
+      "symbol": "CTSO",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: price $5.55 is 16.1% above MA20 $4.78 (limit 3%) \u2014 do not chase",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: price $5.55 is 16.1% above MA20 $4.78 (limit 3%) \u2014 do not chase"
       },
       "universe_policy": {
         "status": "approved",
