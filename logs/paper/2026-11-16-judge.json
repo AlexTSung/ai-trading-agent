@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-16T08:01:05.773962-05:00",
+  "timestamp": "2026-11-16T09:01:16.020635-05:00",
   "date": "2026-11-16",
   "approved": [],
   "held": [
@@ -169,7 +169,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding MSFT \u2014 only 0.6% below entry (need \u22653%)"
+          "note": "Already holding MSFT \u2014 only 0.5% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 1.0,
@@ -180,7 +180,7 @@
           "note": "Mega-cap $3890B; Profitable; 41 analyst buy ratings \u2014 strong institutional coverage"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $529.51 > MA50 $519.03, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $759.05 < MA50 $764.44. Portfolio: Already holding MSFT \u2014 only 0.6% below entry (need \u22653%). Volatility: VIX 18.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $3890B; Profitable; 41 analyst buy ratings \u2014 strong institutional coverage. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $529.51 > MA50 $519.03, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $759.05 < MA50 $764.44. Portfolio: Already holding MSFT \u2014 only 0.5% below entry (need \u22653%). Volatility: VIX 18.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $3890B; Profitable; 41 analyst buy ratings \u2014 strong institutional coverage. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -1134,7 +1134,7 @@
     "SO": {
       "symbol": "SO",
       "recommendation": "HOLD",
-      "score": 7.65,
+      "score": 7.92,
       "approval_gate": 8.5,
       "size_multiplier": 1.0,
       "macro_regime": "RISK_OFF",
@@ -1159,7 +1159,7 @@
       "avg_down_candidate": false,
       "score_breakdown": {
         "technical": "2.0/2.0",
-        "news": "1.0/1.5",
+        "news": "1.27/1.5",
         "macro": "0.0/1.0",
         "portfolio": "1.5/2.0",
         "volatility": "1.0/1.0",
@@ -1171,8 +1171,8 @@
           "note": "STRONG_BUY \u2014 MA20 $92.75 > MA50 $88.69, price $93.61 above both [capped 3.0\u21922.0 at weight 2.0]"
         },
         "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
+          "score": 1.27,
+          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
         },
         "macro": {
           "score": 0.0,
@@ -1191,7 +1191,7 @@
           "note": "Mega-cap $109B; Profitable; 6 analyst buy ratings"
         }
       },
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $92.75 > MA50 $88.69, price $93.61 above both [capped 3.0\u21922.0 at weight 2.0]. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $759.05 < MA50 $764.44. Portfolio: Adequate cash reserve 26%. Volatility: VIX 18.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $109B; Profitable; 6 analyst buy ratings. Source: discovery | Gate: 8.5.",
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $92.75 > MA50 $88.69, price $93.61 above both [capped 3.0\u21922.0 at weight 2.0]. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $759.05 < MA50 $764.44. Portfolio: Adequate cash reserve 26%. Volatility: VIX 18.7 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $109B; Profitable; 6 analyst buy ratings. Source: discovery | Gate: 8.5.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -1342,8 +1342,10 @@
       "symbol": "DIS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "Data error: 429 Client Error: Too Many Requests for url: https://data.alpaca.markets/v1beta1/news?symbols=DIS&limit=5&sort=desc",
-      "criteria": {},
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for DIS \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
       "universe_policy": {
         "status": "approved",
         "enforced": true,
