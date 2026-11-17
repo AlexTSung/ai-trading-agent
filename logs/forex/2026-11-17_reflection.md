@@ -1,9 +1,9 @@
 # Daily Trading Reflection — 2026-11-17
 
 ## P&L
-- Realized today: $+0.00
-- Trades closed: 0
-- Wins: 0  Losses: 0
+- Realized today: $+131.09
+- Trades closed: 1
+- Wins: 1  Losses: 0
 
 ## Did I follow the strategy exactly?
 - [ ] Only took trades with judge score ≥ 7.0
@@ -16,6 +16,9 @@
 ## What happened vs. what I expected?
 _(Review each trade: was the outcome different from what you anticipated? Why?)_
 
+- **EUR_JPY** LONG → stop_loss → $+131.09
+  - Expected: ___  Actual: ___  Lesson: ___
+
 ## Lessons logged today
 
 ## One improvement for tomorrow
@@ -23,8 +26,8 @@ _(Even a tiny improvement compounds over time — what ONE thing will you do bet
 
 > ___
 
-## Overall performance — 64 trades lifetime
-- Win rate: 53.1%  (target ≥55%)
+## Overall performance — 65 trades lifetime
+- Win rate: 53.8%  (target ≥55%)
 - Profit factor: 0.49  (target ≥1.3)
 - Max drawdown: 1893.8%  (max 8%)
 
