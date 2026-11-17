@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-17T00:01:06.142684-05:00",
+  "timestamp": "2026-11-17T01:02:03.154064-05:00",
   "date": "2026-11-17",
   "approved": [],
   "held": [
@@ -14,7 +14,8 @@
     "ADBE",
     "CSX",
     "WFC",
-    "NKE"
+    "NKE",
+    "GSK"
   ],
   "vetoed": [
     "MSFT",
@@ -27,8 +28,9 @@
     "TGT",
     "VIXY",
     "CMCSA",
-    "NCLH",
-    "BRK.B",
+    "ADMA",
+    "XYZ",
+    "COST",
     "SPDN",
     "PCG",
     "KO",
@@ -37,8 +39,8 @@
     "NEE",
     "KHC",
     "WMT",
-    "IA",
-    "GO"
+    "RBA",
+    "GXO"
   ],
   "scores": {
     "AAPL": {
@@ -145,7 +147,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding MSFT \u2014 only 1.8% below entry (need \u22653%)"
+          "note": "Already holding MSFT \u2014 only 2.0% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 1.0,
@@ -466,7 +468,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding MRK \u2014 only 1.1% below entry (need \u22653%)"
+          "note": "Already holding MRK \u2014 only 1.0% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 1.0,
@@ -999,14 +1001,34 @@
       },
       "_gate_used": 8.0
     },
-    "NCLH": {
-      "symbol": "NCLH",
+    "ADMA": {
+      "symbol": "ADMA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "XYZ": {
+      "symbol": "XYZ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for XYZ \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
@@ -1093,14 +1115,14 @@
       },
       "_gate_used": 8.5
     },
-    "BRK.B": {
-      "symbol": "BRK.B",
+    "COST": {
+      "symbol": "COST",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 85 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 79 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 85 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 79 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1355,17 +1377,14 @@
       },
       "_gate_used": 7.0
     },
-    "IA": {
-      "symbol": "IA",
+    "RBA": {
+      "symbol": "RBA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "Quality veto: MICRO_CAP VETO: $0.36B market cap \u2014 too small for discovery buys",
+      "rationale": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "quality": {
-          "score": 0.0,
-          "note": "MICRO_CAP VETO: $0.36B market cap \u2014 too small for discovery buys",
-          "veto": true
-        }
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1379,21 +1398,69 @@
       },
       "_gate_used": 7.0
     },
-    "GO": {
-      "symbol": "GO",
+    "GXO": {
+      "symbol": "GXO",
       "recommendation": "VETO",
-      "score": 4.5,
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 73 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 73 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "GSK": {
+      "symbol": "GSK",
+      "recommendation": "HOLD",
+      "score": 7.5,
       "approval_gate": 8.5,
+      "size_multiplier": 1.0,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
+          "Win rate 95% CI on 34 trips: 12%\u201340%",
+          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 34,
+        "band": 0.15
+      },
+      "vix": 19.3,
       "is_discovery": true,
-      "rationale": "Discovery quality veto: scored 0.0/2.5 on quality (minimum 0.5). Small-cap $1.2B \u2014 limited institutional support; Unprofitable \u2014 burning cash; Short float 28.44% \u2014 heavily shorted, risk of squeeze or continued decline",
+      "is_speculative": true,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "2.0/2.0",
+        "news": "1.0/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "1.5/2.0",
+        "volatility": "1.0/1.0",
+        "quality": "2.0/2.5"
+      },
       "criteria": {
         "technical": {
-          "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $13.12 > MA50 $12.25, price between MAs"
+          "score": 2.0,
+          "note": "STRONG_BUY \u2014 MA20 $50.31 > MA50 $49.31, price $50.41 above both [capped 3.0\u21922.0 at weight 2.0]"
         },
         "news": {
-          "score": 0.5,
-          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
         },
         "macro": {
           "score": 0.0,
@@ -1408,11 +1475,11 @@
           "note": "VIX 19.3 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]"
         },
         "quality": {
-          "score": 0.0,
-          "note": "Small-cap $1.2B \u2014 limited institutional support; Unprofitable \u2014 burning cash; Short float 28.44% \u2014 heavily shorted, risk of squeeze or continued decline",
-          "veto": true
+          "score": 2.0,
+          "note": "Mega-cap $101B; Profitable"
         }
       },
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $50.31 > MA50 $49.31, price $50.41 above both [capped 3.0\u21922.0 at weight 2.0]. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $757.72 < MA50 $763.84. Portfolio: Adequate cash reserve 27%. Volatility: VIX 19.3 \u2014 calm tape, favorable entry (NORMAL) [capped 1.5\u21921.0 at weight 1.0]. Quality: Mega-cap $101B; Profitable. Source: discovery | Gate: 8.5.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
