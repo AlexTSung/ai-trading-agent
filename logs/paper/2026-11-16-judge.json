@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-16T22:01:21.636520-05:00",
+  "timestamp": "2026-11-16T23:01:20.633717-05:00",
   "date": "2026-11-16",
   "approved": [],
   "held": [
@@ -34,7 +34,8 @@
     "FISV",
     "NEE",
     "KHC",
-    "WMT"
+    "WMT",
+    "IA"
   ],
   "scores": {
     "AAPL": {
@@ -141,7 +142,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding MSFT \u2014 only 1.7% below entry (need \u22653%)"
+          "note": "Already holding MSFT \u2014 only 1.6% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 1.0,
@@ -1296,6 +1297,30 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "IA": {
+      "symbol": "IA",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "Quality veto: MICRO_CAP VETO: $0.36B market cap \u2014 too small for discovery buys",
+      "criteria": {
+        "quality": {
+          "score": 0.0,
+          "note": "MICRO_CAP VETO: $0.36B market cap \u2014 too small for discovery buys",
+          "veto": true
+        }
       },
       "universe_policy": {
         "status": "approved",
