@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-17T05:01:58.276297-05:00",
+  "timestamp": "2026-11-17T06:01:32.479408-05:00",
   "date": "2026-11-17",
   "approved": [],
   "held": [
@@ -26,7 +26,7 @@
     "TGT",
     "VIXY",
     "CMCSA",
-    "ABNB",
+    "MCD",
     "SPDN",
     "PCG",
     "KO",
@@ -34,7 +34,8 @@
     "FISV",
     "NEE",
     "KHC",
-    "WMT"
+    "WMT",
+    "JD"
   ],
   "scores": {
     "AAPL": {
@@ -141,7 +142,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding MSFT \u2014 only 2.1% below entry (need \u22653%)"
+          "note": "Already holding MSFT \u2014 only 1.8% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 1.0,
@@ -995,14 +996,14 @@
       },
       "_gate_used": 8.0
     },
-    "ABNB": {
-      "symbol": "ABNB",
+    "MCD": {
+      "symbol": "MCD",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1244,6 +1245,27 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "JD": {
+      "symbol": "JD",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
