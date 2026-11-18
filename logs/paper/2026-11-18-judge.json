@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-18T16:01:52.002698-05:00",
+  "timestamp": "2026-11-18T17:01:38.745265-05:00",
   "date": "2026-11-18",
   "approved": [],
   "held": [
@@ -26,10 +26,9 @@
     "CSX",
     "TTWO",
     "SPDN",
-    "RWM",
     "GRAB",
+    "RWM",
     "NVD",
-    "HIHO",
     "PCG",
     "WMT",
     "VTRS",
@@ -37,11 +36,10 @@
     "KHC",
     "DIS",
     "KO",
-    "INTA",
-    "WPP",
-    "GE",
-    "AS",
-    "JJSF"
+    "UGI",
+    "MKL",
+    "YELP",
+    "REAL"
   ],
   "scores": {
     "AAPL": {
@@ -148,7 +146,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 3.8% below entry (entry $527.35 \u2192 now $507.50), position 7.6% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 3.8% below entry (entry $527.35 \u2192 now $507.55), position 7.6% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
@@ -775,7 +773,7 @@
     "CSX": {
       "symbol": "CSX",
       "recommendation": "VETO",
-      "score": 4.35,
+      "score": 4.85,
       "approval_gate": 8.0,
       "size_multiplier": 0.5,
       "macro_regime": "RISK_OFF",
@@ -800,7 +798,7 @@
       "avg_down_candidate": false,
       "score_breakdown": {
         "technical": "1.5/2.0",
-        "news": "0.5/1.5",
+        "news": "1.0/1.5",
         "macro": "0.0/1.0",
         "portfolio": "0.0/2.0",
         "volatility": "0.25/1.0",
@@ -812,8 +810,8 @@
           "note": "WEAK_BUY \u2014 MA20 $51.45 > MA50 $49.14, price between MAs"
         },
         "news": {
-          "score": 0.5,
-          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
         },
         "macro": {
           "score": 0.0,
@@ -832,7 +830,7 @@
           "note": "Large-cap $95B; Profitable; 13 analyst buy ratings"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $51.45 > MA50 $49.14, price between MAs. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $753.75 < MA50 $762.52. Portfolio: Already holding CSX \u2014 price above entry, avg-down not warranted. Volatility: VIX 25.5 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $95B; Profitable; 13 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $51.45 > MA50 $49.14, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $753.75 < MA50 $762.52. Portfolio: Already holding CSX \u2014 price above entry, avg-down not warranted. Volatility: VIX 25.5 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $95B; Profitable; 13 analyst buy ratings. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -960,27 +958,6 @@
       },
       "_gate_used": 8.5
     },
-    "RWM": {
-      "symbol": "RWM",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
     "GRAB": {
       "symbol": "GRAB",
       "recommendation": "VETO",
@@ -1002,14 +979,14 @@
       },
       "_gate_used": 7.0
     },
-    "NVD": {
-      "symbol": "NVD",
+    "RWM": {
+      "symbol": "RWM",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 84 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 84 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1023,14 +1000,14 @@
       },
       "_gate_used": 7.0
     },
-    "HIHO": {
-      "symbol": "HIHO",
+    "NVD": {
+      "symbol": "NVD",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 92 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 84 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 92 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 84 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1263,11 +1240,11 @@
       },
       "_gate_used": 7.0
     },
-    "INTA": {
-      "symbol": "INTA",
+    "UGI": {
+      "symbol": "UGI",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for INTA \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for UGI \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
@@ -1283,11 +1260,11 @@
       },
       "_gate_used": 7.0
     },
-    "WPP": {
-      "symbol": "WPP",
+    "MKL": {
+      "symbol": "MKL",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for WPP \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for MKL \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
@@ -1303,32 +1280,11 @@
       },
       "_gate_used": 7.0
     },
-    "GE": {
-      "symbol": "GE",
+    "YELP": {
+      "symbol": "YELP",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $328.03 is 3.4% above MA20 $317.22 (limit 3%) \u2014 do not chase",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: price $328.03 is 3.4% above MA20 $317.22 (limit 3%) \u2014 do not chase"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "AS": {
-      "symbol": "AS",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for AS \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for YELP \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
@@ -1344,14 +1300,13 @@
       },
       "_gate_used": 7.0
     },
-    "JJSF": {
-      "symbol": "JJSF",
+    "REAL": {
+      "symbol": "REAL",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 78 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for REAL \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 78 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
