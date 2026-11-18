@@ -1,114 +1,27 @@
 {
   "session_date": "2026-11-18",
-  "judged_at": "2026-11-18T09:01:26.125106+00:00",
+  "judged_at": "2026-11-18T14:00:56.121381+00:00",
   "environment": "practice",
-  "total_reviewed": 7,
+  "total_reviewed": 2,
   "tradeable": 0,
   "gate": 7.5,
   "verdicts": [
     {
-      "pair": "USD_CHF",
-      "direction": "LONG",
-      "score": 8.07,
-      "verdict": "DISQUALIFIED",
-      "reason": "G10_technical_score_0.33_below_0.40_minimum; G11_H1_regime_conflict_LONG_at_range_top",
-      "size_multiplier": 0.5,
-      "environment": "practice",
-      "judged_at": "2026-11-18T09:01:26.124146+00:00",
-      "entry_price": 0.84168,
-      "stop_price": 0.83504,
-      "tp1_price": 0.85495,
-      "tp2_price": 0.86823,
-      "stop_pips": 66,
-      "tp1_pips": 132,
-      "atr14_pips": 22.1,
-      "factors": {
-        "carry": {
-          "score": 1.0,
-          "weight": 2.5,
-          "detail": {
-            "carry_pct": 3.5,
-            "carry_signal": "LONG",
-            "raw_score": 1.0
-          }
-        },
-        "momentum": {
-          "score": 1.0,
-          "weight": 2.0,
-          "detail": {
-            "h4_momentum": "bullish",
-            "daily_momentum": "bullish",
-            "hp_signal": "LONG",
-            "ma_cross": "bullish",
-            "above_ma20": true,
-            "signals": 5,
-            "raw_score": 1.0
-          }
-        },
-        "technical": {
-          "score": 0.333,
-          "weight": 1.5,
-          "detail": {
-            "rsi14": "ok_at_57.2",
-            "pivot": "above_pivot",
-            "points": 2,
-            "raw_score": 0.333
-          }
-        },
-        "session": {
-          "score": 0.75,
-          "weight": 1.0,
-          "detail": {
-            "session_quality": "london",
-            "utc_hour": 9,
-            "raw_score": 0.75
-          }
-        },
-        "volatility": {
-          "score": 0.7,
-          "weight": 1.5,
-          "detail": {
-            "spread_pips": 1.8,
-            "spread_ok": true,
-            "atr_pips": 22.1,
-            "atr_regime": "borderline",
-            "raw_score": 0.7
-          }
-        },
-        "risk_reward": {
-          "score": 0.85,
-          "weight": 1.5,
-          "detail": {
-            "rr_ratio": 2.0,
-            "stop_pips": 66,
-            "tp1_pips": 132,
-            "raw_score": 0.85
-          }
-        }
-      },
-      "learned_weights_active": true,
-      "direction_penalty": 0.0,
-      "disqualifiers": [
-        "G10_technical_score_0.33_below_0.40_minimum",
-        "G11_H1_regime_conflict_LONG_at_range_top"
-      ]
-    },
-    {
       "pair": "EUR_JPY",
       "direction": "SHORT",
-      "score": 7.17,
+      "score": 7.42,
       "verdict": "DISQUALIFIED",
-      "reason": "DEPRIORITIZED_EUR_JPY_needs_7.5_got_7.17; G10_technical_score_0.33_below_0.40_minimum; G11_H1_regime_conflict_SHORT_at_range_bottom",
+      "reason": "DEPRIORITIZED_EUR_JPY_needs_7.5_got_7.42; G10_technical_score_0.33_below_0.40_minimum",
       "size_multiplier": 0.5,
       "environment": "practice",
-      "judged_at": "2026-11-18T09:01:26.124435+00:00",
-      "entry_price": 174.526,
-      "stop_price": 175.60921,
-      "tp1_price": 172.35957,
-      "tp2_price": 170.19314,
-      "stop_pips": 108,
-      "tp1_pips": 216,
-      "atr14_pips": 36.1,
+      "judged_at": "2026-11-18T14:00:56.121039+00:00",
+      "entry_price": 174.8185,
+      "stop_price": 175.91286,
+      "tp1_price": 172.62979,
+      "tp2_price": 170.44107,
+      "stop_pips": 109,
+      "tp1_pips": 218,
+      "atr14_pips": 36.5,
       "factors": {
         "carry": {
           "score": 0.8,
@@ -142,21 +55,21 @@
           }
         },
         "session": {
-          "score": 0.75,
+          "score": 1.0,
           "weight": 1.0,
           "detail": {
-            "session_quality": "london",
-            "utc_hour": 9,
-            "raw_score": 0.75
+            "session_quality": "london_ny_overlap",
+            "utc_hour": 14,
+            "raw_score": 1.0
           }
         },
         "volatility": {
           "score": 0.7,
           "weight": 1.5,
           "detail": {
-            "spread_pips": 2.4,
+            "spread_pips": 2.9,
             "spread_ok": true,
-            "atr_pips": 36.1,
+            "atr_pips": 36.5,
             "atr_regime": "borderline",
             "raw_score": 0.7
           }
@@ -166,8 +79,8 @@
           "weight": 1.5,
           "detail": {
             "rr_ratio": 2.0,
-            "stop_pips": 108,
-            "tp1_pips": 216,
+            "stop_pips": 109,
+            "tp1_pips": 218,
             "raw_score": 0.85
           }
         }
@@ -175,181 +88,8 @@
       "learned_weights_active": true,
       "direction_penalty": 0.0,
       "disqualifiers": [
-        "DEPRIORITIZED_EUR_JPY_needs_7.5_got_7.17",
-        "G10_technical_score_0.33_below_0.40_minimum",
-        "G11_H1_regime_conflict_SHORT_at_range_bottom"
-      ]
-    },
-    {
-      "pair": "AUD_JPY",
-      "direction": "SHORT",
-      "score": 7.17,
-      "verdict": "DISQUALIFIED",
-      "reason": "G10_technical_score_0.33_below_0.40_minimum; G11_H1_regime_conflict_SHORT_at_range_bottom",
-      "size_multiplier": 1.0,
-      "environment": "practice",
-      "judged_at": "2026-11-18T09:01:26.124569+00:00",
-      "entry_price": 107.0045,
-      "stop_price": 107.70707,
-      "tp1_price": 105.59936,
-      "tp2_price": 104.19421,
-      "stop_pips": 70,
-      "tp1_pips": 140,
-      "atr14_pips": 35.1,
-      "factors": {
-        "carry": {
-          "score": 0.8,
-          "weight": 2.5,
-          "detail": {
-            "carry_pct": 4.25,
-            "carry_signal": "LONG",
-            "raw_score": 0.8
-          }
-        },
-        "momentum": {
-          "score": 0.8,
-          "weight": 2.0,
-          "detail": {
-            "h4_momentum": "bearish",
-            "daily_momentum": "bearish",
-            "ma_cross": "bearish",
-            "below_ma20": true,
-            "signals": 4,
-            "raw_score": 0.8
-          }
-        },
-        "technical": {
-          "score": 0.333,
-          "weight": 1.5,
-          "detail": {
-            "macd": "bearish",
-            "pivot": "below_pivot",
-            "points": 2,
-            "raw_score": 0.333
-          }
-        },
-        "session": {
-          "score": 0.75,
-          "weight": 1.0,
-          "detail": {
-            "session_quality": "london",
-            "utc_hour": 9,
-            "raw_score": 0.75
-          }
-        },
-        "volatility": {
-          "score": 0.7,
-          "weight": 1.5,
-          "detail": {
-            "spread_pips": 2.1,
-            "spread_ok": true,
-            "atr_pips": 35.1,
-            "atr_regime": "borderline",
-            "raw_score": 0.7
-          }
-        },
-        "risk_reward": {
-          "score": 0.85,
-          "weight": 1.5,
-          "detail": {
-            "rr_ratio": 2.0,
-            "stop_pips": 70,
-            "tp1_pips": 140,
-            "raw_score": 0.85
-          }
-        }
-      },
-      "learned_weights_active": true,
-      "direction_penalty": 0.0,
-      "disqualifiers": [
-        "G10_technical_score_0.33_below_0.40_minimum",
-        "G11_H1_regime_conflict_SHORT_at_range_bottom"
-      ]
-    },
-    {
-      "pair": "NZD_JPY",
-      "direction": "SHORT",
-      "score": 6.95,
-      "verdict": "DISQUALIFIED",
-      "reason": "G10_technical_score_0.33_below_0.40_minimum; G11_H1_regime_conflict_SHORT_at_range_bottom",
-      "size_multiplier": 1.0,
-      "environment": "practice",
-      "judged_at": "2026-11-18T09:01:26.124706+00:00",
-      "entry_price": 87.3375,
-      "stop_price": 88.05579,
-      "tp1_price": 85.90093,
-      "tp2_price": 84.46436,
-      "stop_pips": 72,
-      "tp1_pips": 144,
-      "atr14_pips": 23.9,
-      "factors": {
-        "carry": {
-          "score": 0.8,
-          "weight": 2.5,
-          "detail": {
-            "carry_pct": 5.4,
-            "carry_signal": "LONG",
-            "raw_score": 0.8
-          }
-        },
-        "momentum": {
-          "score": 0.8,
-          "weight": 2.0,
-          "detail": {
-            "h4_momentum": "bearish",
-            "daily_momentum": "bearish",
-            "ma_cross": "bearish",
-            "below_ma20": true,
-            "signals": 4,
-            "raw_score": 0.8
-          }
-        },
-        "technical": {
-          "score": 0.333,
-          "weight": 1.5,
-          "detail": {
-            "macd": "bearish",
-            "pivot": "below_pivot",
-            "points": 2,
-            "raw_score": 0.333
-          }
-        },
-        "session": {
-          "score": 0.75,
-          "weight": 1.0,
-          "detail": {
-            "session_quality": "london",
-            "utc_hour": 9,
-            "raw_score": 0.75
-          }
-        },
-        "volatility": {
-          "score": 0.55,
-          "weight": 1.5,
-          "detail": {
-            "spread_pips": 3.3,
-            "spread_ok": true,
-            "atr_pips": 23.9,
-            "atr_regime": "quiet_ok",
-            "raw_score": 0.55
-          }
-        },
-        "risk_reward": {
-          "score": 0.85,
-          "weight": 1.5,
-          "detail": {
-            "rr_ratio": 2.0,
-            "stop_pips": 72,
-            "tp1_pips": 144,
-            "raw_score": 0.85
-          }
-        }
-      },
-      "learned_weights_active": true,
-      "direction_penalty": 0.0,
-      "disqualifiers": [
-        "G10_technical_score_0.33_below_0.40_minimum",
-        "G11_H1_regime_conflict_SHORT_at_range_bottom"
+        "DEPRIORITIZED_EUR_JPY_needs_7.5_got_7.42",
+        "G10_technical_score_0.33_below_0.40_minimum"
       ]
     },
     {
@@ -357,194 +97,23 @@
       "direction": "SHORT",
       "score": 5.68,
       "verdict": "DISQUALIFIED",
-      "reason": "G10_technical_score_0.33_below_0.40_minimum",
+      "reason": "G10_technical_score_0.17_below_0.40_minimum; G11_H1_regime_conflict_SHORT_at_range_bottom",
       "size_multiplier": 0.0,
       "environment": "practice",
-      "judged_at": "2026-11-18T09:01:26.123967+00:00",
-      "entry_price": 1.09619,
-      "stop_price": 1.10255,
-      "tp1_price": 1.08348,
-      "tp2_price": 1.07077,
-      "stop_pips": 64,
-      "tp1_pips": 128,
-      "atr14_pips": 21.2,
+      "judged_at": "2026-11-18T14:00:56.120862+00:00",
+      "entry_price": 1.09685,
+      "stop_price": 1.10374,
+      "tp1_price": 1.08306,
+      "tp2_price": 1.06928,
+      "stop_pips": 69,
+      "tp1_pips": 138,
+      "atr14_pips": 23.0,
       "factors": {
         "carry": {
           "score": 0.2,
           "weight": 2.5,
           "detail": {
             "carry_pct": -1.0,
-            "carry_signal": "SHORT",
-            "raw_score": 0.2
-          }
-        },
-        "momentum": {
-          "score": 0.8,
-          "weight": 2.0,
-          "detail": {
-            "h4_momentum": "bearish",
-            "daily_momentum": "bearish",
-            "ma_cross": "bearish",
-            "below_ma20": true,
-            "signals": 4,
-            "raw_score": 0.8
-          }
-        },
-        "technical": {
-          "score": 0.333,
-          "weight": 1.5,
-          "detail": {
-            "rsi14": "ok_at_37.8",
-            "pivot": "below_pivot",
-            "points": 2,
-            "raw_score": 0.333
-          }
-        },
-        "session": {
-          "score": 0.75,
-          "weight": 1.0,
-          "detail": {
-            "session_quality": "london",
-            "utc_hour": 9,
-            "raw_score": 0.75
-          }
-        },
-        "volatility": {
-          "score": 0.7,
-          "weight": 1.5,
-          "detail": {
-            "spread_pips": 1.6,
-            "spread_ok": true,
-            "atr_pips": 21.2,
-            "atr_regime": "borderline",
-            "raw_score": 0.7
-          }
-        },
-        "risk_reward": {
-          "score": 0.85,
-          "weight": 1.5,
-          "detail": {
-            "rr_ratio": 2.0,
-            "stop_pips": 64,
-            "tp1_pips": 128,
-            "raw_score": 0.85
-          }
-        }
-      },
-      "learned_weights_active": true,
-      "direction_penalty": 0.0,
-      "disqualifiers": [
-        "G10_technical_score_0.33_below_0.40_minimum"
-      ]
-    },
-    {
-      "pair": "EUR_GBP",
-      "direction": "SHORT",
-      "score": 5.45,
-      "verdict": "DISQUALIFIED",
-      "reason": "DEPRIORITIZED_EUR_GBP_needs_7.5_got_5.45; G10_technical_score_0.33_below_0.40_minimum",
-      "size_multiplier": 0.0,
-      "environment": "practice",
-      "judged_at": "2026-11-18T09:01:26.123796+00:00",
-      "entry_price": 0.8335,
-      "stop_price": 0.83593,
-      "tp1_price": 0.82864,
-      "tp2_price": 0.82379,
-      "stop_pips": 24,
-      "tp1_pips": 48,
-      "atr14_pips": 8.1,
-      "factors": {
-        "carry": {
-          "score": 0.2,
-          "weight": 2.5,
-          "detail": {
-            "carry_pct": -0.75,
-            "carry_signal": "SHORT",
-            "raw_score": 0.2
-          }
-        },
-        "momentum": {
-          "score": 0.8,
-          "weight": 2.0,
-          "detail": {
-            "h4_momentum": "bearish",
-            "daily_momentum": "bearish",
-            "ma_cross": "bearish",
-            "below_ma20": true,
-            "signals": 4,
-            "raw_score": 0.8
-          }
-        },
-        "technical": {
-          "score": 0.333,
-          "weight": 1.5,
-          "detail": {
-            "macd": "bearish",
-            "pivot": "below_pivot",
-            "points": 2,
-            "raw_score": 0.333
-          }
-        },
-        "session": {
-          "score": 0.75,
-          "weight": 1.0,
-          "detail": {
-            "session_quality": "london",
-            "utc_hour": 9,
-            "raw_score": 0.75
-          }
-        },
-        "volatility": {
-          "score": 0.55,
-          "weight": 1.5,
-          "detail": {
-            "spread_pips": 1.4,
-            "spread_ok": true,
-            "atr_pips": 8.1,
-            "atr_regime": "quiet_ok",
-            "raw_score": 0.55
-          }
-        },
-        "risk_reward": {
-          "score": 0.85,
-          "weight": 1.5,
-          "detail": {
-            "rr_ratio": 2.0,
-            "stop_pips": 24,
-            "tp1_pips": 48,
-            "raw_score": 0.85
-          }
-        }
-      },
-      "learned_weights_active": true,
-      "direction_penalty": 0.0,
-      "disqualifiers": [
-        "DEPRIORITIZED_EUR_GBP_needs_7.5_got_5.45",
-        "G10_technical_score_0.33_below_0.40_minimum"
-      ]
-    },
-    {
-      "pair": "AUD_USD",
-      "direction": "SHORT",
-      "score": 5.2,
-      "verdict": "DISQUALIFIED",
-      "reason": "G10_technical_score_0.17_below_0.40_minimum; G11_H1_regime_conflict_SHORT_at_range_bottom",
-      "size_multiplier": 0.0,
-      "environment": "practice",
-      "judged_at": "2026-11-18T09:01:26.124295+00:00",
-      "entry_price": 0.672,
-      "stop_price": 0.67682,
-      "tp1_price": 0.66237,
-      "tp2_price": 0.65273,
-      "stop_pips": 48,
-      "tp1_pips": 96,
-      "atr14_pips": 16.1,
-      "factors": {
-        "carry": {
-          "score": 0.2,
-          "weight": 2.5,
-          "detail": {
-            "carry_pct": -0.9,
             "carry_signal": "SHORT",
             "raw_score": 0.2
           }
@@ -571,23 +140,23 @@
           }
         },
         "session": {
-          "score": 0.75,
+          "score": 1.0,
           "weight": 1.0,
           "detail": {
-            "session_quality": "london",
-            "utc_hour": 9,
-            "raw_score": 0.75
+            "session_quality": "london_ny_overlap",
+            "utc_hour": 14,
+            "raw_score": 1.0
           }
         },
         "volatility": {
-          "score": 0.55,
+          "score": 0.7,
           "weight": 1.5,
           "detail": {
-            "spread_pips": 1.3,
+            "spread_pips": 1.6,
             "spread_ok": true,
-            "atr_pips": 16.1,
-            "atr_regime": "quiet_ok",
-            "raw_score": 0.55
+            "atr_pips": 23.0,
+            "atr_regime": "borderline",
+            "raw_score": 0.7
           }
         },
         "risk_reward": {
@@ -595,8 +164,8 @@
           "weight": 1.5,
           "detail": {
             "rr_ratio": 2.0,
-            "stop_pips": 48,
-            "tp1_pips": 96,
+            "stop_pips": 69,
+            "tp1_pips": 138,
             "raw_score": 0.85
           }
         }
