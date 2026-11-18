@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-18T03:02:06.870862-05:00",
+  "timestamp": "2026-11-18T04:02:11.081847-05:00",
   "date": "2026-11-18",
   "approved": [],
   "held": [
@@ -25,6 +25,7 @@
     "CMCSA",
     "CSX",
     "KLAR",
+    "COST",
     "SPDN",
     "RWM",
     "GP",
@@ -36,6 +37,7 @@
     "KHC",
     "NEE",
     "KO",
+    "BOC",
     "GXO"
   ],
   "scores": {
@@ -143,7 +145,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 3.6% below entry (entry $527.35 \u2192 now $508.30), position 7.6% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 3.6% below entry (entry $527.35 \u2192 now $508.13), position 7.6% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -682,7 +684,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 1.5% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 1.6% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.75,
@@ -880,6 +882,27 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: price $14.28 is 7.1% above MA20 $13.34 (limit 3%) \u2014 do not chase"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "COST": {
+      "symbol": "COST",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 81 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 81 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1184,6 +1207,27 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 81 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "BOC": {
+      "symbol": "BOC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
