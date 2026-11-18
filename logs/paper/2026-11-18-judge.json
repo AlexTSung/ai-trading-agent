@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-18T07:01:03.151491-05:00",
+  "timestamp": "2026-11-18T08:01:05.920740-05:00",
   "date": "2026-11-18",
   "approved": [],
   "held": [
@@ -9,7 +9,6 @@
     "PYPL",
     "COP",
     "KDP",
-    "BLK",
     "PCG"
   ],
   "vetoed": [
@@ -25,7 +24,6 @@
     "PFE",
     "CMCSA",
     "CSX",
-    "ABNB",
     "SPDN",
     "RWM",
     "GP",
@@ -35,7 +33,9 @@
     "DIS",
     "TSCO",
     "KHC",
-    "NEE"
+    "NEE",
+    "KO",
+    "ADAC"
   ],
   "scores": {
     "AAPL": {
@@ -142,7 +142,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 3.9% below entry (entry $527.35 \u2192 now $506.68), position 7.6% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 4.1% below entry (entry $527.35 \u2192 now $505.48), position 7.6% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -515,7 +515,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding MRK \u2014 only 1.5% below entry (need \u22653%)"
+          "note": "Already holding MRK \u2014 only 1.8% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.75,
@@ -681,7 +681,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 1.8% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 2.0% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.75,
@@ -761,10 +761,10 @@
         },
         "quality": {
           "score": 1.9,
-          "note": "Large-cap $47B; Profitable; 8 analyst buy ratings"
+          "note": "Large-cap $49B; Profitable; 8 analyst buy ratings"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $35.86 > MA50 $33.44, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $755.89 < MA50 $763.16. Portfolio: Adequate cash reserve 31%. Volatility: VIX 22.9 \u2014 moderate volatility (NORMAL). Quality: Large-cap $47B; Profitable; 8 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $35.86 > MA50 $33.44, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $755.89 < MA50 $763.16. Portfolio: Adequate cash reserve 31%. Volatility: VIX 22.9 \u2014 moderate volatility (NORMAL). Quality: Large-cap $49B; Profitable; 8 analyst buy ratings. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -870,100 +870,6 @@
         "required_gate": 8.0
       },
       "_gate_used": 8.0
-    },
-    "BLK": {
-      "symbol": "BLK",
-      "recommendation": "HOLD",
-      "score": 6.5,
-      "approval_gate": 8.5,
-      "size_multiplier": 1.0,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 22.91,
-      "is_discovery": true,
-      "is_speculative": true,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "2.0/2.0",
-        "news": "1.0/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "1.5/2.0",
-        "volatility": "0.75/1.0",
-        "quality": "1.25/2.5"
-      },
-      "criteria": {
-        "technical": {
-          "score": 2.0,
-          "note": "STRONG_BUY \u2014 MA20 $1176.71 > MA50 $1116.64, price $1180.56 above both [capped 3.0\u21922.0 at weight 2.0]"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $755.89 < MA50 $763.16"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "Adequate cash reserve 31%"
-        },
-        "volatility": {
-          "score": 0.75,
-          "note": "VIX 22.9 \u2014 moderate volatility (NORMAL)"
-        },
-        "quality": {
-          "score": 1.25,
-          "note": "Mega-cap $183B; Zero analyst buy coverage on a discovery stock"
-        }
-      },
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $1176.71 > MA50 $1116.64, price $1180.56 above both [capped 3.0\u21922.0 at weight 2.0]. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $755.89 < MA50 $763.16. Portfolio: Adequate cash reserve 31%. Volatility: VIX 22.9 \u2014 moderate volatility (NORMAL). Quality: Mega-cap $183B; Zero analyst buy coverage on a discovery stock. Source: discovery | Gate: 8.5.",
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.5
-      },
-      "_gate_used": 8.5
-    },
-    "ABNB": {
-      "symbol": "ABNB",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 60 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
     },
     "SPDN": {
       "symbol": "SPDN",
@@ -1235,6 +1141,48 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "KO": {
+      "symbol": "KO",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 81 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 81 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "ADAC": {
+      "symbol": "ADAC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
