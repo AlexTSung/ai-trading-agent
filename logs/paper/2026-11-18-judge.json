@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-18T18:01:03.975493-05:00",
+  "timestamp": "2026-11-18T19:01:41.877409-05:00",
   "date": "2026-11-18",
   "approved": [],
   "held": [
@@ -36,7 +36,9 @@
     "CMG",
     "KHC",
     "DIS",
-    "KO"
+    "KO",
+    "UGI",
+    "LNG"
   ],
   "scores": {
     "AAPL": {
@@ -143,7 +145,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 3.7% below entry (entry $527.35 \u2192 now $507.69), position 7.6% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 3.2% below entry (entry $527.35 \u2192 now $510.73), position 7.6% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
@@ -285,7 +287,7 @@
     "PYPL": {
       "symbol": "PYPL",
       "recommendation": "HOLD",
-      "score": 6.27,
+      "score": 5.0,
       "approval_gate": 8.0,
       "size_multiplier": 0.5,
       "macro_regime": "RISK_OFF",
@@ -310,7 +312,7 @@
       "avg_down_candidate": false,
       "score_breakdown": {
         "technical": "1.5/2.0",
-        "news": "1.27/1.5",
+        "news": "0.0/1.5",
         "macro": "0.0/1.0",
         "portfolio": "1.5/2.0",
         "volatility": "0.25/1.0",
@@ -322,8 +324,8 @@
           "note": "WEAK_BUY \u2014 MA20 $58.11 > MA50 $55.90, price between MAs"
         },
         "news": {
-          "score": 1.27,
-          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
+          "score": 0.0,
+          "note": "NEGATIVE \u2014 2 bearish signals in recent headlines"
         },
         "macro": {
           "score": 0.0,
@@ -342,7 +344,7 @@
           "note": "Large-cap $48B; Profitable"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $58.11 > MA50 $55.90, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $753.75 < MA50 $762.52. Portfolio: Adequate cash reserve 33%. Volatility: VIX 25.5 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $48B; Profitable. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $58.11 > MA50 $55.90, price between MAs. News: NEGATIVE \u2014 2 bearish signals in recent headlines. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $753.75 < MA50 $762.52. Portfolio: Adequate cash reserve 33%. Volatility: VIX 25.5 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $48B; Profitable. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -1297,6 +1299,46 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "UGI": {
+      "symbol": "UGI",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for UGI \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "LNG": {
+      "symbol": "LNG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LNG \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
