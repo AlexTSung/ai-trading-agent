@@ -1,9 +1,9 @@
 # Daily Trading Reflection — 2026-11-19
 
 ## P&L
-- Realized today: $-340.44
-- Trades closed: 1
-- Wins: 0  Losses: 1
+- Realized today: $-283.03
+- Trades closed: 2
+- Wins: 1  Losses: 1
 
 ## Did I follow the strategy exactly?
 - [ ] Only took trades with judge score ≥ 7.0
@@ -16,6 +16,9 @@
 ## What happened vs. what I expected?
 _(Review each trade: was the outcome different from what you anticipated? Why?)_
 
+- **AUD_JPY** SHORT → stop_loss → $+57.41
+  - Expected: ___  Actual: ___  Lesson: ___
+
 - **NZD_JPY** LONG → stop_loss → $-340.44
   - Expected: ___  Actual: ___  Lesson: ___
 
@@ -27,8 +30,8 @@ _(Even a tiny improvement compounds over time — what ONE thing will you do bet
 
 > ___
 
-## Overall performance — 69 trades lifetime
-- Win rate: 55.1%  (target ≥55%)
+## Overall performance — 70 trades lifetime
+- Win rate: 55.7%  (target ≥55%)
 - Profit factor: 0.50  (target ≥1.3)
 - Max drawdown: 1893.8%  (max 8%)
 
