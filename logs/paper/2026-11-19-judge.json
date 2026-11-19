@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-19T01:01:44.426942-05:00",
+  "timestamp": "2026-11-19T02:01:48.004245-05:00",
   "date": "2026-11-19",
   "approved": [],
   "held": [
@@ -24,7 +24,8 @@
     "PFE",
     "CMCSA",
     "CSX",
-    "COST",
+    "TTWO",
+    "XYZ",
     "SPDN",
     "GRAB",
     "RWM",
@@ -142,7 +143,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding MSFT \u2014 only 2.9% below entry (need \u22653%)"
+          "note": "Already holding MSFT \u2014 only 2.1% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -839,14 +840,34 @@
       },
       "_gate_used": 8.0
     },
-    "COST": {
-      "symbol": "COST",
+    "TTWO": {
+      "symbol": "TTWO",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 75 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 75 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "XYZ": {
+      "symbol": "XYZ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for XYZ \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
