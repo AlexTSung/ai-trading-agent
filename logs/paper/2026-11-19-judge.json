@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-19T02:01:48.004245-05:00",
+  "timestamp": "2026-11-19T03:02:00.461892-05:00",
   "date": "2026-11-19",
   "approved": [],
   "held": [
@@ -24,14 +24,14 @@
     "PFE",
     "CMCSA",
     "CSX",
+    "GME",
     "TTWO",
-    "XYZ",
+    "WMT",
     "SPDN",
     "GRAB",
     "RWM",
     "NVD",
     "PCG",
-    "WMT",
     "VTRS",
     "CMG",
     "KHC",
@@ -143,7 +143,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding MSFT \u2014 only 2.1% below entry (need \u22653%)"
+          "note": "Already holding MSFT \u2014 only 2.4% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -840,6 +840,27 @@
       },
       "_gate_used": 8.0
     },
+    "GME": {
+      "symbol": "GME",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
     "TTWO": {
       "symbol": "TTWO",
       "recommendation": "VETO",
@@ -861,11 +882,11 @@
       },
       "_gate_used": 7.0
     },
-    "XYZ": {
-      "symbol": "XYZ",
+    "WMT": {
+      "symbol": "WMT",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for XYZ \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for WMT \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
@@ -1059,26 +1080,6 @@
       },
       "_gate_used": 7.0
     },
-    "WMT": {
-      "symbol": "WMT",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for WMT \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
     "TJX": {
       "symbol": "TJX",
       "recommendation": "HOLD",
@@ -1136,10 +1137,10 @@
         },
         "quality": {
           "score": 2.35,
-          "note": "Mega-cap $154B; Profitable; 13 analyst buy ratings"
+          "note": "Mega-cap $155B; Profitable; 13 analyst buy ratings"
         }
       },
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $138.83 > MA50 $136.40, price $140.34 above both [capped 2.5\u21922.0 at weight 2.0]. News: NEGATIVE \u2014 3 bearish signals in recent headlines. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $753.75 < MA50 $762.52. Portfolio: Adequate cash reserve 33%. Volatility: VIX 25.5 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $154B; Profitable; 13 analyst buy ratings. Source: discovery | Gate: 8.5.",
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $138.83 > MA50 $136.40, price $140.34 above both [capped 2.5\u21922.0 at weight 2.0]. News: NEGATIVE \u2014 3 bearish signals in recent headlines. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $753.75 < MA50 $762.52. Portfolio: Adequate cash reserve 33%. Volatility: VIX 25.5 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $155B; Profitable; 13 analyst buy ratings. Source: discovery | Gate: 8.5.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
