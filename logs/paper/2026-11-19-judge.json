@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-19T16:02:06.819374-05:00",
+  "timestamp": "2026-11-19T16:54:13.484919-05:00",
   "date": "2026-11-19",
   "approved": [],
   "held": [
@@ -12,8 +12,7 @@
     "NCLH",
     "KO",
     "MDLZ",
-    "KHC",
-    "DUOL"
+    "KHC"
   ],
   "vetoed": [
     "MSFT",
@@ -31,7 +30,7 @@
     "SPDN",
     "PCG",
     "CMG",
-    "LNG"
+    "NJR"
   ],
   "scores": {
     "AAPL": {
@@ -138,7 +137,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 5.6% below entry (entry $527.35 \u2192 now $497.65), position 7.6% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 5.4% below entry (entry $527.35 \u2192 now $498.87), position 7.6% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -563,7 +562,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: PFE is 4.2% below entry (entry $28.79 \u2192 now $27.57), position 4.8% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: PFE is 4.5% below entry (entry $28.79 \u2192 now $27.48), position 4.7% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -1129,84 +1128,11 @@
       },
       "_gate_used": 7.0
     },
-    "DUOL": {
-      "symbol": "DUOL",
-      "recommendation": "HOLD",
-      "score": 5.0,
-      "approval_gate": 8.5,
-      "size_multiplier": 1.0,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 24.56,
-      "is_discovery": true,
-      "is_speculative": true,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "1.5/2.0",
-        "news": "0.5/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "1.5/2.0",
-        "volatility": "0.75/1.0",
-        "quality": "0.75/2.5"
-      },
-      "criteria": {
-        "technical": {
-          "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $150.15 > MA50 $147.21, price between MAs"
-        },
-        "news": {
-          "score": 0.5,
-          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $751.34 < MA50 $761.68"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "Adequate cash reserve 33%"
-        },
-        "volatility": {
-          "score": 0.75,
-          "note": "VIX 24.6 \u2014 moderate volatility (NORMAL)"
-        },
-        "quality": {
-          "score": 0.75,
-          "note": "Mid-cap $7.0B; Profitable; Short float 20.17% \u2014 heavily shorted, risk of squeeze or continued decline"
-        }
-      },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $150.15 > MA50 $147.21, price between MAs. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $751.34 < MA50 $761.68. Portfolio: Adequate cash reserve 33%. Volatility: VIX 24.6 \u2014 moderate volatility (NORMAL). Quality: Mid-cap $7.0B; Profitable; Short float 20.17% \u2014 heavily shorted, risk of squeeze or continued decline. Source: discovery | Gate: 8.5.",
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.5
-      },
-      "_gate_used": 8.5
-    },
-    "LNG": {
-      "symbol": "LNG",
+    "NJR": {
+      "symbol": "NJR",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LNG \u2014 auto-veto per Hard Rule 9",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NJR \u2014 auto-veto per Hard Rule 9",
       "criteria": {
         "earnings_veto": true
       },
