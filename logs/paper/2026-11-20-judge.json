@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-20T06:01:05.861103-05:00",
+  "timestamp": "2026-11-20T07:01:46.873710-05:00",
   "date": "2026-11-20",
   "approved": [],
   "held": [
@@ -26,11 +26,11 @@
     "VIXY",
     "PFE",
     "CMCSA",
-    "GME",
-    "PDD",
+    "UVXY",
     "SPDN",
     "PCG",
-    "CMG"
+    "CMG",
+    "BJ"
   ],
   "scores": {
     "AAPL": {
@@ -137,7 +137,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 6.6% below entry (entry $527.35 \u2192 now $492.70), position 7.5% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 6.7% below entry (entry $527.35 \u2192 now $491.91), position 7.5% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -563,7 +563,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: PFE is 3.6% below entry (entry $28.79 \u2192 now $27.74), position 4.8% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: PFE is 3.5% below entry (entry $28.79 \u2192 now $27.78), position 4.8% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -753,35 +753,14 @@
       },
       "_gate_used": 8.0
     },
-    "GME": {
-      "symbol": "GME",
+    "UVXY": {
+      "symbol": "UVXY",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 73 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 73 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "PDD": {
-      "symbol": "PDD",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -1137,6 +1116,26 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "BJ": {
+      "symbol": "BJ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BJ \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
