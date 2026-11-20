@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-19T21:01:08.186499-05:00",
+  "timestamp": "2026-11-19T22:01:19.810780-05:00",
   "date": "2026-11-19",
   "approved": [],
   "held": [
@@ -31,7 +31,9 @@
     "PDD",
     "SPDN",
     "PCG",
-    "CMG"
+    "CMG",
+    "APAC",
+    "MAGN"
   ],
   "scores": {
     "AAPL": {
@@ -138,7 +140,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 6.0% below entry (entry $527.35 \u2192 now $495.95), position 7.5% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 6.0% below entry (entry $527.35 \u2192 now $495.63), position 7.5% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -563,7 +565,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: PFE is 4.2% below entry (entry $28.79 \u2192 now $27.58), position 4.8% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: PFE is 4.1% below entry (entry $28.79 \u2192 now $27.60), position 4.8% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -1210,6 +1212,51 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "APAC": {
+      "symbol": "APAC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 100 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "MAGN": {
+      "symbol": "MAGN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "Quality veto: MICRO_CAP VETO: $0.45B market cap \u2014 too small for discovery buys",
+      "criteria": {
+        "quality": {
+          "score": 0.0,
+          "note": "MICRO_CAP VETO: $0.45B market cap \u2014 too small for discovery buys",
+          "veto": true
+        }
       },
       "universe_policy": {
         "status": "approved",
