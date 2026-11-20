@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-19T19:01:05.591000-05:00",
+  "timestamp": "2026-11-19T19:53:10.402227-05:00",
   "date": "2026-11-19",
   "approved": [],
   "held": [
@@ -30,7 +30,9 @@
     "GME",
     "PDD",
     "SPDN",
-    "PCG"
+    "PCG",
+    "CMG",
+    "BILL"
   ],
   "scores": {
     "AAPL": {
@@ -137,7 +139,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 5.7% below entry (entry $527.35 \u2192 now $497.40), position 7.6% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 6.1% below entry (entry $527.35 \u2192 now $495.30), position 7.5% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -203,8 +205,8 @@
           "note": "STRONG_SELL \u2014 price $374.48 below MA50 $376.03"
         },
         "news": {
-          "score": 1.27,
-          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
         },
         "macro": {
           "score": 0.0,
@@ -562,7 +564,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: PFE is 4.3% below entry (entry $28.79 \u2192 now $27.54), position 4.8% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: PFE is 4.4% below entry (entry $28.79 \u2192 now $27.53), position 4.8% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -1200,6 +1202,47 @@
         "required_gate": 8.5
       },
       "_gate_used": 8.5
+    },
+    "CMG": {
+      "symbol": "CMG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "BILL": {
+      "symbol": "BILL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BILL \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
     }
   },
   "universe": {
