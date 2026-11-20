@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-20T05:01:05.274164-05:00",
+  "timestamp": "2026-11-20T06:01:05.861103-05:00",
   "date": "2026-11-20",
   "approved": [],
   "held": [
@@ -27,6 +27,7 @@
     "PFE",
     "CMCSA",
     "GME",
+    "PDD",
     "SPDN",
     "PCG",
     "CMG"
@@ -136,7 +137,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 7.0% below entry (entry $527.35 \u2192 now $490.54), position 7.5% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 6.6% below entry (entry $527.35 \u2192 now $492.70), position 7.5% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -562,7 +563,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: PFE is 3.7% below entry (entry $28.79 \u2192 now $27.72), position 4.8% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: PFE is 3.6% below entry (entry $28.79 \u2192 now $27.74), position 4.8% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.75,
@@ -760,6 +761,27 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 73 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "PDD": {
+      "symbol": "PDD",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
