@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-20T22:01:09.413160-05:00",
+  "timestamp": "2026-11-20T23:01:58.180222-05:00",
   "date": "2026-11-20",
   "approved": [],
   "held": [
@@ -26,7 +26,9 @@
     "SPDN",
     "CMG",
     "PCG",
-    "NCLH"
+    "NCLH",
+    "CHTR",
+    "DPZ"
   ],
   "scores": {
     "AAPL": {
@@ -133,7 +135,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 7.2% below entry (entry $527.35 \u2192 now $489.50), position 7.5% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 8.1% below entry (entry $527.35 \u2192 now $484.52), position 7.5% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
@@ -187,7 +189,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: TSLA is 4.2% below entry (entry $366.59 \u2192 now $351.10), position 2.3% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: TSLA is 5.7% below entry (entry $366.59 \u2192 now $345.82), position 2.3% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
@@ -454,7 +456,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: PFE is 4.7% below entry (entry $28.79 \u2192 now $27.44), position 4.8% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: PFE is 4.8% below entry (entry $28.79 \u2192 now $27.40), position 4.8% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
@@ -591,7 +593,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding CSX \u2014 price above entry, avg-down not warranted"
+          "note": "Already holding CSX \u2014 only 0.8% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -968,6 +970,48 @@
         "required_gate": 8.5
       },
       "_gate_used": 8.5
+    },
+    "CHTR": {
+      "symbol": "CHTR",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "DPZ": {
+      "symbol": "DPZ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
     }
   },
   "universe": {
