@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-23T17:01:18.716125-05:00",
+  "timestamp": "2026-11-23T18:02:09.550010-05:00",
   "date": "2026-11-23",
   "approved": [],
   "held": [],
@@ -20,7 +20,8 @@
     "KDP",
     "CMCSA",
     "CSX",
-    "GME",
+    "GLSI",
+    "TTWO",
     "SPDN",
     "KO",
     "PCG",
@@ -391,8 +392,28 @@
       },
       "_gate_used": 7.0
     },
-    "GME": {
-      "symbol": "GME",
+    "GLSI": {
+      "symbol": "GLSI",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for GLSI \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "TTWO": {
+      "symbol": "TTWO",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
