@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-23T06:01:47.975989-05:00",
+  "timestamp": "2026-11-23T07:01:52.181432-05:00",
   "date": "2026-11-23",
   "approved": [],
   "held": [
@@ -20,8 +20,7 @@
     "PFE",
     "CMCSA",
     "CSX",
-    "WEN",
-    "UVXY",
+    "GME",
     "SPDN",
     "KHC",
     "WMT",
@@ -126,8 +125,8 @@
           "note": "STRONG_SELL \u2014 price $485.34 below MA50 $519.90"
         },
         "news": {
-          "score": 1.27,
-          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
         },
         "macro": {
           "score": 0.0,
@@ -135,7 +134,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 5.0% below entry (entry $527.35 \u2192 now $501.00), position 7.7% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 5.0% below entry (entry $527.35 \u2192 now $500.74), position 7.6% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
@@ -189,7 +188,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding TSLA \u2014 only 1.7% below entry (need \u22653%)"
+          "note": "Already holding TSLA \u2014 only 1.5% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -283,7 +282,7 @@
     "LLY": {
       "symbol": "LLY",
       "recommendation": "HOLD",
-      "score": 6.02,
+      "score": 5.75,
       "approval_gate": 8.0,
       "size_multiplier": 0.5,
       "macro_regime": "RISK_OFF",
@@ -308,7 +307,7 @@
       "avg_down_candidate": false,
       "score_breakdown": {
         "technical": "1.5/2.0",
-        "news": "1.27/1.5",
+        "news": "1.0/1.5",
         "macro": "0.0/1.0",
         "portfolio": "1.5/2.0",
         "volatility": "0.25/1.0",
@@ -320,8 +319,8 @@
           "note": "WEAK_BUY \u2014 MA20 $1384.64 > MA50 $1267.49, price between MAs"
         },
         "news": {
-          "score": 1.27,
-          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
         },
         "macro": {
           "score": 0.0,
@@ -340,7 +339,7 @@
           "note": "Mega-cap $1268B"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $1384.64 > MA50 $1267.49, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Adequate cash reserve 34%. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $1268B. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $1384.64 > MA50 $1267.49, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Adequate cash reserve 34%. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $1268B. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -456,7 +455,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: PFE is 4.1% below entry (entry $28.79 \u2192 now $27.62), position 4.8% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: PFE is 4.1% below entry (entry $28.79 \u2192 now $27.60), position 4.8% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
@@ -616,35 +615,14 @@
       },
       "_gate_used": 7.0
     },
-    "WEN": {
-      "symbol": "WEN",
+    "GME": {
+      "symbol": "GME",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 80 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "UVXY": {
-      "symbol": "UVXY",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
