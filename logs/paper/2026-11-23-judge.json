@@ -1,0 +1,835 @@
+{
+  "agent_version": "6.2.0",
+  "timestamp": "2026-11-23T00:01:38.973540-05:00",
+  "date": "2026-11-23",
+  "approved": [],
+  "held": [
+    "AAPL",
+    "LLY",
+    "KDP"
+  ],
+  "vetoed": [
+    "MSFT",
+    "TSLA",
+    "SQQQ",
+    "SPXS",
+    "SOXS",
+    "ARGX",
+    "TGT",
+    "VIXY",
+    "PFE",
+    "CMCSA",
+    "CSX",
+    "TLT",
+    "SPDN",
+    "KHC",
+    "WMT",
+    "KO",
+    "CMG",
+    "PCG",
+    "NCLH",
+    "PTLO",
+    "BBW"
+  ],
+  "scores": {
+    "AAPL": {
+      "symbol": "AAPL",
+      "recommendation": "HOLD",
+      "score": 5.25,
+      "approval_gate": 8.0,
+      "size_multiplier": 0.5,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
+          "Win rate 95% CI on 34 trips: 12%\u201340%",
+          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 34,
+        "band": 0.15
+      },
+      "vix": 28.44,
+      "is_discovery": false,
+      "is_speculative": false,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "1.5/2.0",
+        "news": "1.0/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "0.0/2.0",
+        "volatility": "0.25/1.0",
+        "quality": "2.5/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $347.57 > MA50 $341.85, price between MAs"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding AAPL \u2014 price above entry, avg-down not warranted"
+        },
+        "volatility": {
+          "score": 0.25,
+          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
+        },
+        "quality": {
+          "score": 2.5,
+          "note": "Mega-cap $4978B; Profitable; 20 analyst buy ratings \u2014 strong institutional coverage"
+        }
+      },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $347.57 > MA50 $341.85, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Already holding AAPL \u2014 price above entry, avg-down not warranted. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $4978B; Profitable; 20 analyst buy ratings \u2014 strong institutional coverage. Source: watchlist | Gate: 8.0.",
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": {
+          "trades": 2,
+          "wins": 1,
+          "win_rate": 0.5,
+          "avg_pnl_pct": 5.34,
+          "total_pnl_usd": 518.26,
+          "last_exit": "2026-09-30",
+          "judge_n": 2,
+          "avg_judge_score": 8.12,
+          "avg_judge_winners": 8.12,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 7.5,
+        "record_label": "thin record (2 closed)",
+        "required_gate": 8.0
+      },
+      "_gate_used": 8.0
+    },
+    "MSFT": {
+      "symbol": "MSFT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "Sell signal present \u2014 not a buy candidate",
+      "criteria": {
+        "technical": {
+          "score": 0.0,
+          "note": "STRONG_SELL \u2014 price $485.34 below MA50 $519.90"
+        },
+        "news": {
+          "score": 1.27,
+          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "AVG_DOWN candidate: MSFT is 5.7% below entry (entry $527.35 \u2192 now $497.51), position 7.6% of portfolio (max 8%)"
+        },
+        "volatility": {
+          "score": 0.25,
+          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
+        },
+        "quality": {
+          "score": 2.5,
+          "note": "Mega-cap $3598B; Profitable; 41 analyst buy ratings \u2014 strong institutional coverage"
+        }
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": {
+          "trades": 3,
+          "wins": 1,
+          "win_rate": 0.3333333333333333,
+          "avg_pnl_pct": -2.01,
+          "total_pnl_usd": -293.86,
+          "last_exit": "2026-07-13",
+          "judge_n": 2,
+          "avg_judge_score": 8.13,
+          "avg_judge_winners": 8.13,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "losing record (3 closed, -2.01% avg)",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "TSLA": {
+      "symbol": "TSLA",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "Sell signal present \u2014 not a buy candidate",
+      "criteria": {
+        "technical": {
+          "score": 0.0,
+          "note": "STRONG_SELL \u2014 price $346.23 below MA50 $375.65"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding TSLA \u2014 only 2.2% below entry (need \u22653%)"
+        },
+        "volatility": {
+          "score": 0.25,
+          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
+        },
+        "quality": {
+          "score": 2.35,
+          "note": "Mega-cap $1367B; Profitable; 15 analyst buy ratings"
+        }
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": {
+          "trades": 1,
+          "wins": 0,
+          "win_rate": 0.0,
+          "avg_pnl_pct": -5.2,
+          "total_pnl_usd": -240.35,
+          "last_exit": "2026-07-13",
+          "judge_n": 0,
+          "avg_judge_score": null,
+          "avg_judge_winners": null,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 7.5,
+        "record_label": "thin record (1 closed)",
+        "required_gate": 7.5
+      },
+      "_gate_used": 7.0
+    },
+    "SQQQ": {
+      "symbol": "SQQQ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "hedge",
+        "record": null,
+        "would_change": null,
+        "required_gate": null
+      },
+      "_gate_used": 7.0
+    },
+    "SPXS": {
+      "symbol": "SPXS",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "hedge",
+        "record": null,
+        "would_change": null,
+        "required_gate": null
+      },
+      "_gate_used": 7.0
+    },
+    "SOXS": {
+      "symbol": "SOXS",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "hedge",
+        "record": null,
+        "would_change": null,
+        "required_gate": null
+      },
+      "_gate_used": 7.0
+    },
+    "LLY": {
+      "symbol": "LLY",
+      "recommendation": "HOLD",
+      "score": 6.02,
+      "approval_gate": 8.0,
+      "size_multiplier": 0.5,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
+          "Win rate 95% CI on 34 trips: 12%\u201340%",
+          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 34,
+        "band": 0.15
+      },
+      "vix": 28.44,
+      "is_discovery": false,
+      "is_speculative": false,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "1.5/2.0",
+        "news": "1.27/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "1.5/2.0",
+        "volatility": "0.25/1.0",
+        "quality": "1.5/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $1384.64 > MA50 $1267.49, price between MAs"
+        },
+        "news": {
+          "score": 1.27,
+          "note": "MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Adequate cash reserve 34%"
+        },
+        "volatility": {
+          "score": 0.25,
+          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
+        },
+        "quality": {
+          "score": 1.5,
+          "note": "Mega-cap $1268B"
+        }
+      },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $1384.64 > MA50 $1267.49, price between MAs. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Adequate cash reserve 34%. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $1268B. Source: watchlist | Gate: 8.0.",
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 8.0
+    },
+    "ARGX": {
+      "symbol": "ARGX",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": {
+          "trades": 0,
+          "wins": 0,
+          "win_rate": null,
+          "avg_pnl_pct": null,
+          "total_pnl_usd": 0,
+          "last_exit": "",
+          "judge_n": 1,
+          "avg_judge_score": 8.52,
+          "avg_judge_winners": 8.52,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "TGT": {
+      "symbol": "TGT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: price $165.98 is 4.5% above MA20 $158.78 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $165.98 is 4.5% above MA20 $158.78 (limit 3%) \u2014 do not chase"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": {
+          "trades": 0,
+          "wins": 0,
+          "win_rate": null,
+          "avg_pnl_pct": null,
+          "total_pnl_usd": 0,
+          "last_exit": "",
+          "judge_n": 1,
+          "avg_judge_score": 8.87,
+          "avg_judge_winners": 8.87,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "VIXY": {
+      "symbol": "VIXY",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "hedge",
+        "record": null,
+        "would_change": null,
+        "required_gate": null
+      },
+      "_gate_used": 7.0
+    },
+    "PFE": {
+      "symbol": "PFE",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "Sell signal present \u2014 not a buy candidate",
+      "criteria": {
+        "technical": {
+          "score": 0.0,
+          "note": "STRONG_SELL \u2014 price $27.43 below MA50 $28.82"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "AVG_DOWN candidate: PFE is 4.3% below entry (entry $28.79 \u2192 now $27.55), position 4.8% of portfolio (max 8%)"
+        },
+        "volatility": {
+          "score": 0.25,
+          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
+        },
+        "quality": {
+          "score": 2.15,
+          "note": "Mega-cap $156B; Profitable; 8 analyst buy ratings"
+        }
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "KDP": {
+      "symbol": "KDP",
+      "recommendation": "HOLD",
+      "score": 6.15,
+      "approval_gate": 8.0,
+      "size_multiplier": 0.5,
+      "macro_regime": "RISK_OFF",
+      "learned_hints": {
+        "applied": {
+          "watchlist_gate": 8.0,
+          "news_weight_mult": 0.85
+        },
+        "notes": [
+          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
+          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
+          "Win rate 95% CI on 34 trips: 12%\u201340%",
+          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
+        ],
+        "tier": "confident",
+        "sample": 34,
+        "band": 0.15
+      },
+      "vix": 28.44,
+      "is_discovery": false,
+      "is_speculative": false,
+      "avg_down_candidate": false,
+      "score_breakdown": {
+        "technical": "1.5/2.0",
+        "news": "1.0/1.5",
+        "macro": "0.0/1.0",
+        "portfolio": "1.5/2.0",
+        "volatility": "0.25/1.0",
+        "quality": "1.9/2.5"
+      },
+      "criteria": {
+        "technical": {
+          "score": 1.5,
+          "note": "WEAK_BUY \u2014 MA20 $35.85 > MA50 $33.63, price between MAs"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
+        },
+        "portfolio": {
+          "score": 1.5,
+          "note": "Adequate cash reserve 34%"
+        },
+        "volatility": {
+          "score": 0.25,
+          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
+        },
+        "quality": {
+          "score": 1.9,
+          "note": "Large-cap $50B; Profitable; 9 analyst buy ratings"
+        }
+      },
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $35.85 > MA50 $33.63, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Adequate cash reserve 34%. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $50B; Profitable; 9 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 8.0
+    },
+    "CMCSA": {
+      "symbol": "CMCSA",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "CSX": {
+      "symbol": "CSX",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "Sell signal present \u2014 not a buy candidate",
+      "criteria": {
+        "technical": {
+          "score": 0.0,
+          "note": "STRONG_SELL \u2014 price $49.13 below MA50 $49.16"
+        },
+        "news": {
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
+        },
+        "macro": {
+          "score": 0.0,
+          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
+        },
+        "portfolio": {
+          "score": 0.0,
+          "note": "Already holding CSX \u2014 price above entry, avg-down not warranted"
+        },
+        "volatility": {
+          "score": 0.25,
+          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
+        },
+        "quality": {
+          "score": 2.1,
+          "note": "Large-cap $91B; Profitable; 13 analyst buy ratings"
+        }
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "TLT": {
+      "symbol": "TLT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "SPDN": {
+      "symbol": "SPDN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "KHC": {
+      "symbol": "KHC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "WMT": {
+      "symbol": "WMT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "KO": {
+      "symbol": "KO",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "CMG": {
+      "symbol": "CMG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "PCG": {
+      "symbol": "PCG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: price $13.79 is 3.7% above MA20 $13.29 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $13.79 is 3.7% above MA20 $13.29 (limit 3%) \u2014 do not chase"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "NCLH": {
+      "symbol": "NCLH",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "PTLO": {
+      "symbol": "PTLO",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "BBW": {
+      "symbol": "BBW",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BBW \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    }
+  },
+  "universe": {
+    "status": "approved",
+    "enforced": true,
+    "changes": []
+  }
+}
