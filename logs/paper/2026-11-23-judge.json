@@ -1,95 +1,37 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-23T09:01:42.151024-05:00",
+  "timestamp": "2026-11-23T10:01:35.528609-05:00",
   "date": "2026-11-23",
   "approved": [],
-  "held": [
-    "AAPL",
-    "LLY",
-    "KDP"
-  ],
+  "held": [],
   "vetoed": [
+    "AAPL",
     "MSFT",
+    "AMZN",
     "TSLA",
     "SQQQ",
     "SPXS",
     "SOXS",
+    "LLY",
     "ARGX",
     "TGT",
     "VIXY",
     "PFE",
+    "KDP",
     "CMCSA",
     "CSX",
-    "SPDN",
-    "KHC",
-    "WMT",
-    "KO",
-    "CMG",
-    "PCG",
-    "NCLH"
+    "MNSO"
   ],
   "scores": {
     "AAPL": {
       "symbol": "AAPL",
-      "recommendation": "HOLD",
-      "score": 5.25,
-      "approval_gate": 8.0,
-      "size_multiplier": 0.5,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 28.44,
-      "is_discovery": false,
-      "is_speculative": false,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "1.5/2.0",
-        "news": "1.0/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "0.0/2.0",
-        "volatility": "0.25/1.0",
-        "quality": "2.5/2.5"
-      },
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "technical": {
-          "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $347.57 > MA50 $341.85, price between MAs"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
-        },
-        "portfolio": {
-          "score": 0.0,
-          "note": "Already holding AAPL \u2014 price above entry, avg-down not warranted"
-        },
-        "volatility": {
-          "score": 0.25,
-          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
-        },
-        "quality": {
-          "score": 2.5,
-          "note": "Mega-cap $4978B; Profitable; 20 analyst buy ratings \u2014 strong institutional coverage"
-        }
+        "volatility_veto": true,
+        "vix": 35.89
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $347.57 > MA50 $341.85, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Already holding AAPL \u2014 price above entry, avg-down not warranted. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $4978B; Profitable; 20 analyst buy ratings \u2014 strong institutional coverage. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -109,40 +51,18 @@
         "would_change": null,
         "record_gate": 7.5,
         "record_label": "thin record (2 closed)",
-        "required_gate": 8.0
+        "required_gate": 7.5
       },
-      "_gate_used": 8.0
+      "_gate_used": 7.0
     },
     "MSFT": {
       "symbol": "MSFT",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "Sell signal present \u2014 not a buy candidate",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "technical": {
-          "score": 0.0,
-          "note": "STRONG_SELL \u2014 price $485.34 below MA50 $519.90"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 4.1% below entry (entry $527.35 \u2192 now $505.81), position 7.7% of portfolio (max 8%)"
-        },
-        "volatility": {
-          "score": 0.25,
-          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
-        },
-        "quality": {
-          "score": 2.5,
-          "note": "Mega-cap $3598B; Profitable; 41 analyst buy ratings \u2014 strong institutional coverage"
-        }
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -167,36 +87,35 @@
       },
       "_gate_used": 7.0
     },
+    "AMZN": {
+      "symbol": "AMZN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
     "TSLA": {
       "symbol": "TSLA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "Sell signal present \u2014 not a buy candidate",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "technical": {
-          "score": 0.0,
-          "note": "STRONG_SELL \u2014 price $346.23 below MA50 $375.65"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
-        },
-        "portfolio": {
-          "score": 0.0,
-          "note": "Already holding TSLA \u2014 only 1.2% below entry (need \u22653%)"
-        },
-        "volatility": {
-          "score": 0.25,
-          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
-        },
-        "quality": {
-          "score": 2.35,
-          "note": "Mega-cap $1367B; Profitable; 15 analyst buy ratings"
-        }
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -225,10 +144,10 @@
       "symbol": "SQQQ",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -244,10 +163,10 @@
       "symbol": "SPXS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -263,10 +182,10 @@
       "symbol": "SOXS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -280,65 +199,13 @@
     },
     "LLY": {
       "symbol": "LLY",
-      "recommendation": "HOLD",
-      "score": 5.75,
-      "approval_gate": 8.0,
-      "size_multiplier": 0.5,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 28.44,
-      "is_discovery": false,
-      "is_speculative": false,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "1.5/2.0",
-        "news": "1.0/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "1.5/2.0",
-        "volatility": "0.25/1.0",
-        "quality": "1.5/2.5"
-      },
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "technical": {
-          "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $1384.64 > MA50 $1267.49, price between MAs"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "Adequate cash reserve 33%"
-        },
-        "volatility": {
-          "score": 0.25,
-          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
-        },
-        "quality": {
-          "score": 1.5,
-          "note": "Mega-cap $1268B"
-        }
+        "volatility_veto": true,
+        "vix": 35.89
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $1384.64 > MA50 $1267.49, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Adequate cash reserve 33%. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $1268B. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -349,16 +216,16 @@
         "record_label": "no closed trades",
         "required_gate": 8.0
       },
-      "_gate_used": 8.0
+      "_gate_used": 7.0
     },
     "ARGX": {
       "symbol": "ARGX",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -387,10 +254,10 @@
       "symbol": "TGT",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $165.98 is 4.5% above MA20 $158.78 (limit 3%) \u2014 do not chase",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: price $165.98 is 4.5% above MA20 $158.78 (limit 3%) \u2014 do not chase"
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -419,10 +286,10 @@
       "symbol": "VIXY",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 68 is above 60 \u2014 overbought, wait for a pullback"
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -438,32 +305,10 @@
       "symbol": "PFE",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "Sell signal present \u2014 not a buy candidate",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "technical": {
-          "score": 0.0,
-          "note": "STRONG_SELL \u2014 price $27.43 below MA50 $28.82"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "AVG_DOWN candidate: PFE is 4.9% below entry (entry $28.79 \u2192 now $27.36), position 4.7% of portfolio (max 8%)"
-        },
-        "volatility": {
-          "score": 0.25,
-          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
-        },
-        "quality": {
-          "score": 2.15,
-          "note": "Mega-cap $156B; Profitable; 8 analyst buy ratings"
-        }
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -479,65 +324,13 @@
     },
     "KDP": {
       "symbol": "KDP",
-      "recommendation": "HOLD",
-      "score": 6.15,
-      "approval_gate": 8.0,
-      "size_multiplier": 0.5,
-      "macro_regime": "RISK_OFF",
-      "learned_hints": {
-        "applied": {
-          "watchlist_gate": 8.0,
-          "news_weight_mult": 0.85
-        },
-        "notes": [
-          "Gate tightened to 8.0 \u2014 risk-reducing, allowed at confident tier",
-          "News weight hint 0.60 clamped to 0.85 (\u00b115% band at 34 round trips)",
-          "Win rate 95% CI on 34 trips: 12%\u201340%",
-          "CONFIDENT tier \u2014 fitted on 34 closed round trips"
-        ],
-        "tier": "confident",
-        "sample": 34,
-        "band": 0.15
-      },
-      "vix": 28.44,
-      "is_discovery": false,
-      "is_speculative": false,
-      "avg_down_candidate": false,
-      "score_breakdown": {
-        "technical": "1.5/2.0",
-        "news": "1.0/1.5",
-        "macro": "0.0/1.0",
-        "portfolio": "1.5/2.0",
-        "volatility": "0.25/1.0",
-        "quality": "1.9/2.5"
-      },
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "technical": {
-          "score": 1.5,
-          "note": "WEAK_BUY \u2014 MA20 $35.85 > MA50 $33.63, price between MAs"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
-        },
-        "portfolio": {
-          "score": 1.5,
-          "note": "Adequate cash reserve 33%"
-        },
-        "volatility": {
-          "score": 0.25,
-          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
-        },
-        "quality": {
-          "score": 1.9,
-          "note": "Large-cap $50B; Profitable; 9 analyst buy ratings"
-        }
+        "volatility_veto": true,
+        "vix": 35.89
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $35.85 > MA50 $33.63, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Adequate cash reserve 33%. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $50B; Profitable; 9 analyst buy ratings. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -548,16 +341,16 @@
         "record_label": "no closed trades",
         "required_gate": 8.0
       },
-      "_gate_used": 8.0
+      "_gate_used": 7.0
     },
     "CMCSA": {
       "symbol": "CMCSA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -575,32 +368,10 @@
       "symbol": "CSX",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "Sell signal present \u2014 not a buy candidate",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "technical": {
-          "score": 0.0,
-          "note": "STRONG_SELL \u2014 price $49.13 below MA50 $49.16"
-        },
-        "news": {
-          "score": 1.0,
-          "note": "NEUTRAL \u2014 no strong sentiment signals"
-        },
-        "macro": {
-          "score": 0.0,
-          "note": "RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21"
-        },
-        "portfolio": {
-          "score": 0.0,
-          "note": "Already holding CSX \u2014 price above entry, avg-down not warranted"
-        },
-        "volatility": {
-          "score": 0.25,
-          "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
-        },
-        "quality": {
-          "score": 2.1,
-          "note": "Large-cap $91B; Profitable; 13 analyst buy ratings"
-        }
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
@@ -614,140 +385,14 @@
       },
       "_gate_used": 7.0
     },
-    "SPDN": {
-      "symbol": "SPDN",
+    "MNSO": {
+      "symbol": "MNSO",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 71 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "KHC": {
-      "symbol": "KHC",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "WMT": {
-      "symbol": "WMT",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "KO": {
-      "symbol": "KO",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "CMG": {
-      "symbol": "CMG",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "PCG": {
-      "symbol": "PCG",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: price $13.79 is 3.7% above MA20 $13.29 (limit 3%) \u2014 do not chase",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: price $13.79 is 3.7% above MA20 $13.29 (limit 3%) \u2014 do not chase"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "NCLH": {
-      "symbol": "NCLH",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
