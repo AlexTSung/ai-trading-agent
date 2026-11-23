@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-23T01:01:20.853005-05:00",
+  "timestamp": "2026-11-23T02:01:02.162987-05:00",
   "date": "2026-11-23",
   "approved": [],
   "held": [
@@ -21,15 +21,13 @@
     "CMCSA",
     "CSX",
     "GME",
-    "MCD",
+    "DIS",
     "SPDN",
     "KHC",
     "WMT",
     "KO",
     "CMG",
-    "PCG",
-    "NCLH",
-    "MSCI"
+    "PCG"
   ],
   "scores": {
     "AAPL": {
@@ -136,7 +134,7 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 5.9% below entry (entry $527.35 \u2192 now $496.50), position 7.6% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 5.9% below entry (entry $527.35 \u2192 now $496.06), position 7.6% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
@@ -190,7 +188,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding TSLA \u2014 only 1.7% below entry (need \u22653%)"
+          "note": "Already holding TSLA \u2014 only 2.1% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -638,8 +636,8 @@
       },
       "_gate_used": 7.0
     },
-    "MCD": {
-      "symbol": "MCD",
+    "DIS": {
+      "symbol": "DIS",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
@@ -772,48 +770,6 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: price $13.79 is 3.7% above MA20 $13.29 (limit 3%) \u2014 do not chase"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "NCLH": {
-      "symbol": "NCLH",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "MSCI": {
-      "symbol": "MSCI",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
