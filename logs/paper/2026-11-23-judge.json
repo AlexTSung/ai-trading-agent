@@ -1,14 +1,14 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-23T04:01:00.469999-05:00",
+  "timestamp": "2026-11-23T05:01:11.845014-05:00",
   "date": "2026-11-23",
   "approved": [],
   "held": [
-    "AAPL",
     "LLY",
     "KDP"
   ],
   "vetoed": [
+    "AAPL",
     "MSFT",
     "TSLA",
     "SQQQ",
@@ -20,8 +20,7 @@
     "PFE",
     "CMCSA",
     "CSX",
-    "APP",
-    "TLT",
+    "GME",
     "SPDN",
     "KHC",
     "WMT",
@@ -32,8 +31,8 @@
   "scores": {
     "AAPL": {
       "symbol": "AAPL",
-      "recommendation": "HOLD",
-      "score": 5.25,
+      "recommendation": "VETO",
+      "score": 4.25,
       "approval_gate": 8.0,
       "size_multiplier": 0.5,
       "macro_regime": "RISK_OFF",
@@ -62,7 +61,7 @@
         "macro": "0.0/1.0",
         "portfolio": "0.0/2.0",
         "volatility": "0.25/1.0",
-        "quality": "2.5/2.5"
+        "quality": "1.5/2.5"
       },
       "criteria": {
         "technical": {
@@ -86,11 +85,11 @@
           "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
         },
         "quality": {
-          "score": 2.5,
-          "note": "Mega-cap $4978B; Profitable; 20 analyst buy ratings \u2014 strong institutional coverage"
+          "score": 1.5,
+          "note": "Mega-cap $4990B"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $347.57 > MA50 $341.85, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Already holding AAPL \u2014 price above entry, avg-down not warranted. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $4978B; Profitable; 20 analyst buy ratings \u2014 strong institutional coverage. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $347.57 > MA50 $341.85, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Already holding AAPL \u2014 price above entry, avg-down not warranted. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $4990B. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -134,15 +133,15 @@
         },
         "portfolio": {
           "score": 1.5,
-          "note": "AVG_DOWN candidate: MSFT is 5.5% below entry (entry $527.35 \u2192 now $498.21), position 7.6% of portfolio (max 8%)"
+          "note": "AVG_DOWN candidate: MSFT is 5.2% below entry (entry $527.35 \u2192 now $499.81), position 7.6% of portfolio (max 8%)"
         },
         "volatility": {
           "score": 0.25,
           "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
         },
         "quality": {
-          "score": 2.5,
-          "note": "Mega-cap $3598B; Profitable; 41 analyst buy ratings \u2014 strong institutional coverage"
+          "score": 1.5,
+          "note": "Mega-cap $3604B"
         }
       },
       "universe_policy": {
@@ -188,15 +187,15 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding TSLA \u2014 only 1.2% below entry (need \u22653%)"
+          "note": "Already holding TSLA \u2014 only 1.4% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
           "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
         },
         "quality": {
-          "score": 2.35,
-          "note": "Mega-cap $1367B; Profitable; 15 analyst buy ratings"
+          "score": 1.5,
+          "note": "Mega-cap $1369B"
         }
       },
       "universe_policy": {
@@ -462,8 +461,8 @@
           "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
         },
         "quality": {
-          "score": 2.15,
-          "note": "Mega-cap $156B; Profitable; 8 analyst buy ratings"
+          "score": 1.5,
+          "note": "Mega-cap $156B"
         }
       },
       "universe_policy": {
@@ -481,7 +480,7 @@
     "KDP": {
       "symbol": "KDP",
       "recommendation": "HOLD",
-      "score": 6.15,
+      "score": 5.5,
       "approval_gate": 8.0,
       "size_multiplier": 0.5,
       "macro_regime": "RISK_OFF",
@@ -510,7 +509,7 @@
         "macro": "0.0/1.0",
         "portfolio": "1.5/2.0",
         "volatility": "0.25/1.0",
-        "quality": "1.9/2.5"
+        "quality": "1.25/2.5"
       },
       "criteria": {
         "technical": {
@@ -534,11 +533,11 @@
           "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
         },
         "quality": {
-          "score": 1.9,
-          "note": "Large-cap $50B; Profitable; 9 analyst buy ratings"
+          "score": 1.25,
+          "note": "Large-cap $47B"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $35.85 > MA50 $33.63, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Adequate cash reserve 34%. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $50B; Profitable; 9 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $35.85 > MA50 $33.63, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $747.88 < MA50 $760.21. Portfolio: Adequate cash reserve 34%. Volatility: VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $47B. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -592,15 +591,15 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding CSX \u2014 only 0.0% below entry (need \u22653%)"
+          "note": "Already holding CSX \u2014 price above entry, avg-down not warranted"
         },
         "volatility": {
           "score": 0.25,
           "note": "VIX 28.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED)"
         },
         "quality": {
-          "score": 2.1,
-          "note": "Large-cap $91B; Profitable; 13 analyst buy ratings"
+          "score": 1.25,
+          "note": "Large-cap $91B"
         }
       },
       "universe_policy": {
@@ -615,35 +614,14 @@
       },
       "_gate_used": 7.0
     },
-    "APP": {
-      "symbol": "APP",
+    "GME": {
+      "symbol": "GME",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "TLT": {
-      "symbol": "TLT",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
