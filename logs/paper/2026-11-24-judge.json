@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-24T05:01:46.233744-05:00",
+  "timestamp": "2026-11-24T06:01:02.367111-05:00",
   "date": "2026-11-24",
   "approved": [],
   "held": [],
@@ -20,14 +20,12 @@
     "KDP",
     "CMCSA",
     "CSX",
-    "JNJ",
-    "ABBV",
+    "TGTX",
+    "MCD",
+    "ZETA",
     "SPDN",
     "KO",
-    "PCG",
-    "CMG",
-    "NCLH",
-    "WMT"
+    "PCG"
   ],
   "scores": {
     "AAPL": {
@@ -392,8 +390,8 @@
       },
       "_gate_used": 7.0
     },
-    "JNJ": {
-      "symbol": "JNJ",
+    "TGTX": {
+      "symbol": "TGTX",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
@@ -413,14 +411,34 @@
       },
       "_gate_used": 7.0
     },
-    "ABBV": {
-      "symbol": "ABBV",
+    "MCD": {
+      "symbol": "MCD",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
         "volatility_veto": true,
         "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "ZETA": {
+      "symbol": "ZETA",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for ZETA \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
@@ -478,69 +496,6 @@
     },
     "PCG": {
       "symbol": "PCG",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
-      "criteria": {
-        "volatility_veto": true,
-        "vix": 35.89
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "CMG": {
-      "symbol": "CMG",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
-      "criteria": {
-        "volatility_veto": true,
-        "vix": 35.89
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "NCLH": {
-      "symbol": "NCLH",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
-      "criteria": {
-        "volatility_veto": true,
-        "vix": 35.89
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "WMT": {
-      "symbol": "WMT",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
