@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-24T08:01:40.229016-05:00",
+  "timestamp": "2026-11-24T09:02:13.258276-05:00",
   "date": "2026-11-24",
   "approved": [],
   "held": [],
@@ -20,16 +20,17 @@
     "KDP",
     "CMCSA",
     "CSX",
+    "JNJ",
     "GME",
-    "RTX",
     "SPDN",
     "KO",
     "PCG",
     "CMG",
     "NCLH",
     "WMT",
-    "MAX",
-    "FAST"
+    "GCL",
+    "CME",
+    "SCHD"
   ],
   "scores": {
     "AAPL": {
@@ -394,8 +395,8 @@
       },
       "_gate_used": 7.0
     },
-    "GME": {
-      "symbol": "GME",
+    "JNJ": {
+      "symbol": "JNJ",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
@@ -415,8 +416,8 @@
       },
       "_gate_used": 7.0
     },
-    "RTX": {
-      "symbol": "RTX",
+    "GME": {
+      "symbol": "GME",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
@@ -562,8 +563,8 @@
       },
       "_gate_used": 7.0
     },
-    "MAX": {
-      "symbol": "MAX",
+    "GCL": {
+      "symbol": "GCL",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
@@ -583,13 +584,35 @@
       },
       "_gate_used": 7.0
     },
-    "FAST": {
-      "symbol": "FAST",
+    "CME": {
+      "symbol": "CME",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for FAST \u2014 auto-veto per Hard Rule 9",
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
-        "earnings_veto": true
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "SCHD": {
+      "symbol": "SCHD",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
       },
       "universe_policy": {
         "status": "approved",
