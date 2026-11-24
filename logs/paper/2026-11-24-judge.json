@@ -1,0 +1,701 @@
+{
+  "agent_version": "6.2.0",
+  "timestamp": "2026-11-24T00:01:53.474631-05:00",
+  "date": "2026-11-24",
+  "approved": [],
+  "held": [],
+  "vetoed": [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "TSLA",
+    "SQQQ",
+    "SPXS",
+    "SOXS",
+    "LLY",
+    "ARGX",
+    "TGT",
+    "VIXY",
+    "PFE",
+    "KDP",
+    "CMCSA",
+    "CSX",
+    "ABBV",
+    "TLT",
+    "SPDN",
+    "KO",
+    "PCG",
+    "CMG",
+    "NCLH",
+    "WMT",
+    "SBC",
+    "ADT",
+    "CBNK",
+    "OPCH",
+    "PTC",
+    "LFCR"
+  ],
+  "scores": {
+    "AAPL": {
+      "symbol": "AAPL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": {
+          "trades": 2,
+          "wins": 1,
+          "win_rate": 0.5,
+          "avg_pnl_pct": 5.34,
+          "total_pnl_usd": 518.26,
+          "last_exit": "2026-09-30",
+          "judge_n": 2,
+          "avg_judge_score": 8.12,
+          "avg_judge_winners": 8.12,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 7.5,
+        "record_label": "thin record (2 closed)",
+        "required_gate": 7.5
+      },
+      "_gate_used": 7.0
+    },
+    "MSFT": {
+      "symbol": "MSFT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": {
+          "trades": 3,
+          "wins": 1,
+          "win_rate": 0.3333333333333333,
+          "avg_pnl_pct": -2.01,
+          "total_pnl_usd": -293.86,
+          "last_exit": "2026-07-13",
+          "judge_n": 2,
+          "avg_judge_score": 8.13,
+          "avg_judge_winners": 8.13,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "losing record (3 closed, -2.01% avg)",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "AMZN": {
+      "symbol": "AMZN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "TSLA": {
+      "symbol": "TSLA",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": {
+          "trades": 1,
+          "wins": 0,
+          "win_rate": 0.0,
+          "avg_pnl_pct": -5.2,
+          "total_pnl_usd": -240.35,
+          "last_exit": "2026-07-13",
+          "judge_n": 0,
+          "avg_judge_score": null,
+          "avg_judge_winners": null,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 7.5,
+        "record_label": "thin record (1 closed)",
+        "required_gate": 7.5
+      },
+      "_gate_used": 7.0
+    },
+    "SQQQ": {
+      "symbol": "SQQQ",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "hedge",
+        "record": null,
+        "would_change": null,
+        "required_gate": null
+      },
+      "_gate_used": 7.0
+    },
+    "SPXS": {
+      "symbol": "SPXS",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "hedge",
+        "record": null,
+        "would_change": null,
+        "required_gate": null
+      },
+      "_gate_used": 7.0
+    },
+    "SOXS": {
+      "symbol": "SOXS",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "hedge",
+        "record": null,
+        "would_change": null,
+        "required_gate": null
+      },
+      "_gate_used": 7.0
+    },
+    "LLY": {
+      "symbol": "LLY",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "ARGX": {
+      "symbol": "ARGX",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": {
+          "trades": 0,
+          "wins": 0,
+          "win_rate": null,
+          "avg_pnl_pct": null,
+          "total_pnl_usd": 0,
+          "last_exit": "",
+          "judge_n": 1,
+          "avg_judge_score": 8.52,
+          "avg_judge_winners": 8.52,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "TGT": {
+      "symbol": "TGT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": {
+          "trades": 0,
+          "wins": 0,
+          "win_rate": null,
+          "avg_pnl_pct": null,
+          "total_pnl_usd": 0,
+          "last_exit": "",
+          "judge_n": 1,
+          "avg_judge_score": 8.87,
+          "avg_judge_winners": 8.87,
+          "avg_judge_losers": null
+        },
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "VIXY": {
+      "symbol": "VIXY",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "hedge",
+        "record": null,
+        "would_change": null,
+        "required_gate": null
+      },
+      "_gate_used": 7.0
+    },
+    "PFE": {
+      "symbol": "PFE",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "KDP": {
+      "symbol": "KDP",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "CMCSA": {
+      "symbol": "CMCSA",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "CSX": {
+      "symbol": "CSX",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "ABBV": {
+      "symbol": "ABBV",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "TLT": {
+      "symbol": "TLT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "SPDN": {
+      "symbol": "SPDN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "KO": {
+      "symbol": "KO",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "PCG": {
+      "symbol": "PCG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "CMG": {
+      "symbol": "CMG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "NCLH": {
+      "symbol": "NCLH",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "WMT": {
+      "symbol": "WMT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "SBC": {
+      "symbol": "SBC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "ADT": {
+      "symbol": "ADT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "CBNK": {
+      "symbol": "CBNK",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "OPCH": {
+      "symbol": "OPCH",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "PTC": {
+      "symbol": "PTC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "LFCR": {
+      "symbol": "LFCR",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    }
+  },
+  "universe": {
+    "status": "approved",
+    "enforced": true,
+    "changes": []
+  }
+}
