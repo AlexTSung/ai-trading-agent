@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-24T17:01:10.032136-05:00",
+  "timestamp": "2026-11-24T18:02:05.275278-05:00",
   "date": "2026-11-24",
   "approved": [],
   "held": [
@@ -22,13 +22,18 @@
     "CMCSA",
     "CSX",
     "MLTX",
-    "KSS",
     "TGTX",
+    "KSS",
     "WMT",
-    "GILD",
+    "XLV",
     "SPDN",
     "INSM",
-    "MDT"
+    "MDT",
+    "PCG",
+    "KHC",
+    "TSCO",
+    "GFR",
+    "HPE"
   ],
   "scores": {
     "AAPL": {
@@ -516,7 +521,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 1.3% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 1.2% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -759,14 +764,14 @@
       },
       "_gate_used": 7.0
     },
-    "KSS": {
-      "symbol": "KSS",
+    "TGTX": {
+      "symbol": "TGTX",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $25.35 is 6.4% above MA20 $23.82 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $25.35 is 6.4% above MA20 $23.82 (limit 3%) \u2014 do not chase"
+        "note": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -780,14 +785,14 @@
       },
       "_gate_used": 7.0
     },
-    "TGTX": {
-      "symbol": "TGTX",
+    "KSS": {
+      "symbol": "KSS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: price $25.35 is 6.4% above MA20 $23.82 (limit 3%) \u2014 do not chase",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: price $25.35 is 6.4% above MA20 $23.82 (limit 3%) \u2014 do not chase"
       },
       "universe_policy": {
         "status": "approved",
@@ -822,14 +827,14 @@
       },
       "_gate_used": 7.0
     },
-    "GILD": {
-      "symbol": "GILD",
+    "XLV": {
+      "symbol": "XLV",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $178.33 is 5.6% above MA20 $168.86 (limit 3%) \u2014 do not chase",
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: price $178.33 is 5.6% above MA20 $168.86 (limit 3%) \u2014 do not chase"
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
@@ -889,8 +894,11 @@
       "symbol": "MDT",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "Data error: 429 Client Error: Too Many Requests for url: https://data.alpaca.markets/v2/stocks/MDT/bars?timeframe=1Day&limit=60&start=2026-07-27&adjustment=raw&sort=desc&feed=iex",
-      "criteria": {},
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -907,6 +915,112 @@
           "avg_judge_winners": 9.62,
           "avg_judge_losers": null
         },
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "PCG": {
+      "symbol": "PCG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 65 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "KHC": {
+      "symbol": "KHC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: price $25.59 is 3.2% above MA20 $24.81 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $25.59 is 3.2% above MA20 $24.81 (limit 3%) \u2014 do not chase"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "TSCO": {
+      "symbol": "TSCO",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "GFR": {
+      "symbol": "GFR",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 87 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 87 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "HPE": {
+      "symbol": "HPE",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "dip_buy_candidate": true,
+      "rationale": "FALLING KNIFE VETO: Stock was already below MA50 before today's drop \u2014 pre-existing downtrend, not a dip buy opportunity",
+      "criteria": {
+        "falling_knife_veto": true,
+        "knife_reason": "FALLING KNIFE VETO: Stock was already below MA50 before today's drop \u2014 pre-existing downtrend, not a dip buy opportunity"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
         "would_change": null,
         "record_gate": 8.0,
         "record_label": "no closed trades",
