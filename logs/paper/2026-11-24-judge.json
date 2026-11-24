@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-24T07:01:55.208305-05:00",
+  "timestamp": "2026-11-24T08:01:40.229016-05:00",
   "date": "2026-11-24",
   "approved": [],
   "held": [],
@@ -21,15 +21,15 @@
     "CMCSA",
     "CSX",
     "GME",
-    "MCD",
-    "TGTX",
+    "RTX",
     "SPDN",
     "KO",
     "PCG",
     "CMG",
     "NCLH",
     "WMT",
-    "EG"
+    "MAX",
+    "FAST"
   ],
   "scores": {
     "AAPL": {
@@ -415,29 +415,8 @@
       },
       "_gate_used": 7.0
     },
-    "MCD": {
-      "symbol": "MCD",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
-      "criteria": {
-        "volatility_veto": true,
-        "vix": 35.89
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "TGTX": {
-      "symbol": "TGTX",
+    "RTX": {
+      "symbol": "RTX",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
@@ -583,14 +562,34 @@
       },
       "_gate_used": 7.0
     },
-    "EG": {
-      "symbol": "EG",
+    "MAX": {
+      "symbol": "MAX",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
       "criteria": {
         "volatility_veto": true,
         "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "FAST": {
+      "symbol": "FAST",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for FAST \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
