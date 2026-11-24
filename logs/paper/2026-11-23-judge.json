@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-23T19:01:54.769499-05:00",
+  "timestamp": "2026-11-23T20:01:52.804378-05:00",
   "date": "2026-11-23",
   "approved": [],
   "held": [],
@@ -28,7 +28,10 @@
     "CMG",
     "NCLH",
     "WMT",
-    "MD"
+    "YOU",
+    "ADT",
+    "CCC",
+    "CBNK"
   ],
   "scores": {
     "AAPL": {
@@ -560,8 +563,71 @@
       },
       "_gate_used": 7.0
     },
-    "MD": {
-      "symbol": "MD",
+    "YOU": {
+      "symbol": "YOU",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "ADT": {
+      "symbol": "ADT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "CCC": {
+      "symbol": "CCC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
+      "criteria": {
+        "volatility_veto": true,
+        "vix": 35.89
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "CBNK": {
+      "symbol": "CBNK",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "VOLATILITY VETO: VIX 35.9 exceeds 35 \u2014 no new positions, manage existing only",
