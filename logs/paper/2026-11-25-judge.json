@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-25T02:01:56.829058-05:00",
+  "timestamp": "2026-11-25T03:01:35.556955-05:00",
   "date": "2026-11-25",
   "approved": [],
   "held": [
@@ -21,9 +21,6 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "GME",
-    "KSS",
-    "COST",
     "SPDN",
     "INSM",
     "MDT",
@@ -32,7 +29,7 @@
     "TSCO",
     "WMT",
     "UAE",
-    "ITRI"
+    "MAX"
   ],
   "scores": {
     "AAPL": {
@@ -520,7 +517,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 1.0% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 0.7% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -742,69 +739,6 @@
       },
       "_gate_used": 8.0
     },
-    "GME": {
-      "symbol": "GME",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "KSS": {
-      "symbol": "KSS",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: price $25.35 is 6.4% above MA20 $23.82 (limit 3%) \u2014 do not chase",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: price $25.35 is 6.4% above MA20 $23.82 (limit 3%) \u2014 do not chase"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "COST": {
-      "symbol": "COST",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
     "SPDN": {
       "symbol": "SPDN",
       "recommendation": "VETO",
@@ -984,8 +918,8 @@
       },
       "_gate_used": 7.0
     },
-    "ITRI": {
-      "symbol": "ITRI",
+    "MAX": {
+      "symbol": "MAX",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
