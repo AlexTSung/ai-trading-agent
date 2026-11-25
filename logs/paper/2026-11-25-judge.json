@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-25T17:01:40.882622-05:00",
+  "timestamp": "2026-11-25T18:01:16.463696-05:00",
   "date": "2026-11-25",
   "approved": [],
   "held": [
@@ -22,9 +22,8 @@
     "VZ",
     "CMCSA",
     "CSX",
+    "RKT",
     "KHC",
-    "CCL",
-    "MA",
     "VRTX",
     "SPDN",
     "TOPP",
@@ -34,7 +33,7 @@
     "TSCO",
     "PCG",
     "KO",
-    "COO"
+    "RTX"
   ],
   "scores": {
     "AAPL": {
@@ -491,7 +490,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 0.9% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 1.0% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -713,6 +712,27 @@
       },
       "_gate_used": 8.0
     },
+    "RKT": {
+      "symbol": "RKT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: price $15.28 is 9.4% above MA20 $13.97 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $15.28 is 9.4% above MA20 $13.97 (limit 3%) \u2014 do not chase"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
     "KHC": {
       "symbol": "KHC",
       "recommendation": "VETO",
@@ -721,48 +741,6 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "CCL": {
-      "symbol": "CCL",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "MA": {
-      "symbol": "MA",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
@@ -964,8 +942,8 @@
       },
       "_gate_used": 7.0
     },
-    "COO": {
-      "symbol": "COO",
+    "RTX": {
+      "symbol": "RTX",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
