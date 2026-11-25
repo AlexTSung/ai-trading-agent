@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-25T05:01:54.244216-05:00",
+  "timestamp": "2026-11-25T06:02:02.980607-05:00",
   "date": "2026-11-25",
   "approved": [],
   "held": [
@@ -21,7 +21,8 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "UVXY",
+    "WEN",
+    "BRK.B",
     "SPDN",
     "INSM",
     "MDT",
@@ -29,7 +30,9 @@
     "KHC",
     "TSCO",
     "WMT",
-    "UAE"
+    "PHAR",
+    "URBN",
+    "POOL"
   ],
   "scores": {
     "AAPL": {
@@ -517,7 +520,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 0.5% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 0.3% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -739,14 +742,35 @@
       },
       "_gate_used": 8.0
     },
-    "UVXY": {
-      "symbol": "UVXY",
+    "WEN": {
+      "symbol": "WEN",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 73 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 73 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "BRK.B": {
+      "symbol": "BRK.B",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
@@ -918,14 +942,56 @@
       },
       "_gate_used": 7.0
     },
-    "UAE": {
-      "symbol": "UAE",
+    "PHAR": {
+      "symbol": "PHAR",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback"
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "URBN": {
+      "symbol": "URBN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "POOL": {
+      "symbol": "POOL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
