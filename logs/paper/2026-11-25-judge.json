@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-25T01:02:04.060768-05:00",
+  "timestamp": "2026-11-25T02:01:56.829058-05:00",
   "date": "2026-11-25",
   "approved": [],
   "held": [
@@ -21,9 +21,9 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "MLTX",
-    "CMG",
-    "IBB",
+    "GME",
+    "KSS",
+    "COST",
     "SPDN",
     "INSM",
     "MDT",
@@ -32,8 +32,7 @@
     "TSCO",
     "WMT",
     "UAE",
-    "UE",
-    "CRH"
+    "ITRI"
   ],
   "scores": {
     "AAPL": {
@@ -521,7 +520,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 1.2% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 1.0% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -743,14 +742,14 @@
       },
       "_gate_used": 8.0
     },
-    "MLTX": {
-      "symbol": "MLTX",
+    "GME": {
+      "symbol": "GME",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $13.08 is 9.7% above MA20 $11.93 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $13.08 is 9.7% above MA20 $11.93 (limit 3%) \u2014 do not chase"
+        "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -764,14 +763,14 @@
       },
       "_gate_used": 7.0
     },
-    "CMG": {
-      "symbol": "CMG",
+    "KSS": {
+      "symbol": "KSS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $37.08 is 6.6% above MA20 $34.79 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: price $25.35 is 6.4% above MA20 $23.82 (limit 3%) \u2014 do not chase",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $37.08 is 6.6% above MA20 $34.79 (limit 3%) \u2014 do not chase"
+        "note": "CHASE VETO: price $25.35 is 6.4% above MA20 $23.82 (limit 3%) \u2014 do not chase"
       },
       "universe_policy": {
         "status": "approved",
@@ -785,14 +784,14 @@
       },
       "_gate_used": 7.0
     },
-    "IBB": {
-      "symbol": "IBB",
+    "COST": {
+      "symbol": "COST",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $219.47 is 3.1% above MA20 $212.95 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $219.47 is 3.1% above MA20 $212.95 (limit 3%) \u2014 do not chase"
+        "note": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -985,28 +984,8 @@
       },
       "_gate_used": 7.0
     },
-    "UE": {
-      "symbol": "UE",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for UE \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "CRH": {
-      "symbol": "CRH",
+    "ITRI": {
+      "symbol": "ITRI",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
