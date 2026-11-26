@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-26T10:01:15.242943-05:00",
+  "timestamp": "2026-11-26T11:01:37.756212-05:00",
   "date": "2026-11-26",
   "approved": [],
   "held": [
@@ -22,9 +22,11 @@
     "VZ",
     "CMCSA",
     "CSX",
+    "DAL",
+    "IBB",
     "VRTX",
-    "GM",
-    "SONY",
+    "AMGN",
+    "MO",
     "SPDN",
     "TOPP",
     "NKE",
@@ -32,7 +34,8 @@
     "NCLH",
     "TSCO",
     "PCG",
-    "KO"
+    "KO",
+    "MSC"
   ],
   "scores": {
     "AAPL": {
@@ -711,6 +714,48 @@
       },
       "_gate_used": 8.0
     },
+    "DAL": {
+      "symbol": "DAL",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "IBB": {
+      "symbol": "IBB",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
     "VRTX": {
       "symbol": "VRTX",
       "recommendation": "VETO",
@@ -732,8 +777,8 @@
       },
       "_gate_used": 7.0
     },
-    "GM": {
-      "symbol": "GM",
+    "AMGN": {
+      "symbol": "AMGN",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
@@ -753,14 +798,14 @@
       },
       "_gate_used": 7.0
     },
-    "SONY": {
-      "symbol": "SONY",
+    "MO": {
+      "symbol": "MO",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
@@ -928,6 +973,27 @@
       "criteria": {
         "holiday_veto": true,
         "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "MSC": {
+      "symbol": "MSC",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: price $1.08 is 10.3% above MA20 $0.98 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $1.08 is 10.3% above MA20 $0.98 (limit 3%) \u2014 do not chase"
       },
       "universe_policy": {
         "status": "approved",
