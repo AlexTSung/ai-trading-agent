@@ -1,0 +1,93 @@
+{
+  "session_date": "2026-11-26",
+  "judged_at": "2026-11-26T09:00:42.125440+00:00",
+  "environment": "practice",
+  "total_reviewed": 1,
+  "tradeable": 1,
+  "gate": 7.5,
+  "verdicts": [
+    {
+      "pair": "GBP_JPY",
+      "direction": "LONG",
+      "score": 7.53,
+      "verdict": "BUY",
+      "reason": "score_7.53_standard_size",
+      "size_multiplier": 0.5,
+      "environment": "practice",
+      "judged_at": "2026-11-26T09:00:42.125301+00:00",
+      "entry_price": 208.55,
+      "stop_price": 206.97093,
+      "tp1_price": 211.70814,
+      "tp2_price": 214.86629,
+      "stop_pips": 158,
+      "tp1_pips": 316,
+      "atr14_pips": 52.6,
+      "factors": {
+        "carry": {
+          "score": 1.0,
+          "weight": 2.5,
+          "detail": {
+            "carry_pct": 4.9,
+            "carry_signal": "LONG",
+            "raw_score": 1.0
+          }
+        },
+        "momentum": {
+          "score": 0.6,
+          "weight": 2.0,
+          "detail": {
+            "h4_momentum": "bullish",
+            "hp_signal": "LONG",
+            "above_ma20": true,
+            "signals": 3,
+            "raw_score": 0.6
+          }
+        },
+        "technical": {
+          "score": 0.5,
+          "weight": 1.5,
+          "detail": {
+            "macd": "bullish",
+            "ibs": "oversold_0.293",
+            "pivot": "above_pivot",
+            "points": 3,
+            "raw_score": 0.5
+          }
+        },
+        "session": {
+          "score": 0.75,
+          "weight": 1.0,
+          "detail": {
+            "session_quality": "london",
+            "utc_hour": 9,
+            "raw_score": 0.75
+          }
+        },
+        "volatility": {
+          "score": 0.7,
+          "weight": 1.5,
+          "detail": {
+            "spread_pips": 3.6,
+            "spread_ok": true,
+            "atr_pips": 52.6,
+            "atr_regime": "borderline",
+            "raw_score": 0.7
+          }
+        },
+        "risk_reward": {
+          "score": 0.85,
+          "weight": 1.5,
+          "detail": {
+            "rr_ratio": 2.0,
+            "stop_pips": 158,
+            "tp1_pips": 316,
+            "raw_score": 0.85
+          }
+        }
+      },
+      "learned_weights_active": true,
+      "direction_penalty": 0.0,
+      "disqualifiers": []
+    }
+  ]
+}
