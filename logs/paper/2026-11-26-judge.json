@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-26T02:02:05.788147-05:00",
+  "timestamp": "2026-11-26T03:01:36.627847-05:00",
   "date": "2026-11-26",
   "approved": [],
   "held": [
@@ -22,7 +22,7 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "VRTX",
+    "SCHD",
     "SPDN",
     "TOPP",
     "NKE",
@@ -709,14 +709,14 @@
       },
       "_gate_used": 8.0
     },
-    "VRTX": {
-      "symbol": "VRTX",
+    "SCHD": {
+      "symbol": "SCHD",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
