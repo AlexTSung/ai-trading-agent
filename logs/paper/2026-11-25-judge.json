@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-25T18:01:16.463696-05:00",
+  "timestamp": "2026-11-25T19:01:40.767270-05:00",
   "date": "2026-11-25",
   "approved": [],
   "held": [
@@ -33,7 +33,8 @@
     "TSCO",
     "PCG",
     "KO",
-    "RTX"
+    "RTX",
+    "MDLN"
   ],
   "scores": {
     "AAPL": {
@@ -103,7 +104,7 @@
     "PYPL": {
       "symbol": "PYPL",
       "recommendation": "HOLD",
-      "score": 6.0,
+      "score": 6.5,
       "approval_gate": 8.0,
       "size_multiplier": 0.5,
       "macro_regime": "RISK_OFF",
@@ -128,7 +129,7 @@
       "avg_down_candidate": false,
       "score_breakdown": {
         "technical": "1.5/2.0",
-        "news": "0.5/1.5",
+        "news": "1.0/1.5",
         "macro": "0.0/1.0",
         "portfolio": "2.0/2.0",
         "volatility": "0.25/1.0",
@@ -140,8 +141,8 @@
           "note": "WEAK_BUY \u2014 MA20 $57.95 > MA50 $56.12, price between MAs"
         },
         "news": {
-          "score": 0.5,
-          "note": "MIXED/NEGATIVE \u2014 1 bearish signal(s) present"
+          "score": 1.0,
+          "note": "NEUTRAL \u2014 no strong sentiment signals"
         },
         "macro": {
           "score": 0.0,
@@ -160,7 +161,7 @@
           "note": "Large-cap $48B; Profitable"
         }
       },
-      "rationale": "Technical: WEAK_BUY \u2014 MA20 $57.95 > MA50 $56.12, price between MAs. News: MIXED/NEGATIVE \u2014 1 bearish signal(s) present. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $740.43 < MA50 $757.93. Portfolio: Strong cash reserve 48%. Volatility: VIX 26.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $48B; Profitable. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: WEAK_BUY \u2014 MA20 $57.95 > MA50 $56.12, price between MAs. News: NEUTRAL \u2014 no strong sentiment signals. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $740.43 < MA50 $757.93. Portfolio: Strong cash reserve 48%. Volatility: VIX 26.4 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Large-cap $48B; Profitable. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -490,7 +491,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 1.0% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 1.1% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -950,6 +951,27 @@
       "criteria": {
         "holiday_veto": true,
         "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "MDLN": {
+      "symbol": "MDLN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: price $40.54 is 6.1% above MA20 $38.23 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $40.54 is 6.1% above MA20 $38.23 (limit 3%) \u2014 do not chase"
       },
       "universe_policy": {
         "status": "approved",
