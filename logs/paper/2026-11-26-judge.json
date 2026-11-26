@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-26T00:01:21.611812-05:00",
+  "timestamp": "2026-11-26T01:01:07.760967-05:00",
   "date": "2026-11-26",
   "approved": [],
   "held": [
@@ -22,13 +22,13 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "RKT",
-    "NKE",
-    "DIS",
-    "KLAR",
-    "RTX",
+    "ADMA",
+    "GME",
+    "CCL",
+    "VRTX",
     "SPDN",
     "TOPP",
+    "NKE",
     "CMG",
     "NCLH",
     "TSCO",
@@ -713,14 +713,14 @@
       },
       "_gate_used": 8.0
     },
-    "RKT": {
-      "symbol": "RKT",
+    "ADMA": {
+      "symbol": "ADMA",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: price $15.28 is 9.4% above MA20 $13.97 (limit 3%) \u2014 do not chase",
+      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: price $15.28 is 9.4% above MA20 $13.97 (limit 3%) \u2014 do not chase"
+        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -734,34 +734,14 @@
       },
       "_gate_used": 7.0
     },
-    "NKE": {
-      "symbol": "NKE",
+    "GME": {
+      "symbol": "GME",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NKE \u2014 auto-veto per Hard Rule 9",
-      "criteria": {
-        "earnings_veto": true
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "DIS": {
-      "symbol": "DIS",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
         "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+        "note": "CHASE VETO: RSI(14) 74 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -775,8 +755,8 @@
       },
       "_gate_used": 7.0
     },
-    "KLAR": {
-      "symbol": "KLAR",
+    "CCL": {
+      "symbol": "CCL",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
@@ -796,14 +776,14 @@
       },
       "_gate_used": 7.0
     },
-    "RTX": {
-      "symbol": "RTX",
+    "VRTX": {
+      "symbol": "VRTX",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "rationale": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 61 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -846,6 +826,26 @@
       "criteria": {
         "chase_veto": true,
         "note": "CHASE VETO: RSI(14) 82 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "NKE": {
+      "symbol": "NKE",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NKE \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
