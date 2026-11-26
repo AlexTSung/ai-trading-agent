@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-26T12:02:06.009772-05:00",
+  "timestamp": "2026-11-26T13:01:08.577361-05:00",
   "date": "2026-11-26",
   "approved": [],
   "held": [
@@ -22,12 +22,9 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "AMGN",
     "VRTX",
-    "SBUX",
-    "GILD",
-    "BLK",
-    "RARE",
+    "XLV",
+    "MO",
     "SPDN",
     "TOPP",
     "NKE",
@@ -35,8 +32,7 @@
     "NCLH",
     "TSCO",
     "PCG",
-    "KO",
-    "RBLX"
+    "KO"
   ],
   "scores": {
     "AAPL": {
@@ -715,27 +711,6 @@
       },
       "_gate_used": 8.0
     },
-    "AMGN": {
-      "symbol": "AMGN",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
     "VRTX": {
       "symbol": "VRTX",
       "recommendation": "VETO",
@@ -757,61 +732,8 @@
       },
       "_gate_used": 7.0
     },
-    "SBUX": {
-      "symbol": "SBUX",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": {
-          "trades": 0,
-          "wins": 0,
-          "win_rate": null,
-          "avg_pnl_pct": null,
-          "total_pnl_usd": 0,
-          "last_exit": "",
-          "judge_n": 1,
-          "avg_judge_score": 9.12,
-          "avg_judge_winners": 9.12,
-          "avg_judge_losers": null
-        },
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "GILD": {
-      "symbol": "GILD",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 66 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "BLK": {
-      "symbol": "BLK",
+    "XLV": {
+      "symbol": "XLV",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
@@ -831,14 +753,14 @@
       },
       "_gate_used": 7.0
     },
-    "RARE": {
-      "symbol": "RARE",
+    "MO": {
+      "symbol": "MO",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
@@ -1006,27 +928,6 @@
       "criteria": {
         "holiday_veto": true,
         "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "RBLX": {
-      "symbol": "RBLX",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 64 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
