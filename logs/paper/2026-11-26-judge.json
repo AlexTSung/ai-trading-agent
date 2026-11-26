@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-26T16:01:48.352453-05:00",
+  "timestamp": "2026-11-26T17:01:40.309348-05:00",
   "date": "2026-11-26",
   "approved": [],
   "held": [
@@ -22,8 +22,9 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "LULU",
-    "NDAQ",
+    "AMGN",
+    "KO",
+    "MO",
     "SPDN",
     "TOPP",
     "NKE",
@@ -31,7 +32,7 @@
     "NCLH",
     "TSCO",
     "PCG",
-    "KO"
+    "ESS"
   ],
   "scores": {
     "AAPL": {
@@ -710,13 +711,14 @@
       },
       "_gate_used": 8.0
     },
-    "LULU": {
-      "symbol": "LULU",
+    "AMGN": {
+      "symbol": "AMGN",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LULU \u2014 auto-veto per Hard Rule 9",
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
       "criteria": {
-        "earnings_veto": true
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
@@ -730,8 +732,29 @@
       },
       "_gate_used": 7.0
     },
-    "NDAQ": {
-      "symbol": "NDAQ",
+    "KO": {
+      "symbol": "KO",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "MO": {
+      "symbol": "MO",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
@@ -897,14 +920,14 @@
       },
       "_gate_used": 7.0
     },
-    "KO": {
-      "symbol": "KO",
+    "ESS": {
+      "symbol": "ESS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "rationale": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
