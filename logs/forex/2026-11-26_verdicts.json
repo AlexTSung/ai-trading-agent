@@ -1,27 +1,27 @@
 {
   "session_date": "2026-11-26",
-  "judged_at": "2026-11-26T13:00:43.852995+00:00",
+  "judged_at": "2026-11-26T14:00:54.622456+00:00",
   "environment": "practice",
   "total_reviewed": 2,
-  "tradeable": 0,
+  "tradeable": 1,
   "gate": 7.5,
   "verdicts": [
     {
       "pair": "USD_JPY",
       "direction": "LONG",
-      "score": 8.17,
-      "verdict": "DISQUALIFIED",
-      "reason": "G11_H1_regime_conflict_LONG_at_range_top",
+      "score": 8.42,
+      "verdict": "BUY",
+      "reason": "score_8.42_large_size",
       "size_multiplier": 0.5,
       "environment": "practice",
-      "judged_at": "2026-11-26T13:00:43.852517+00:00",
-      "entry_price": 159.261,
-      "stop_price": 158.18379,
-      "tp1_price": 161.41543,
-      "tp2_price": 163.56986,
-      "stop_pips": 108,
-      "tp1_pips": 216,
-      "atr14_pips": 35.9,
+      "judged_at": "2026-11-26T14:00:54.621943+00:00",
+      "entry_price": 159.213,
+      "stop_price": 158.20886,
+      "tp1_price": 161.22129,
+      "tp2_price": 163.22957,
+      "stop_pips": 100,
+      "tp1_pips": 200,
+      "atr14_pips": 33.5,
       "factors": {
         "carry": {
           "score": 1.0,
@@ -45,14 +45,15 @@
           }
         },
         "technical": {
-          "score": 0.5,
+          "score": 0.667,
           "weight": 1.5,
           "detail": {
-            "rsi14": "ok_at_58.4",
+            "rsi14": "ok_at_49.5",
             "macd": "bullish",
+            "ibs": "oversold_0.015",
             "pivot": "above_pivot",
-            "points": 3,
-            "raw_score": 0.5
+            "points": 4,
+            "raw_score": 0.667
           }
         },
         "session": {
@@ -60,7 +61,7 @@
           "weight": 1.0,
           "detail": {
             "session_quality": "london_ny_overlap",
-            "utc_hour": 13,
+            "utc_hour": 14,
             "raw_score": 1.0
           }
         },
@@ -68,9 +69,9 @@
           "score": 0.7,
           "weight": 1.5,
           "detail": {
-            "spread_pips": 1.4,
+            "spread_pips": 1.6,
             "spread_ok": true,
-            "atr_pips": 35.9,
+            "atr_pips": 33.5,
             "atr_regime": "borderline",
             "raw_score": 0.7
           }
@@ -80,17 +81,15 @@
           "weight": 1.5,
           "detail": {
             "rr_ratio": 2.0,
-            "stop_pips": 108,
-            "tp1_pips": 216,
+            "stop_pips": 100,
+            "tp1_pips": 200,
             "raw_score": 0.85
           }
         }
       },
       "learned_weights_active": true,
       "direction_penalty": 0.0,
-      "disqualifiers": [
-        "G11_H1_regime_conflict_LONG_at_range_top"
-      ]
+      "disqualifiers": []
     },
     {
       "pair": "GBP_JPY",
@@ -100,14 +99,14 @@
       "reason": "G10_technical_score_0.33_below_0.40_minimum; G11_H1_regime_conflict_LONG_at_range_top",
       "size_multiplier": 0.5,
       "environment": "practice",
-      "judged_at": "2026-11-26T13:00:43.852772+00:00",
-      "entry_price": 208.7345,
-      "stop_price": 207.1535,
-      "tp1_price": 211.8965,
-      "tp2_price": 215.0585,
-      "stop_pips": 158,
-      "tp1_pips": 316,
-      "atr14_pips": 52.7,
+      "judged_at": "2026-11-26T14:00:54.622118+00:00",
+      "entry_price": 208.873,
+      "stop_price": 207.3595,
+      "tp1_price": 211.9,
+      "tp2_price": 214.927,
+      "stop_pips": 151,
+      "tp1_pips": 302,
+      "atr14_pips": 50.4,
       "factors": {
         "carry": {
           "score": 1.0,
@@ -144,7 +143,7 @@
           "weight": 1.0,
           "detail": {
             "session_quality": "london_ny_overlap",
-            "utc_hour": 13,
+            "utc_hour": 14,
             "raw_score": 1.0
           }
         },
@@ -152,9 +151,9 @@
           "score": 0.7,
           "weight": 1.5,
           "detail": {
-            "spread_pips": 3.5,
+            "spread_pips": 3.8,
             "spread_ok": true,
-            "atr_pips": 52.7,
+            "atr_pips": 50.4,
             "atr_regime": "borderline",
             "raw_score": 0.7
           }
@@ -164,8 +163,8 @@
           "weight": 1.5,
           "detail": {
             "rr_ratio": 2.0,
-            "stop_pips": 158,
-            "tp1_pips": 316,
+            "stop_pips": 151,
+            "tp1_pips": 302,
             "raw_score": 0.85
           }
         }
