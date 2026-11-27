@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-27T15:02:05.084601-05:00",
+  "timestamp": "2026-11-27T16:01:31.243333-05:00",
   "date": "2026-11-27",
   "approved": [],
   "held": [
@@ -22,14 +22,13 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "LULU",
-    "COST",
-    "SONY",
+    "KHC",
+    "MO",
     "SPDN",
     "NKE",
     "PCG",
     "FT",
-    "RTX"
+    "MRP"
   ],
   "scores": {
     "AAPL": {
@@ -812,13 +811,14 @@
       },
       "_gate_used": 7.0
     },
-    "LULU": {
-      "symbol": "LULU",
+    "KHC": {
+      "symbol": "KHC",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LULU \u2014 auto-veto per Hard Rule 9",
+      "rationale": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback",
       "criteria": {
-        "earnings_veto": true
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 72 is above 60 \u2014 overbought, wait for a pullback"
       },
       "universe_policy": {
         "status": "approved",
@@ -832,35 +832,14 @@
       },
       "_gate_used": 7.0
     },
-    "COST": {
-      "symbol": "COST",
+    "MO": {
+      "symbol": "MO",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 69 is above 60 \u2014 overbought, wait for a pullback"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "SONY": {
-      "symbol": "SONY",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
-      "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
       },
       "universe_policy": {
         "status": "approved",
@@ -957,14 +936,13 @@
       },
       "_gate_used": 7.0
     },
-    "RTX": {
-      "symbol": "RTX",
+    "MRP": {
+      "symbol": "MRP",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for MRP \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 62 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
