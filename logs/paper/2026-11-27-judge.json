@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-27T13:01:04.026465-05:00",
+  "timestamp": "2026-11-27T14:01:02.181295-05:00",
   "date": "2026-11-27",
   "approved": [],
   "held": [
@@ -23,9 +23,8 @@
     "CMCSA",
     "CSX",
     "CMG",
+    "MLTX",
     "VRTX",
-    "XLV",
-    "MO",
     "SPDN",
     "NKE",
     "PCG"
@@ -605,10 +604,10 @@
         },
         "quality": {
           "score": 2.35,
-          "note": "Mega-cap $235B; Profitable; 10 analyst buy ratings"
+          "note": "Mega-cap $234B; Profitable; 10 analyst buy ratings"
         }
       },
-      "rationale": "Technical: STRONG_BUY \u2014 MA20 $242.36 > MA50 $237.07, price $248.03 above both [capped 2.5\u21922.0 at weight 2.0]. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $738.40 < MA50 $757.26. Portfolio: Strong cash reserve 48%. Volatility: VIX 26.8 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $235B; Profitable; 10 analyst buy ratings. Source: watchlist | Gate: 8.0.",
+      "rationale": "Technical: STRONG_BUY \u2014 MA20 $242.36 > MA50 $237.07, price $248.03 above both [capped 2.5\u21922.0 at weight 2.0]. News: MILDLY POSITIVE \u2014 1 bullish signal(s), no negatives [capped 1.5\u21921.275 at weight 1.275]. Macro: RISK-OFF \u2014 SPY STRONG_SELL and MA20 $738.40 < MA50 $757.26. Portfolio: Strong cash reserve 48%. Volatility: VIX 26.8 > 25 \u2014 elevated volatility, half sizing applies (ELEVATED). Quality: Mega-cap $234B; Profitable; 10 analyst buy ratings. Source: watchlist | Gate: 8.0.",
       "universe_policy": {
         "status": "approved",
         "enforced": true,
@@ -641,7 +640,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 0.8% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 1.0% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -832,50 +831,29 @@
       },
       "_gate_used": 7.0
     },
+    "MLTX": {
+      "symbol": "MLTX",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 63 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
     "VRTX": {
       "symbol": "VRTX",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "XLV": {
-      "symbol": "XLV",
-      "recommendation": "VETO",
-      "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
-      "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
-      },
-      "universe_policy": {
-        "status": "approved",
-        "enforced": true,
-        "bucket": "outside_core",
-        "record": null,
-        "would_change": null,
-        "record_gate": 8.0,
-        "record_label": "no closed trades",
-        "required_gate": 8.0
-      },
-      "_gate_used": 7.0
-    },
-    "MO": {
-      "symbol": "MO",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
