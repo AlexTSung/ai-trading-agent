@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-27T04:01:38.075054-05:00",
+  "timestamp": "2026-11-27T05:01:00.608978-05:00",
   "date": "2026-11-27",
   "approved": [],
   "held": [
@@ -22,7 +22,7 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "DIS",
+    "LULU",
     "SPDN",
     "TOPP",
     "NKE",
@@ -31,7 +31,8 @@
     "TSCO",
     "PCG",
     "KO",
-    "PTLO"
+    "LEN",
+    "MDLN"
   ],
   "scores": {
     "AAPL": {
@@ -488,7 +489,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 1.0% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 1.4% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -710,14 +711,13 @@
       },
       "_gate_used": 8.0
     },
-    "DIS": {
-      "symbol": "DIS",
+    "LULU": {
+      "symbol": "LULU",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback",
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for LULU \u2014 auto-veto per Hard Rule 9",
       "criteria": {
-        "chase_veto": true,
-        "note": "CHASE VETO: RSI(14) 67 is above 60 \u2014 overbought, wait for a pullback"
+        "earnings_veto": true
       },
       "universe_policy": {
         "status": "approved",
@@ -898,14 +898,35 @@
       },
       "_gate_used": 7.0
     },
-    "PTLO": {
-      "symbol": "PTLO",
+    "LEN": {
+      "symbol": "LEN",
       "recommendation": "VETO",
       "score": 0.0,
       "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
       "criteria": {
         "holiday_veto": true,
         "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "MDLN": {
+      "symbol": "MDLN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: price $40.54 is 6.1% above MA20 $38.23 (limit 3%) \u2014 do not chase",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: price $40.54 is 6.1% above MA20 $38.23 (limit 3%) \u2014 do not chase"
       },
       "universe_policy": {
         "status": "approved",
