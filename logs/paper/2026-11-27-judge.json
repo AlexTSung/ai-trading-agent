@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-27T01:01:29.875777-05:00",
+  "timestamp": "2026-11-27T02:02:01.565331-05:00",
   "date": "2026-11-27",
   "approved": [],
   "held": [
@@ -22,7 +22,7 @@
     "VZ",
     "CMCSA",
     "CSX",
-    "NVO",
+    "RKT",
     "SPDN",
     "TOPP",
     "NKE",
@@ -487,7 +487,7 @@
         },
         "portfolio": {
           "score": 0.0,
-          "note": "Already holding PFE \u2014 only 0.9% below entry (need \u22653%)"
+          "note": "Already holding PFE \u2014 only 1.0% below entry (need \u22653%)"
         },
         "volatility": {
           "score": 0.25,
@@ -709,14 +709,14 @@
       },
       "_gate_used": 8.0
     },
-    "NVO": {
-      "symbol": "NVO",
+    "RKT": {
+      "symbol": "RKT",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "rationale": "CHASE VETO: price $15.28 is 9.4% above MA20 $13.97 (limit 3%) \u2014 do not chase",
       "criteria": {
-        "holiday_veto": true,
-        "holiday": "Thanksgiving"
+        "chase_veto": true,
+        "note": "CHASE VETO: price $15.28 is 9.4% above MA20 $13.97 (limit 3%) \u2014 do not chase"
       },
       "universe_policy": {
         "status": "approved",
