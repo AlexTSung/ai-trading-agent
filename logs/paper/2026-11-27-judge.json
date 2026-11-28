@@ -1,6 +1,6 @@
 {
   "agent_version": "6.2.0",
-  "timestamp": "2026-11-27T18:00:59.994975-05:00",
+  "timestamp": "2026-11-27T19:02:05.400495-05:00",
   "date": "2026-11-27",
   "approved": [],
   "held": [
@@ -24,7 +24,14 @@
     "CSX",
     "MLTX",
     "IBB",
-    "DIS"
+    "DIS",
+    "XLV",
+    "XLF",
+    "SPDN",
+    "NKE",
+    "PCG",
+    "BNY",
+    "FT"
   ],
   "scores": {
     "AAPL": {
@@ -853,8 +860,156 @@
       "symbol": "DIS",
       "recommendation": "VETO",
       "score": 0.0,
-      "rationale": "Data error: 429 Client Error: Too Many Requests for url: https://data.alpaca.markets/v1beta1/news?symbols=DIS&limit=5&sort=desc",
-      "criteria": {},
+      "rationale": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 70 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "XLV": {
+      "symbol": "XLV",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "XLF": {
+      "symbol": "XLF",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "SPDN": {
+      "symbol": "SPDN",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "NKE": {
+      "symbol": "NKE",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for NKE \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "PCG": {
+      "symbol": "PCG",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback",
+      "criteria": {
+        "chase_veto": true,
+        "note": "CHASE VETO: RSI(14) 77 is above 60 \u2014 overbought, wait for a pullback"
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "BNY": {
+      "symbol": "BNY",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "EARNINGS VETO: upcoming-earnings language in recent news for BNY \u2014 auto-veto per Hard Rule 9",
+      "criteria": {
+        "earnings_veto": true
+      },
+      "universe_policy": {
+        "status": "approved",
+        "enforced": true,
+        "bucket": "outside_core",
+        "record": null,
+        "would_change": null,
+        "record_gate": 8.0,
+        "record_label": "no closed trades",
+        "required_gate": 8.0
+      },
+      "_gate_used": 7.0
+    },
+    "FT": {
+      "symbol": "FT",
+      "recommendation": "VETO",
+      "score": 0.0,
+      "rationale": "HOLIDAY_WEEK: Thanksgiving this week \u2014 no speculative trades in low-liquidity weeks",
+      "criteria": {
+        "holiday_veto": true,
+        "holiday": "Thanksgiving"
+      },
       "universe_policy": {
         "status": "approved",
         "enforced": true,
